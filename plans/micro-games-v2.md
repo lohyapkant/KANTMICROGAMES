@@ -1,7 +1,8 @@
 # Plan: KANTMICROGAME — HTML5 Micro Games (v2 — the one-file pivot)
 
-Today: 2026-10-31. Status: build 20261031-002 done — the shelf and PANDASNACK now live
-together in ONE file. Round 2 (a second game) is next.
+Today: 2026-10-31. Status: build 20261031-003 done — the shelf and PANDASNACK + BOOPEEK
+now live together in ONE file (the one-file pivot of round 1.5, round 2 shipped BOOPEEK).
+Round 3 (a third module) is next.
 
 Supersedes micro-games.md (v1), kept as history: v1 described one file per game in
 separate folders; the owner changed their mind after round 1 — see prompt P-02.
@@ -79,9 +80,11 @@ games, feeds events, ticks and paints only the open module, and keeps instant re
   `image-rendering: pixelated`; refit on resize and rotation.
 - Fixed-step update (60 steps/second) with capped catch-up, inside each module.
 - All stage colors referenced BY NAME from the game's own `palette`.
-- Difficulty if present is one table of bands unlocked by score/time.
-- `W A S D` + arrows move; `Space`/DASH pad is the action; `R` restarts instantly;
-  stage tap = module's choice (dash in PANDASNACK); `ESC` or ⌂ SHELF exits home.
+- Difficulty if present is one table of bands unlocked by score/time (BOOPEEK has none —
+  the cozy poke game keeps it simple by design).
+- `W A S D` + arrows move; `Space`/action pad is the action (dash in PANDASNACK, poke in
+  BOOPEEK); `R` restarts instantly; stage tap = module's choice (dash in PANDASNACK, poke in
+  BOOPEEK); `ESC` or ⌂ SHELF exits home.
 
 ## Definition of done (per build)
 
@@ -98,7 +101,7 @@ games, feeds events, ticks and paints only the open module, and keeps instant re
 | 20261031-000 | 2026-10-31 | Round 0 scaffold (v1 architecture: folder per game). DONE. |
 | 20261031-001 | 2026-10-31 | Round 1: PANDASNACK shipped in `games/PANDASNACK/`. DONE. |
 | 20261031-002 | 2026-10-31 | One-file pivot: shelf + game screens + shared helper layer + PANDASNACK folded in as a module; `games/` deleted; hash routing; pads/keys re-routed through the runtime. DONE. |
-| 20261031-003 | next | Round 2 game: a second module with a different control verb. |
+| 20261031-003 | 2026-10-31 | Round 2: BOOPEEK shipped as the second module (shy ghost poke) inside the one-file app; CHANGELOG/README/plan/prompt updated; smoke re-run green. DONE. |
 
 ## Tool and model log (owner request, 2026-10-31)
 
@@ -110,6 +113,7 @@ the build's prompt copy.
 | 000 | 2026-10-31 | GLM-5.3-Flash Free (OpenCode) |
 | 001 | 2026-10-31 | GLM-5.3-Flash Free (OpenCode) |
 | 002 | 2026-10-31 | GLM-5.3-Flash Free (OpenCode) |
+| 003 | 2026-10-31 | GLM-5.3-Flash Free (OpenCode) |
 
 Rule: every future build truthfully records its model in all four homes.
 
@@ -121,7 +125,7 @@ Rule: every future build truthfully records its model in all four homes.
 | DUCKLINE | A mother duck crosses a pond; collected ducklings waddle in a line behind her. | WASD lead-a-chain | backlog — round 2 candidate |
 | SPROUTUP | A baby sprout climbs a rain of water drops; sun settles, it blooms — short and lovely. | WASD weave | backlog |
 | SLIMEHOP | A bouncing slime must only land on lily pads that float apart over time. | WASD + Space hop timing | backlog |
-| BOOPEEK | A shy ghost peeks from doors; poke it before it hides — cozy not scary. | WASD walk + Space poke | backlog |
+| BOOPEEK | A shy ghost peeks from doors; poke it before it hides — cozy not scary. | WASD walk + Space poke | built in round 2 (module content 20261031-003) |
 | SNAILRACE | Race three snails; food pellets speed you up, salt slows — tiny arcade. | WASD steer | backlog |
 | HUGPARADE | Two round friends reunite across a maze that redraws itself every 10 seconds. | WASD only | backlog |
 | CATNAPCATCH | Guard a sleeping cat from falling noise-makers with a paper pillow. | WASD catch | backlog |

@@ -11,7 +11,7 @@
     <style>
         /*
            ============================================================
-           KANTMICROGAME — ONE FILE (since build 20261031-002).
+           KANTMICROGAME — ONE FILE (since build 20261031-003).
            The shelf AND every game live inside this single HTML file:
              * two screens — the shelf, and the currently open game —
                swap inside the page (no navigation, no iframes, no folders)
@@ -390,7 +390,7 @@
     <footer id="meta">
         <span class="v" id="verBox">KANT MICRO</span>
         <br><span class="zzz">one file</span> · runs completely offline · every game lives inside this page ·
-        <span class="zzz">build 20261031-002</span>
+        <span class="zzz">build 20261031-003</span>
     </footer>
 </div>
 
@@ -403,7 +403,7 @@
 
 const APP = {
     name: "KANT MICRO",
-    fileVersion: "20261031-002",       // build number of THIS one-file app
+    fileVersion: "20261031-003",       // build number of THIS one-file app
     savePrefix: "KANTMICROGAME."       // best scores live at prefix + GAMEID + ".best"
 };
 
@@ -1522,6 +1522,293 @@ wirePad("stage", function () {
         previewPaint: paintPandaSnackPreview,
         start, stop, restart,
         update, paint, onDir, onAction, onStageTap, onAnyKey
+    });
+})();
+
+/* ==================================================================
+   PART 5-B — BOOPEEK module
+   A shy ghost peeks from a cozy door; the visitor walks up and pokes
+   him. Victory at the love target. Small, cozy, one action button.
+   ================================================================== */
+
+(function () {
+    "use strict";
+
+    const SETTINGS = {
+        gameName: "BOOPEEK",
+        versionNumber: "20261031-003",
+        stageSize: 100,
+        saveKey: "KANTMICROGAME.BOOPEEK.best",
+        playerSettings: { pokeReach: 10, victoryTarget: 10, wiggleSeconds: 0.25, moveSpeedDesignPixelsPerSecond: 22 },
+        worldSettings: { doorX: 89, doorY: 26, doorW: 4, doorH: 6 },
+        palette: {
+            booWall: "#F6EFDF", booFloorA: "#E8DFCB", booFloorB: "#DECFB9",
+            booGhostWhite: "#FFFDF6", booGhostDark: "#3B2F27",
+            booStar: "#FFE066", booStarWhite: "#FFFDF4",
+            booTextBrown: "#4A3B32", booTextPink: "#E96AA0",
+            visitorWhite: "#FFFDF6", visitorDark: "#3B2F27", visitorBlush: "#F7A8B8",
+            visitorNose: "#8A6247", visitorShadow: "#7FB36B"
+        }
+    };
+
+    const PAL = SETTINGS.palette;
+
+    const STATE = { TITLE: "title", PLAY: "play", OVER: "over" };
+    let state = STATE.TITLE;
+    let stateTime = 0;
+    let score = 0;
+    let storedBest = 0;
+    let winFlag = false;
+
+    const mover = { x: 44, y: 58, walking: false, leanDir: 0, walkPhase: 0, blinkTimer: 2.0, blinking: false, blinkLeft: 0 };
+    const input = { up: false, down: false, left: false, right: false };
+
+    const DOOR = SETTINGS.worldSettings;
+    const PLAYER = SETTINGS.playerSettings;
+
+    let clock = 0;
+    let wiggleT = 0;
+    let scoreChanged = false;
+    let sparkles = [];
+    let accumulator = 0;
+    const STEP_SECONDS = 1 / 60;
+
+    const SPARK_FRAMES = [
+        ["..Y..", "..Y..", "YYWYY", "..Y..", "..Y.."],
+        [".....", "..Y..", ".YYY.", "..Y..", "....."],
+        [".....", ".....", "..Y..", ".....", "....."]
+    ];
+
+    function startRun() {
+        score = 0;
+        mover.x = 44; mover.y = 58;
+        mover.walking = false; mover.leanDir = 0; mover.walkPhase = 0; mover.blinking = false; mover.blinkLeft = 0;
+        wiggleT = 0;
+        state = STATE.PLAY;
+        stateTime = 0;
+        syncChrome(true);
+    }
+
+    function finishRun() {
+        const record = score > storedBest;
+        if (record) { storedBest = score; saveBest(SETTINGS.gameName, score); }
+        winFlag = true;
+        state = STATE.OVER;
+        stateTime = 0;
+        syncChrome(true);
+    }
+
+    function triggerPoke() {
+        if (state !== STATE.PLAY) return false;
+        const doorCX = DOOR.doorX + DOOR.doorW / 2;
+        const doorCY = DOOR.doorY + DOOR.doorH / 2;
+        const pandaCX = mover.x + 6.5, pandaCY = mover.y + 7;
+        const inRange = Math.hypot(doorCX - pandaCX, doorCY - pandaCY) <= PLAYER.pokeReach;
+        if (inRange) {
+            score++;
+            scoreChanged = true;
+            syncChrome(true);
+            wiggleT = PLAYER.wiggleSeconds;
+            for (let s = 0; s < 6; s++) {
+                sparkles.push({
+                    x: doorCX - 2 + (Math.random() * 8 - 4),
+                    y: doorCY - 2 + (Math.random() * 8 - 4),
+                    t: 0, life: 0.45, colors: { Y: PAL.booStar, W: PAL.booStarWhite }
+                });
+            }
+        }
+        return inRange;
+    }
+
+    function update(rawDt) {
+        let dt = rawDt > 0.25 ? 0.25 : rawDt;
+        accumulator += dt;
+        let steps = 0;
+        while (accumulator >= STEP_SECONDS && steps < 4) {
+            stepWorld(STEP_SECONDS);
+            accumulator -= STEP_SECONDS;
+            steps++;
+        }
+        if (steps === 4) accumulator = 0;
+    }
+
+    function stepWorld(dt) {
+        clock += dt;
+        stateTime += dt;
+        updateSparkles(dt);
+        if (state === STATE.TITLE) return;
+        if (state === STATE.OVER) return;
+
+        const moveSpeed = SETTINGS.playerSettings.moveSpeedDesignPixelsPerSecond;
+        const mx = (input.right ? 1 : 0) - (input.left ? 1 : 0);
+        const my = (input.down ? 1 : 0) - (input.up ? 1 : 0);
+        mover.walking = (mx !== 0 || my !== 0);
+        if (mover.walking) mover.walkPhase = (mover.walkPhase + dt * 6) % 2; else mover.walkPhase = 0;
+        if (mover.blinkLeft > 0) { mover.blinkLeft -= dt; if (mover.blinkLeft <= 0) mover.blinking = false; }
+        else { mover.blinkTimer -= dt; if (mover.blinkTimer <= 0) { mover.blinking = true; mover.blinkLeft = 0.16; mover.blinkTimer = 2.0 + Math.random() * 2.2; } }
+        let stepSpeed = moveSpeed * (mover.walking ? 1 : 0.4);
+        if (mx !== 0 && my !== 0) stepSpeed *= 0.7071;
+        if (mx !== 0) mover.x += Math.sign(mx) * stepSpeed * dt;
+        if (my !== 0) mover.y += Math.sign(my) * stepSpeed * dt;
+        mover.x = Math.max(2, Math.min(SETTINGS.stageSize - 15, mover.x));
+        mover.y = Math.max(3, Math.min(SETTINGS.stageSize - 19, mover.y));
+    }
+
+    function updateSparkles(dt) {
+        for (let i = sparkles.length - 1; i >= 0; i--) {
+            sparkles[i].t += dt;
+            if (sparkles[i].t >= sparkles[i].life) sparkles.splice(i, 1);
+        }
+    }
+
+    const bgCanvas = document.createElement("canvas");
+    bgCanvas.width = SETTINGS.stageSize;
+    bgCanvas.height = SETTINGS.stageSize;
+
+    function paintBackgroundCache() {
+        const ctx = bgCanvas.getContext("2d");
+        for (let by = 0; by < 10; by++) {
+            for (let bx = 0; bx < 10; bx++) {
+                ctx.fillStyle = (bx + by) % 2 === 0 ? PAL.booFloorA : PAL.booFloorB;
+                ctx.fillRect(bx * 10, by * 10, 10, 10);
+            }
+        }
+    }
+
+    function drawGhost(ctx) {
+        const wiggle = wiggleT > 0 ? ((Math.floor(clock / 0.05) % 2) * 1) : 0;
+        const gy = Math.round(DOOR.doorY + DOOR.doorH / 2 + wiggle);
+        const cx = DOOR.doorX + DOOR.doorW / 2;
+        paintRoundBlob(ctx, cx - 3, gy - 3, 6, 7, PAL.booGhostWhite);
+        ctx.fillStyle = PAL.booGhostDark;
+        ctx.fillRect(cx - 2, gy, 2, 2);
+        ctx.fillRect(cx, gy, 2, 2);
+        ctx.fillRect(cx - 1, gy + 2, 2, 1);
+    }
+
+    function drawDoor(ctx) {
+        const { doorX, doorY, doorW, doorH } = DOOR;
+        ctx.fillStyle = "#8A6247";
+        ctx.fillRect(doorX - 1, doorY - 1, doorW + 2, doorH + 2);
+        ctx.fillStyle = "#A97C50";
+        ctx.fillRect(doorX, doorY, doorW, doorH);
+        ctx.fillStyle = "#5C4028";
+        ctx.fillRect(doorX + doorW - 1, doorY + 1, 1, 1);
+    }
+
+    function drawSparkle(ctx, sp) {
+        const idx = Math.max(0, Math.min(2, Math.floor((sp.t / sp.life) * 3)));
+        const frame = SPARK_FRAMES[idx];
+        for (let y = 0; y < 5; y++) {
+            for (let x = 0; x < 5; x++) {
+                const ch = frame[y][x];
+                if (ch === " ") continue;
+                ctx.fillStyle = ch === "Y" ? PAL.booStar : PAL.booStarWhite;
+                ctx.fillRect(Math.round(sp.x) + x, Math.round(sp.y) + y, 1, 1);
+            }
+        }
+    }
+
+    function paintTitle(ctx) {
+        const cx = 50;
+        paintPixelText(ctx, "BOOPEEK", cx, 14, PAL.booTextBrown, PAL.booWall, 2);
+        paintPixelText(ctx, "POKE THE GHOST!", cx, 30, PAL.booTextPink, PAL.booWall, 1);
+        if (Math.floor(clock / 0.55) % 2 === 0) {
+            paintPixelText(ctx, "PRESS ANY KEY OR TAP", cx, 84, PAL.booTextBrown, null, 1);
+        }
+    }
+
+    function paintOver(ctx) {
+        const cx = 50;
+        paintPixelText(ctx, "BOO! YOU FOUND HIS HEART!", cx, 18, PAL.booTextPink, PAL.booWall, 1);
+        paintPixelText(ctx, String(score), cx, 30, PAL.booTextBrown, PAL.booWall, 3);
+        if (Math.floor(clock / 0.55) % 2 === 0) {
+            paintPixelText(ctx, "PRESS ANY KEY OR TAP", cx, 84, PAL.booTextBrown, null, 1);
+        }
+    }
+
+    function paintHud(ctx) {
+        paintPixelText(ctx, "BOO LOVE " + score + " OF " + PLAYER.victoryTarget, 50, 88, PAL.booTextPink, null, 1);
+    }
+
+    function drawVisitor(ctx) {
+        const px = Math.round(mover.x);
+        const py = Math.round(mover.y);
+        const lean = mover.walking ? mover.leanDir : 0;
+        paintRoundBlob(ctx, px + 1, py + 16, 11, 2, PAL.visitorShadow);
+        paintRoundBlob(ctx, px + 1, py + 9, 11, 6, PAL.visitorWhite);
+        paintRoundBlob(ctx, px + lean, py, 13, 9, PAL.visitorWhite);
+        const earY = py - 2;
+        paintRoundBlob(ctx, px + lean, earY, 4, 4, PAL.visitorDark);
+        paintRoundBlob(ctx, px + lean + 9, earY, 4, 4, PAL.visitorDark);
+        paintEyes(ctx, px + lean + 2, py + 3, { patch: PAL.visitorDark, shine: PAL.visitorWhite }, mover.blinking);
+        ctx.fillStyle = PAL.visitorBlush;
+        ctx.fillRect(px + 1, py + 6, 2, 1);
+        ctx.fillRect(px + 10, py + 6, 2, 1);
+        ctx.fillStyle = PAL.visitorNose;
+        ctx.fillRect(px + lean + 6, py + 5, 1, 1);
+        const footA = Math.floor(mover.walkPhase || 0) % 2 === 0;
+        ctx.fillStyle = PAL.visitorDark;
+        ctx.fillRect(px + (footA ? 2 : 3), py + 14, 2, 2);
+        ctx.fillRect(px + (footA ? 9 : 8), py + 14, 2, 2);
+    }
+
+    function paint(ctx) {
+        const bgctx = ctx;
+        for (let by = 0; by < 10; by++) {
+            for (let bx = 0; bx < 10; bx++) {
+                bgctx.fillStyle = (bx + by) % 2 === 0 ? PAL.booFloorA : PAL.booFloorB;
+                bgctx.fillRect(bx * 10, by * 10, 10, 10);
+            }
+        }
+        drawDoor(ctx);
+        drawVisitor(ctx);
+        drawGhost(ctx);
+        for (const sp of sparkles) drawSparkle(ctx, sp);
+        if (state === STATE.TITLE) paintTitle(ctx);
+        else if (state === STATE.PLAY) paintHud(ctx);
+        else paintOver(ctx);
+    }
+
+    let scScore = null, scBest = null, scMsg = null;
+    function syncChrome(force) {
+        const shownBest = Math.max(storedBest, score);
+        if (force || scScore !== score) { scScore = score; scoreEl.textContent = String(score); }
+        if (force || scBest !== shownBest) { scBest = shownBest; bestEl.textContent = String(shownBest); }
+        let msg;
+        if (state === STATE.PLAY) msg = "BOO peeks from the door — poke him!";
+        else if (state === STATE.TITLE) msg = "press any key or tap to start";
+        else msg = "you found his heart!";
+        if (force || scMsg !== msg) { scMsg = msg; msgEl.textContent = msg; }
+    }
+
+    function start() { storedBest = readBest(SETTINGS.gameName); state = STATE.TITLE; stateTime = 0; score = 0; mover.x = 44; mover.y = 58; wiggleT = 0; accumulator = 0; paintBackgroundCache(); syncChrome(true); }
+    function stop() { }
+    function restart() { startRun(); }
+    function onDir(dir, pressed) {
+        input[dir] = !!pressed;
+        if (pressed) {
+            if (dir === "left") mover.leanDir = -1;
+            else if (dir === "right") mover.leanDir = 1;
+        }
+    }
+    function onAction() { if (state === STATE.PLAY) { const hit = triggerPoke(); if (hit && score >= PLAYER.victoryTarget) finishRun(); } else if (stateTime > 0.35) { startRun(); } }
+    function onStageTap() { onAction(); }
+    function onAnyKey() { if (state !== STATE.PLAY && stateTime > 0.35) startRun(); }
+
+    function paintBoopeekPreview(ctx) {
+        for (let by = 0; by < 10; by++) { for (let bx = 0; bx < 10; bx++) { ctx.fillStyle = (bx + by) % 2 === 0 ? PAL.booFloorA : PAL.booFloorB; ctx.fillRect(bx * 10, by * 10, 10, 10); } }
+        drawDoor(ctx);
+        drawVisitor(ctx);
+        drawGhost(ctx);
+    }
+
+    GAMES.push({
+        id: SETTINGS.gameName, versionNumber: SETTINGS.versionNumber, name: "Boo Peek",
+        tagline: "BOO the shy ghost peeks — poke him!",
+        concept: "Boo the shy ghost peeks out of a cozy door; tap to poke him.",
+        actionLabel: "POKE", hint: "WASD move · SPACE/POKE pad to poke · R restart · ESC shelf",
+        previewPaint: paintBoopeekPreview, start, stop, restart, update, paint, onDir, onAction, onStageTap, onAnyKey
     });
 })();
 

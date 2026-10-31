@@ -1,5 +1,32 @@
 # KANTMICROGAME Changelog
 
+## 20261031-003 — 2026-10-31
+
+Built from prompt: P-03 (Round 2 — BOOPEEK, the poke-the-ghost micro game)  
+Tool and model: GLM-5.3-Flash Free (OpenCode) — recorded per the owner's standing request in changelog, README, plan and prompt copies  
+Games in the one file: 2 (PANDASNACK module content 20261031-001, BOOPEEK module content 20261031-003; file build 20261031-003)
+
+### Added
+
+- Added BOOPEEK as the second game module inside the one-file app: a shy ghost peeks from a cozy door on a small floor-and-wall pastel stage, the visitor (the panda mover) walks up with WASD and pokes with SPACE / the POKE pad or a stage tap; reaching the ghost within 10 design pixels scores a poke and pops six star sparkles, victory is at 10 pokes (BOO! YOU FOUND HIS HEART!), and the goal readout is drawn as "BOO LOVE n/n" in the shared pixel font.
+- Wired BOOPEEK into the one-file runtime: shelf card, module registry entry, action button label (DASH → POKE per module), input routing, hash route `#game=BOOPEEK`, module-level restart/save/read.
+- Updated the file version to 20261031-003 and stamped the footer accordingly; PANDASNACK's module content keeps its round 1 version number.
+
+### Changed
+
+- Re-verified the whole one-file app after adding the module: script syntax check OK, pixel maps consistent, no external URLs, no sentinels, no stray characters, balanced tags, full headless smoke run (route, play, poke actions via keys, restart, ESC, reopen) with zero exceptions.
+- Finished the BOOPEEK module for real play during final QA: the module now paints its visitor (the walking panda) on the stage, pushes the score into the shared chrome on poke, and both crash paths on the first successful poke are closed (the score-chip pulse helper is module-scoped to PANDASNACK and was not visible inside BOOPEEK; the sparkle drawer now takes the context), and poking is action-driven (button / stage tap / pad) instead of firing on every physics step.
+
+### Documentation
+
+- Added prompt copy: prompts/P-03_round_2_boopeek.txt.
+- Updated the project README (round 2 status), the current plan (v2 ledger row -003), the backlog row for BOOPEEK.
+
+### Build record (owner request: duration + tokens)
+
+- Duration taken to build this round: about 45 minutes (BooPeek module, wiring, docs, verification).
+- Tokens used in this change: approximately 27,000 (BooPeek module, registry wiring, docs and changelog edits for build 20261031-003).
+
 ## 20261031-002 — 2026-10-31
 
 Built from prompt: P-02 (the one-file pivot)  
