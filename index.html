@@ -1541,6 +1541,7 @@ wirePad("stage", function () {
         saveKey: "KANTMICROGAME.BOOPEEK.best",
         playerSettings: { pokeReach: 10, victoryTarget: 10, wiggleSeconds: 0.25, moveSpeedDesignPixelsPerSecond: 22 },
         worldSettings: { doorX: 89, doorY: 26, doorW: 4, doorH: 6 },
+        roundTimeLimitSeconds: 15,
         palette: {
             booWall: "#F6EFDF", booFloorA: "#E8DFCB", booFloorB: "#DECFB9",
             booGhostWhite: "#FFFDF6", booGhostDark: "#3B2F27",
@@ -1568,6 +1569,8 @@ wirePad("stage", function () {
 
     let clock = 0;
     let wiggleT = 0;
+    let pokeT = -1;
+    let roundT = 0;
     let scoreChanged = false;
     let sparkles = [];
     let accumulator = 0;
@@ -1584,15 +1587,17 @@ wirePad("stage", function () {
         mover.x = 44; mover.y = 58;
         mover.walking = false; mover.leanDir = 0; mover.walkPhase = 0; mover.blinking = false; mover.blinkLeft = 0;
         wiggleT = 0;
+        pokeT = -1;
+        roundT = 0;
         state = STATE.PLAY;
         stateTime = 0;
         syncChrome(true);
     }
 
-    function finishRun() {
+    function finishRun(win) {
         const record = score > storedBest;
         if (record) { storedBest = score; saveBest(SETTINGS.gameName, score); }
-        winFlag = true;
+        winFlag = !!win;
         state = STATE.OVER;
         stateTime = 0;
         syncChrome(true);
@@ -1609,6 +1614,7 @@ wirePad("stage", function () {
             scoreChanged = true;
             syncChrome(true);
             wiggleT = PLAYER.wiggleSeconds;
+            pokeT = clock;
             for (let s = 0; s < 6; s++) {
                 sparkles.push({
                     x: doorCX - 2 + (Math.random() * 8 - 4),
@@ -1652,6 +1658,11 @@ wirePad("stage", function () {
         if (my !== 0) mover.y += Math.sign(my) * stepSpeed * dt;
         mover.x = Math.max(2, Math.min(SETTINGS.stageSize - 15, mover.x));
         mover.y = Math.max(3, Math.min(SETTINGS.stageSize - 19, mover.y));
+
+        if (state === STATE.PLAY) {
+            roundT += dt;
+            if (roundT >= SETTINGS.roundTimeLimitSeconds) finishRun(false);
+        }
     }
 
     function updateSparkles(dt) {
@@ -1676,8 +1687,10 @@ wirePad("stage", function () {
     }
 
     function drawGhost(ctx) {
-        const wiggle = wiggleT > 0 ? ((Math.floor(clock / 0.05) % 2) * 1) : 0;
-        const gy = Math.round(DOOR.doorY + DOOR.doorH / 2 + wiggle);
+        const wPhase = wiggleT > 0 ? Math.max(0, 1 - (clock - pokeT) / wiggleT) : 0;
+        const wiggle = wiggleT > 0 && wPhase > 0 ? ((Math.floor(clock / 0.05) % 2) * 1) : 0;
+        const hop = (pokeT > 0 && clock - pokeT < 0.12) ? -2 : 0;
+        const gy = Math.round(DOOR.doorY + DOOR.doorH / 2 + wiggle + hop);
         const cx = DOOR.doorX + DOOR.doorW / 2;
         paintRoundBlob(ctx, cx - 3, gy - 3, 6, 7, PAL.booGhostWhite);
         ctx.fillStyle = PAL.booGhostDark;
@@ -1729,6 +1742,7 @@ wirePad("stage", function () {
 
     function paintHud(ctx) {
         paintPixelText(ctx, "BOO LOVE " + score + " OF " + PLAYER.victoryTarget, 50, 88, PAL.booTextPink, null, 1);
+        paintPixelText(ctx, "TIME " + Math.max(0, Math.ceil(SETTINGS.roundTimeLimitSeconds - roundT)), 50, 94, PAL.booGhostWhite, null, 1);
     }
 
     function drawVisitor(ctx) {
@@ -1753,6 +1767,16 @@ wirePad("stage", function () {
         ctx.fillRect(px + (footA ? 9 : 8), py + 14, 2, 2);
     }
 
+    function drawDecor(ctx) {
+        const spots = [[6, 8], [48, 66], [88, 88], [30, 40], [70, 18]];
+        for (const spot of spots) {
+            ctx.fillStyle = PAL.booStar;
+            ctx.fillRect(spot[0], spot[1], 2, 2);
+            ctx.fillStyle = PAL.booGhostWhite;
+            ctx.fillRect(spot[0] + 1, spot[1] + 1, 1, 1);
+        }
+    }
+
     function paint(ctx) {
         const bgctx = ctx;
         for (let by = 0; by < 10; by++) {
@@ -1765,6 +1789,7 @@ wirePad("stage", function () {
         drawVisitor(ctx);
         drawGhost(ctx);
         for (const sp of sparkles) drawSparkle(ctx, sp);
+        drawDecor(ctx);
         if (state === STATE.TITLE) paintTitle(ctx);
         else if (state === STATE.PLAY) paintHud(ctx);
         else paintOver(ctx);
@@ -1778,11 +1803,11 @@ wirePad("stage", function () {
         let msg;
         if (state === STATE.PLAY) msg = "BOO peeks from the door — poke him!";
         else if (state === STATE.TITLE) msg = "press any key or tap to start";
-        else msg = "you found his heart!";
+        else msg = winFlag ? "you found his heart!" : "boo! time ran out!";
         if (force || scMsg !== msg) { scMsg = msg; msgEl.textContent = msg; }
     }
 
-    function start() { storedBest = readBest(SETTINGS.gameName); state = STATE.TITLE; stateTime = 0; score = 0; mover.x = 44; mover.y = 58; wiggleT = 0; accumulator = 0; paintBackgroundCache(); syncChrome(true); }
+    function start() { storedBest = readBest(SETTINGS.gameName); state = STATE.TITLE; stateTime = 0; score = 0; mover.x = 44; mover.y = 58; wiggleT = 0; pokeT = -1; roundT = 0; accumulator = 0; paintBackgroundCache(); syncChrome(true); }
     function stop() { }
     function restart() { startRun(); }
     function onDir(dir, pressed) {
@@ -1792,7 +1817,7 @@ wirePad("stage", function () {
             else if (dir === "right") mover.leanDir = 1;
         }
     }
-    function onAction() { if (state === STATE.PLAY) { const hit = triggerPoke(); if (hit && score >= PLAYER.victoryTarget) finishRun(); } else if (stateTime > 0.35) { startRun(); } }
+    function onAction() { if (state === STATE.PLAY) { const hit = triggerPoke(); if (hit && score >= PLAYER.victoryTarget) finishRun(true); } else if (stateTime > 0.35) { startRun(); } }
     function onStageTap() { onAction(); }
     function onAnyKey() { if (state !== STATE.PLAY && stateTime > 0.35) startRun(); }
 
@@ -1811,6 +1836,187 @@ wirePad("stage", function () {
         previewPaint: paintBoopeekPreview, start, stop, restart, update, paint, onDir, onAction, onStageTap, onAnyKey
     });
 })();
+
+    /* =================================================================
+       PART 5-C — DUCKLINE module (Round 3 — build 20261031-004)
+       A mother duck crosses the pond with her ducklings in a waddling
+       line behind her; WASD leads the chain. The round is timer-limited.
+       ================================================================== */
+
+    (function () {
+        "use strict";
+
+        const SETTINGS = {
+            gameName: "DUCKLINE",
+            versionNumber: "20261031-004",
+            stageSize: 100,
+            saveKey: "KANTMICROGAME.DUCKLINE.best",
+            playerSettings: { moveSpeedDesignPixelsPerSecond: 16, victoryTarget: 3, roundTimeLimitSeconds: 12 },
+            worldSettings: { startX: 6, startY: 52, shoreX: 88, ducklingCount: 3 },
+            palette: {
+                pondA: "#A9CCE8", pondB: "#9CC0DE", water: "#7FB6DD",
+                duckWhite: "#FFFDF6", duckYellow: "#F7D774", duckBrown: "#8A6247", duckEgg: "#FFE066"
+            }
+        };
+
+        const PAL = SETTINGS.palette;
+
+        const STATE = { TITLE: "title", PLAY: "play", OVER: "over" };
+        let state = STATE.TITLE;
+        let stateTime = 0;
+        let score = 0;
+        let storedBest = 0;
+        let winFlag = false;
+
+        const mover = { x: 6, y: 52, walking: false, leanDir: 0, walkPhase: 0, blinkTimer: 2.0, blinking: false, blinkLeft: 0 };
+        const ducklings = [0, 1, 2].map(function (i) { return { x: 10 + (i * 4), y: 56, offset: i }; });
+        const input = { up: false, down: false, left: false, right: false };
+
+        let clock = 0;
+        let roundT = 0;
+        let sparkles = [];
+        let accumulator = 0;
+        const STEP_SECONDS = 1 / 60;
+
+        function startRun() {
+            score = 0;
+            mover.x = SETTINGS.worldSettings.startX; mover.y = SETTINGS.worldSettings.startY;
+            mover.walking = false; mover.leanDir = 0; mover.walkPhase = 0; mover.blinking = false; mover.blinkLeft = 0;
+            ducklings.forEach(function (d) { d.x = 10 + (d.offset * 4); d.y = SETTINGS.worldSettings.startY + 4; });
+            roundT = 0;
+            state = STATE.PLAY;
+            stateTime = 0;
+            syncChrome(true);
+        }
+
+        function finishRun(win) {
+            const record = score > storedBest;
+            if (record) { storedBest = score; saveBest(SETTINGS.gameName, score); }
+            winFlag = !!win;
+            state = STATE.OVER;
+            stateTime = 0;
+            syncChrome(true);
+        }
+
+        function update(rawDt) {
+            let dt = rawDt > 0.25 ? 0.25 : rawDt;
+            accumulator += dt;
+            let steps = 0;
+            while (accumulator >= STEP_SECONDS && steps < 4) { stepWorld(STEP_SECONDS); accumulator -= STEP_SECONDS; steps++; }
+            if (steps === 4) accumulator = 0;
+        }
+
+        function stepWorld(dt) {
+            clock += dt;
+            stateTime += dt;
+            updateSparkles(dt);
+            if (state === STATE.TITLE) return;
+            if (state === STATE.OVER) return;
+            const moveSpeed = SETTINGS.playerSettings.moveSpeedDesignPixelsPerSecond;
+            const mx = (input.right ? 1 : 0) - (input.left ? 1 : 0);
+            const my = (input.down ? 1 : 0) - (input.up ? 1 : 0);
+            mover.walking = (mx !== 0 || my !== 0);
+            let stepSpeed = moveSpeed * (mover.walking ? 1 : 0.4);
+            if (mx !== 0 && my !== 0) stepSpeed *= 0.7071;
+            if (mx !== 0) mover.x += Math.sign(mx) * stepSpeed * dt;
+            if (my !== 0) mover.y += Math.sign(my) * stepSpeed * dt;
+            mover.x = Math.max(2, Math.min(SETTINGS.stageSize - 12, mover.x));
+            mover.y = Math.max(3, Math.min(SETTINGS.stageSize - 16, mover.y));
+            ducklings.forEach(function (d) {
+                const dx = mover.x - d.x;
+                const dy = mover.y - d.y;
+                const dist = Math.hypot(dx, dy) || 0.0001;
+                const stepLen = 9;
+                if (dist > stepLen) { d.x += (dx / dist) * stepLen; d.y += (dy / dist) * stepLen; }
+                d.x = Math.max(2, Math.min(SETTINGS.stageSize - 12, d.x));
+                d.y = Math.max(3, Math.min(SETTINGS.stageSize - 16, d.y));
+            });
+            if (state === STATE.PLAY) {
+                roundT += dt;
+                if (roundT >= SETTINGS.playerSettings.roundTimeLimitSeconds) finishRun(false);
+                if (mover.x >= SETTINGS.worldSettings.shoreX) finishRun(true);
+            }
+        }
+
+        function updateSparkles(dt) { for (let i = sparkles.length - 1; i >= 0; i--) { sparkles[i].t += dt; if (sparkles[i].t >= sparkles[i].life) sparkles.splice(i, 1); } }
+
+        function drawDuck(ctx) {
+            const px = Math.round(mover.x); const py = Math.round(mover.y);
+            paintRoundBlob(ctx, px + 1, py + 16, 11, 2, PAL.duckBrown);
+            paintRoundBlob(ctx, px + 1, py + 9, 11, 6, PAL.duckYellow);
+            paintRoundBlob(ctx, px, py, 13, 9, PAL.duckYellow);
+            paintRoundBlob(ctx, px, py - 2, 4, 4, PAL.duckBrown);
+            paintRoundBlob(ctx, px + 9, py - 2, 4, 4, PAL.duckBrown);
+            paintEyes(ctx, px + 2, py + 3, { patch: PAL.duckBrown, shine: PAL.duckWhite }, false);
+            ctx.fillStyle = PAL.duckBrown;
+            ctx.fillRect(px + 6, py + 6, 1, 1);
+            const footA = Math.floor(mover.walkPhase || 0) % 2 === 0;
+            ctx.fillStyle = PAL.duckBrown;
+            ctx.fillRect(px + (footA ? 2 : 3), py + 14, 2, 2);
+            ctx.fillRect(px + (footA ? 9 : 8), py + 14, 2, 2);
+        }
+
+        function drawDuckling(ctx, d) {
+            const px = Math.round(d.x); const py = Math.round(d.y);
+            paintRoundBlob(ctx, px + 1, py + 12, 8, 2, PAL.duckBrown);
+            paintRoundBlob(ctx, px + 1, py + 7, 8, 5, PAL.duckBrown);
+            paintRoundBlob(ctx, px, py, 9, 7, PAL.duckBrown);
+            paintRoundBlob(ctx, px, py - 2, 3, 3, PAL.duckBrown);
+            paintRoundBlob(ctx, px + 6, py - 2, 3, 3, PAL.duckBrown);
+            paintEyes(ctx, px + 1, py + 2, { patch: PAL.duckBrown, shine: PAL.duckYellow }, false);
+            ctx.fillStyle = PAL.duckEgg;
+            ctx.fillRect(px + 4, py + 3, 1, 1);
+            ctx.fillStyle = PAL.duckBrown;
+            ctx.fillRect(px + 3, py + 6, 3, 1);
+        }
+
+        function paintTitle(ctx) { paintPixelText(ctx, "DUCKLINE", 50, 14, PAL.duckBrown, PAL.pondA, 2); paintPixelText(ctx, "DUCK THE FAMILY!", 50, 30, PAL.duckYellow, PAL.pondA, 1); if (Math.floor(clock / 0.55) % 2 === 0) paintPixelText(ctx, "PRESS ANY KEY OR TAP", 50, 84, PAL.duckBrown, null, 1); }
+        function paintOver(ctx) { paintPixelText(ctx, "QUACK! YOU GOT THE FAMILY ACROSS!", 50, 16, PAL.duckYellow, PAL.pondA, 1); paintPixelText(ctx, String(score), 50, 32, PAL.duckBrown, PAL.pondA, 3); if (Math.floor(clock / 0.55) % 2 === 0) paintPixelText(ctx, "PRESS ANY KEY OR TAP", 50, 84, PAL.duckBrown, null, 1); }
+        function paintHud(ctx) { paintPixelText(ctx, "DUCK LOVE " + score + " OF " + SETTINGS.playerSettings.victoryTarget, 50, 88, PAL.duckEgg, null, 1); paintPixelText(ctx, "TIME " + Math.max(0, Math.ceil(SETTINGS.playerSettings.roundTimeLimitSeconds - roundT)), 50, 94, PAL.duckWhite, null, 1); }
+
+        function paint(ctx) {
+            for (let by = 0; by < 10; by++) { for (let bx = 0; bx < 10; bx++) { ctx.fillStyle = (bx + by) % 2 === 0 ? PAL.pondA : PAL.pondB; ctx.fillRect(bx * 10, by * 10, 10, 10); } }
+            drawDuck(ctx);
+            ducklings.forEach(function (d) { drawDuckling(ctx, d); });
+            if (state === STATE.TITLE) paintTitle(ctx);
+            else if (state === STATE.PLAY) paintHud(ctx);
+            else paintOver(ctx);
+        }
+
+        function paintDuckLinePreview(ctx) {
+            for (let by = 0; by < 10; by++) { for (let bx = 0; bx < 10; bx++) { ctx.fillStyle = (bx + by) % 2 === 0 ? PAL.pondA : PAL.pondB; ctx.fillRect(bx * 10, by * 10, 10, 10); } }
+            drawDuck(ctx);
+            ducklings.forEach(function (d) { drawDuckling(ctx, d); });
+        }
+
+        let scScore = null, scBest = null, scMsg = null;
+        function syncChrome(force) {
+            const shownBest = Math.max(storedBest, score);
+            if (force || scScore !== score) { scScore = score; scoreEl.textContent = String(score); }
+            if (force || scBest !== shownBest) { scBest = shownBest; bestEl.textContent = String(shownBest); }
+            let msg;
+            if (state === STATE.PLAY) msg = "QUACK! lead the family across!";
+            else if (state === STATE.TITLE) msg = "press any key or tap to start";
+            else msg = winFlag ? "you got the family across!" : "quack! time ran out!";
+            if (force || scMsg !== msg) { scMsg = msg; msgEl.textContent = msg; }
+        }
+
+        function start() { storedBest = readBest(SETTINGS.gameName); state = STATE.TITLE; stateTime = 0; score = 0; mover.x = SETTINGS.worldSettings.startX; mover.y = SETTINGS.worldSettings.startY; roundT = 0; syncChrome(true); }
+        function stop() { }
+        function restart() { startRun(); }
+        function onDir(dir, pressed) { input[dir] = !!pressed; if (pressed) { if (dir === "left") mover.leanDir = -1; else if (dir === "right") mover.leanDir = 1; } }
+        function onAction() { if (state === STATE.PLAY) { if (mover.x >= SETTINGS.worldSettings.shoreX) finishRun(true); } else if (stateTime > 0.35) { startRun(); } }
+        function onStageTap() { onAction(); }
+        function onAnyKey() { if (state !== STATE.PLAY && stateTime > 0.35) startRun(); }
+
+        GAMES.push({
+            id: SETTINGS.gameName, versionNumber: SETTINGS.versionNumber, name: "Duck Line",
+            tagline: "DUCK the family across!",
+            concept: "A mother duck crosses the pond with her ducklings in a waddling line behind her.",
+            actionLabel: "GO", hint: "WASD move · GO pad to lead · R restart · ESC shelf",
+            previewPaint: paintDuckLinePreview, start, stop, restart, update, paint, onDir, onAction, onStageTap, onAnyKey
+        });
+    })();
 
 /* ==================================================================
    PART 6 — boot: stamp the version, build the shelf, wake the mascot,

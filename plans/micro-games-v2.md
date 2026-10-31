@@ -2,7 +2,8 @@
 
 Today: 2026-10-31. Status: build 20261031-003 done — the shelf and PANDASNACK + BOOPEEK
 now live together in ONE file (the one-file pivot of round 1.5, round 2 shipped BOOPEEK).
-Round 3 (a third module) is next.
+Round 3 (a third module) is next — the DUCKLINE module content 20261031-004 has started
+inside the one-file app.
 
 Supersedes micro-games.md (v1), kept as history: v1 described one file per game in
 separate folders; the owner changed their mind after round 1 — see prompt P-02.
@@ -122,7 +123,7 @@ Rule: every future build truthfully records its model in all four homes.
 | Name | One sentence | Verb | Status |
 |---|---|---|---|
 | PANDASNACK | A chubby panda scurries to eat bamboo shoots while wasps drift past. | WASD dodge+dash | in the file (round 1) |
-| DUCKLINE | A mother duck crosses a pond; collected ducklings waddle in a line behind her. | WASD lead-a-chain | backlog — round 2 candidate |
+| DUCKLINE | A mother duck crosses a pond; collected ducklings waddle in a line behind her. | WASD lead-a-chain | round 3 candidate (next) |
 | SPROUTUP | A baby sprout climbs a rain of water drops; sun settles, it blooms — short and lovely. | WASD weave | backlog |
 | SLIMEHOP | A bouncing slime must only land on lily pads that float apart over time. | WASD + Space hop timing | backlog |
 | BOOPEEK | A shy ghost peeks from doors; poke it before it hides — cozy not scary. | WASD walk + Space poke | built in round 2 (module content 20261031-003) |
