@@ -1,0 +1,1545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <!-- Fits phone screens and stops pinch-zoom mischief during a scurry. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#FFF3E2">
+    <title>KANT MICRO — tiny pixel games in one file</title>
+    <style>
+        /*
+           ============================================================
+           KANTMICROGAME — ONE FILE (since build 20261031-002).
+           The shelf AND every game live inside this single HTML file:
+             * two screens — the shelf, and the currently open game —
+               swap inside the page (no navigation, no iframes, no folders)
+             * one shared stage canvas + one shared input layer; every
+               game is a self-contained module (own IIFE, own SETTINGS)
+             * one file, fully offline, no web fonts, no network
+             * pixel art everywhere inside the stage; system fonts outside
+           ============================================================
+        */
+
+        :root {
+            --cream:      #FFF3E2;
+            --cream-deep: #FFE8CC;
+            --panel:      #FFFDF8;
+            --ink:        #4A3B32;
+            --ink-soft:   #8A776A;
+            --outline:    #E8D8C2;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body { height: 100%; }
+
+        [hidden] { display: none !important; }
+
+        body {
+            min-height: 100dvh; /* iPhone Safari: true screen height while the address bar moves */
+            overflow-x: hidden;
+            color: var(--ink);
+            font-family: -apple-system, "SF Pro Rounded", "Segoe UI", system-ui, sans-serif;
+            background:
+                radial-gradient(circle at 15% -10%, #FFEFD8 0%, transparent 34%),
+                radial-gradient(circle at 88% 4%, #FDE4EA 0%, transparent 30%),
+                linear-gradient(180deg, var(--cream) 0%, var(--cream-deep) 100%);
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        #page {
+            min-height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: calc(env(safe-area-inset-top, 0px) + 20px) 14px calc(env(safe-area-inset-bottom, 0px) + 16px);
+        }
+
+        /* =============== shelf screen =============== */
+
+        #banner { display: flex; align-items: center; gap: 18px; max-width: 640px; margin-bottom: 16px; }
+
+        #mascot {
+            display: block;
+            width: 96px;    /* 16 design-pixels wide, x6, crisp */
+            height: 90px;   /* 15 design-pixels tall            */
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+        }
+
+        #bannerText h1 {
+            font-size: clamp(30px, 8vw, 44px);
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            line-height: 0.95;
+            text-shadow: 0 3px 0 rgba(74, 59, 50, 0.08);
+        }
+
+        #bannerText .tagline {
+            margin-top: 9px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--ink-soft);
+        }
+
+        #howto {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+            max-width: 640px;
+            margin-bottom: 20px;
+        }
+
+        .chip {
+            display: inline-flex;
+            align-items: baseline;
+            gap: 7px;
+            padding: 8px 14px;
+            border-radius: 999px;
+            background: var(--panel);
+            border: 1px solid var(--outline);
+            box-shadow: 0 4px 10px rgba(74, 59, 50, 0.06);
+            font-size: 12.5px;
+            font-weight: 800;
+            font-style: normal;
+        }
+
+        .chip i { font-style: normal; color: var(--ink-soft); font-size: 11px; letter-spacing: 0.5px; }
+        .chip b { font-size: 15px; }
+        .chip.pulse b { animation: pulse 0.3s ease; }
+
+        @keyframes pulse {
+            0%   { transform: scale(1); }
+            45%  { transform: scale(1.35); }
+            100% { transform: scale(1); }
+        }
+
+        #shelf {
+            width: 100%;
+            max-width: 760px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(228px, 1fr));
+            gap: 16px;
+        }
+
+        .card {
+            position: relative;
+            display: block;
+            padding: 18px 18px 15px;
+            border-radius: 22px;
+            background: var(--panel);
+            border: 1px solid var(--outline);
+            box-shadow: 0 10px 24px rgba(74, 59, 50, 0.10);
+            text-decoration: none;
+            color: var(--ink);
+            text-align: left;
+            font-family: inherit;
+            cursor: pointer;
+            transition: transform 0.16s ease;
+        }
+
+        .card:hover { transform: translateY(-4px) rotate(-0.5deg); }
+
+        .card .preview {
+            display: block;
+            width: 100%;
+            height: 96px;
+            border-radius: 14px;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+            background: #FFF6E4;
+            border: 1px dashed var(--outline);
+            margin-bottom: 13px;
+        }
+
+        .card .name { font-size: 17px; font-weight: 800; }
+        .card .concept { margin-top: 6px; font-size: 13px; font-weight: 600; line-height: 1.45; color: var(--ink-soft); }
+        .card .best { margin-top: 11px; font-size: 12px; font-weight: 800; }
+        .card .best::before { content: "★ "; color: #E9A93D; }
+
+        .card.soon { border: 2px dashed #D9C7B2; background: rgba(255, 253, 248, 0.65); box-shadow: none; cursor: default; }
+        .card.soon:hover { transform: none; }
+        .card.soon .name { color: var(--ink-soft); }
+
+        .soonRow { display: flex; align-items: center; gap: 14px; }
+        #soonMoon { flex: none; width: 56px; height: 56px; image-rendering: pixelated; image-rendering: crisp-edges; }
+
+        /* =============== game screen =============== */
+
+        .gameTop { display: flex; flex-direction: column; align-items: center; gap: 10px; margin-bottom: 12px; width: 100%; max-width: 720px; }
+
+        .topRow { display: flex; align-items: center; gap: 10px; width: 100%; justify-content: center; flex-wrap: wrap; }
+
+        .pill {
+            padding: 9px 16px;
+            border-radius: 999px;
+            border: 1px solid var(--outline);
+            background: var(--panel);
+            box-shadow: 0 4px 0 rgba(74, 59, 50, 0.12);
+            font-family: inherit;
+            font-weight: 800;
+            font-size: 13px;
+            color: var(--ink);
+            cursor: pointer;
+            touch-action: none;
+        }
+
+        .pill.press { transform: translateY(3px); box-shadow: 0 1px 0 rgba(74, 59, 50, 0.12); }
+
+        #gameTitle {
+            font-size: clamp(24px, 6.5vw, 36px);
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            text-shadow: 0 3px 0 rgba(74, 59, 50, 0.08);
+            text-align: center;
+        }
+
+        #gameTagline { font-size: 13px; font-weight: 700; color: var(--ink-soft); text-align: center; }
+
+        #arena { display: flex; flex-direction: column; align-items: center; gap: 16px; width: 100%; }
+
+        @media (min-width: 680px) {
+            #arena { flex-direction: row; align-items: center; gap: 34px; }
+        }
+
+        #stageBlock { display: flex; flex-direction: column; align-items: center; min-width: 0; }
+
+        #bezel {
+            padding: 12px;
+            border-radius: 24px;
+            background: var(--panel);
+            border: 1px solid var(--outline);
+            box-shadow: 0 12px 26px rgba(74, 59, 50, 0.12), 0 3px 0 rgba(74, 59, 50, 0.05);
+            max-width: 100%;
+        }
+
+        #stage {
+            display: block;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+            border-radius: 10px;
+        }
+
+        #msg {
+            margin-top: 11px;
+            font-size: 12.5px;
+            font-weight: 800;
+            color: var(--ink-soft);
+            text-align: center;
+            letter-spacing: 0.3px;
+        }
+
+        #controls { display: flex; flex-direction: column; align-items: center; gap: 13px; touch-action: none; }
+
+        #pad {
+            display: grid;
+            grid-template-columns: 58px 58px 58px;
+            grid-template-rows: 58px 58px 58px;
+            gap: 9px;
+            grid-template-areas:
+                ".      up    ."
+                "left   dash  right"
+                ".      down  .";
+        }
+
+        .pbtn {
+            border: 0;
+            border-radius: 16px;
+            font-family: inherit;
+            font-weight: 800;
+            font-size: 19px;
+            color: #4A3B32;
+            box-shadow: 0 5px 0 var(--btn-shade, #D9C7B2), 0 8px 14px rgba(74, 59, 50, 0.10);
+            transition: transform 0.05s ease, box-shadow 0.05s ease;
+            touch-action: none;
+            cursor: pointer;
+        }
+
+        .pbtn.press {
+            transform: translateY(4px);
+            box-shadow: 0 1px 0 var(--btn-shade, #D9C7B2), 0 3px 8px rgba(74, 59, 50, 0.08);
+        }
+
+        #pUp    { grid-area: up;    background: #E2F3E6; --btn-shade: #A9CBB1; }
+        #pLeft  { grid-area: left;  background: #E4F1FA; --btn-shade: #A9C8DC; }
+        #pDash  { grid-area: dash;  background: #FFE5C5; --btn-shade: #DBB07E; font-size: 13px; letter-spacing: 0.5px; }
+        #pRight { grid-area: right; background: #FCE4ED; --btn-shade: #DFAEC3; }
+        #pDown  { grid-area: down;  background: #FFF2D6; --btn-shade: #DFC386; }
+
+        #btnRestart {
+            padding: 11px 24px;
+            border-radius: 999px;
+            border: 1px solid var(--outline);
+            background: var(--panel);
+            box-shadow: 0 4px 0 rgba(74, 59, 50, 0.12);
+            font-family: inherit;
+            font-weight: 800;
+            font-size: 13px;
+            color: var(--ink);
+            cursor: pointer;
+            touch-action: none;
+        }
+
+        #btnRestart.press { transform: translateY(3px); box-shadow: 0 1px 0 rgba(74, 59, 50, 0.12); }
+
+        .hint { font-size: 11.5px; font-weight: 700; color: var(--ink-soft); text-align: center; }
+
+        /* =============== footer =============== */
+
+        #meta {
+            margin-top: auto;
+            padding-top: 24px;
+            text-align: center;
+            font-size: 11.5px;
+            font-weight: 600;
+            color: var(--ink-soft);
+        }
+
+        #meta .v {
+            display: inline-block;
+            margin-bottom: 7px;
+            padding: 4px 11px;
+            border-radius: 999px;
+            background: var(--panel);
+            border: 1px solid var(--outline);
+            font-weight: 800;
+            color: var(--ink);
+        }
+
+        .zzz { font-weight: 800; color: #E9A93D; letter-spacing: 1px; }
+
+        @media (max-width: 420px) {
+            #banner { gap: 12px; }
+            #mascot { width: 80px; height: 75px; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .card, .card:hover, .chip.pulse b { animation: none; transition: none; transform: none; }
+        }
+    </style>
+</head>
+<body>
+<div id="page">
+
+    <!-- =============== the shelf screen (home) =============== -->
+    <section id="shelfScreen">
+        <header id="banner">
+            <div><canvas id="mascot" width="16" height="15" aria-label="A pixel-art panda mascot, bobbing and blinking"></canvas></div>
+            <div id="bannerText">
+                <h1>KANT MICRO</h1>
+                <p class="tagline">tiny pixel games — pick one, smile, play a minute</p>
+            </div>
+        </header>
+
+        <nav id="howto" aria-label="How to play the games">
+            <span class="chip"><i>⌨</i> WASD to move</span>
+            <span class="chip"><i>⎵</i> SPACE for the action</span>
+            <span class="chip"><i>📱</i> on-screen pads on phone</span>
+            <span class="chip"><i>✓</i> no ads, no accounts</span>
+        </nav>
+
+        <main id="shelf" aria-label="Micro games"></main>
+    </section>
+
+    <!-- =============== the game screen (one shared stage + pads) =============== -->
+    <section id="gameScreen" hidden>
+        <div class="gameTop">
+            <div class="topRow">
+                <button id="btnBack" class="pill" aria-label="Back to the shelf">⌂ SHELF</button>
+            </div>
+            <h2 id="gameTitle"></h2>
+            <p id="gameTagline"></p>
+            <div class="topRow">
+                <span class="chip"><i>SCORE</i><b id="scoreVal">0</b></span>
+                <span class="chip"><i>★ BEST</i><b id="bestVal">0</b></span>
+            </div>
+        </div>
+
+        <main id="arena">
+            <section id="stageBlock">
+                <div id="bezel">
+                    <canvas id="stage" width="100" height="100"
+                            aria-label="The tiny game stage"></canvas>
+                </div>
+                <p id="msg"></p>
+            </section>
+
+            <section id="controls">
+                <div id="pad">
+                    <button id="pUp"     class="pbtn" data-dir="up"    aria-label="Move up (W)">↑</button>
+                    <button id="pLeft"   class="pbtn" data-dir="left"  aria-label="Move left (A)">←</button>
+                    <button id="pDash"   class="pbtn" aria-label="Action button (SPACE)">DASH</button>
+                    <button id="pRight"  class="pbtn" data-dir="right" aria-label="Move right (D)">→</button>
+                    <button id="pDown"   class="pbtn" data-dir="down"   aria-label="Move down (S)">↓</button>
+                </div>
+                <button id="btnRestart">RESTART · R</button>
+                <p class="hint" id="inputHint"></p>
+            </section>
+        </main>
+    </section>
+
+    <footer id="meta">
+        <span class="v" id="verBox">KANT MICRO</span>
+        <br><span class="zzz">one file</span> · runs completely offline · every game lives inside this page ·
+        <span class="zzz">build 20261031-002</span>
+    </footer>
+</div>
+
+<script>
+"use strict";
+
+/* ==================================================================
+   PART 0 — file settings and the shared storage helpers
+   ================================================================== */
+
+const APP = {
+    name: "KANT MICRO",
+    fileVersion: "20261031-002",       // build number of THIS one-file app
+    savePrefix: "KANTMICROGAME."       // best scores live at prefix + GAMEID + ".best"
+};
+
+function readBest(gameId) {
+    try {
+        const value = window.localStorage.getItem(APP.savePrefix + gameId + ".best");
+        const parsed = value === null ? 0 : parseInt(value, 10);
+        return Number.isFinite(parsed) ? parsed : 0;
+    } catch (error) {
+        return 0;     // private browsing: saving skips, the game still runs
+    }
+}
+
+function saveBest(gameId, value) {
+    try {
+        window.localStorage.setItem(APP.savePrefix + gameId + ".best", String(value));
+    } catch (error) {
+        /* saving quietly refused; the run itself is unaffected */
+    }
+}
+
+/* ==================================================================
+   PART 1 — the shared pixel-art helpers (defined once, used by the
+   shelf mascot, every card preview and every game)
+   ================================================================== */
+
+/* paint a string map: equal-width rows; each letter is a color from
+   `colors`; "." is transparent; optional scale and horizontal flip */
+function paintPixels(ctx, map, colors, dx, dy, flipX, scale) {
+    const s = scale || 1;
+    const fx = Math.round(dx), fy = Math.round(dy);
+    for (let y = 0; y < map.length; y++) {
+        const row = map[y];
+        for (let x = 0; x < row.length; x++) {
+            const color = colors[row[x]];
+            if (!color) continue;
+            const drawX = flipX ? (fx + (row.length - 1 - x) * s) : (fx + x * s);
+            ctx.fillStyle = color;
+            ctx.fillRect(drawX, fy + y * s, s, s);
+        }
+    }
+}
+
+/* a rounded rectangle of solid pixels, painted per-pixel so it never
+   erases art underneath it */
+function paintRoundBlob(ctx, px, py, w, h, color) {
+    ctx.fillStyle = color;
+    const X = Math.round(px), Y = Math.round(py);
+    for (let y = 0; y < h; y++) {
+        for (let x = 0; x < w; x++) {
+            if ((x + y) <= 1 || (x + y) >= (w + h - 2) || (w - 1 - x + y) <= 1 || (x + h - 1 - y) <= 1) continue;
+            ctx.fillRect(X + x, Y + y, 1, 1);
+        }
+    }
+}
+
+/* two chubby dark eye patches with shine pixels; blink = patches only */
+function paintEyes(ctx, atX, atY, colors, blink) {
+    ctx.fillStyle = colors.patch;
+    ctx.fillRect(atX, atY, 3, 2);
+    ctx.fillRect(atX + 6, atY, 3, 2);
+    if (!blink) {
+        ctx.fillStyle = colors.shine;
+        ctx.fillRect(atX + 1, atY, 1, 1);
+        ctx.fillRect(atX + 7, atY, 1, 1);
+    } else {
+        ctx.fillStyle = colors.patch;
+        ctx.fillRect(atX, atY + 1, 3, 1);
+        ctx.fillRect(atX + 6, atY + 1, 3, 1);
+    }
+}
+
+/* the shared 3 x 5 pixel font (five rows of three characters each) */
+const PIXEL_FONT = {
+    A: ["010", "101", "111", "101", "101"],
+    B: ["110", "101", "110", "101", "110"],
+    C: ["011", "100", "100", "100", "011"],
+    D: ["110", "101", "101", "101", "110"],
+    E: ["111", "100", "110", "100", "111"],
+    F: ["111", "100", "110", "100", "100"],
+    G: ["011", "100", "101", "101", "011"],
+    H: ["101", "101", "111", "101", "101"],
+    I: ["111", "010", "010", "010", "111"],
+    J: ["001", "001", "001", "101", "110"],
+    K: ["101", "110", "100", "110", "101"],
+    L: ["100", "100", "100", "100", "111"],
+    M: ["101", "111", "111", "101", "101"],
+    N: ["110", "101", "101", "101", "101"],
+    O: ["010", "101", "101", "101", "010"],
+    P: ["110", "101", "110", "100", "100"],
+    Q: ["010", "101", "101", "011", "001"],
+    R: ["110", "101", "110", "101", "101"],
+    S: ["011", "100", "010", "001", "110"],
+    T: ["111", "010", "010", "010", "010"],
+    U: ["101", "101", "101", "101", "111"],
+    V: ["101", "101", "101", "101", "010"],
+    W: ["101", "101", "111", "111", "101"],
+    X: ["101", "101", "010", "101", "101"],
+    Y: ["101", "101", "010", "010", "010"],
+    Z: ["111", "001", "010", "100", "111"],
+    0: ["111", "101", "101", "101", "111"],
+    1: ["010", "110", "010", "010", "111"],
+    2: ["111", "001", "111", "100", "111"],
+    3: ["111", "001", "111", "001", "111"],
+    4: ["101", "101", "111", "001", "001"],
+    5: ["111", "100", "111", "001", "111"],
+    6: ["111", "100", "111", "101", "111"],
+    7: ["111", "001", "001", "001", "001"],
+    8: ["111", "101", "111", "101", "111"],
+    9: ["111", "101", "111", "001", "111"],
+    "!": ["010", "010", "010", "000", "010"],
+    "?": ["111", "001", "010", "000", "010"],
+    ".": ["000", "000", "000", "000", "010"],
+    "-": ["000", "000", "111", "000", "000"],
+    "+": ["000", "010", "111", "010", "000"],
+    " ": ["000", "000", "000", "000", "000"]
+};
+
+function pixelTextWidth(text, scale) {
+    return (text.length * 4 - 1) * scale;
+}
+
+/* paint centered pixel text; optional one-pixel-deep shadow pass */
+function paintPixelText(ctx, text, cx, cy, colorName, shadowColorName, scale) {
+    if (shadowColorName) {
+        paintPixelLine(ctx, text, cx, cy + (scale || 1), shadowColorName, scale);
+    }
+    paintPixelLine(ctx, text, cx, cy, colorName, scale);
+}
+
+function paintPixelLine(ctx, text, cx, cy, colorName, scale) {
+    const s = scale || 1;
+    const width = pixelTextWidth(text, s);
+    const ox = Math.round(cx - width / 2);
+    const oy = Math.round(cy);
+    for (let i = 0; i < text.length; i++) {
+        const glyph = PIXEL_FONT[text[i]] || PIXEL_FONT[text[i].toUpperCase()] || PIXEL_FONT["?"];
+        for (let gy = 0; gy < 5; gy++) {
+            for (let gx = 0; gx < 3; gx++) {
+                if (glyph[gy][gx] !== "1") continue;
+                ctx.fillStyle = colorName;
+                ctx.fillRect(ox + i * 4 * s + gx * s, oy + gy * s, s, s);
+            }
+        }
+    }
+}
+
+/* ==================================================================
+   PART 2 — the shelf mascot: a chubby pixel panda that bobs and blinks
+   (the same face that grew up into the round 1 game's meadow)
+   ================================================================== */
+
+const PANDA_OPEN = [
+    "..KK........KK..",
+    ".KKKK......KKKK.",
+    ".KKKK......KKKK.",
+    "..KKKKKKKKKKKK..",
+    ".KKWWWWWWWWWWKK.",
+    ".KWWWWWWWWWWWWK.",
+    "KWWWWWWWWWWWWWWK",
+    "KWWKKKWWWWKKKWWK",
+    "KWWKWKWWWWKWKWWK",
+    "KWWWWWWWWWWWWWWK",
+    "KWWPWWWWWWWWPWWK",
+    "KWWWWWWMMWWWWWWK",
+    ".KWWWWWWWWWWWWK.",
+    ".KWWWWWWWWWWWWK.",
+    "..KKKKKKKKKKKK.."
+];
+
+const PANDA_BLINK = PANDA_OPEN.map(function (row, y) {
+    return y === 8 ? "KWWKKKWWWWKKKWWK" : row;
+});
+
+const PANDA_COLORS = {
+    K: "#3B2F27",
+    W: "#FFFFFF",
+    P: "#F7A8B8",
+    M: "#8A6247"
+};
+
+function startMascot() {
+    const canvas = document.getElementById("mascot");
+    const ctx = canvas.getContext("2d");
+    if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        paintPixels(ctx, PANDA_OPEN, PANDA_COLORS, 0, 0);
+        return;
+    }
+    let step = 0;
+    function tick() {
+        const bob = (step === 0 || step === 2) ? 1 : 0;
+        paintPixels(ctx, step === 3 ? PANDA_BLINK : PANDA_OPEN, PANDA_COLORS, 0, bob);
+        step = (step + 1) % 4;
+    }
+    tick();
+    window.setInterval(tick, 560);
+}
+
+/* ==================================================================
+   PART 3 — the shelf: cards are built from the GAMES registry; the
+   coming-soon slot keeps the shelf open for growth, forever
+   ================================================================== */
+
+const MOON_MAP = [
+    "...WWWW.",
+    "..WWWWWW",
+    ".WW..WWW",
+    "WW....WW",
+    "WW.....W",
+    "WW....WW",
+    ".WW..WWW",
+    "..WWWWW."
+];
+
+const MOON_COLORS = { W: "#F4C764" };
+
+/* PANDASNACK's card preview scene: the panda head, two bamboo shoots,
+   and two wasps drifting around it */
+const BAMBOO_PREVIEW = [
+    ".DLDDL.",
+    "LLLSLLL",
+    ".LLSLL.",
+    "...S...",
+    "...S...",
+    "...s...",
+    "...S...",
+    "...S...",
+    "..SSS.."
+];
+
+const BAMBOO_PREVIEW_COLORS = { D: "#4F8F33", L: "#79C352", S: "#57A238", s: "#9CCB5C" };
+
+const WASP_PREVIEW = [
+    "....WW...",
+    "....WW...",
+    "KKKYYKKY.",
+    "KEKYYKKY.",
+    "KKKYYKKYK",
+    "KKKYYYYY.",
+    ".YYYYY..."
+];
+
+const WASP_PREVIEW_COLORS = { K: "#40342A", Y: "#FFD25E", W: "#FDFBF2", E: "#FFFDF6" };
+
+function paintPandaSnackPreview(ctx) {
+    paintPixels(ctx, PANDA_OPEN, PANDA_COLORS, 26, 18, false, 3);
+    paintPixels(ctx, BAMBOO_PREVIEW, BAMBOO_PREVIEW_COLORS, 100, 40, false, 3);
+    paintPixels(ctx, BAMBOO_PREVIEW, BAMBOO_PREVIEW_COLORS, 146, 20, false, 3);
+    paintPixels(ctx, WASP_PREVIEW, WASP_PREVIEW_COLORS, 30, 74, false, 2);
+    paintPixels(ctx, WASP_PREVIEW, WASP_PREVIEW_COLORS, 152, 62, false, 2);
+}
+
+function buildCard(game) {
+    const card = document.createElement("button");
+    card.className = "card";
+    card.addEventListener("pointerdown", function (event) {
+        event.preventDefault();
+        openGame(game.id);
+    });
+
+    const preview = document.createElement("canvas");
+    preview.className = "preview";
+    preview.width = 200;
+    preview.height = 96;
+    preview.setAttribute("aria-label", "Pixel-art preview of " + game.name);
+    if (typeof game.previewPaint === "function") {
+        game.previewPaint(preview.getContext("2d"));
+    }
+    card.appendChild(preview);
+
+    const title = document.createElement("div");
+    title.className = "name";
+    title.textContent = game.name;
+    card.appendChild(title);
+
+    const concept = document.createElement("div");
+    concept.className = "concept";
+    concept.textContent = game.concept;
+    card.appendChild(concept);
+
+    const best = document.createElement("div");
+    best.className = "best";
+    const saved = readBest(game.id);
+    best.textContent = (saved > 0) ? "best score " + saved : "not played yet";
+    card.appendChild(best);
+
+    return card;
+}
+
+function buildComingSoonCard() {
+    const card = document.createElement("div");
+    card.className = "card soon";
+    const row = document.createElement("div");
+    row.className = "soonRow";
+
+    const moon = document.createElement("canvas");
+    moon.id = "soonMoon";
+    moon.width = 8;
+    moon.height = 8;
+    moon.setAttribute("aria-label", "A sleepy pixel moon");
+    paintPixels(moon.getContext("2d"), MOON_MAP, MOON_COLORS, 0, 0);
+    row.appendChild(moon);
+
+    const text = document.createElement("div");
+    text.innerHTML =
+        '<div class="name">COMING SOON ...</div>' +
+        '<div class="concept">This slot stays open. The next tiny game is ' +
+        'being dreamed up round by round.</div>';
+    row.appendChild(text);
+
+    card.appendChild(row);
+    return card;
+}
+
+function buildShelf() {
+    const shelf = document.getElementById("shelf");
+    shelf.innerHTML = "";
+    GAMES.forEach(function (game) {
+        shelf.appendChild(buildCard(game));
+    });
+    shelf.appendChild(buildComingSoonCard());
+}
+
+/* ==================================================================
+   PART 4 — the app runtime: registry, screens, one shared stage,
+   one shared input layer, one loop
+   ================================================================== */
+
+const GAMES = [];               // every game module pushes itself in here
+const ACTIVE = { module: null };
+
+const shelfScreenEl = document.getElementById("shelfScreen");
+const gameScreenEl = document.getElementById("gameScreen");
+const stageCanvas = document.getElementById("stage");
+const stageCtx = stageCanvas.getContext("2d");
+const scoreEl = document.getElementById("scoreVal");
+const bestEl = document.getElementById("bestVal");
+const msgEl = document.getElementById("msg");
+const gameTitleEl = document.getElementById("gameTitle");
+const gameTaglineEl = document.getElementById("gameTagline");
+const inputHintEl = document.getElementById("inputHint");
+const dashBtnEl = document.getElementById("pDash");
+const verEl = document.getElementById("verBox");
+
+const STAGE_SIZE = 100;
+
+function openGame(gameId) {
+    const module2 = GAMES.find(function (game) { return game.id === gameId; });
+    if (!module2) return;
+    if (ACTIVE.module && ACTIVE.module.id !== gameId) ACTIVE.module.stop();
+    ACTIVE.module = module2;
+    shelfScreenEl.hidden = true;
+    gameScreenEl.hidden = false;
+    gameTitleEl.textContent = module2.name;
+    gameTaglineEl.textContent = module2.tagline;
+    inputHintEl.textContent = module2.hint;
+    dashBtnEl.textContent = module2.actionLabel;
+    scoreEl.textContent = "0";
+    bestEl.textContent = String(readBest(gameId));
+    msgEl.textContent = "";
+    module2.start();
+    fitStage();
+    setHash("game=" + gameId);
+}
+
+function openShelf() {
+    if (ACTIVE.module) ACTIVE.module.stop();
+    ACTIVE.module = null;
+    gameScreenEl.hidden = true;
+    shelfScreenEl.hidden = false;
+    buildShelf();                     // fresh best-score lines on the cards
+    setHash("");
+}
+
+function setHash(value) {
+    try {
+        window.location.hash = value;
+    } catch (error) {
+        /* some embedded browsers refuse hash writes; the pages still swap */
+    }
+}
+
+function routeFromHash() {
+    const match = /^#game=([A-Z0-9-]+)/.exec(window.location.hash || "");
+    const wanted = match ? match[1] : null;
+    if (wanted && (!ACTIVE.module || ACTIVE.module.id !== wanted)) openGame(wanted);
+    if (!wanted && ACTIVE.module) openShelf();
+}
+
+window.addEventListener("hashchange", routeFromHash);
+
+/* whole-number scaling: the same rule every build has always followed */
+function fitStage() {
+    if (gameScreenEl.hidden) return;
+    const widthBudget = Math.min(window.innerWidth - 48, 660);
+    const heightBudget = window.innerHeight - (window.innerWidth >= 680 ? 170 : 360);
+    let scale = Math.floor(Math.min(widthBudget, heightBudget) / STAGE_SIZE);
+    scale = Math.max(2, Math.min(6, scale));
+    stageCanvas.style.width = (STAGE_SIZE * scale) + "px";
+    stageCanvas.style.height = (STAGE_SIZE * scale) + "px";
+}
+
+window.addEventListener("resize", fitStage);
+window.addEventListener("orientationchange", fitStage);
+
+/* ---------- the one loop: only the open game ticks and paints ---------- */
+
+const FRAME = { lastTime: performance.now() };
+
+function frame(now) {
+    let dt = (now - FRAME.lastTime) / 1000;
+    FRAME.lastTime = now;
+    if (dt > 0.25) dt = 0.25;
+    if (ACTIVE.module) {
+        ACTIVE.module.update(dt);
+        stageCtx.clearRect(0, 0, stageCanvas.width, stageCanvas.height);
+        ACTIVE.module.paint(stageCtx);
+    }
+    window.requestAnimationFrame(frame);
+}
+
+/* ---------- shared keyboard ---------- */
+
+const DIR_KEYS = {
+    KeyW: "up",    ArrowUp: "up",
+    KeyA: "left",  ArrowLeft: "left",
+    KeyS: "down",  ArrowDown: "down",
+    KeyD: "right", ArrowRight: "right"
+};
+
+function pressPadVisual(dir, on) {
+    const el = document.getElementById("p" + dir.charAt(0).toUpperCase() + dir.slice(1));
+    if (el) el.classList.toggle("press", !!on);
+}
+
+window.addEventListener("keydown", function (event) {
+    if (!ACTIVE.module) return;
+    const code = event.code;
+    if (code === "Space" || code.indexOf("Arrow") === 0) event.preventDefault();
+    if (event.repeat) return;
+    const dir = DIR_KEYS[code];
+    if (dir) { ACTIVE.module.onDir(dir, true); pressPadVisual(dir, true); return; }
+    if (code === "Space") { ACTIVE.module.onAction(); return; }
+    if (code === "Escape") { openShelf(); return; }
+    if (code === "KeyR") { ACTIVE.module.restart(); return; }
+    if (typeof ACTIVE.module.onAnyKey === "function") ACTIVE.module.onAnyKey();
+});
+
+window.addEventListener("keyup", function (event) {
+    if (!ACTIVE.module) return;
+    const dir = DIR_KEYS[event.code];
+    if (dir) { ACTIVE.module.onDir(dir, false); pressPadVisual(dir, false); }
+});
+
+/* ---------- shared pads (they serve whichever game is open) ---------- */
+
+function wirePad(id, onDown, onUp) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const down = function (event) {
+        event.preventDefault();
+        el.classList.add("press");
+        if (el.setPointerCapture && event.pointerId !== undefined) {
+            try { el.setPointerCapture(event.pointerId); } catch (error) { /* fine */ }
+        }
+        if (onDown) onDown();
+    };
+    const up = function () {
+        el.classList.remove("press");
+        if (onUp) onUp();
+    };
+    el.addEventListener("pointerdown", down);
+    el.addEventListener("pointerup", up);
+    el.addEventListener("pointercancel", up);
+    el.addEventListener("lostpointercapture", up);
+    el.addEventListener("contextmenu", function (event) { event.preventDefault(); });
+    return el;
+}
+
+const releaseDirs = null; /* pads handle their own releases */
+
+["Up", "Down", "Left", "Right"].forEach(function (edge) {
+    const dir = edge.toLowerCase();
+    wirePad("p" + edge,
+        function () { if (ACTIVE.module) ACTIVE.module.onDir(dir, true); },
+        function () { if (ACTIVE.module) ACTIVE.module.onDir(dir, false); });
+});
+
+wirePad("pDash", function () {
+    if (!ACTIVE.module) return;
+    ACTIVE.module.onAction();
+});
+
+wirePad("btnRestart", function () {
+    if (ACTIVE.module) ACTIVE.module.restart();
+});
+
+wirePad("btnBack", function () { openShelf(); });
+
+/* tapping the stage during play: the module decides what that means */
+wirePad("stage", function () {
+    if (ACTIVE.module) ACTIVE.module.onStageTap();
+});
+
+/* ==================================================================
+   PART 5 — GAME MODULES. One IIFE per game: it owns its own SETTINGS,
+   state and functions inside its own scope, registers itself in GAMES,
+   and talks to the app through the tiny module contract:
+     start / stop / restart / update(dt) / paint(ctx) / onDir / onAction /
+     onStageTap / onAnyKey + name, tagline, concept, actionLabel, hint
+   ================================================================== */
+
+(function () {
+    "use strict";
+
+    /* ---------- PANDASNACK settings (content of round 1, unchanged numbers) ---------- */
+
+    const SETTINGS = {
+        gameName: "PANDASNACK",
+        versionNumber: "20261031-001",         // the game content build; the file itself is -002
+        stageSize: 100,                        // design pixels; stage is a square
+        saveKey: "KANTMICROGAME.PANDASNACK.best",
+
+        playerSettings: {
+            moveSpeedDesignPixelsPerSecond: 26,
+            dashSpeedMultiplier: 1.75,
+            dashSeconds: 0.7,
+            dashCooldownSeconds: 2.2,
+            startingHearts: 3,
+            secondsOfProtectionAfterHit: 1.6,
+            pandaCenterHitRadius: 7.0
+        },
+
+        worldSettings: {
+            bambooShootsOnStage: 2,
+            bambooRespawnDelaySeconds: 0.45,
+            minBambooDistanceFromPanda: 14,
+            minBambooDistanceFromBamboo: 16,
+            firstWaspSpawnDelaySeconds: 1.2,
+            waspHitRadius: 6.5,
+            waspWaveAmplitude: 2.5,
+            waspWaveSeconds: 3.0
+        },
+
+        difficultyBands: [
+            { untilScore: 4,    maxWasps: 1, waspSpeed: 13, waspSpawnEverySeconds: 2.7 },
+            { untilScore: 9,    maxWasps: 2, waspSpeed: 17, waspSpawnEverySeconds: 2.0 },
+            { untilScore: 14,   maxWasps: 3, waspSpeed: 21, waspSpawnEverySeconds: 1.6 },
+            { untilScore: null, maxWasps: 4, waspSpeed: 26, waspSpawnEverySeconds: 1.25 }
+        ]
+    };
+
+    const PAL = SETTINGS.palette = {
+        meadowCheckerA: "#A9E29B",
+        meadowCheckerB: "#9CD58D",
+        meadowTuft:     "#7CB368",
+        flowerPetal:    "#F9CFE0",
+        flowerCenter:   "#FFE49A",
+        pandaWhite: "#FFFDF6", pandaDark: "#3B2F27", pandaBlush: "#F7A8B8",
+        pandaNose: "#8A6247", pandaShadow: "#7FB36B", pandaTear: "#9BCFF2",
+        bambooStalk: "#57A238", bambooStalkRing: "#9CCB5C", bambooLeaf: "#79C352", bambooLeafTip: "#4F8F33",
+        waspYellow: "#FFD25E", waspDark: "#40342A", waspWing: "#FDFBF2", waspEye: "#FFFDF6",
+        heartFill: "#F76C8A", heartEmpty: "#E8DCCB", heartShine: "#FFFDF8",
+        sparkleGold: "#FFE066", sparkleWhite: "#FFFDF4", dustPuff: "#CBB79F", dustLight: "#EFE3CE", owStar: "#F0544F",
+        dashLeaf: "#4FA53F", dashLeafField: "#DDEBCB", speedLine: "#F7F1DC",
+        textBrown: "#4A3B32", textPink: "#E96AA0", textCream: "#FFFDF8"
+    };
+
+    /* ---------- sprite maps ---------- */
+
+    const BAMBOO_A = [
+        ".DLDDL.", "LLLSLLL", ".LLSLL.", "...S...", "...S...", "...s...", "...S...", "...S...", "..SSS.."
+    ];
+    // sway frame: the leafy crown leans one pixel to the right
+    const BAMBOO_B = [
+        "..DLDDL", ".LLLSLL", "..LLSLL", "...S...", "...S...", "...s...", "...S...", "...S...", "..SSS.."
+    ];
+    const BAMBOO_COLORS = { D: PAL.bambooLeafTip, L: PAL.bambooLeaf, S: PAL.bambooStalk, s: PAL.bambooStalkRing };
+
+    const WASP_A = [
+        "....WW...", "....WW...", "KKKYYKKY.", "KEKYYKKY.", "KKKYYKKYK", "KKKYYYYY.", ".YYYYY..."
+    ];
+    const WASP_B = [
+        ".........", "....WW...", "KKKYYKKY.", "KEKYYKKY.", "KKKYYKKYK", "KKKYYYYY.", ".YYYYY..."
+    ];
+    const WASP_COLORS = { K: PAL.waspDark, Y: PAL.waspYellow, W: PAL.waspWing, E: PAL.waspEye };
+
+    const HEART_MAP = [".RR.RR.", "RWRRRRR", "RRRRRRR", ".RRRRR.", "..RRR..", "...R..."];
+    const HEART_FULL =  { R: PAL.heartFill,  W: PAL.heartShine };
+    const HEART_EMPTY = { R: PAL.heartEmpty, W: PAL.heartShine };
+
+    const SPARK_A = ["..Y..", "..Y..", "YYWYY", "..Y..", "..Y.."];
+    const SPARK_B = [".....", "..Y..", ".YYY.", "..Y..", "....."];
+    const SPARK_C = [".....", ".....", "..Y..", ".....", "....."];
+    const SPARK_FRAMES = [SPARK_A, SPARK_B, SPARK_C];
+
+    const LEAF_MAP = ["...G.", "..GG.", ".GGG.", ".GG..", "..G.."];
+    const FLOWER_MAP = [".P.", "PCP", ".P."];
+
+    /* ---------- state ---------- */
+
+    const STATE = { TITLE: "title", PLAY: "play", OVER: "over" };
+    let state = STATE.TITLE;
+    let stateTime = 0;
+    let score = 0;
+    let hearts = SETTINGS.playerSettings.startingHearts;
+    let storedBest = 0;
+    let newBestFlag = false;
+
+    const panda = {
+        x: 44, y: 58, walking: false, walkPhase: 0, leanDir: 0,
+        blinkTimer: 2.2, blinking: false, blinkLeft: 0,
+        chompT: 0, invulnT: 0, dashing: false, dashT: 0, dashReadyT: 0
+    };
+
+    let bamboo = [];
+    let pendingBamboo = 0;
+    let respawnTimers = [];
+    let wasps = [];
+    let sparkles = [];
+    let waspSpawnTimer = 0;
+    let waspWingFrame = 0;
+    let clock = 0;
+    let dustTimer = 0;
+    let scoreChanged = false;
+
+    const input = { up: false, down: false, left: false, right: false };
+
+    /* ---------- world helpers ---------- */
+
+    function difficultyBand() {
+        for (const band of SETTINGS.difficultyBands) {
+            if (band.untilScore === null || score <= band.untilScore) return band;
+        }
+        return SETTINGS.difficultyBands[SETTINGS.difficultyBands.length - 1];
+    }
+
+    function farEnoughFromThings(x, y) {
+        const pandaCX = panda.x + 6, pandaCY = panda.y + 7;
+        if (Math.hypot(x + 3 - pandaCX, y + 4 - pandaCY) < SETTINGS.worldSettings.minBambooDistanceFromPanda) return false;
+        for (const other of bamboo) {
+            if (Math.hypot(x + 3 - (other.x + 3), y + 4 - (other.y + 4)) < SETTINGS.worldSettings.minBambooDistanceFromBamboo) return false;
+        }
+        return true;
+    }
+
+    function spawnBamboo() {
+        for (let attempt = 0; attempt < 40; attempt++) {
+            const x = 4 + Math.floor(Math.random() * 84);
+            const y = 18 + Math.floor(Math.random() * 68);
+            if (farEnoughFromThings(x, y)) {
+                bamboo.push({ x, y, sway: Math.floor(Math.random() * 2) });
+                return;
+            }
+        }
+        /* 40 polite tries and still no spot: skip quietly and try next respawn */
+    }
+
+    function spawnWasp() {
+        const band = difficultyBand();
+        if (wasps.length >= band.maxWasps) return;
+        const fromLeft = Math.random() < 0.5;
+        const speed = fromLeft ? band.waspSpeed : -band.waspSpeed;
+        for (let attempt = 0; attempt < 10; attempt++) {
+            const y = 6 + Math.random() * 78;
+            const entryX = fromLeft ? -10 : SETTINGS.stageSize + 1;
+            if (Math.abs(y - (panda.y + 7)) >= 18) {
+                wasps.push({ x: entryX, baseY: y, vx: speed, phase: Math.random() * 6.28 });
+                return;
+            }
+        }
+    }
+
+    function startRun() {
+        score = 0;
+        hearts = SETTINGS.playerSettings.startingHearts;
+        panda.x = 44; panda.y = 58;
+        panda.dashing = false; panda.dashT = 0; panda.dashReadyT = 0;
+        panda.invulnT = 0; panda.chompT = 0; panda.blinking = false; panda.blinkTimer = 2.2;
+        panda.walking = false; panda.leanDir = 0;
+        bamboo = []; pendingBamboo = 0; respawnTimers = [];
+        wasps = []; sparkles = [];
+        waspSpawnTimer = SETTINGS.worldSettings.firstWaspSpawnDelaySeconds;
+        for (let i = 0; i < SETTINGS.worldSettings.bambooShootsOnStage; i++) spawnBamboo();
+        state = STATE.PLAY;
+        stateTime = 0;
+        syncChrome(true);
+    }
+
+    function finishRun() {
+        const record = score > storedBest;
+        if (record) {
+            storedBest = score;
+            saveBest(SETTINGS.gameName, score);
+        }
+        newBestFlag = record;
+        state = STATE.OVER;
+        stateTime = 0;
+        syncChrome(true);
+    }
+
+    function waspY(wasp) {
+        return Math.round(wasp.baseY + Math.sin(wasp.phase) * SETTINGS.worldSettings.waspWaveAmplitude);
+    }
+
+    function secondsPerWaspWing() { return 0.09; }
+
+    function triggerDash() {
+        if (state !== STATE.PLAY || panda.dashing || panda.dashReadyT > 0) return false;
+        panda.dashing = true;
+        panda.dashT = SETTINGS.playerSettings.dashSeconds;
+        panda.dashReadyT = SETTINGS.playerSettings.dashCooldownSeconds;
+        return true;
+    }
+
+    /* ---------- fixed-step world update ---------- */
+
+    let accumulator = 0;
+    const STEP_SECONDS = 1 / 60;
+
+    function update(rawDt) {
+        let dt = rawDt > 0.25 ? 0.25 : rawDt;
+        accumulator += dt;
+        let steps = 0;
+        while (accumulator >= STEP_SECONDS && steps < 4) {
+            stepWorld(STEP_SECONDS);
+            accumulator -= STEP_SECONDS;
+            steps++;
+        }
+        if (steps === 4) accumulator = 0;
+    }
+
+    function stepWorld(dt) {
+        clock += dt;
+        stateTime += dt;
+        waspWingFrame = Math.floor(clock / secondsPerWaspWing()) % 2;
+
+        updateSparkles(dt);
+        if (state === STATE.TITLE) { updatePandaFace(dt, true); return; }
+        if (state === STATE.OVER) return;
+
+        updatePandaFace(dt, false);
+
+        // the panda scurries
+        const player = SETTINGS.playerSettings;
+        const world = SETTINGS.worldSettings;
+        const mx = (input.right ? 1 : 0) - (input.left ? 1 : 0);
+        const my = (input.down ? 1 : 0) - (input.up ? 1 : 0);
+        panda.walking = (mx !== 0 || my !== 0);
+        let speed = player.moveSpeedDesignPixelsPerSecond * (panda.dashing ? player.dashSpeedMultiplier : 1);
+        if (mx !== 0 && my !== 0) speed *= 0.7071;
+        if (mx !== 0) panda.x += Math.sign(mx) * speed * dt;
+        if (my !== 0) panda.y += Math.sign(my) * speed * dt;
+        panda.x = Math.max(2, Math.min(SETTINGS.stageSize - 15, panda.x));
+        panda.y = Math.max(3, Math.min(SETTINGS.stageSize - 19, panda.y));
+        if (panda.walking) {
+            panda.walkPhase += dt * 8;
+            dustTimer -= dt;
+            if (dustTimer <= 0) {
+                dustTimer = 0.18;
+                sparkles.push({ x: panda.x + 2 + Math.random() * 9, y: panda.y + 15, t: 0, life: 0.3,
+                                colors: { Y: PAL.dustPuff, W: PAL.dustLight } });
+            }
+        }
+        if (panda.dashing) {
+            panda.dashT -= dt;
+            if (panda.dashT <= 0) panda.dashing = false;
+        } else if (panda.dashReadyT > 0) {
+            panda.dashReadyT -= dt;
+        }
+        if (panda.invulnT > 0) panda.invulnT -= dt;
+        if (panda.chompT > 0) panda.chompT -= dt;
+
+        // munch a shoot standing close enough
+        for (let i = bamboo.length - 1; i >= 0; i--) {
+            const shoot = bamboo[i];
+            const shootCX = shoot.x + 3, shootCY = shoot.y + 4;
+            const pandaCX = panda.x + 6.5, pandaCY = panda.y + 7;
+            if (Math.hypot(shootCX - pandaCX, shootCY - pandaCY) <= 8) {
+                bamboo.splice(i, 1);
+                score++;
+                scoreChanged = true;
+                panda.chompT = 0.45;
+                for (let s = 0; s < 6; s++) {
+                    sparkles.push({
+                        x: shootCX - 2 + (Math.random() * 8 - 4), y: shootCY - 2 + (Math.random() * 8 - 4),
+                        t: 0, life: 0.45, colors: { Y: PAL.sparkleGold, W: PAL.sparkleWhite }
+                    });
+                }
+                respawnTimers.push(SETTINGS.worldSettings.bambooRespawnDelaySeconds);
+            }
+        }
+
+        // the wasps drift, and may sting
+        for (let i = wasps.length - 1; i >= 0; i--) {
+            const wasp = wasps[i];
+            wasp.x += wasp.vx * dt;
+            wasp.phase += dt * (6.28 / world.waspWaveSeconds);
+            const waspCY = waspY(wasp);
+            if (wasp.x < -12 || wasp.x > SETTINGS.stageSize + 11) {
+                wasps.splice(i, 1);
+                continue;
+            }
+            if (panda.invulnT <= 0) {
+                const pandaCX = panda.x + 6.5, pandaCY = panda.y + 7;
+                const waspCX = wasp.x + 4.5;
+                if (Math.hypot(waspCX - pandaCX, waspCY - pandaCY) <= world.waspHitRadius) {
+                    hearts--;
+                    scoreChanged = true;
+                    panda.invulnT = player.secondsOfProtectionAfterHit;
+                    for (let s = 0; s < 5; s++) {
+                        sparkles.push({
+                            x: pandaCX - 2 + (Math.random() * 8 - 4), y: pandaCY - 2 + (Math.random() * 8 - 4),
+                            t: 0, life: 0.4, colors: { Y: PAL.owStar, W: PAL.sparkleWhite }
+                        });
+                    }
+                    if (hearts <= 0) { finishRun(); return; }
+                }
+            }
+        }
+
+        // refill shoots after their small delay; release wasps on the spawn beat
+        for (let i = respawnTimers.length - 1; i >= 0; i--) {
+            respawnTimers[i] -= dt;
+            if (respawnTimers[i] <= 0) {
+                respawnTimers.splice(i, 1);
+                if (bamboo.length + pendingBamboo < world.bambooShootsOnStage) pendingBamboo++;
+            }
+        }
+        if (pendingBamboo > 0 && bamboo.length < world.bambooShootsOnStage) {
+            pendingBamboo--;
+            spawnBamboo();
+        }
+
+        const band = difficultyBand();
+        waspSpawnTimer -= dt;
+        if (waspSpawnTimer <= 0) {
+            waspSpawnTimer = band.waspSpawnEverySeconds;
+            spawnWasp();
+        }
+    }
+
+    function updatePandaFace(dt, titleMode) {
+        if (panda.blinkLeft > 0) {
+            panda.blinkLeft -= dt;
+            if (panda.blinkLeft <= 0) panda.blinking = false;
+        } else {
+            panda.blinkTimer -= dt;
+            if (panda.blinkTimer <= 0) {
+                panda.blinking = true;
+                panda.blinkLeft = 0.16;
+                panda.blinkTimer = 2.0 + Math.random() * 2.2;
+            }
+        }
+        if (titleMode && panda.chompT <= 0 && Math.floor(clock % 3) === 2) panda.chompT = 0.3;
+    }
+
+    function updateSparkles(dt) {
+        for (let i = sparkles.length - 1; i >= 0; i--) {
+            sparkles[i].t += dt;
+            if (sparkles[i].t >= sparkles[i].life) sparkles.splice(i, 1);
+        }
+    }
+
+    /* ---------- painting ---------- */
+
+    const bgCanvas = document.createElement("canvas");
+    bgCanvas.width = SETTINGS.stageSize;
+    bgCanvas.height = SETTINGS.stageSize;
+
+    function paintBackgroundCache() {
+        const ctx = bgCanvas.getContext("2d");
+        for (let by = 0; by < 10; by++) {
+            for (let bx = 0; bx < 10; bx++) {
+                ctx.fillStyle = (bx + by) % 2 === 0 ? PAL.meadowCheckerA : PAL.meadowCheckerB;
+                ctx.fillRect(bx * 10, by * 10, 10, 10);
+            }
+        }
+        const tufts = [[9, 50], [27, 87], [52, 15], [78, 41], [91, 89], [15, 27], [64, 73], [41, 45]];
+        for (const [tx, ty] of tufts) {
+            ctx.fillStyle = PAL.meadowTuft;
+            ctx.fillRect(tx, ty, 2, 1);
+        }
+        const flowers = [[20, 40], [70, 21], [88, 61], [13, 79], [49, 33], [60, 92], [33, 12]];
+        for (const [fx, fy] of flowers) {
+            paintPixels(ctx, FLOWER_MAP, { P: PAL.flowerPetal, C: PAL.flowerCenter }, fx, fy);
+        }
+    }
+
+    function drawPanda(ctx, x, y, opts) {
+        const px = Math.round(x);
+        const py = Math.round(y + (opts.bob || 0));
+        const lean = opts.lean || 0;
+        const sad = !!opts.sad;
+
+        paintRoundBlob(ctx, px + 1, py + 16, 11, 2, PAL.pandaShadow);
+        paintRoundBlob(ctx, px + 1, py + 9, 11, 6, PAL.pandaWhite);
+        paintRoundBlob(ctx, px + lean, py, 13, 9, PAL.pandaWhite);
+
+        const earY = py - 2 + (sad ? 2 : 0);
+        paintRoundBlob(ctx, px + lean, earY, 4, 4, PAL.pandaDark);
+        paintRoundBlob(ctx, px + lean + 9, earY, 4, 4, PAL.pandaDark);
+
+        paintEyes(ctx, px + lean + 2, py + 3, { patch: PAL.pandaDark, shine: PAL.pandaWhite }, opts.blink || sad);
+
+        if (!sad) {
+            ctx.fillStyle = PAL.pandaBlush;
+            ctx.fillRect(px + 1, py + 6, 2, 1);
+            ctx.fillRect(px + 10, py + 6, 2, 1);
+        }
+
+        ctx.fillStyle = PAL.pandaNose;
+        ctx.fillRect(px + lean + 6, py + 5, 1, 1);
+        if (opts.chomp) {
+            ctx.fillStyle = PAL.pandaDark;
+            ctx.fillRect(px + 4, py + 6, 5, 2);
+            ctx.fillStyle = PAL.pandaBlush;
+            ctx.fillRect(px + 5, py + 7, 3, 1);
+        } else if (sad) {
+            ctx.fillStyle = PAL.pandaDark;
+            ctx.fillRect(px + lean + 5, py + 6, 1, 1);
+            ctx.fillRect(px + lean + 7, py + 6, 1, 1);
+            ctx.fillStyle = PAL.pandaTear;
+            ctx.fillRect(px + lean + 3, py + 7 + (Math.floor(clock * 3) % 5), 1, 1);
+        } else {
+            ctx.fillStyle = PAL.pandaDark;
+            ctx.fillRect(px + lean + 6, py + 6, 1, 1);
+        }
+
+        if (!sad) {
+            const footA = Math.floor(opts.walkPhase || 0) % 2 === 0;
+            ctx.fillStyle = PAL.pandaDark;
+            ctx.fillRect(px + (footA ? 2 : 3), py + 14, 2, 2);
+            ctx.fillRect(px + (footA ? 9 : 8), py + 14, 2, 2);
+        }
+
+        if (opts.dash) {
+            ctx.fillStyle = PAL.speedLine;
+            ctx.fillRect(px - 3, py + 11, 2, 1);
+            ctx.fillRect(px + 14, py + 12, 2, 1);
+        }
+    }
+
+    function drawBamboo(shoot) {
+        const frameIndex = Math.floor(clock / 0.6 + shoot.sway * 0.4) % 2;
+        paintPixels(stageCtx, frameIndex === 0 ? BAMBOO_A : BAMBOO_B, BAMBOO_COLORS, shoot.x, shoot.y);
+    }
+
+    function drawWasp(wasp) {
+        const wing = waspWingFrame === 0 ? WASP_A : WASP_B;
+        paintPixels(stageCtx, wing, WASP_COLORS, wasp.x, waspY(wasp), wasp.vx > 0);
+    }
+
+    function drawSparkle(sp) {
+        const idx = Math.max(0, Math.min(2, Math.floor((sp.t / sp.life) * 3)));
+        paintPixels(stageCtx, SPARK_FRAMES[idx], sp.colors, sp.x, sp.y);
+    }
+
+    function paintTitle() {
+        drawPanda(stageCtx, 43, 62, {
+            bob: Math.floor(clock / 0.9) % 2 === 0 ? 0 : 1,
+            blink: panda.blinking,
+            chomp: panda.chompT > 0
+        });
+        paintPixelText(stageCtx, "PANDA", 50, 15, PAL.textBrown, PAL.meadowCheckerA, 2);
+        paintPixelText(stageCtx, "SNACK!", 50, 30, PAL.textPink, PAL.meadowCheckerA, 2);
+        if (Math.floor(clock / 0.55) % 2 === 0) {
+            paintPixelText(stageCtx, "PRESS ANY KEY OR TAP", 50, 84, PAL.textBrown, null, 1);
+        }
+        paintPixelText(stageCtx, "BEST " + Math.max(storedBest, score), 50, 71, PAL.textBrown, null, 1);
+    }
+
+    function paintPlay() {
+        if (!(panda.invulnT > 0 && Math.floor(panda.invulnT * 10) % 2 === 0)) {
+            drawPanda(stageCtx, panda.x, panda.y, {
+                bob: panda.walking ? Math.floor(panda.walkPhase) % 2 : (Math.floor(clock / 1.1) % 2),
+                lean: panda.leanDir, blink: panda.blinking, chomp: panda.chompT > 0,
+                walkPhase: panda.walking ? panda.walkPhase : 0, dash: panda.dashing
+            });
+        }
+    }
+
+    function paintOver() {
+        drawPanda(stageCtx, 43, 54, { blink: true, sad: true });
+        paintPixelText(stageCtx, "OUT OF HEARTS", 50, 20, PAL.textPink, PAL.textCream, 1);
+        paintPixelText(stageCtx, String(score), 50, 31, PAL.textBrown, PAL.meadowCheckerA, 3);
+        if (newBestFlag) {
+            paintPixelText(stageCtx, "A NEW BEST!", 50, 56 + (Math.floor(clock / 0.4) % 2), PAL.textPink, null, 1);
+        } else {
+            paintPixelText(stageCtx, "BEST " + storedBest, 50, 57, PAL.textBrown, null, 1);
+        }
+        if (Math.floor(clock / 0.55) % 2 === 0) {
+            paintPixelText(stageCtx, "PRESS ANY KEY OR TAP", 50, 84, PAL.textBrown, null, 1);
+        }
+    }
+
+    function paintHUD() {
+        for (let i = 0; i < SETTINGS.playerSettings.startingHearts; i++) {
+            paintPixels(stageCtx, HEART_MAP, i < hearts ? HEART_FULL : HEART_EMPTY, 3 + i * 8, 2);
+        }
+        const player = SETTINGS.playerSettings;
+        const fraction = panda.dashing ? 1 : (panda.dashReadyT <= 0 ? 1 : 1 - panda.dashReadyT / player.dashCooldownSeconds);
+        paintRoundBlob(stageCtx, 3, 11, 14, 3, PAL.dashLeafField);
+        const fillW = Math.round(12 * fraction);
+        if (fillW > 0) {
+            stageCtx.fillStyle = fraction >= 1 ? PAL.dashLeaf : PAL.dashLeafField;
+            stageCtx.fillRect(4, 12, fillW, 1);
+        }
+        paintPixels(stageCtx, LEAF_MAP, { G: fraction >= 1 ? PAL.dashLeaf : PAL.dashLeafField }, 19, 10);
+    }
+
+    function paint(ctx) {
+        ctx.drawImage(bgCanvas, 0, 0);
+        for (const shoot of bamboo) drawBamboo(shoot);
+        if (state === STATE.TITLE) paintTitle();
+        else if (state === STATE.PLAY) { paintPlay(); for (const wasp of wasps) drawWasp(wasp); }
+        else paintOver();
+        for (const sp of sparkles) drawSparkle(sp);
+        if (state === STATE.PLAY) paintHUD();
+    }
+
+    /* ---------- chrome sync (score chip, best chip, message line) ---------- */
+
+    const messages = {
+        play: "munch bamboo · dodge the wasps",
+        lastHeart: "oh no — one heart left, careful!",
+        title: "press any key or tap to start",
+        overRecord: "A NEW BEST! tap or press a key for more",
+        over: "what a picnic! tap or press a key for more"
+    };
+
+    function pulseScoreChip() {
+        const chip = scoreEl.parentElement;
+        chip.classList.remove("pulse");
+        void chip.offsetWidth;
+        chip.classList.add("pulse");
+    }
+
+    function syncChrome(force) {
+        const shownBest = Math.max(storedBest, score);
+        if (force || syncChrome.shownScore !== score) {
+            syncChrome.shownScore = score;
+            scoreEl.textContent = String(score);
+            if (score > 0) pulseScoreChip();
+        }
+        if (force || syncChrome.shownBest !== shownBest) {
+            syncChrome.shownBest = shownBest;
+            bestEl.textContent = String(shownBest);
+        }
+        let msg;
+        if (state === STATE.PLAY) msg = (hearts === 1) ? messages.lastHeart : messages.play;
+        else if (state === STATE.TITLE) msg = messages.title;
+        else msg = newBestFlag ? messages.overRecord : messages.over;
+        if (force || syncChrome.shownMsg !== msg) {
+            syncChrome.shownMsg = msg;
+            msgEl.textContent = msg;
+        }
+    }
+
+    /* ---------- the module contract ---------- */
+
+    function start() {
+        storedBest = readBest(SETTINGS.gameName);
+        state = STATE.TITLE; stateTime = 0;
+        score = 0;
+        panda.x = 44; panda.y = 58; panda.walking = false; panda.leanDir = 0;
+        panda.dashing = false; panda.dashT = 0; panda.dashReadyT = 0;
+        panda.invulnT = 0; panda.chompT = 0; panda.blinking = false; panda.blinkTimer = 2.2;
+        bamboo = []; pendingBamboo = 0; respawnTimers = [];
+        wasps = []; sparkles = []; waspSpawnTimer = 0;
+        paintBackgroundCache();
+        // the title meadow keeps two tasty shoots on display
+        bamboo = [{ x: 14, y: 58, sway: 0 }, { x: 80, y: 54, sway: 1 }];
+        accumulator = 0;
+        syncChrome(true);
+    }
+
+    function stop() { /* nothing to release; the loop only ticks the open game */ }
+
+    function restart() { startRun(); }
+
+    function onDir(dir, pressed) {
+        input[dir] = !!pressed;
+        if (pressed) {
+            if (dir === "left") panda.leanDir = -1;
+            else if (dir === "right") panda.leanDir = 1;
+            tryAnyKeyStart();
+        }
+    }
+
+    function onAction() {
+        if (state === STATE.PLAY) triggerDash();
+        else tryAnyKeyStart();
+    }
+
+    function onStageTap() {
+        if (state === STATE.PLAY) triggerDash();
+        else tryAnyKeyStart();
+    }
+
+    function onAnyKey() { tryAnyKeyStart(); }
+
+    function tryAnyKeyStart() {
+        if (state !== STATE.PLAY && stateTime > 0.35) startRun();
+    }
+
+    /* register and never leave */
+    GAMES.push({
+        id: SETTINGS.gameName,
+        versionNumber: SETTINGS.versionNumber,
+        name: "Panda Snack",
+        tagline: "munch bamboo · dodge the wasps",
+        concept: "A chubby panda scurries for bamboo shoots while wasps drift past.",
+        actionLabel: "DASH",
+        hint: "desktop: WASD move · SPACE or tap stage to dash · R restart · ESC shelf",
+        previewPaint: paintPandaSnackPreview,
+        start, stop, restart,
+        update, paint, onDir, onAction, onStageTap, onAnyKey
+    });
+})();
+
+/* ==================================================================
+   PART 6 — boot: stamp the version, build the shelf, wake the mascot,
+   follow the hash, and start the one loop
+   ================================================================== */
+
+function boot() {
+    verEl.textContent = APP.name + " — build " + APP.fileVersion;
+    buildShelf();
+    startMascot();
+    routeFromHash();
+    requestAnimationFrame(frame);
+}
+
+boot();
+
+</script>
+</body>
+</html>
