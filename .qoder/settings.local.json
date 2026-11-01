@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git -C /Users/kant/XCODEUSE/KANTMICROGAME status && git -C /Users/kant/XCODEUSE/KANTMICROGAME log --oneline -5)",
+      "Bash(git:*)",
+      "Bash(head:*)",
+      "Bash(grep -rn \"index.html\" /Users/kant/XCODEUSE/KANTMICROGAME/plans/micro-games-v2.md | head -20; echo ---; grep -n \"workers.dev\\\\|github.com/lohyapkant\" /Users/kant/XCODEUSE/KANTMICROGAME/MODELS.md /Users/kant/XCODEUSE/KANTMICROGAME/plans/micro-games-v2.md)",
+      "Bash(for f in README.md CHANGELOG.md MODELS.md plans/micro-games-v2.md prompts/P-08_documentation-cleanup.txt deploy/index.html; do echo \"== $f\"; grep -c \"github.com/lohyapkant/KANTMICROGAMES\\\\|kantmicrogames.lohyapkant.workers.dev\" \"$f\"; grep -c -i \"MIT\" \"$f\"; done)"
+    ]
+  }
+}

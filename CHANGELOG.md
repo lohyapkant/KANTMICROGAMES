@@ -13,7 +13,80 @@
   build corrected it (build 006 corrected the model record for 000/001).
 - **Owner model observations** belong in `MODELS.md` as dated, append-only notes — not in
   this changelog, and never as a permanent ranking.
-- The same rules are repeated beside `APP.fileVersion` in `index.html`.
+- The same rules are repeated beside `APP.fileVersion` in `deploy/index.html`.
+
+## 008-20261101 — 2026-11-01 (documentation cleanup)
+
+Built from prompt: P-08 (documentation cleanup — links, `deploy/` move, MIT license, model links, GPT-OSS attempt recorded)  
+Tool and model: **Claude Opus 4.6 Thinking (Antigravity)**, completed by **Qwen3.8-Flash (Qoder CLI)** — recorded per the owner's standing request in changelog, README, plan and prompt copies  
+Games in the one file: 4 (PANDASNACK module content 007-20261101 **frozen**, BOOPEEK module content 006-20261101 **frozen**, DUCKLINE module content 005-20261101 **frozen**, SPROUTUP module content 007-20261101; file build 007-20261101 — **no game code changes**)
+
+### Added — project links
+
+- Added **GitHub repository** and **public demo site** links to README, CHANGELOG, prompt
+  file, MODELS.md and the `deploy/index.html` footer:
+  - GitHub: <https://github.com/lohyapkant/KANTMICROGAMES>
+  - Public demo: <https://kantmicrogames.lohyapkant.workers.dev/>
+  - Hosting: [Cloudflare Workers](https://workers.cloudflare.com/)
+- Added a "Models used in this project" table in README with home-page links for every AI
+  model used (DeepSeek, GLM/ChatGLM, Flint/Zyphra, Gemini/Google, GPT/OpenAI,
+  Claude/Anthropic) for educational reference. The same links, kept here so every model has
+  them in one place:
+  - DeepSeek: <https://www.deepseek.com/>
+  - ChatGLM: <https://chatglm.cn/>
+  - Zyphra (Flint): <https://www.zyphra.com/>
+  - Google (Gemini): <https://gemini.google.com/>
+  - OpenAI (GPT): <https://openai.com/>
+  - Anthropic (Claude): <https://www.anthropic.com/>
+  - Qwen: <https://qwen.ai/>
+
+### Added — MIT license in index.html
+
+- Added the full MIT license text as an HTML comment at the top of `deploy/index.html`,
+  crediting **Loh Yap Kant** as the original creator.
+- Added a License section in README linking to the `LICENSE` file.
+
+### Changed — `deploy/` folder documented
+
+- Documented that `index.html` was moved from the project root into `deploy/` to satisfy
+  Cloudflare Workers deployment requirements (`wrangler.jsonc` sets `assets.directory` to
+  `"./deploy"`). All file references in README and this changelog updated accordingly.
+
+### Changed — GPT-OSS 120B (Medium) attempt recorded
+
+- The owner first attempted this documentation cleanup with **GPT-OSS 120B (Medium)**
+  via Antigravity. The model deleted sections of files instead of following the existing
+  templates and guidance. The owner switched to **Claude Opus 4.6 Thinking (Antigravity)**
+  to complete the work. The GPT-OSS attempt is recorded in `MODELS.md` and the prompt
+  copy (`P-08`) for historical and educational completeness.
+
+### Documentation
+
+- Updated README (build 008 row in models table, links section, model links table, license
+  section, file list updated for `deploy/` and `wrangler.jsonc`, build history row).
+- Updated `plans/micro-games-v2.md` (build ledger row 008, tool/model log row 008).
+- Added `MODELS.md` entries for GPT-OSS 120B (Medium) and Claude Opus 4.6 Thinking.
+- Created `prompts/P-08_documentation-cleanup.txt`.
+
+### Completed — recovery pass (dated correction, not silent)
+
+- Claude Opus 4.6 Thinking halted mid-round with most of the work done but uncommitted. A
+  recovery pass by **Qwen3.8-Flash (Qoder CLI)** on 2026-11-01 verified every P-08
+  requirement against the actual files and closed the gaps:
+  - Project links were claimed for `MODELS.md` but missing there — added (plus the MIT
+    license and legal-name note, so every documentation home carries the links).
+  - Project links added to `plans/micro-games-v2.md` for cross-file consistency.
+  - Model home-page links added to this changelog entry and to the `P-08` prompt copy
+    (previously only in README).
+  - Qwen3.8-Flash recorded as a model used on this project (README model link table,
+    `MODELS.md`, tool logs).
+- No content deleted; all edits follow the existing templates in each file.
+
+### Build record (owner request: duration + tokens)
+
+- Claude Opus 4.6 Thinking (Antigravity): duration **~20 min**, tokens **~60,000**.
+- Qwen3.8-Flash (Qoder CLI), recovery pass: duration **~15 min**, tokens **~30,000**
+  (rough estimate; no session telemetry surfaced by the tool).
 
 ## 007-20261101 — 2026-11-01 (Round 4 — SPROUTUP)
 

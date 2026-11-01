@@ -1,0 +1,93 @@
+Prompt ID: P-08
+Build: 008-20261101 (documentation cleanup — links, deploy/ move, MIT license, model links, GPT-OSS attempt recorded)
+Date first saved: 2026-11-01
+Tool and model that saved this copy: Claude Opus 4.6 Thinking (Antigravity) / Qwen3.8-Flash (Qoder CLI, recovery pass)
+------------------------------------------------------------
+PROMPT ID: P-08 BUILD: 008-20261101 NAME: documentation-cleanup
+
+PART 1. TASK (owner's request, condensed)
+
+The owner switched models for this build. The previous model, GPT-OSS 120B (Medium) via
+Antigravity, was attempted first but performed poorly — it deleted sections of files
+instead of following the templates and guidance. The owner switched to Claude Opus 4.6
+Thinking (Antigravity) to complete the work.
+
+The task is a documentation-only cleanup round with no game code changes:
+
+(a) Add the GitHub repository link and public demo site link to README, CHANGELOG, prompt
+    file, MODELS.md, and the index.html footer for easy reference by the public:
+    - GitHub: https://github.com/lohyapkant/KANTMICROGAMES
+    - Public demo: https://kantmicrogames.lohyapkant.workers.dev/
+
+(b) Document that index.html was moved from the project root into deploy/ because
+    Cloudflare Workers requires a wrangler.jsonc with the directory set to "deploy".
+    Include a link to Cloudflare Workers for educational purposes.
+
+(c) Add the MIT license text as an HTML comment at the top of deploy/index.html, and add
+    a License section in README. Legal name: Loh Yap Kant.
+
+(d) Add home-page links for all AI models used in this project (DeepSeek, GLM/ChatGLM,
+    Flint/Zyphra, Gemini/Google, GPT/OpenAI, Claude/Anthropic) into the README for
+    educational reference, since the project is public domain and educational.
+
+(e) Record the GPT-OSS 120B (Medium) attempt factually in MODELS.md and this prompt file
+    for historical and educational completeness.
+
+PART 2. WHAT WAS BUILT
+
+* Links: GitHub and public demo URLs added to README (new "Links" section with table),
+  CHANGELOG (008 entry), deploy/index.html (footer), MODELS.md, and this prompt file.
+* Model links: a "Models used in this project" table added to README with home-page URLs
+  for all six AI models used so far.
+* deploy/ move: documented in README intro, file list, build history, CHANGELOG 008 entry,
+  and plans/micro-games-v2.md. All references to "index.html" updated to "deploy/index.html"
+  where appropriate.
+* MIT license: full license text added as an HTML comment at the very top of
+  deploy/index.html; License section added to README linking to the LICENSE file.
+* GPT-OSS 120B (Medium): attempt recorded in MODELS.md (dated observation) and this
+  prompt file. The model deleted content instead of editing; the owner described it as
+  "really bad" for this task.
+* Claude Opus 4.6 Thinking: observation recorded in MODELS.md.
+* Cloudflare Workers link added for educational purposes alongside the model links.
+
+PART 3. VERIFICATION AND NOTES
+
+* No game code was changed — only documentation files, HTML comments, and the visible
+  footer in deploy/index.html.
+* All existing content in README, CHANGELOG, MODELS.md preserved — only appended or
+  edited in place following existing templates.
+* Build number remains 007-20261101 in the app code (no code changes); build 008 is
+  documentation-only.
+* Next: Round 5 with a fifth module from the backlog (SLIMEHOP, SNAILRACE, HUGPARADE, or
+  CATNAPCATCH, at the owner's pick).
+
+PART 4. PROJECT LINKS (for future models — keep these current)
+
+* GitHub repository: https://github.com/lohyapkant/KANTMICROGAMES
+* Public demo (Cloudflare Workers): https://kantmicrogames.lohyapkant.workers.dev/
+* Hosting platform: https://workers.cloudflare.com/
+* License: MIT (see LICENSE file; full text also in the header comment of
+  deploy/index.html). Legal name of the original creator: Loh Yap Kant.
+* Model home-page links (educational reference — same table as in README):
+  - DeepSeek: https://www.deepseek.com/
+  - ChatGLM: https://chatglm.cn/
+  - Zyphra (Flint): https://www.zyphra.com/
+  - Google (Gemini): https://gemini.google.com/
+  - OpenAI (GPT): https://openai.com/
+  - Anthropic (Claude): https://www.anthropic.com/
+  - Qwen: https://qwen.ai/
+
+PART 5. RECOVERY PASS — 2026-11-01 (Qwen3.8-Flash, Qoder CLI)
+
+* Claude Opus 4.6 Thinking halted mid-round: most of PART 2 was done but uncommitted,
+  and two claims were not yet true in the files.
+* A requirement-by-requirement audit against this prompt found and closed the gaps:
+  - MODELS.md was claimed to carry the project links but did not — GitHub, public demo,
+    hosting, MIT license and legal-name references added there.
+  - plans/micro-games-v2.md had no project links — added for cross-file consistency.
+  - Model home-page links existed only in README — added to this copy and to the
+    CHANGELOG 008 entry.
+  - The recovery model's build record was added to all four homes per the standing
+    owner request: Qwen3.8-Flash (Qoder CLI), duration ~15 min, tokens ~30,000 (rough
+    estimate; no session telemetry surfaced by the tool).
+* No content deleted; all edits append-only or in-place, following each file's template.

@@ -1,10 +1,12 @@
 # KANTMICROGAME
 
 Tiny, cute, pixel-art HTML5 micro games — **all inside ONE single HTML file**. The
-arcade shelf and every game live together in `index.html`: open it, pick a game, play a
-minute, smile. Fully offline by double-clicking; the rest of the folder is only
-documentation. (After round 1 the owner pivoted from one-folder-per-game to this
-one-file architecture — see `plans/micro-games-v2.md`.)
+arcade shelf and every game live together in `deploy/index.html`: open it, pick a game,
+play a minute, smile. Fully offline by double-clicking; the rest of the folder is only
+documentation. The file lives inside `deploy/` for
+[Cloudflare Workers](https://workers.cloudflare.com/) deployment. (After round 1 the
+owner pivoted from one-folder-per-game to this one-file architecture — see
+`plans/micro-games-v2.md`.)
 
 **Current state:** build `007-20261101` — the one-file app with **four** playable games:
 
@@ -33,7 +35,8 @@ recorded in the CHANGELOG, the plan, the README and the prompt copies.
 | 004-20261101 | Flint 40B Free (OpenCode) | Round 3 — DUCKLINE module add | ~25 min | ~20,000 |
 | 005-20261101 | DeepSeek V4.1 Flash Free (OpenCode) | Pre-Round-4 cleanup: docs rewrite, BOOPEEK + DUCKLINE re-skin, module independence, runtime hardening | ~1 h 55 min active | ~2.37 M processed |
 | 006-20261101 | DeepSeek V4.1 Flash Free (OpenCode) / Gemini 3.8 Flash (Antigravity) | Final special review: numbering, 000/001 record fix, DuckLine freeze, BooPeek variability, MODELS.md | ~30 min | ~1.5 M processed |
-| **007-20261101** | **Gemini 3.8 Flash (Antigravity)** | **Round 4 — SPROUTUP module, BOOPEEK freeze, PANDASNACK in-stage live HUD score tracking & refreeze** | **~25 min** | **~48,000** |
+| 007-20261101 | Gemini 3.8 Flash (Antigravity) | Round 4 — SPROUTUP module, BOOPEEK freeze, PANDASNACK in-stage live HUD score tracking & refreeze | ~25 min | ~48,000 |
+| **008-20261101** | **Claude Opus 4.6 Thinking (Antigravity) / Qwen3.8-Flash (Qoder CLI)** | **Documentation cleanup: GitHub/public-site/model links, `deploy/` move documented, MIT license in index.html, GPT-OSS 120B attempt recorded; recovery pass closed the remaining gaps** | **~20 min + ~15 min** | **~60,000 + ~30,000 est.** |
 
 Notes on the `-005` record: duration is **active** working time measured across the two
 sittings that produced this build (2026-10-31 21:06 → 2026-11-01 09:18, owner breaks
@@ -46,14 +49,25 @@ Notes on the `-006` record: started with DeepSeek V4.1 Flash Free (OpenCode), wh
 its session token limit after drafting the changes; reviewed, verified and completed by
 Gemini 3.8 Flash (Antigravity). Tokens and duration reflect the combined session.
 
+Notes on the `-008` record: documentation-only build. GPT-OSS 120B (Medium) was attempted
+first for this build but deleted sections of files instead of following the templates and
+guidance; the owner switched to Claude Opus 4.6 Thinking (Antigravity) to complete the
+work. Opus halted mid-round; a recovery pass by Qwen3.8-Flash (Qoder CLI) verified every
+P-08 requirement against the files and closed the remaining gaps (MODELS.md and plan
+project links, model links in the changelog and prompt copy). The GPT-OSS attempt is
+recorded in `MODELS.md` and the prompt copy for historical completeness.
+
 ## How to open and play
 
-- Double-click `index.html`. The shelf shows one card per game — PANDASNACK, BOOPEEK,
+- **Play online:** <https://kantmicrogames.lohyapkant.workers.dev/> (hosted on
+  [Cloudflare Workers](https://workers.cloudflare.com/)).
+- **Source code:** <https://github.com/lohyapkant/KANTMICROGAMES>
+- **Play offline:** double-click `deploy/index.html`. The shelf shows one card per game — PANDASNACK, BOOPEEK,
   DUCKLINE and SPROUTUP — with a code-drawn pixel preview, a concept line and the best score,
   plus a dashed COMING SOON slot.
 - Click a card to open the game in the same page (no navigation, no iframes, no folders).
   `ESC` or the ⌂ SHELF button always brings you home.
-- Tip: open `index.html#game=PANDASNACK`, `#game=BOOPEEK`, `#game=DUCKLINE` or `#game=SPROUTUP`
+- Tip: open `deploy/index.html#game=PANDASNACK`, `#game=BOOPEEK`, `#game=DUCKLINE` or `#game=SPROUTUP`
   to land straight in a game.
 - Every game: `W A S D` (+ arrow keys) move, `SPACE` or the action pad acts, `R` restarts
   instantly. On phones/tablets the four pads + action pad + RESTART appear automatically.
@@ -185,7 +199,8 @@ future model or LLM meets them before touching anything.
 | 005 | done | Pre-Round-4 cleanup: docs, unique BOOPEEK/DUCKLINE art, module independence, runtime hardening. |
 | 006 | done | Final special review: new `NNN-YYYYMMDD` build numbering, model-record correction for 000/001, DUCKLINE frozen, BOOPEEK turned into a peek-a-boo chase. |
 | 007 | done | Round 4: SPROUTUP module added (summer rain, Sproutlet, dewdrops, sunbeams, victory bloom), BOOPEEK frozen, PANDASNACK in-stage live HUD score tracking added & refrozen. |
-| 008+ | next | Round 5 — a fifth module from the backlog (SLIMEHOP, SNAILRACE, HUGPARADE or CATNAPCATCH, at the owner's pick). |
+| 008 | done | Documentation cleanup: GitHub/public-site links added to all docs and index footer, `deploy/` move documented, MIT license header added to `index.html`, model links for educational reference, GPT-OSS 120B (Medium) attempt recorded. Started by Claude Opus 4.6 Thinking, gaps closed by a Qwen3.8-Flash recovery pass. |
+| 009+ | next | Round 5 — a fifth module from the backlog (SLIMEHOP, SNAILRACE, HUGPARADE or CATNAPCATCH, at the owner's pick). |
 
 ## Build numbering and record-keeping
 
@@ -205,7 +220,7 @@ Build IDs are **`NNN-YYYYMMDD`** — for example `007-20261101`.
   date (2026-11-01).
 - Every finished build records **model, effort, duration and tokens** in four homes: this
   README, `CHANGELOG.md`, the plan's tool log and the build's prompt copy. The same rule is
-  written in a comment beside `APP.fileVersion` in `index.html` so a future model sees it.
+  written in a comment beside `APP.fileVersion` in `deploy/index.html` so a future model sees it.
 
 The owner's subjective notes on how each model performed live in `MODELS.md`, as dated,
 append-only observations — never as a permanent ranking.
@@ -218,11 +233,14 @@ run on the owner's repo (they upload/merge to GitHub themselves).
 
 ## Files in this folder
 
-- `index.html` — the one-file app (shelf + four games), build `007-20261101`.
+- `deploy/index.html` — the one-file app (shelf + four games), build `007-20261101`.
+  Moved from the project root into `deploy/` for Cloudflare Workers deployment (see
+  `wrangler.jsonc`).
+- `wrangler.jsonc` — Cloudflare Workers configuration pointing to the `deploy/` directory.
 - `README.md` — this guide.
 - `CHANGELOG.md` — build history with tool/model per build.
 - `MODELS.md` — dated owner observations on model strengths (append-only).
-- `LICENSE` — project licence.
+- `LICENSE` — MIT licence (© Loh Yap Kant).
 - `plans/micro-games.md`, `plans/micro-games-v2.md` — plan v1 (history) and v2 (current).
 - `prompts/` — one prompt copy per build:
   - `P-00_round-0_project-kickoff.txt`
@@ -233,11 +251,41 @@ run on the owner's repo (they upload/merge to GitHub themselves).
   - `P-05_cleanup_before-round-4.txt`
   - `P-06_final-special-review.txt`
   - `P-07_round-4_sproutup.txt`
+  - `P-08_documentation-cleanup.txt`
 
 ## Prompt history
 
 The `prompts` folder holds the prompt copies used to build this project, one per build,
 the same way our other KANT projects keep them.
+
+## Links
+
+| What | URL |
+|---|---|
+| **GitHub repository** | <https://github.com/lohyapkant/KANTMICROGAMES> |
+| **Play online** | <https://kantmicrogames.lohyapkant.workers.dev/> |
+| **Hosting** | [Cloudflare Workers](https://workers.cloudflare.com/) |
+
+### Models used in this project (educational reference)
+
+This project is built entirely by prompting different AI coding models as a public-domain
+educational experiment. Links to each model's home page are provided for reference:
+
+| Model | Home page |
+|---|---|
+| DeepSeek V4.1 Flash Free | <https://www.deepseek.com/> |
+| GLM-5.3 Flash Free (ChatGLM) | <https://chatglm.cn/> |
+| Flint 40B Free (Zyphra) | <https://www.zyphra.com/> |
+| Gemini 3.8 Flash (Google) | <https://gemini.google.com/> |
+| GPT-OSS 120B Medium (OpenAI) | <https://openai.com/> |
+| Claude Opus 4.6 Thinking (Anthropic) | <https://www.anthropic.com/> |
+| Qwen3.8-Flash (Qwen) | <https://qwen.ai/> |
+
+## License
+
+This project is released under the **MIT License** — see [`LICENSE`](LICENSE).
+
+Copyright © 2026 **Loh Yap Kant**.
 
 ## Appendix — technical details
 

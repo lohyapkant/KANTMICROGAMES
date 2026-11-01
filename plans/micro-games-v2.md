@@ -1,10 +1,9 @@
 # Plan: KANTMICROGAME — HTML5 Micro Games (v2 — the one-file pivot)
 
-Today: 2026-11-01. Status: build **007-20261101** done — the shelf and all four games
-(PANDASNACK, BOOPEEK, DUCKLINE, SPROUTUP) live together in ONE file. Build 007 is **Round 4**:
-it introduces the SPROUTUP module (summer rain, dewdrops, sunbeams, victory bloom), freezes
-BOOPEEK, and temporarily unfroze PANDASNACK to add live in-stage HUD score tracking before
-refreezing it. Round 5 (a fifth module) is next.
+Today: 2026-11-01. Status: build **008-20261101** done — the shelf and all four games
+(PANDASNACK, BOOPEEK, DUCKLINE, SPROUTUP) live together in ONE file. Build 008 is a
+**documentation cleanup** build: GitHub/public-site links, `deploy/` move documented,
+MIT license in index.html, model links added. Round 5 (a fifth module) is next.
 
 Build IDs are `NNN-YYYYMMDD` (build number first, finish date second). A game's module
 content number is the build in which its content last changed. PANDASNACK is **frozen** at
@@ -14,9 +13,17 @@ and SPROUTUP is live at 007-20261101.
 Supersedes micro-games.md (v1), kept as history: v1 described one file per game in
 separate folders; the owner changed their mind after round 1 — see prompt P-02.
 
+**Project links (keep current — same links live in README, CHANGELOG, MODELS.md, the
+prompt copies and the `deploy/index.html` footer):**
+
+- GitHub repository: <https://github.com/lohyapkant/KANTMICROGAMES>
+- Public demo (Cloudflare Workers): <https://kantmicrogames.lohyapkant.workers.dev/>
+- Hosting platform: <https://workers.cloudflare.com/>
+- License: MIT (see `LICENSE`; legal name of the original creator: **Loh Yap Kant**)
+
 ## Objective
 
-One single HTML file, `KANTMICROGAME/index.html`, contains the arcade shelf AND every
+One single HTML file, `KANTMICROGAME/deploy/index.html`, contains the arcade shelf AND every
 micro game. Tiny, cute, pixel-art games; round-by-round builds like our other KANT
 projects; fully offline by double-clicking. The folder beside the file holds only
 documentation (README, CHANGELOG, plans, prompts) — no code files, no game folders.
@@ -40,12 +47,15 @@ NOT building any sharing, engine, SDK or embedding support now.
 
 ```
 KANTMICROGAME/
-  index.html            <- EVERYTHING: shelf screen + game screen + all game modules
-  README.md             <- project guide + a short manual per game
-  CHANGELOG.md          <- one entry per finished build (builds, not rounds)
-  plans/micro-games.md       <- v1 plan, kept for history
-  plans/micro-games-v2.md    <- this plan (later pivots add v3, v4 …)
-  prompts/P-XX_*.txt    <- one prompt copy per build, per KANTPLANEINVASION convention
+  deploy/index.html         <- EVERYTHING: shelf screen + game screen + all game modules
+  wrangler.jsonc            <- Cloudflare Workers config (assets.directory: "./deploy")
+  README.md                 <- project guide + a short manual per game
+  CHANGELOG.md              <- one entry per finished build (builds, not rounds)
+  MODELS.md                 <- dated owner observations on model strengths (append-only)
+  LICENSE                   <- MIT licence (© Loh Yap Kant)
+  plans/micro-games.md      <- v1 plan, kept for history
+  plans/micro-games-v2.md   <- this plan (later pivots add v3, v4 …)
+  prompts/P-XX_*.txt        <- one prompt copy per build, per KANTPLANEINVASION convention
 ```
 
 Nothing else in the project folder; no other workspace folder is touched. The owner
@@ -116,6 +126,7 @@ games, feeds events, ticks and paints only the open module, and keeps instant re
 | 005-20261101 | 2026-11-01 | Pre-Round-4 cleanup: README/CHANGELOG rewritten; BOOPEEK re-skinned (Pip the lantern mouse + Boo the nightcap ghost, midnight nursery); DUCKLINE re-skinned (mallard family, sunny pond, trail-following ducklings); module independence audit + boundary comments; runtime input hygiene and loop guard; all three games smoke-tested. DONE. |
 | 006-20261101 | 2026-11-01 | Final special review: new `NNN-YYYYMMDD` build numbering (retro-renamed, 004/005 corrected to their finish date); model record corrected for 000/001; DUCKLINE frozen; BOOPEEK rebuilt as a five-spot peek-a-boo chase; `MODELS.md` added for dated owner observations; numbering guidance added to code, README and CHANGELOG. DONE. |
 | 007-20261101 | 2026-11-01 | Round 4: SPROUTUP shipped as fourth module (summer rain, Sproutlet, dewdrops, sunbeams, victory bloom); BOOPEEK frozen; PANDASNACK in-stage live HUD score tracking added & refrozen; shelf card with custom preview added. DONE. |
+| 008-20261101 | 2026-11-01 | Documentation cleanup: GitHub/public-site/model links added to all docs and index footer; `deploy/` move documented; MIT license header added to `index.html`; GPT-OSS 120B (Medium) attempt recorded. Opus halted mid-round; a Qwen3.8-Flash recovery pass verified every requirement and closed the remaining gaps. DONE. |
 
 ## Tool and model log (owner request, 2026-10-31)
 
@@ -132,6 +143,7 @@ the build's prompt copy.
 | 005 | 2026-11-01 | DeepSeek V4.1 Flash Free (OpenCode) — ~1 h 55 min active, ≈2.37 M tokens processed |
 | 006 | 2026-11-01 | DeepSeek V4.1 Flash Free (OpenCode) / Gemini 3.8 Flash (Antigravity) — ~30 min, ~1.5 M tokens (handoff at session limit) |
 | 007 | 2026-11-01 | Gemini 3.8 Flash (Antigravity) — ~25 min, ~48,000 tokens processed |
+| 008 | 2026-11-01 | Claude Opus 4.6 Thinking (Antigravity) — ~20 min, ~60,000 tokens (GPT-OSS 120B Medium attempted first, failed) / Qwen3.8-Flash (Qoder CLI) — recovery pass ~15 min, ~30,000 tokens est. (closed remaining link gaps) |
 
 Rule: every future build truthfully records its model in all four homes.
 
