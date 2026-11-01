@@ -16,9 +16,11 @@ versions change, and a note here describes one moment on one set of builds.
 - GitHub repository: <https://github.com/lohyapkant/KANTMICROGAMES>
 - Public demo (Cloudflare Workers): <https://kantmicrogames.lohyapkant.workers.dev/>
 - Hosting platform: <https://workers.cloudflare.com/>
-- Project name: **KANTMICROGAMES** (repository, worker and public address). The local folder
-  is `KANTMICROGAME/` and the save keys keep the older prefix `KANTMICROGAME.` so players'
-  saved bests survive; both are explained in "About the name" in `README.md`.
+- Project name: **KANTMICROGAMES** (repository, worker and public address). The app, the
+  save keys (`KANTMICROGAMES.<GAME>.best`, `KANTMICROGAMES.ui.*`) and the console tag use
+  that name from build 010; the local folder is `KANTMICROGAME/` and the archived prompt
+  copies keep their original spellings. Both are explained in "About the name" in
+  `README.md`.
 - License: MIT (see `LICENSE` and the header comment in `deploy/index.html`). Legal name of
   the original creator: **Loh Yap Kant**, with help from the models observed below.
 
@@ -141,6 +143,25 @@ everywhere it appears (README, CHANGELOG, plan tool log and `P-09` prompt copy).
 coincidence, this is also the first build whose documentation pass audited the project name
 and standardised it on **KANTMICROGAMES**. Credits are a snapshot of one billing meter on
 one date, not a ranking of the model.
+
+## 2026-11-01 — Qwen3.8-Flash (Qoder CLI) — Round 5, SLIMEHOP
+
+Builds observed: `010-20261101` (full build).
+
+The owner's notes: delivered Round 5 in one sitting. SLIMEHOP shipped as a fifth sealed
+IIFE — a 3×3 lily-pad pond with one-hop movement, the WET → MOSS → BLOOM pad states, a
+stomp with cooldown and snail stun, a snail that eats flowers, an in-stage pixel HUD and a
+custom shelf preview. The art went through several screenshot-driven revisions: the slime
+initially touched the pad above it, the moss and flower floated a pixel or two off the pad,
+the title plate ghosted the pads behind it, and bloom sparkles landed on the slime's face —
+all fixed after inspecting 6× crops rather than trusting the code. The model also renamed
+the on-screen brand, save prefix and console tag to **KANTMICROGAMES** on the owner's
+instruction (the page is fresh, so no migration was needed), kept the four frozen modules
+byte-identical apart from their unused `saveKey` labels, proved that by diff, and recorded a
+documented deviation from the backlog's floating-pad concept. Verification covered all five
+games, four viewports and touch emulation in headless Chrome. Honest limits are recorded in
+the changelog: no physical devices, no other browsers, and Qoder exposes credits but not
+tokens. This is a snapshot of one build on one date.
 
 ---
 

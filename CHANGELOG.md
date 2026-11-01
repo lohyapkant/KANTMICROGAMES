@@ -11,10 +11,11 @@
   records the **credits used**, labelled as credits — never silently presented as tokens.
   The same facts go to `README.md`, `plans/micro-games-v2.md` and the build's prompt copy —
   four homes, one truth.
-- **The project name is `KANTMICROGAMES`.** Entries dated up to build 008 used the older
-  singular spelling; they are historical records and are not rewritten. The folder
-  `KANTMICROGAME/`, the save-key prefix `KANTMICROGAME.` and the on-screen brand
-  `KANT MICRO` are kept on purpose (see "About the name" in `README.md`).
+- **The project name is `KANTMICROGAMES`.** Entries dated up to build 009 used the older
+  singular spellings; they are historical records and are not rewritten. From build 010 the
+  app itself agrees: the on-screen brand, the save-key prefix (`KANTMICROGAMES.`) and the
+  console tag all use the full name. The local folder `KANTMICROGAME/` and the archived
+  prompt copies are kept on purpose (see "About the name" in `README.md`).
 - **Corrections are dated, not silent.** If a past record was wrong, fix it and say which
   build corrected it (build 006 corrected the model record for 000/001).
 - **Documentation review/edit attempts are recorded.** Every attempt to review, edit or
@@ -24,6 +25,108 @@
 - **Owner model observations** belong in `MODELS.md` as dated, append-only notes — not in
   this changelog, and never as a permanent ranking.
 - The same rules are repeated beside `APP.fileVersion` in `deploy/index.html`.
+
+## 010-20261101 — 2026-11-01 (SLIMEHOP + KANTMICROGAMES rename)
+
+Built from prompt: P-10 (the owner's Round 5 request, saved verbatim in
+`prompts/P-10_slimehop.txt`)  
+Tool and model: **Qwen3.8-Flash (Qoder CLI)** — recorded per the owner's standing request in
+changelog, README, plan, MODELS.md and the prompt copy  
+Games in the one file: 5 (PANDASNACK module content 007-20261101 **frozen**, BOOPEEK
+006-20261101 **frozen**, DUCKLINE 005-20261101 **frozen**, SPROUTUP 007-20261101,
+**SLIMEHOP 010-20261101**; file build **010-20261101**)
+
+### Added — SLIMEHOP module (PART 5-E)
+
+- A new sealed IIFE using only the module contract, the shared pixel helpers,
+  `readBest` / `saveBest` and `scoreEl` / `bestEl` / `msgEl`; private names use the
+  `slime` / `SLIME_*` prefix.
+- **Pond:** a 3×3 set of nine lily pads at x `[26, 50, 74]`, y `[38, 59, 80]`, with the slime
+  starting on the middle pad. Every direction press is exactly one 0.24 s hop (11 px arc);
+  hopping into the edge is a harmless squash.
+- **Bloom states:** each landing steps the pad **WET → MOSS → BLOOM** and scores **+10**
+  per step. Landing or stomping the ninth bloom wins instantly with **+100**; the round
+  otherwise ends at **30 s**.
+- **STOMP** (`SPACE`, action pad or stage tap): blooms the pad underfoot for +10 on a
+  **1.2 s cooldown**, shown as five readiness pips bottom-left, and stuns the snail within
+  30 px for **1.8 s** (cancel-safe: a stunned snail returns to the pad it left).
+- **Snail saboteur:** wanders when no flowers exist, otherwise crawls toward a bloomed pad
+  (0.7 s per crawl) and eats it back to WET. Its move delay eases from 3.2 s to 1.5 s as
+  the round ticks.
+- **In-stage HUD:** `BLOOM n/9` and `TIME n` on the top plate, plus `SLIMEHOP`,
+  `BLOOM EVERY PAD` and `POND IN BLOOM!` / `THE POND WENT STILL` overlay plates, all drawn
+  with the shared 3×5 pixel font. The shared font gained a `/` glyph so `1/9` renders.
+- **Pixel art:** three-tone rolling water with drifting glints, soft fireflies and framing
+  reeds; plump lily pads with a light top edge, dark under-rim and a wedge notch; a wet
+  glint, a moss tuft and an 11×8 pink-and-gold bloom with a green stem for the three pad
+  states; a 14×12 spring slime with a stretch hop, squash landing, blink, blush and a stomp
+  glow; a shaded-spiral snail with a cream foot, sleepy eyes, wobble and stun stars; pink
+  petals spilling out to the sides of a bloom.
+- **Shelf:** a custom 200×96 preview (slime, moss, bloom and snail on their pads between
+  reeds), a concept line and the `STOMP` action label.
+- While polishing the art and effects, four issues were found by eye in 6× screenshots and
+  fixed: the slime touched the pad above it (rows moved to 38/59/80), the moss and flower
+  floated a pixel or two above their pad (offsets tightened), the title sign ghosted the
+  top pads and snail (opaque plates), and bloom sparkles landed on the slime's face (sprayed
+  to the pad's sides instead).
+
+### Changed — on-screen brand, save keys and console tag
+
+- `APP.name`, the `<h1>`, the document title, the footer (`KANTMICROGAMES — build
+  010-20261101`), `APP.savePrefix` (`KANTMICROGAMES.`) and the console tag
+  (`KANTMICROGAMES module error:`) now use the full project name. UI preferences live under
+  `KANTMICROGAMES.ui.pads` / `KANTMICROGAMES.ui.hand` and bests under
+  `KANTMICROGAMES.<GAME>.best`.
+- **Owner's rationale, recorded:** the page is fresh and nobody else has this build, so no
+  saved scores or preferences exist under the old prefix and there is nothing to migrate —
+  this was the safe moment to rename. The four frozen modules changed only their unused
+  `saveKey` label strings; historical documentation, `tests/` evidence and prompt copies
+  `P-00` … `P-09` keep their original spellings as records.
+
+### Note — concept changed from the backlog sketch
+
+The plan's backlog line for SLIMEHOP read "a bouncing slime must only land on lily pads
+that float apart over time". The shipped game keeps the slime, the hopping and the pond but
+makes the pads a static 3×3 board and moves the timing pressure into the **stomp cooldown**,
+the **snail's crawl** and the **30 s clock**, so the verb stays one sentence: *bloom every
+pad before the sleepy snail eats the flowers.* The backlog row in the plan is updated to
+match. If the owner prefers the original floating-pad timing idea, that is a new round.
+
+### Verification and limits
+
+- `node --check` on the extracted inline script: clean. Headless **Chrome 156** via
+  Playwright-core 1.64.1, loading `file://`.
+- SLIMEHOP loop: title → play, five hops plus a stomp (score 40), snail movement, round
+  ending at 30 s with the time-out message, best saved under `KANTMICROGAMES.SLIMEHOP.best`,
+  `R` restart back to 0, `ESC` back to the shelf. Zero console and page errors.
+- All five games opened and fed a short input burst: correct titles/taglines, non-blank
+  stage, no console errors, `ESC` returns to the shelf.
+- Touch: iPhone 13 emulation — tap the stage to start, tap the direction pad to hop (+10),
+  tap the stage to stomp (+10). Pads fit and the page does not scroll.
+- Viewports 1280 × 800, 360 × 640, 320 × 653 and 280 × 653: no horizontal overflow; the
+  stage sizes 600 px, 300 px and 200 px (whole-number 2×–6×) and fits the viewport.
+- Frozen-module proof: each of PANDASNACK, BOOPEEK, DUCKLINE and SPROUTUP compared with
+  build 009 with the `saveKey` label normalised — identical line for line.
+- **Not verified:** physical phones/tablets, Safari/Firefox/Edge, screen readers, real
+  notches, 120 Hz, or any device the headless run cannot model. No sound exists.
+
+### Build record (owner request: duration + tokens/credits)
+
+- Duration: **~30 min** wall-clock, one sitting (2026-11-01, 18:59 → about
+  19:30 WIB, from the owner's request to the finished records). Wall-clock, not a
+  stopwatch on active editing.
+- Tokens: **not exposed by the tool.** As in build 009, Qoder reports a `credits` value per
+  request instead of token counts, so this build records **9.0583 credits used** across
+  186 billable requests (18:59–19:26 WIB), summed from the per-request `credits`
+  telemetry in the session transcript. Labelled as credits, never presented as tokens, and
+  no token number is invented.
+
+### Documentation review/edit attempts (standing rule)
+
+- One documentation pass by **Qwen3.8-Flash (Qoder CLI)** during this build, covering
+  README, CHANGELOG, MODELS.md, CONTROLS.md, the plan and the new prompt copy. Edits were
+  append-only or in place following each file's template; no content was deleted and no
+  documentation attempt failed in this round.
 
 ## 009-20261101 — 2026-11-01 (responsive shell)
 

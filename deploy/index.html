@@ -6,9 +6,16 @@
   Repository : https://github.com/lohyapkant/KANTMICROGAMES
   Play online: https://kantmicrogames.lohyapkant.workers.dev/
   Hosting    : Cloudflare Workers (https://workers.cloudflare.com/)
-  Current    : build 009-20261101 — responsive shell (shell only; game content frozen)
-  Names      : project KANTMICROGAMES · on-screen brand "KANT MICRO" ·
-               save keys keep the historical prefix KANTMICROGAME.
+  Current    : build 010-20261101 — SLIMEHOP added; five games
+  Names      : project and on-screen brand KANTMICROGAMES ·
+               save keys and the console tag use the KANTMICROGAMES prefix
+  Build log  : 010 — Qwen3.8-Flash (Qoder CLI) · Round 5 (SLIMEHOP +
+               rename) · ~30 min wall-clock · 9.0583 credits
+               used (186 billable requests; Qoder exposes no
+               token counts) — full records in README, CHANGELOG and
+               prompts/P-10_slimehop.txt
+              009 — Qwen3.8-Flash (Qoder CLI) · responsive shell ·
+               19.7809 credits used (157 billable requests)
   ================================================================
 
   MIT License
@@ -43,7 +50,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#FFF3E2">
-    <title>KANT MICRO — tiny pixel games in one file</title>
+    <title>KANTMICROGAMES — tiny pixel games in one file</title>
     <style>
         /*
            ============================================================
@@ -176,10 +183,13 @@
         #bannerText { min-width: 0; }
 
         #bannerText h1 {
-            font-size: clamp(30px, 8vw, 44px);
+            /* the brand is one long word: scale it down and, on the
+               narrowest phones only, let it break instead of overflowing */
+            font-size: clamp(19px, 5.8vw, 38px);
             font-weight: 800;
-            letter-spacing: 0.5px;
+            letter-spacing: 0;
             line-height: 0.95;
+            overflow-wrap: anywhere;
             text-shadow: 0 3px 0 rgba(74, 59, 50, 0.08);
         }
 
@@ -622,6 +632,11 @@
             #mascot { width: 80px; height: 75px; }
         }
 
+        @media (max-width: 340px) {
+            #banner { gap: 10px; }
+            #mascot { width: 64px; height: 60px; }
+        }
+
         @media (prefers-reduced-motion: reduce) {
             .card, .card:hover, .chip.pulse b { animation: none; transition: none; transform: none; }
             .pbtn, .pill, #btnRestart { transition: none; }
@@ -637,7 +652,7 @@
         <header id="banner">
             <div><canvas id="mascot" width="16" height="15" aria-label="A pixel-art panda mascot, bobbing and blinking"></canvas></div>
             <div id="bannerText">
-                <h1>KANT MICRO</h1>
+                <h1>KANTMICROGAMES</h1>
                 <p class="tagline">tiny pixel games — pick one, smile, play a minute</p>
             </div>
         </header>
@@ -697,9 +712,9 @@
     </section>
 
     <footer id="meta">
-        <span class="v" id="verBox">KANT MICRO</span>
+        <span class="v" id="verBox">KANTMICROGAMES</span>
         <br><span class="zzz">one file</span> · runs completely offline · every game lives inside this page ·
-        <span class="zzz">build 009-20261101</span>
+        <span class="zzz">build 010-20261101</span>
         <br><a href="https://github.com/lohyapkant/KANTMICROGAMES" style="color:inherit">GitHub</a> ·
         <a href="https://kantmicrogames.lohyapkant.workers.dev/" style="color:inherit">Play Online</a> ·
         MIT License © 2026 Loh Yap Kant
@@ -711,7 +726,7 @@
 
 /* ==================================================================
    READ ME FIRST — BOUNDARIES BETWEEN THE SHELF, THE RUNTIME AND THE
-   FOUR GAME MODULES (PANDASNACK, BOOPEEK, DUCKLINE, SPROUTUP).
+   FIVE GAME MODULES (PANDASNACK, BOOPEEK, DUCKLINE, SPROUTUP, SLIMEHOP).
 
    The shelf and the runtime are SHARED. The games are NOT shared.
    Each game is its own IIFE with its own SETTINGS, palette, sprite
@@ -728,14 +743,18 @@
    3. Prefix every private name with the game's own prefix:
       PANDASNACK -> panda / PAL / PANDA_*, BOOPEEK -> peek / boo / pip /
       BOO_ / PIP_*, DUCKLINE -> duck / mama / DUCK_*, SPROUTUP -> sprout /
-      SPROUT_*.
+      SPROUT_*, SLIMEHOP -> slime / SLIME_*.
    4. Paint with the ctx passed into paint(ctx). Do not assume the
       shared stageCtx; that assumption is a PANDASNACK legacy only.
    5. Do not copy one game's character art into another game. Panda,
-      mouse, mallard and seedling shapes must stay visually distinct.
+      mouse, mallard, seedling and slime shapes must stay visually
+      distinct.
    6. PANDASNACK (content 007-20261101), BOOPEEK (content 006-20261101),
       and DUCKLINE (content 005-20261101) are FROZEN by owner request:
       do not restyle, rebalance or refactor them unless the owner asks.
+      (Build 010 changed only their unused `saveKey` label string when
+      the storage prefix was renamed; art, tuning and behaviour are
+      untouched.)
    7. Add a new game as a NEW IIFE registered in GAMES; never graft a
       new game into an existing module.
    ================================================================== */
@@ -758,7 +777,8 @@
    it last changed in. A refactor that keeps a game's art and numbers
    identical does NOT change that game's number (DUCKLINE is frozen at
    005-20261101; BOOPEEK is frozen at 006-20261101; PANDASNACK content
-   was updated in 007-20261101 for in-stage score HUD and refrozen).
+   was updated in 007-20261101 for in-stage score HUD and refrozen;
+   SLIMEHOP is new at 010-20261101).
 
    Every finished build records, in FOUR homes — this file's header or
    comments, README.md, CHANGELOG.md and the build's prompt copy — plus
@@ -772,15 +792,16 @@
    The owner's standing request; keep it exact and keep it honest.
    Owner observations about model strengths are dated entries in
    MODELS.md — add a new dated line, never rewrite an old one.
-   Project name: KANTMICROGAMES (repo, site, wrangler). The save-key
-   prefix stays KANTMICROGAME. because players' saved bests depend on
-   it, and the on-screen brand stays "KANT MICRO".
+   Project name: KANTMICROGAMES, on screen and in storage. Build 010
+   renamed the brand, the save-key prefix and the console tag from the
+   old singular spelling; build 009 and earlier keys are not migrated
+   because the owner confirmed no player has this page yet.
    ================================================================== */
 
 const APP = {
-    name: "KANT MICRO",
-    fileVersion: "009-20261101",       // build number of THIS one-file app
-    savePrefix: "KANTMICROGAME."       // best scores live at prefix + GAMEID + ".best"
+    name: "KANTMICROGAMES",
+    fileVersion: "010-20261101",       // build number of THIS one-file app
+    savePrefix: "KANTMICROGAMES."      // best scores live at prefix + GAMEID + ".best"
 };
 
 function readBest(gameId) {
@@ -895,6 +916,7 @@ const PIXEL_FONT = {
     ".": ["000", "000", "000", "000", "010"],
     "-": ["000", "000", "111", "000", "000"],
     "+": ["000", "010", "111", "010", "000"],
+    "/": ["001", "001", "010", "100", "100"],
     " ": ["000", "000", "000", "000", "000"]
 };
 
@@ -1290,7 +1312,7 @@ function frame(now) {
                other two games. Report once per open, keep the app alive. */
             if (!ACTIVE.errorReported) {
                 ACTIVE.errorReported = true;
-                console.error("KANTMICROGAME module error:", error);
+                console.error("KANTMICROGAMES module error:", error);
                 msgEl.textContent = "the game hiccuped — press R to restart or ESC for the shelf";
             }
         }
@@ -1651,7 +1673,7 @@ applyUi();
         gameName: "PANDASNACK",
         versionNumber: "007-20261101",         // game content build (updated in 007 for live HUD)
         stageSize: 100,                        // design pixels; stage is a square
-        saveKey: "KANTMICROGAME.PANDASNACK.best",
+        saveKey: "KANTMICROGAMES.PANDASNACK.best",
 
         playerSettings: {
             moveSpeedDesignPixelsPerSecond: 26,
@@ -2292,7 +2314,7 @@ applyUi();
         gameName: "BOOPEEK",
         versionNumber: "006-20261101",
         stageSize: 100,
-        saveKey: "KANTMICROGAME.BOOPEEK.best",
+        saveKey: "KANTMICROGAMES.BOOPEEK.best",
 
         playerSettings: {
             moveSpeedDesignPixelsPerSecond: 30,
@@ -3118,7 +3140,7 @@ applyUi();
         gameName: "DUCKLINE",
         versionNumber: "005-20261101",
         stageSize: 100,
-        saveKey: "KANTMICROGAME.DUCKLINE.best",
+        saveKey: "KANTMICROGAMES.DUCKLINE.best",
 
         playerSettings: {
             moveSpeedDesignPixelsPerSecond: 26,
@@ -3887,7 +3909,7 @@ applyUi();
         gameName: "SPROUTUP",
         versionNumber: "007-20261101",
         stageSize: 100,
-        saveKey: "KANTMICROGAME.SPROUTUP.best",
+        saveKey: "KANTMICROGAMES.SPROUTUP.best",
 
         playerSettings: {
             moveSpeedDesignPixelsPerSecond: 30,
@@ -4494,6 +4516,891 @@ applyUi();
         actionLabel: "REACH",
         hint: "desktop: WASD weave · SPACE or tap stage to reach · R restart · ESC shelf",
         previewPaint: paintSproutUpPreview,
+        start, stop, restart,
+        update, paint, onDir, onAction, onStageTap, onAnyKey
+    });
+})();
+
+
+/* ==================================================================
+   PART 5-E — SLIMEHOP module (content 010-20261101)
+   ------------------------------------------------------------------
+   MODULE BOUNDARY — READ BEFORE EDITING
+   * Everything inside this IIFE is PRIVATE to SLIMEHOP: SETTINGS, PAL,
+     sprite maps, state, timers and draw helpers.
+   * Do NOT read or write other modules' names from here, and do NOT
+     let other modules read these names. The only shared things a
+     module may touch are: the module contract (start / stop / restart /
+     update / paint / onDir / onAction / onStageTap / onAnyKey), the
+     pixel helpers in PART 1, readBest / saveBest, and the shared chrome
+     handles scoreEl / bestEl / msgEl.
+   * Every private name in this module is prefixed slime / SLIME_ on
+     purpose. Keep that habit when adding art or logic.
+   * Paint with the ctx passed into paint(ctx); never assume stageCtx.
+   * Art direction: Slimey, a springy little slime, bounces across a
+     dawn lily pond. Every pad blooms under its feet; a sleepy pond
+     snail crawls around undoing the work. Cozy, bouncy, pastel.
+   ================================================================== */
+
+(function () {
+    "use strict";
+
+    /* ---------- SLIMEHOP settings (private) ---------- */
+
+    const SETTINGS = {
+        gameName: "SLIMEHOP",
+        versionNumber: "010-20261101",
+        stageSize: 100,
+        saveKey: "KANTMICROGAMES.SLIMEHOP.best",
+
+        playerSettings: {
+            hopSeconds: 0.24,
+            hopArcPixels: 11,
+            landSquashSeconds: 0.14,
+            stompCooldownSeconds: 1.2,
+            stompStunSeconds: 1.8,
+            stompStunRadiusPixels: 30,
+            bloomStepPoints: 10,
+            winBonusPoints: 100
+        },
+
+        worldSettings: {
+            cols: 3,
+            rows: 3,
+            padCentersX: [26, 50, 74],
+            padCentersY: [38, 59, 80],
+            padWidth: 18,
+            padHeight: 12,
+            snailStartPad: 2,
+            snailMoveDelay: 3.2,
+            snailMoveDelayMin: 1.5,
+            snailMoveDelayDecay: 0.05,
+            snailMoveSeconds: 0.7,
+            snailWanderDelay: 1.4
+        },
+
+        roundTimeLimitSeconds: 30,
+
+        palette: {
+            waterDeep: "#5FB1C8", waterMid: "#79C8DB", waterLight: "#9ADCEA", waterGlint: "#E4FAFF",
+            padDark: "#3F8B4A", padGreen: "#64B95C", padLight: "#8FD97F",
+            bloomPetal: "#FF9EC6", bloomPetalLight: "#FFC8DE",
+            bloomCenter: "#FFE066", bloomCenterDark: "#D9A21F",
+            slimeBody: "#7BE07B", slimeShade: "#4FAE55", slimeLight: "#C4F8AC",
+            slimeEye: "#20301F", slimeWhite: "#FFFFFF", slimeCheek: "#FFA9C0", slimeMouth: "#20301F",
+            snailShell: "#D79A5B", snailShellDark: "#A86C36", snailShellLight: "#F0C48C",
+            snailBody: "#F2DDA8", snailEye: "#3A2E22",
+            reed: "#2F6B45", reedLight: "#4C8F5C",
+            firefly: "#FFF3A6",
+            plate: "#143832", text: "#EAFBF7", textGold: "#FFE98A", textPink: "#FFB3CF"
+        }
+    };
+
+    const PAL = SETTINGS.palette;
+    const WORLD = SETTINGS.worldSettings;
+    const PLAYER = SETTINGS.playerSettings;
+    const STAGE = SETTINGS.stageSize;
+
+    /* ---------- SLIMEHOP private state ---------- */
+
+    const STATE = { TITLE: "title", PLAY: "play", OVER: "over" };
+    const PAD_WET = 0, PAD_MOSS = 1, PAD_BLOOM = 2;
+
+    let slimeState = STATE.TITLE;
+    let slimeStateT = 0;
+    let slimeClock = 0;
+    let slimeRoundT = 0;
+    let slimeScore = 0;
+    let slimeBest = 0;
+    let slimeWin = false;
+
+    let pads = [];
+    let hop = null;                 // { fromI, toI, t, dur } while airborne
+    let squashT = 0;                // landing / bonk squash
+    let stompT = 0;
+    let stompReadyT = 0;
+    let blinkTimer = 2.0;
+    let blinkLeft = 0;
+    let sparkles = [];
+    let rings = [];
+    let accumulator = 0;
+    const STEP_SECONDS = 1 / 60;
+
+    const slime = { pad: 4 };
+
+    const snail = {
+        pad: WORLD.snailStartPad,
+        targetPad: WORLD.snailStartPad,
+        x: 0, y: 0,
+        fromX: 0, fromY: 0,
+        toX: 0, toY: 0,
+        fromPad: WORLD.snailStartPad,
+        t: 0, dur: 0,
+        moving: false,
+        delay: WORLD.snailMoveDelay,
+        stunT: 0,
+        wobble: 0
+    };
+
+    /* ---------- SLIMEHOP sprite maps (all prefixed, all local) ---------- */
+
+    const SLIME_IDLE = [
+        "....GGGGGG....",
+        "..GHGGGGGGHG..",
+        ".GGGGGGGGGGGG.",
+        "GGGGGGGGGGGGGG",
+        "GGGKKGGGGKKGGG",
+        "GGGKWGGGGWKGGG",
+        "GGGGGGGGGGGGGG",
+        "GGPGGGGGGGGPGG",
+        "GGGGGMMMMGGGGG",
+        ".GGGGGGGGGGGG.",
+        "..gggggggggg..",
+        "...gg....gg..."
+    ];
+
+    const SLIME_SQUASH = [
+        "..............",
+        "....GGGGGG....",
+        "..GGGGGGGGGG..",
+        ".GGGGGGGGGGGG.",
+        "GGGKKGGGGKKGGG",
+        "GGGKWGGGGWKGGG",
+        "GGGGGGGGGGGGGG",
+        "GGPGGGGGGGGPGG",
+        "GGGGGMMMMGGGGG",
+        "GGGGGGGGGGGGGG",
+        ".gggggggggggg.",
+        "..gg..gg..gg.."
+    ];
+
+    const SLIME_STRETCH = [
+        "...GGGGGGGG...",
+        "..GHGGGGGGHG..",
+        ".GGGGGGGGGGGG.",
+        ".GGGKKGGKKGGG.",
+        ".GGGKWGGWKGGG.",
+        ".GGGGGGGGGGGG.",
+        ".GGPGGGGGGPGG.",
+        ".GGGGMMMMGGGG.",
+        ".GGGGGGGGGGGG.",
+        "..gggggggggg..",
+        "...gg....gg...",
+        ".............."
+    ];
+
+    const SLIME_COLORS = {
+        G: PAL.slimeBody, g: PAL.slimeShade, H: PAL.slimeLight,
+        K: PAL.slimeEye, W: PAL.slimeWhite, P: PAL.slimeCheek, M: PAL.slimeMouth
+    };
+
+    const SNAIL_MAP = [
+        "...BBBB.....",
+        "..BSSSSB....",
+        ".BSSssSSB...",
+        ".BSsSSsSB...",
+        ".BSSssSSB...",
+        "..BSSSSB....",
+        "...BBBB.....",
+        ".NNNNNNNNN..",
+        "..NNNNNNN..."
+    ];
+
+    const SNAIL_COLORS = {
+        B: PAL.snailShellDark, S: PAL.snailShell, s: PAL.snailShellLight, N: PAL.snailBody
+    };
+
+    const FLOWER_MAP = [
+        "..P.P.P.P..",
+        ".PPPPPPPPP.",
+        "PPPYYYYYPPP",
+        ".PPPYYYPPP.",
+        "..PPPPPPP..",
+        "...P.P.P...",
+        "....STS....",
+        ".....S....."
+    ];
+
+    const FLOWER_COLORS = {
+        P: PAL.bloomPetal, Y: PAL.bloomCenter, S: PAL.padGreen, T: PAL.padDark
+    };
+
+    const MOSS_MAP = [
+        ".m.m.",
+        "mLmLm",
+        ".mmm."
+    ];
+
+    const MOSS_COLORS = { m: PAL.padDark, L: PAL.padLight };
+
+    const FIREFLY_SEEDS = [[14, 30], [38, 26], [63, 45], [87, 29]];
+
+    /* ---------- SLIMEHOP helpers ---------- */
+
+    function padAt(index) { return pads[index]; }
+
+    function slimeFootX() {
+        if (!hop) return padAt(slime.pad).cx;
+        const from = padAt(hop.fromI), to = padAt(hop.toI);
+        return from.cx + (to.cx - from.cx) * (hop.t / hop.dur);
+    }
+
+    function slimeFootY() {
+        if (!hop) return padAt(slime.pad).cy - 2;
+        const from = padAt(hop.fromI), to = padAt(hop.toI);
+        const base = (from.cy - 2) + ((to.cy - 2) - (from.cy - 2)) * (hop.t / hop.dur);
+        return base - Math.sin(Math.PI * (hop.t / hop.dur)) * PLAYER.hopArcPixels;
+    }
+
+    function burst(x, y, color, count) {
+        for (let i = 0; i < count; i++) {
+            sparkles.push({
+                x: x + (Math.random() * 6 - 3),
+                y: y + (Math.random() * 4 - 2),
+                vy: -6 - Math.random() * 10,
+                t: 0, life: 0.36 + Math.random() * 0.18, color: color
+            });
+        }
+    }
+
+    function ring(x, y, maxR) {
+        rings.push({ x: x, y: y, r: 2, maxR: maxR, t: 0, life: 0.34 });
+    }
+
+    function nextSnailDelay() {
+        const eased = Math.max(WORLD.snailMoveDelayMin,
+            WORLD.snailMoveDelay - slimeRoundT * WORLD.snailMoveDelayDecay);
+        return eased + Math.random() * 0.5;
+    }
+
+    function resetSnail() {
+        snail.pad = WORLD.snailStartPad;
+        snail.targetPad = WORLD.snailStartPad;
+        snail.x = padAt(WORLD.snailStartPad).cx;
+        snail.y = padAt(WORLD.snailStartPad).cy - 2;
+        snail.fromX = snail.x;
+        snail.fromY = snail.y;
+        snail.toX = snail.x;
+        snail.toY = snail.y;
+        snail.fromPad = WORLD.snailStartPad;
+        snail.t = 0;
+        snail.dur = 0;
+        snail.moving = false;
+        snail.delay = WORLD.snailMoveDelay;
+        snail.stunT = 0;
+        snail.wobble = 0;
+    }
+
+    /* ---------- SLIMEHOP run control ---------- */
+
+    function startRun() {
+        pads = [];
+        for (let row = 0; row < WORLD.rows; row++) {
+            for (let col = 0; col < WORLD.cols; col++) {
+                pads.push({
+                    cx: WORLD.padCentersX[col],
+                    cy: WORLD.padCentersY[row],
+                    state: PAD_WET,
+                    popT: 0
+                });
+            }
+        }
+        slimeScore = 0;
+        slimeRoundT = 0;
+        slimeWin = false;
+        slimeState = STATE.PLAY;
+        slimeStateT = 0;
+        slime.pad = 4;
+        hop = null;
+        squashT = 0;
+        stompT = 0;
+        stompReadyT = 0;
+        blinkTimer = 1.6;
+        blinkLeft = 0;
+        sparkles = [];
+        rings = [];
+        accumulator = 0;
+        resetSnail();
+        syncChrome(true);
+    }
+
+    function finishRun(win) {
+        if (slimeScore > slimeBest) {
+            slimeBest = slimeScore;
+            saveBest(SETTINGS.gameName, slimeScore);
+        }
+        slimeWin = !!win;
+        slimeState = STATE.OVER;
+        slimeStateT = 0;
+        hop = null;
+        if (win) {
+            for (let i = 0; i < 6; i++) {
+                burst(12 + i * 15, 30 + (i % 3) * 12, PAL.bloomPetal, 8);
+            }
+        }
+        syncChrome(true);
+    }
+
+    function bloomedCount() {
+        let total = 0;
+        for (const pad of pads) if (pad.state === PAD_BLOOM) total++;
+        return total;
+    }
+
+    function checkBloomWin() {
+        if (slimeState === STATE.PLAY && bloomedCount() >= pads.length) {
+            slimeScore += PLAYER.winBonusPoints;
+            finishRun(true);
+        }
+    }
+
+    function stepPad(index, atX, atY) {
+        const pad = padAt(index);
+        if (pad.state >= PAD_BLOOM) return;
+        pad.state++;
+        pad.popT = 0.32;
+        slimeScore += PLAYER.bloomStepPoints;
+        if (pad.state === PAD_BLOOM) {
+            burst(pad.cx - 10, pad.cy - 4, PAL.bloomPetal, 4);
+            burst(pad.cx + 10, pad.cy - 4, PAL.bloomPetal, 4);
+            burst(pad.cx, pad.cy + 3, PAL.bloomPetalLight, 3);
+            ring(pad.cx, pad.cy + 4, 16);
+        } else {
+            burst(atX, atY, PAL.padLight, 4);
+        }
+        syncChrome(true);
+        checkBloomWin();
+    }
+
+    function requestHop(dir) {
+        if (slimeState !== STATE.PLAY || hop) return;
+        const col = slime.pad % WORLD.cols;
+        const row = Math.floor(slime.pad / WORLD.cols);
+        let nextCol = col, nextRow = row;
+        if (dir === "left") nextCol--;
+        else if (dir === "right") nextCol++;
+        else if (dir === "up") nextRow--;
+        else if (dir === "down") nextRow++;
+        else return;
+        if (nextCol < 0 || nextCol >= WORLD.cols || nextRow < 0 || nextRow >= WORLD.rows) {
+            squashT = 0.12;             // gentle bonk on the pond edge
+            return;
+        }
+        hop = { fromI: slime.pad, toI: nextRow * WORLD.cols + nextCol, t: 0, dur: PLAYER.hopSeconds };
+    }
+
+    function triggerStomp() {
+        if (slimeState !== STATE.PLAY) return false;
+        if (stompReadyT > 0) return false;
+        stompReadyT = PLAYER.stompCooldownSeconds;
+        stompT = 0.22;
+        const pad = padAt(slime.pad);
+        ring(pad.cx, pad.cy + 4, 22);
+        stepPad(slime.pad, pad.cx, pad.cy - 4);
+        const dx = snail.x - pad.cx;
+        const dy = snail.y - (pad.cy - 2);
+        if (Math.hypot(dx, dy) <= PLAYER.stompStunRadiusPixels) {
+            snail.stunT = PLAYER.stompStunSeconds;
+            if (snail.moving) {
+                snail.moving = false;
+                snail.pad = snail.fromPad;
+                snail.x = snail.fromX;
+                snail.y = snail.fromY;
+            }
+            snail.delay = Math.max(snail.delay, 1.2);
+            ring(snail.x, snail.y - 3, 12);
+        }
+        return true;
+    }
+
+    /* ---------- SLIMEHOP snail ---------- */
+
+    function startSnailMove() {
+        const candidates = [];
+        for (let i = 0; i < pads.length; i++) {
+            if (pads[i].state === PAD_BLOOM && i !== slime.pad) candidates.push(i);
+        }
+        let targetPad;
+        if (candidates.length) {
+            targetPad = candidates[Math.floor(Math.random() * candidates.length)];
+        } else {
+            const col = snail.pad % WORLD.cols;
+            const row = Math.floor(snail.pad / WORLD.cols);
+            const options = [];
+            if (col > 0) options.push(snail.pad - 1);
+            if (col < WORLD.cols - 1) options.push(snail.pad + 1);
+            if (row > 0) options.push(snail.pad - WORLD.cols);
+            if (row < WORLD.rows - 1) options.push(snail.pad + WORLD.cols);
+            targetPad = options[Math.floor(Math.random() * options.length)];
+            if (targetPad === undefined) { snail.delay = WORLD.snailWanderDelay; return; }
+        }
+        const target = padAt(targetPad);
+        snail.targetPad = targetPad;
+        snail.fromPad = snail.pad;
+        snail.fromX = snail.x;
+        snail.fromY = snail.y;
+        snail.toX = target.cx;
+        snail.toY = target.cy - 2;
+        snail.t = 0;
+        snail.dur = WORLD.snailMoveSeconds;
+        snail.moving = true;
+    }
+
+    function unbloomPad(index) {
+        const pad = padAt(index);
+        if (pad.state !== PAD_BLOOM) return;
+        pad.state = PAD_WET;
+        pad.popT = 0.32;
+        burst(pad.cx, pad.cy - 3, PAL.waterLight, 6);
+        ring(pad.cx, pad.cy - 2, 14);
+        syncChrome(true);
+    }
+
+    function updateSnail(dt) {
+        if (snail.stunT > 0) {
+            snail.stunT -= dt;
+            snail.wobble += dt * 12;
+            return;
+        }
+        if (snail.moving) {
+            snail.t += dt;
+            const k = Math.min(1, snail.t / snail.dur);
+            snail.x = snail.fromX + (snail.toX - snail.fromX) * k;
+            snail.y = snail.fromY + (snail.toY - snail.fromY) * k -
+                Math.sin(Math.PI * k) * 6;
+            snail.wobble += dt * 8;
+            if (k >= 1) {
+                snail.moving = false;
+                snail.x = snail.toX;
+                snail.y = snail.toY;
+                snail.pad = snail.targetPad;
+                unbloomPad(snail.pad);
+                snail.delay = nextSnailDelay();
+            }
+            return;
+        }
+        snail.delay -= dt;
+        if (snail.delay <= 0) startSnailMove();
+    }
+
+    /* ---------- SLIMEHOP fixed-step update ---------- */
+
+    function update(rawDt) {
+        let dt = rawDt > 0.25 ? 0.25 : rawDt;
+        accumulator += dt;
+        let steps = 0;
+        while (accumulator >= STEP_SECONDS && steps < 4) {
+            stepWorld(STEP_SECONDS);
+            accumulator -= STEP_SECONDS;
+            steps++;
+        }
+        if (steps === 4) accumulator = 0;
+    }
+
+    function stepWorld(dt) {
+        slimeClock += dt;
+        slimeStateT += dt;
+        updateEffects(dt);
+
+        if (slimeState !== STATE.PLAY) return;
+
+        slimeRoundT += dt;
+
+        if (hop) {
+            hop.t += dt;
+            if (hop.t >= hop.dur) {
+                const landed = hop.toI;
+                hop = null;
+                slime.pad = landed;
+                squashT = PLAYER.landSquashSeconds;
+                const pad = padAt(landed);
+                stepPad(landed, pad.cx, pad.cy - 4);
+            }
+        }
+
+        if (squashT > 0) squashT -= dt;
+        if (stompT > 0) stompT -= dt;
+        if (stompReadyT > 0) stompReadyT -= dt;
+
+        if (blinkLeft > 0) {
+            blinkLeft -= dt;
+        } else {
+            blinkTimer -= dt;
+            if (blinkTimer <= 0) {
+                blinkLeft = 0.14;
+                blinkTimer = 2.1 + Math.random() * 2.2;
+            }
+        }
+
+        for (const pad of pads) if (pad.popT > 0) pad.popT -= dt;
+
+        updateSnail(dt);
+
+        if (slimeState === STATE.PLAY && slimeRoundT >= SETTINGS.roundTimeLimitSeconds) {
+            finishRun(bloomedCount() >= pads.length);
+        }
+    }
+
+    function updateEffects(dt) {
+        for (let i = sparkles.length - 1; i >= 0; i--) {
+            const sp = sparkles[i];
+            sp.t += dt;
+            sp.y += sp.vy * dt;
+            sp.vy += 26 * dt;
+            if (sp.t >= sp.life) sparkles.splice(i, 1);
+        }
+        for (let i = rings.length - 1; i >= 0; i--) {
+            rings[i].t += dt;
+            if (rings[i].t >= rings[i].life) rings.splice(i, 1);
+        }
+    }
+
+    /* ---------- SLIMEHOP painting ---------- */
+
+    function drawPond(ctx) {
+        for (let y = 0; y < STAGE; y += 10) {
+            ctx.fillStyle = (y % 20 === 0) ? PAL.waterMid : PAL.waterDeep;
+            ctx.fillRect(0, y, STAGE, 10);
+        }
+
+        /* drifting glints on the water */
+        ctx.fillStyle = PAL.waterLight;
+        for (let i = 0; i < 11; i++) {
+            const gx = (i * 29 + Math.floor(slimeClock * 4)) % STAGE;
+            const gy = 6 + ((i * 17) % (STAGE - 12));
+            ctx.fillRect(gx, gy, 5, 1);
+        }
+        ctx.fillStyle = PAL.waterGlint;
+        for (let i = 0; i < 7; i++) {
+            const gx = (i * 23 + Math.floor(slimeClock * 2)) % STAGE;
+            const gy = 12 + ((i * 31) % (STAGE - 24));
+            ctx.fillRect(gx, gy, 2, 1);
+        }
+
+        /* reeds framing the pond, kept clear of every pad */
+        drawReeds(ctx, 2);
+        drawReeds(ctx, 92);
+    }
+
+    function drawReeds(ctx, baseX) {
+        ctx.fillStyle = PAL.reed;
+        ctx.fillRect(baseX, 22, 1, 18);
+        ctx.fillRect(baseX + 3, 28, 1, 14);
+        ctx.fillRect(baseX + 5, 18, 1, 20);
+        ctx.fillStyle = PAL.reedLight;
+        ctx.fillRect(baseX - 1, 30, 2, 1);
+        ctx.fillRect(baseX + 2, 36, 3, 1);
+        ctx.fillRect(baseX + 4, 24, 2, 1);
+        ctx.fillRect(baseX + 6, 33, 1, 3);
+    }
+
+    function waterAt(y) {
+        const bandStart = y - (y % 10);
+        return (bandStart % 20 === 0) ? PAL.waterMid : PAL.waterDeep;
+    }
+
+    /* a plump lily pad: oval body, light top edge, dark under-rim and a
+       wedge cut out of the right tip. `s` scales it for the shelf card. */
+    function drawPadShape(ctx, cx, top, s) {
+        const scale = s || 1;
+        const left = cx - 9 * scale;
+        ctx.fillStyle = PAL.padGreen;
+        ctx.fillRect(left + 3 * scale, top + 1 * scale, 12 * scale, 8 * scale);
+        ctx.fillRect(left + 5 * scale, top, 8 * scale, 10 * scale);
+        ctx.fillRect(left, top + 3 * scale, 18 * scale, 4 * scale);
+        ctx.fillStyle = PAL.padLight;
+        ctx.fillRect(left + 6 * scale, top, 6 * scale, scale);
+        ctx.fillStyle = PAL.padDark;
+        ctx.fillRect(left + 4 * scale, top + 9 * scale, 10 * scale, scale);
+
+        ctx.fillStyle = waterAt(top + 2);
+        ctx.fillRect(left + 15 * scale, top + scale, 3 * scale, scale);
+        ctx.fillRect(left + 16 * scale, top + 2 * scale, 2 * scale, 2 * scale);
+        ctx.fillRect(left + 17 * scale, top + 4 * scale, scale, scale);
+    }
+
+    function drawPads(ctx) {
+        for (const pad of pads) {
+            const top = pad.cy - 6;
+
+            if (pad.state === PAD_BLOOM) {
+                paintRoundBlob(ctx, pad.cx - 8, top - 5, 17, 17, "rgba(255,158,198,0.20)");
+            }
+
+            drawPadShape(ctx, pad.cx, top, 1);
+
+            if (pad.state === PAD_WET) {
+                ctx.fillStyle = PAL.waterGlint;
+                ctx.fillRect(pad.cx - 4, top + 4, 2, 1);
+                ctx.fillRect(pad.cx + 2, top + 6, 1, 1);
+            } else if (pad.state === PAD_MOSS) {
+                paintPixels(ctx, MOSS_MAP, MOSS_COLORS, pad.cx - 2, top - 2);
+                ctx.fillStyle = PAL.padLight;
+                ctx.fillRect(pad.cx + 4, top + 2, 1, 1);
+            } else {
+                paintPixels(ctx, FLOWER_MAP, FLOWER_COLORS, pad.cx - 5, top - 7);
+                if (pad.popT > 0) {
+                    ctx.fillStyle = PAL.bloomPetalLight;
+                    ctx.fillRect(pad.cx - 7, top - 6, 1, 1);
+                    ctx.fillRect(pad.cx + 7, top - 4, 1, 1);
+                }
+            }
+        }
+    }
+
+    function drawSnail(ctx) {
+        const bob = (snail.moving || snail.stunT > 0)
+            ? Math.round(Math.sin(snail.wobble) * 1) : 0;
+        ctx.fillStyle = "rgba(20,56,50,0.22)";
+        ctx.fillRect(Math.round(snail.x) - 5, Math.round(snail.y) + 1, 10, 1);
+        paintPixels(ctx, SNAIL_MAP, SNAIL_COLORS,
+            Math.round(snail.x) - 6, Math.round(snail.y) - 9 + bob, false);
+        /* sleepy eyes at the front of the foot */
+        ctx.fillStyle = PAL.snailEye;
+        ctx.fillRect(Math.round(snail.x) + 2, Math.round(snail.y) - 3 + bob, 1, 1);
+        ctx.fillRect(Math.round(snail.x) + 4, Math.round(snail.y) - 3 + bob, 1, 1);
+        if (snail.stunT > 0) {
+            ctx.fillStyle = PAL.textGold;
+            ctx.fillRect(Math.round(snail.x) - 2, Math.round(snail.y) - 14, 1, 1);
+            ctx.fillRect(Math.round(snail.x), Math.round(snail.y) - 15, 1, 1);
+            ctx.fillRect(Math.round(snail.x) + 2, Math.round(snail.y) - 14, 1, 1);
+        }
+    }
+
+    function drawSlime(ctx) {
+        const footX = slimeFootX();
+        const footY = slimeFootY();
+        const px = Math.round(footX) - 7;
+        const py = Math.round(footY) - 12;
+
+        /* shadow: on the target pad while airborne, under the feet otherwise */
+        const shadowPad = hop ? padAt(hop.toI) : padAt(slime.pad);
+        paintRoundBlob(ctx, Math.round(footX) - 5, shadowPad.cy - 3, 11, 3, "rgba(20,56,50,0.24)");
+
+        let map = SLIME_IDLE;
+        if (hop) map = SLIME_STRETCH;
+        else if (squashT > 0) map = SLIME_SQUASH;
+
+        if (stompT > 0) {
+            paintRoundBlob(ctx, px - 2, py - 2, 18, 17, "rgba(255,233,138,0.26)");
+        }
+        paintPixels(ctx, map, SLIME_COLORS, px, py, false);
+
+        /* closed eyes on a blink */
+        if (!hop && blinkLeft > 0) {
+            ctx.fillStyle = PAL.slimeEye;
+            ctx.fillRect(px + 3, py + 4, 2, 1);
+            ctx.fillRect(px + 9, py + 4, 2, 1);
+        }
+    }
+
+    function drawFireflies(ctx) {
+        FIREFLY_SEEDS.forEach(function (seed, i) {
+            const fx = Math.round(seed[0] + Math.sin(slimeClock * 0.9 + i * 1.7) * 5);
+            const fy = Math.round(seed[1] + Math.cos(slimeClock * 0.7 + i) * 3);
+            paintRoundBlob(ctx, fx - 1, fy - 1, 4, 4, "rgba(255,243,166,0.20)");
+            ctx.fillStyle = PAL.firefly;
+            ctx.fillRect(fx, fy, 1, 1);
+        });
+    }
+
+    function drawEffects(ctx) {
+        for (const r of rings) {
+            const frac = r.t / r.life;
+            const radius = Math.round(r.r + (r.maxR - r.r) * frac);
+            ctx.fillStyle = "rgba(228,250,255," + (0.8 * (1 - frac)).toFixed(2) + ")";
+            ctx.fillRect(Math.round(r.x - radius), Math.round(r.y), radius * 2, 1);
+        }
+        for (const sp of sparkles) {
+            ctx.fillStyle = sp.color;
+            ctx.fillRect(Math.round(sp.x), Math.round(sp.y), 1, 1);
+        }
+    }
+
+    function drawSlimePlate(ctx, y, h, alpha) {
+        paintRoundBlob(ctx, 3, y, 94, h, "rgba(20,56,50," + (alpha || 0.62) + ")");
+    }
+
+    function paintSlimeTitle(ctx) {
+        drawSlimePlate(ctx, 6, 38, 1);
+        paintPixelText(ctx, "SLIMEHOP", 50, 13, PAL.textGold, PAL.plate, 2);
+        paintPixelText(ctx, "BLOOM EVERY PAD", 50, 30, PAL.text, null, 1);
+        if (Math.floor(slimeClock / 0.55) % 2 === 0) {
+            drawSlimePlate(ctx, 85, 12, 1);
+            paintPixelText(ctx, "PRESS ANY KEY OR TAP", 50, 89, PAL.text, PAL.plate, 1);
+        }
+    }
+
+    function paintSlimeHud(ctx) {
+        drawSlimePlate(ctx, 2, 21);
+        paintPixelText(ctx, "BLOOM " + bloomedCount() + "/" + pads.length, 50, 6, PAL.textGold, null, 1);
+        paintPixelText(ctx, "TIME " + Math.max(0, Math.ceil(SETTINGS.roundTimeLimitSeconds - slimeRoundT)),
+            50, 14, PAL.text, null, 1);
+
+        /* stomp readiness pips, bottom-left */
+        drawSlimePlate(ctx, 89, 9, 0.55);
+        const ready = stompReadyT <= 0;
+        const fraction = ready ? 1 : 1 - stompReadyT / PLAYER.stompCooldownSeconds;
+        for (let i = 0; i < 5; i++) {
+            ctx.fillStyle = (i + 0.5) / 5 <= fraction
+                ? (ready ? PAL.textGold : PAL.padLight)
+                : "rgba(234,251,247,0.28)";
+            ctx.fillRect(7 + i * 5, 93, 3, 2);
+        }
+    }
+
+    function paintSlimeOver(ctx) {
+        drawSlimePlate(ctx, 6, 44, 1);
+        paintPixelText(ctx, slimeWin ? "POND IN BLOOM!" : "THE POND WENT STILL", 50, 12,
+            slimeWin ? PAL.textGold : PAL.text, PAL.plate, 1);
+        paintPixelText(ctx, String(slimeScore), 50, 22, PAL.textGold, PAL.plate, 3);
+        paintPixelText(ctx, "BEST " + slimeBest, 50, 44, PAL.text, null, 1);
+        if (Math.floor(slimeClock / 0.55) % 2 === 0) {
+            drawSlimePlate(ctx, 85, 12, 1);
+            paintPixelText(ctx, "PRESS ANY KEY OR TAP", 50, 89, PAL.text, PAL.plate, 1);
+        }
+    }
+
+    function paint(ctx) {
+        drawPond(ctx);
+        drawFireflies(ctx);
+        drawPads(ctx);
+        drawSnail(ctx);
+        drawSlime(ctx);
+        drawEffects(ctx);
+        if (slimeState === STATE.TITLE) paintSlimeTitle(ctx);
+        else if (slimeState === STATE.PLAY) paintSlimeHud(ctx);
+        else paintSlimeOver(ctx);
+    }
+
+    /* ---------- SLIMEHOP shelf card preview (private) ---------- */
+
+    function paintSlimeHopPreview(ctx) {
+        for (let y = 0; y < 96; y += 10) {
+            ctx.fillStyle = waterAt(y);
+            ctx.fillRect(0, y, 200, 10);
+        }
+        ctx.fillStyle = PAL.waterLight;
+        for (let i = 0; i < 9; i++) ctx.fillRect(8 + i * 22, 14 + (i % 4) * 20, 6, 1);
+
+        drawReeds(ctx, 6);
+        drawReeds(ctx, 186);
+
+        /* two big pads plus a small one for the snail */
+        drawPadShape(ctx, 46, 52, 3);
+        drawPadShape(ctx, 126, 52, 3);
+        paintPixels(ctx, FLOWER_MAP, FLOWER_COLORS, 111, 31, false, 3);
+
+        drawPadShape(ctx, 176, 70, 2);
+        paintPixels(ctx, SNAIL_MAP, SNAIL_COLORS, 164, 52, false, 2);
+
+        paintPixels(ctx, SLIME_IDLE, SLIME_COLORS, 25, 20, false, 3);
+
+        ctx.fillStyle = PAL.firefly;
+        ctx.fillRect(20, 20, 2, 2);
+        ctx.fillRect(104, 16, 2, 2);
+    }
+
+    /* ---------- SLIMEHOP chrome sync ---------- */
+
+    let slimeShownScore = null;
+    let slimeShownBest = null;
+    let slimeShownMsg = null;
+
+    function syncChrome(force) {
+        const shownBest = Math.max(slimeBest, slimeScore);
+        if (force || slimeShownScore !== slimeScore) {
+            slimeShownScore = slimeScore;
+            scoreEl.textContent = String(slimeScore);
+        }
+        if (force || slimeShownBest !== shownBest) {
+            slimeShownBest = shownBest;
+            bestEl.textContent = String(shownBest);
+        }
+        let msg;
+        if (slimeState === STATE.PLAY) {
+            if (bloomedCount() === 0) msg = "hop pad to pad — every landing blooms it a little!";
+            else if (bloomedCount() < pads.length) msg = "keep blooming — the snail undoes the flowers it finds!";
+            else msg = "all nine pads are blooming!";
+        } else if (slimeState === STATE.TITLE) {
+            msg = "press any key or tap to start";
+        } else if (slimeWin) {
+            msg = "pond in bloom! the snail gave up — try to beat your score!";
+        } else {
+            msg = "the pond went still — bloom all nine pads next time!";
+        }
+        if (force || slimeShownMsg !== msg) {
+            slimeShownMsg = msg;
+            msgEl.textContent = msg;
+        }
+    }
+
+    /* ---------- SLIMEHOP module contract ---------- */
+
+    function start() {
+        slimeBest = readBest(SETTINGS.gameName);
+        pads = [];
+        for (let row = 0; row < WORLD.rows; row++) {
+            for (let col = 0; col < WORLD.cols; col++) {
+                pads.push({
+                    cx: WORLD.padCentersX[col],
+                    cy: WORLD.padCentersY[row],
+                    state: PAD_WET,
+                    popT: 0
+                });
+            }
+        }
+        slimeState = STATE.TITLE;
+        slimeStateT = 0;
+        slimeScore = 0;
+        slimeRoundT = 0;
+        slimeWin = false;
+        slime.pad = 4;
+        hop = null;
+        squashT = 0;
+        stompT = 0;
+        stompReadyT = 0;
+        blinkTimer = 1.6;
+        blinkLeft = 0;
+        sparkles = [];
+        rings = [];
+        accumulator = 0;
+        resetSnail();
+        syncChrome(true);
+    }
+
+    function stop() {}
+    function restart() { startRun(); }
+
+    function onDir(dir, pressed) {
+        if (!pressed) return;
+        if (slimeState !== STATE.PLAY) {
+            if (slimeStateT > 0.35) startRun();
+            return;
+        }
+        requestHop(dir);
+    }
+
+    function onAction() {
+        if (slimeState === STATE.PLAY) triggerStomp();
+        else if (slimeStateT > 0.35) startRun();
+    }
+
+    function onStageTap() { onAction(); }
+
+    function onAnyKey() {
+        if (slimeState !== STATE.PLAY && slimeStateT > 0.35) startRun();
+    }
+
+    GAMES.push({
+        id: SETTINGS.gameName,
+        versionNumber: SETTINGS.versionNumber,
+        name: "Slime Hop",
+        tagline: "bounce the pond into bloom",
+        concept: "Slimey the springy slime hops across a lily-pad pond, blooming every pad before a sleepy snail undoes the work.",
+        actionLabel: "STOMP",
+        hint: "desktop: WASD hop · SPACE or tap stage to stomp · R restart · ESC shelf",
+        previewPaint: paintSlimeHopPreview,
         start, stop, restart,
         update, paint, onDir, onAction, onStageTap, onAnyKey
     });

@@ -1,11 +1,12 @@
 # KANTMICROGAMES — Controls
 
 Which controls exist, how they behave on each kind of device, and why. The shell
-was made responsive and input-aware in build **009-20261101**; the four game
-modules themselves were not touched (PANDASNACK, BOOPEEK and DUCKLINE are frozen,
-and SPROUTUP needed no change).
+was made responsive and input-aware in build **009-20261101**. Build **010-20261101**
+adds the fifth game (SLIMEHOP) using the same contract and controls; the four older
+modules were not touched (PANDASNACK, BOOPEEK and DUCKLINE are frozen, and SPROUTUP
+needed no change).
 
-## One table for all four games
+## One table for all five games
 
 | Game | Move | Action (`SPACE`, action pad, stage tap) | Goal |
 |---|---|---|---|
@@ -13,9 +14,12 @@ and SPROUTUP needed no change).
 | BOOPEEK | tiptoe with `W A S D` / arrows / the direction pad | **POKE** — 20 px reach, 0.1 s cooldown | poke Boo while he peeks; 10 in 20 s, then beat your score |
 | DUCKLINE | swim with `W A S D` / arrows / the direction pad | **GO** — quack boost, 0.55 s at 1.7×, 2 s cooldown | gather three ducklings, reach the far bank in 22 s |
 | SPROUTUP | weave with `W A S D` / arrows / the direction pad | **REACH** — leap burst, 0.5 s at 1.85×, 2 s cooldown | gather 15 drops in 24 s to bloom |
+| SLIMEHOP | hop one pad per press with `W A S D` / arrows / the direction pad | **STOMP** — bloom the pad underfoot, 1.2 s cooldown, stuns a nearby snail | bloom all nine pads in 30 s before the snail eats them |
 
-The action button carries the game's own label (DASH / POKE / GO / REACH), so one
-pad serves every game.
+The action button carries the game's own label (DASH / POKE / GO / REACH / STOMP), so
+one pad serves every game. SLIMEHOP is the one game where a direction press is a single
+**discrete hop** rather than a continuous walk: holding a direction does not repeat, and
+each new press hops one pad (or bonks harmlessly at the pond edge).
 
 ## Input devices
 
@@ -52,8 +56,9 @@ empty: sliding across it keeps the current direction instead of releasing it.
 
 Both preferences sit on the shelf under the how-to chips, are announced with an
 `aria-label`, and persist across reloads in `localStorage` under
-`KANTMICROGAME.ui.pads` and `KANTMICROGAME.ui.hand`. To reset them, clear those
-keys (or all `KANTMICROGAME.*` keys) in the browser's site data.
+`KANTMICROGAMES.ui.pads` and `KANTMICROGAMES.ui.hand`. To reset them, clear those
+keys (or all `KANTMICROGAMES.*` keys) in the browser's site data. Best scores use the
+same prefix: `KANTMICROGAMES.<GAME>.best`.
 
 Pads and buttons are at least **48 × 48 CSS px** at every viewport. On the
 smallest phones (≤ 380 px wide or ≤ 620 px tall) the pad shrinks to exactly 48 px;
