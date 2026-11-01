@@ -1,10 +1,8 @@
+<!-- Applies to: build 012-20261101 · six games · changes to controls are recorded in CHANGELOG.md -->
 # KANTMICROGAMES — Controls
 
-Which controls exist, how they behave on each kind of device, and why. The shell
-was made responsive and input-aware in build **009-20261101**. Build **010-20261101**
-added the fifth game (SLIMEHOP) using the same contract and controls. Build
-**011-20261101** adds the sixth game (SNAILRACE) with the same contract and freezes
-SPROUTUP and SLIMEHOP; the five older modules were not touched.
+Which controls exist, how they behave on each kind of device, and why.
+This guide applies to all six games, on every kind of device.
 
 ## One table for all six games
 
@@ -117,7 +115,6 @@ straight out of a pause. `ESC` still leaves to the shelf while paused.
   "PAUSED", "GAME OVER" and similar shell-level text.
 - Prefers-reduced-motion turns off the card lift, chip pulse and button press
   transforms.
-- Colours and pixel art are untouched; this build only changed the shell.
 
 ## Known control quirks
 

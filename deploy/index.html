@@ -6,22 +6,12 @@
   Repository : https://github.com/lohyapkant/KANTMICROGAMES
   Play online: https://kantmicrogames.lohyapkant.workers.dev/
   Hosting    : Cloudflare Workers (https://workers.cloudflare.com/)
-  Current    : build 011-20261101 — SNAILRACE added; six games;
-               SPROUTUP and SLIMEHOP frozen
+  Current    : build 012-20261101 — documentation restructure; six games
+               (PANDASNACK, BOOPEEK, DUCKLINE, SPROUTUP, SLIMEHOP, SNAILRACE)
   Names      : project and on-screen brand KANTMICROGAMES ·
                save keys and the console tag use the KANTMICROGAMES prefix
-  Build log  : 011 — Qwen3.8-Flash (Qoder CLI) · Round 6 (SNAILRACE;
-               SPROUTUP + SLIMEHOP frozen) · ~30 min wall-clock ·
-               8.2768 credits used (115 billable requests;
-               Qoder exposes no token counts) — full records in README,
-               CHANGELOG and prompts/P-11_snailrace.txt
-               010 — Qwen3.8-Flash (Qoder CLI) · Round 5 (SLIMEHOP +
-               rename) · ~30 min wall-clock · 9.0583 credits
-               used (186 billable requests; Qoder exposes no
-               token counts) — full records in README, CHANGELOG and
-               prompts/P-10_slimehop.txt
-              009 — Qwen3.8-Flash (Qoder CLI) · responsive shell ·
-               19.7809 credits used (157 billable requests)
+  Build log  : build 012-20261101, Qwen3.8-Flash (Qoder CLI) — the full
+               record of every build is in CHANGELOG.md
   ================================================================
 
   MIT License
@@ -719,8 +709,7 @@
 
     <footer id="meta">
         <span class="v" id="verBox">KANTMICROGAMES</span>
-        <br><span class="zzz">one file</span> · runs completely offline · every game lives inside this page ·
-        <span class="zzz">build 010-20261101</span>
+        <br><span class="zzz">one file</span> · runs completely offline · every game lives inside this page
         <br><a href="https://github.com/lohyapkant/KANTMICROGAMES" style="color:inherit">GitHub</a> ·
         <a href="https://kantmicrogames.lohyapkant.workers.dev/" style="color:inherit">Play Online</a> ·
         MIT License © 2026 Loh Yap Kant
@@ -787,15 +776,10 @@
    was updated in 007-20261101 for in-stage score HUD and refrozen;
    SLIMEHOP is new at 010-20261101).
 
-   Every finished build records, in FOUR homes — this file's header or
-   comments, README.md, CHANGELOG.md and the build's prompt copy — plus
-   the plan's tool log:
-     * the full model name and tool,
-     * the effort/round summary,
-     * the duration taken,
-     * the token count (but a tool that bills in CREDITS and exposes
-       no token telemetry records "credits used" instead, labelled as
-       credits, never silently relabelled as tokens).
+   Every finished build's full record — model and tool, effort,
+   duration, and tokens or credits — lives in CHANGELOG.md, under
+   Conventions → Per-build checklist. This header and the page footer
+   show only the current build; the README carries the summary rows.
    The owner's standing request; keep it exact and keep it honest.
    Owner observations about model strengths are dated entries in
    MODELS.md — add a new dated line, never rewrite an old one.
@@ -807,7 +791,7 @@
 
 const APP = {
     name: "KANTMICROGAMES",
-    fileVersion: "011-20261101",       // build number of THIS one-file app
+    fileVersion: "012-20261101",       // build number of THIS one-file app
     savePrefix: "KANTMICROGAMES."      // best scores live at prefix + GAMEID + ".best"
 };
 

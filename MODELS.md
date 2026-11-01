@@ -10,6 +10,11 @@ versions change, and a note here describes one moment on one set of builds.
 2. Keep it factual and polite: describe what was built, what worked, what needed rework.
 3. One entry per model per observation date; link the builds it refers to.
 4. This file is documentation only — it never affects the game code or the build record.
+5. From build 012 every entry starts with a Source line: either 'Owner's words (verbatim)'
+   or 'Recorded by <model> from the owner's feedback'. Earlier entries predate this and are
+   kept as written.
+6. When one model delivers several builds, write one entry per build and name the build in
+   the heading.
 
 **Project links (kept current for every model reading this file)**
 
@@ -19,8 +24,8 @@ versions change, and a note here describes one moment on one set of builds.
 - Project name: **KANTMICROGAMES** (repository, worker and public address). The app, the
   save keys (`KANTMICROGAMES.<GAME>.best`, `KANTMICROGAMES.ui.*`) and the console tag use
   that name from build 010; the local folder is `KANTMICROGAME/` and the archived prompt
-  copies keep their original spellings. Both are explained in "About the name" in
-  `README.md`.
+  copies keep their original spellings. For both, see Naming in `CHANGELOG.md` →
+  Conventions.
 - License: MIT (see `LICENSE` and the header comment in `deploy/index.html`). Legal name of
   the original creator: **Loh Yap Kant**, with help from the models observed below.
 
@@ -207,10 +212,24 @@ tokens. This is a snapshot of one build on one date.
 
 ---
 
+<!-- NEW ENTRIES ABOVE THIS LINE. Never edit existing entries. -->
+
 *Template for a new entry:*
 
 ```
 ## YYYY-MM-DD — <full model name> (<tool>)
+
+Builds observed: `<build-id>`, ...
+
+The owner's notes: ...
+```
+
+*Template v2 (from build 012) — adds the Source line:*
+
+```
+## YYYY-MM-DD — <full model name> (<tool>) — <build ID and/or short title>
+
+Source: <Owner's words (verbatim) | Recorded by <model> from the owner's feedback>
 
 Builds observed: `<build-id>`, ...
 
