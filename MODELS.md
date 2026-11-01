@@ -1,4 +1,4 @@
-# KANTMICROGAME — Model observations (owner notes)
+# KANTMICROGAMES — Model observations (owner notes)
 
 A dated, **append-only** place for the owner's subjective notes on how each model
 performed on this project. It is not a ranking and not a permanent verdict: models change,
@@ -16,6 +16,9 @@ versions change, and a note here describes one moment on one set of builds.
 - GitHub repository: <https://github.com/lohyapkant/KANTMICROGAMES>
 - Public demo (Cloudflare Workers): <https://kantmicrogames.lohyapkant.workers.dev/>
 - Hosting platform: <https://workers.cloudflare.com/>
+- Project name: **KANTMICROGAMES** (repository, worker and public address). The local folder
+  is `KANTMICROGAME/` and the save keys keep the older prefix `KANTMICROGAME.` so players'
+  saved bests survive; both are explained in "About the name" in `README.md`.
 - License: MIT (see `LICENSE` and the header comment in `deploy/index.html`). Legal name of
   the original creator: **Loh Yap Kant**, with help from the models observed below.
 
@@ -125,6 +128,19 @@ resulting suite runs 1,409 assertions with zero failures, and the build added `C
 a test report, a real-device checklist and the build's records. Honest limits recorded in
 the report: headless Chrome only, no physical device or other browser, and the token count
 is unknown because the tool surfaced no telemetry.
+
+## 2026-11-01 — Qwen3.8-Flash (Qoder CLI) — credit record for build 009
+
+Builds observed: `009-20261101` (record addendum; no code change).
+
+The owner's notes: this tool does not report token counts. Its session transcript carries a
+`credits` value for every API request instead, so the record for build 009 was updated to
+**19.7809 credits used** across 157 billable requests (2026-11-01, 16:14–16:40 WIB), summed
+from that per-request telemetry. The unit is credits, not tokens, and is labelled as such
+everywhere it appears (README, CHANGELOG, plan tool log and `P-09` prompt copy). By
+coincidence, this is also the first build whose documentation pass audited the project name
+and standardised it on **KANTMICROGAMES**. Credits are a snapshot of one billing meter on
+one date, not a ranking of the model.
 
 ---
 

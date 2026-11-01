@@ -1,4 +1,4 @@
-# KANTMICROGAME
+# KANTMICROGAMES
 
 Tiny, cute, pixel-art HTML5 micro games — **all inside ONE single HTML file**. The
 arcade shelf and every game live together in `deploy/index.html`: open it, pick a game,
@@ -7,6 +7,22 @@ documentation. The file lives inside `deploy/` for
 [Cloudflare Workers](https://workers.cloudflare.com/) deployment. (After round 1 the
 owner pivoted from one-folder-per-game to this one-file architecture — see
 `plans/micro-games-v2.md`.)
+
+### About the name
+
+The project is **KANTMICROGAMES** (plural) — the GitHub repository
+`lohyapkant/KANTMICROGAMES`, the worker `kantmicrogames` and the public address
+`kantmicrogames.lohyapkant.workers.dev` all use that name. Four older spellings are kept
+deliberately and are not typos:
+
+| Kept as-is | Why |
+|---|---|
+| Folder `KANTMICROGAME/` (singular) | The actual local folder the project is developed in; renaming it would break the owner's paths and any clone instructions. |
+| Save-key prefix `KANTMICROGAME.` (and the console tag `KANTMICROGAME module error`) | Players' saved best scores and preferences already live under it (`KANTMICROGAME.<GAME>.best`, `KANTMICROGAME.ui.*`); changing it would orphan that data, and the console tag stays greppable across builds. |
+| On-screen brand **KANT MICRO** | The short display name in the page title and header, chosen to fit a 100 px-wide toy console. |
+| Prompt copies `P-00` … `P-08` | Archived verbatim; their singular name is a historical record and is not rewritten. |
+
+Everything written from build 009 onward uses **KANTMICROGAMES**.
 
 **Current state:** build `009-20261101` — the one-file app with **four** playable games
 and a shell that fits phones, tablets, foldables and desktops:
@@ -31,12 +47,14 @@ added and refrozen); build 008 was the documentation cleanup. See
 ## Models used thus far
 
 Per the owner's standing request, the model, effort, duration and token count are
-recorded in the CHANGELOG, the plan, the README and the prompt copies. The same applies to
+recorded in the CHANGELOG, the plan, the README and the prompt copies. When a tool bills
+in **credits** and exposes no token telemetry, the credits used are recorded instead and
+labelled as credits — never presented as tokens. The same applies to
 **documentation review/edit attempts**: successful, partial or failed ones are logged with
 model, date and outcome (e.g. the GPT-OSS 120B failure and the subsequent Opus/Qwen passes
 under build 008, and the Qwen3.8-Flash documentation pass under build 009).
 
-| Build | Full model name | Effort | Duration | Tokens |
+| Build | Full model name | Effort | Duration | Tokens / credits |
 |---|---|---|---:|---:|
 | 000-20261031 | DeepSeek V4.1 Flash Free (OpenCode) | Round 0 scaffold (corrected in 006) | not recorded | not recorded |
 | 001-20261031 | DeepSeek V4.1 Flash Free (OpenCode) | Round 1 — PANDASNACK module + docs (corrected in 006) | not recorded | not recorded |
@@ -47,7 +65,7 @@ under build 008, and the Qwen3.8-Flash documentation pass under build 009).
 | 006-20261101 | DeepSeek V4.1 Flash Free (OpenCode) / Gemini 3.8 Flash (Antigravity) | Final special review: numbering, 000/001 record fix, DuckLine freeze, BooPeek variability, MODELS.md | ~30 min | ~1.5 M processed |
 | 007-20261101 | Gemini 3.8 Flash (Antigravity) | Round 4 — SPROUTUP module, BOOPEEK freeze, PANDASNACK in-stage live HUD score tracking & refreeze | ~25 min | ~48,000 |
 | **008-20261101** | **Claude Opus 4.6 Thinking (Antigravity) / Qwen3.8-Flash (Qoder CLI)** | **Documentation cleanup: GitHub/public-site/model links, `deploy/` move documented, MIT license in index.html, GPT-OSS 120B attempt recorded; recovery pass closed the remaining gaps** | **~20 min + ~15 min** | **~60,000 + ~30,000 est.** |
-| **009-20261101** | **Qwen3.8-Flash (Qoder CLI)** — prompt authored by **Claude.ai Sonnet 5.5 Extra** | **Responsive shell: shelf, no-scroll game screen, measured stage fit, input-aware pads/hints, keyboard hygiene, lifecycle pause, sliding direction cluster, accessibility polish; 24-viewport verification; new CONTROLS.md and tests** | **~30 min wall-clock** | **unknown - owner to fill in** |
+| **009-20261101** | **Qwen3.8-Flash (Qoder CLI)** — prompt authored by **Claude.ai Sonnet 5.5 Extra** | **Responsive shell: shelf, no-scroll game screen, measured stage fit, input-aware pads/hints, keyboard hygiene, lifecycle pause, sliding direction cluster, accessibility polish; 24-viewport verification; new CONTROLS.md and tests** | **~30 min wall-clock** | **19.7809 credits used** (157 billable requests; tokens not exposed by Qoder) |
 
 Notes on the `-005` record: duration is **active** working time measured across the two
 sittings that produced this build (2026-10-31 21:06 → 2026-11-01 09:18, owner breaks
@@ -71,12 +89,15 @@ recorded in `MODELS.md` and the prompt copy for historical completeness.
 Notes on the `-009` record: the **prompt was authored by Claude.ai Sonnet 5.5 Extra** and
 pasted by the owner with the request that its authorship be recorded. It was executed by
 **Qwen3.8-Flash (Qoder CLI)**. Duration is wall-clock from the prompt paste to the finished
-records (2026-11-01, 16:14 → about 16:45 WIB, ≈30 min); no token telemetry was surfaced by
-the tool, so the token count is left for the owner. The build number is **009**, not the
-008 in the prompt title: 008 had already been used by the documentation cleanup, and build
-numbers are never reused. The prompt copy is saved unaltered in `P-09_responsive-shell.txt`.
-The frozen game modules were verified unchanged by SHA-256; only the shared shell, the
-documentation and the new `tests/` folder changed.
+records (2026-11-01, 16:14 → about 16:45 WIB, ≈30 min). Qoder does not report token
+counts, so the build records **19.7809 credits used** instead, summed from the per-request
+`credits` telemetry in the session transcript (157 billable requests, 16:14–16:40 WIB).
+Earlier builds used tools that reported tokens; the two units are not comparable and are
+labelled separately. The build number is **009**, not the 008 in the prompt title: 008 had
+already been used by the documentation cleanup, and build numbers are never reused. The
+prompt copy is saved unaltered in `P-09_responsive-shell.txt`. The frozen game modules were
+verified unchanged by SHA-256; only the shared shell, the documentation and the new
+`tests/` folder changed.
 
 ## How to open and play
 

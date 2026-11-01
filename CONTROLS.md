@@ -1,4 +1,4 @@
-# KANTMICROGAME — Controls
+# KANTMICROGAMES — Controls
 
 Which controls exist, how they behave on each kind of device, and why. The shell
 was made responsive and input-aware in build **009-20261101**; the four game

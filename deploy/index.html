@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <!--
   ================================================================
-  KANTMICROGAME — Tiny, cute, pixel-art HTML5 micro games
+  KANTMICROGAMES — Tiny, cute, pixel-art HTML5 micro games
   ================================================================
   Repository : https://github.com/lohyapkant/KANTMICROGAMES
   Play online: https://kantmicrogames.lohyapkant.workers.dev/
   Hosting    : Cloudflare Workers (https://workers.cloudflare.com/)
   Current    : build 009-20261101 — responsive shell (shell only; game content frozen)
+  Names      : project KANTMICROGAMES · on-screen brand "KANT MICRO" ·
+               save keys keep the historical prefix KANTMICROGAME.
   ================================================================
 
   MIT License
@@ -45,7 +47,7 @@
     <style>
         /*
            ============================================================
-           KANTMICROGAME — ONE FILE (since build 002-20261031).
+           KANTMICROGAMES — ONE FILE (since build 002-20261031).
            The shelf AND every game live inside this single HTML file:
              * two screens — the shelf, and the currently open game —
                swap inside the page (no navigation, no iframes, no folders)
@@ -764,10 +766,15 @@
      * the full model name and tool,
      * the effort/round summary,
      * the duration taken,
-     * the token count.
+     * the token count (but a tool that bills in CREDITS and exposes
+       no token telemetry records "credits used" instead, labelled as
+       credits, never silently relabelled as tokens).
    The owner's standing request; keep it exact and keep it honest.
    Owner observations about model strengths are dated entries in
    MODELS.md — add a new dated line, never rewrite an old one.
+   Project name: KANTMICROGAMES (repo, site, wrangler). The save-key
+   prefix stays KANTMICROGAME. because players' saved bests depend on
+   it, and the on-screen brand stays "KANT MICRO".
    ================================================================== */
 
 const APP = {

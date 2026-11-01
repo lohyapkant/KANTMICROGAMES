@@ -1,4 +1,4 @@
-# KANTMICROGAME Changelog
+# KANTMICROGAMES Changelog
 
 ## Conventions (read before adding an entry)
 
@@ -7,8 +7,14 @@
   date (2026-11-01 → `20261101`). The number is the identity; the date is a hint. Never
   reuse a number. A game's `versionNumber` is the build where its content last changed.
 - **Every entry records** the prompt ID, the full model name and tool, and a build record
-  with duration and tokens. The same facts go to `README.md`, `plans/micro-games-v2.md`
-  and the build's prompt copy — four homes, one truth.
+  with duration and tokens. A tool that bills in **credits** and exposes no token telemetry
+  records the **credits used**, labelled as credits — never silently presented as tokens.
+  The same facts go to `README.md`, `plans/micro-games-v2.md` and the build's prompt copy —
+  four homes, one truth.
+- **The project name is `KANTMICROGAMES`.** Entries dated up to build 008 used the older
+  singular spelling; they are historical records and are not rewritten. The folder
+  `KANTMICROGAME/`, the save-key prefix `KANTMICROGAME.` and the on-screen brand
+  `KANT MICRO` are kept on purpose (see "About the name" in `README.md`).
 - **Corrections are dated, not silent.** If a past record was wrong, fix it and say which
   build corrected it (build 006 corrected the model record for 000/001).
 - **Documentation review/edit attempts are recorded.** Every attempt to review, edit or
@@ -105,6 +111,11 @@ was not altered; the deviation is documented in the prompt copy, README and MODE
   CHANGELOG, MODELS.md, plan, `CONTROLS.md`, the test report, the real-device checklist and
   this prompt copy. No content was deleted; edits were append-only or in place following
   each file's template. No failed documentation attempt in this round.
+- A second pass by **Qwen3.8-Flash (Qoder CLI)** on 2026-11-01, after the build was
+  finished: owner-requested naming audit plus the credit record (see the addendum below).
+  Titles and current prose were corrected to **KANTMICROGAMES**; historical entries,
+  prompt copies, the folder name, the save-key prefix and the on-screen brand were left
+  unchanged on purpose. No content was deleted.
 
 ### Verification and limits
 
@@ -122,12 +133,36 @@ was not altered; the deviation is documented in the prompt copy, README and MODE
   home indicators, real pinch zoom, screen readers, foldable postures, more than two
   pointers, 120 Hz and low-end performance. The report lists these gaps explicitly.
 
-### Build record (owner request: duration + tokens)
+### Build record (owner request: duration + tokens/credits)
 
 - Duration taken to build this round: **~30 min wall-clock** (2026-11-01, 16:14 → about
   16:45 WIB, from prompt paste to finished records; no idle gaps observed).
-- Tokens used in this round: **unknown - owner to fill in** — the tool surfaced no token
-  telemetry, and no number is invented.
+- Tokens used in this round: **not exposed by the tool.** Qoder reports a `credits` figure
+  per request instead of token counts, so the build records **19.7809 credits used** (157
+  billable requests, 16:14–16:40 WIB), summed from the session's per-request credit
+  telemetry. The unit is credits, not tokens; the owner asked for it to be recorded this
+  way rather than left blank, and no token number is invented.
+
+### Addendum — 2026-11-01 (post-build: naming audit and credit record)
+
+Owner request after 009 was signed off: check the project name across the files, and record
+credits in place of the unavailable token count.
+
+- **Naming.** The project is **KANTMICROGAMES**, as used by the GitHub repository, the
+  worker `name` in `wrangler.jsonc` and the public address. Current titles and prose in
+  `README.md`, `CHANGELOG.md`, `MODELS.md`, `CONTROLS.md`, `plans/micro-games-v2.md` and
+  the `deploy/index.html` header now use that spelling. Kept unchanged on purpose: the
+  local folder `KANTMICROGAME/`, the save-key prefix `KANTMICROGAME.`, the on-screen brand
+  `KANT MICRO`, and the archived prompt copies `P-00` … `P-08`. All four exceptions are
+  explained in "About the name" in `README.md`.
+- **Credits.** Build 009's record now states **19.7809 credits used** instead of "unknown";
+  the token field stays explicitly unavailable. The same figure is carried in `README.md`,
+  `MODELS.md`, `plans/micro-games-v2.md` (tool log) and `prompts/P-09_responsive-shell.txt`.
+- **Creator name.** `LICENSE` said "Copyright (c) 2026 lohyapkant" (the GitHub handle) while
+  the README, changelog and the `index.html` MIT header name **Loh Yap Kant**. The licence
+  line now reads "Copyright (c) 2026 Loh Yap Kant (GitHub: lohyapkant)", so the legal name
+  and the handle both appear and nothing is lost.
+- No game code changed in this addendum; the four IIFEs remain byte-identical.
 
 ## 008-20261101 — 2026-11-01 (documentation cleanup)
 
