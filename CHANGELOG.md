@@ -51,6 +51,9 @@ Games in the one file: 3 (PANDASNACK module content 001-20261031 **frozen**, BOO
   ring, then he poofs away (0.16 s) and relocates.
 - The next spot is preferred within **55 px**, so the chase stays fair on a 100 px stage.
   Poking empty air does nothing.
+- Extended Pip's vertical floor traversal from `y: 54–62` to `y: 50–81`, allowing the player
+  to walk freely down through the translucent score plate to reach and poke Boo when hiding
+  over the rug or behind the book.
 - Updated the title line to "POKE HIM WHEN HE POPS OUT", the chrome message, the shelf
   concept line and the preview text to match the new loop.
 

@@ -43,6 +43,15 @@ as a working module but without its own 100×100 pixel art — it leaned on the 
 interface, so the pond and duck family had to be rebuilt in `005-20261101`. As above, this
 records one dated experience and may not reflect future versions.
 
+## 2026-11-01 — Gemini 3.8 Flash (Antigravity)
+
+Builds observed: `006-20261101`.
+
+The owner's notes: picked up cleanly from DeepSeek after token limits were reached.
+Successfully cleaned up code, fixed the BooPeek lower floor traversal bug allowing Pip
+to walk down through the translucent score panel to poke Boo, and refactored and reviewed
+the README and CHANGELOG records cleanly.
+
 ---
 
 *Template for a new entry:*

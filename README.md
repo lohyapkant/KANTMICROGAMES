@@ -235,7 +235,8 @@ the same way our other KANT projects keep them.
   radii, bamboo counts and spacing, wasp spawn curve and bands unlocked by score.
 - **BOOPEEK settings (module content `006-20261101`):** move speed 30 px/s, poke reach
   20 px, goal 10 pokes, poke cooldown 0.10 s, round 20 s, start `(26,56)`, Pip walks the
-  floor band y 54–62. Peek-a-boo: five hiding spots `(78,46) (16,40) (5,52) (40,72)
+  floor band y 50–81 (freely traversing through the lower translucent score plate to reach
+  Boo anywhere on the floor). Peek-a-boo: five hiding spots `(78,46) (16,40) (5,52) (40,72)
   (66,74)`, a 0.26 s warning sparkle, 1.15–1.80 s visible, 0.30–0.60 s hidden, a 0.16 s
   poof after a hit, and the next spot is preferred within 55 px so the chase stays fair.
   Save key `KANTMICROGAME.BOOPEEK.best`; no difficulty table (short cozy run by design).

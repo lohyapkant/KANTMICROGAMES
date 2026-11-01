@@ -2010,9 +2010,10 @@ wirePad("stage", function () {
         if (mx !== 0) pip.x += Math.sign(mx) * speed * dt;
         if (my !== 0) pip.y += Math.sign(my) * speed * dt;
         /* Pip walks the nursery floor: keep him on the boards, never up the
-           wallpaper and never behind the HUD bar. */
+           wallpaper, but free to roam down through the translucent HUD bar
+           to reach Boo anywhere on the floor. */
         pip.x = Math.max(2, Math.min(STAGE - 14, pip.x));
-        pip.y = Math.max(54, Math.min(62, pip.y));
+        pip.y = Math.max(50, Math.min(STAGE - 19, pip.y));
 
         updatePipBlink(dt);
         updateGhostBlink(dt);
