@@ -11,6 +11,10 @@
   and the build's prompt copy — four homes, one truth.
 - **Corrections are dated, not silent.** If a past record was wrong, fix it and say which
   build corrected it (build 006 corrected the model record for 000/001).
+- **Documentation review/edit attempts are recorded.** Every attempt to review, edit or
+  reformat this documentation — whether it succeeded, was partial, or failed (see the
+  GPT-OSS 120B attempt and the Opus halt under 008) — is logged with its model/tool, date
+  and outcome, for completionist and historical reference.
 - **Owner model observations** belong in `MODELS.md` as dated, append-only notes — not in
   this changelog, and never as a permanent ranking.
 - The same rules are repeated beside `APP.fileVersion` in `deploy/index.html`.
@@ -81,6 +85,13 @@ Games in the one file: 4 (PANDASNACK module content 007-20261101 **frozen**, BOO
   - Qwen3.8-Flash recorded as a model used on this project (README model link table,
     `MODELS.md`, tool logs).
 - No content deleted; all edits follow the existing templates in each file.
+
+### Added — documentation-attempt history rule
+
+- On the owner's instruction (2026-11-01, Qwen3.8-Flash/Qoder CLI), the records now
+  include every attempt to review, edit or reformat the documentation — successful,
+  partial or failed — with model/tool, date and outcome. Written into this changelog's
+  conventions, the README record-keeping section, and the `P-08` prompt copy.
 
 ### Build record (owner request: duration + tokens)
 

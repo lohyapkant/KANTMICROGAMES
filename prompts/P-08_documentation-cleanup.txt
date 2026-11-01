@@ -91,3 +91,12 @@ PART 5. RECOVERY PASS — 2026-11-01 (Qwen3.8-Flash, Qoder CLI)
     owner request: Qwen3.8-Flash (Qoder CLI), duration ~15 min, tokens ~30,000 (rough
     estimate; no session telemetry surfaced by the tool).
 * No content deleted; all edits append-only or in-place, following each file's template.
+
+PART 6. STANDING OWNER INSTRUCTION — documentation-attempt history (2026-11-01)
+
+* From this point onwards, every attempt to review, edit or reformat the project
+  documentation — successful, partial or failed — must be recorded in the CHANGELOG,
+  README and prompt copies, with the model/tool, date and outcome. Readers should always
+  be able to see what was attempted and what was actually done. The GPT-OSS 120B failure,
+  the Opus halt and the Qwen3.8-Flash recovery pass in this file are the first entries
+  under this rule.

@@ -24,7 +24,10 @@ tracking matching DuckLine and BooPeek, before refreezing it.
 ## Models used thus far
 
 Per the owner's standing request, the model, effort, duration and token count are
-recorded in the CHANGELOG, the plan, the README and the prompt copies.
+recorded in the CHANGELOG, the plan, the README and the prompt copies. The same applies to
+**documentation review/edit attempts**: successful, partial or failed ones are logged with
+model, date and outcome (e.g. the GPT-OSS 120B failure and the subsequent Opus/Qwen passes
+under build 008).
 
 | Build | Full model name | Effort | Duration | Tokens |
 |---|---|---|---:|---:|
@@ -221,6 +224,9 @@ Build IDs are **`NNN-YYYYMMDD`** — for example `007-20261101`.
 - Every finished build records **model, effort, duration and tokens** in four homes: this
   README, `CHANGELOG.md`, the plan's tool log and the build's prompt copy. The same rule is
   written in a comment beside `APP.fileVersion` in `deploy/index.html` so a future model sees it.
+- **Documentation review/edit attempts are part of the record.** Every attempt to review,
+  edit or reformat the docs — successful, partial or failed — is logged with model/tool,
+  date and outcome, so readers can see what was attempted as well as what was done.
 
 The owner's subjective notes on how each model performed live in `MODELS.md`, as dated,
 append-only observations — never as a permanent ranking.
