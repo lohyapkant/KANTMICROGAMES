@@ -1,9 +1,13 @@
 # Plan: KANTMICROGAME — HTML5 Micro Games (v2 — the one-file pivot)
 
-Today: 2026-10-31. Status: build 20261031-003 done — the shelf and PANDASNACK + BOOPEEK
-now live together in ONE file (the one-file pivot of round 1.5, round 2 shipped BOOPEEK).
-Round 3 (a third module) is next — the DUCKLINE module content 20261031-004 has started
-inside the one-file app.
+Today: 2026-11-01. Status: build **20261031-005** done — the shelf and all three games
+(PANDASNACK, BOOPEEK, DUCKLINE) live together in ONE file. Build 005 is a special
+**pre-Round-4 cleanup**: README/CHANGELOG rewritten, BOOPEEK and DUCKLINE re-skinned with
+their own pixel art, and the three modules audited to be independent. Round 4 (a fourth
+module) is next.
+
+PANDASNACK remains **frozen** at module content 20261031-001 by owner request; BOOPEEK and
+DUCKLINE carry module content 20261031-005.
 
 Supersedes micro-games.md (v1), kept as history: v1 described one file per game in
 separate folders; the owner changed their mind after round 1 — see prompt P-02.
@@ -28,7 +32,7 @@ NOT building any sharing, engine, SDK or embedding support now.
 | 4 | Pixel art | All art drawn as pixels on the stage grid: chubby rounded shapes, big eyes, 2-6 frame squishy animations, pastel palette. Emoji only OUTSIDE the stage. |
 | 5 | Simple controls | `W A S D` always works (plus arrows), `Space` is the shared action button; phones get the shared chunky pads around the stage. |
 | 6 | One concept | One screen, one verb, one rule a child can restate in one sentence. |
-| 7 | Short play | A run lasts about 30 to 120 seconds, with instant restart in one tap or key press, from any state. |
+| 7 | Short play | A run lasts about 20 to 120 seconds, with instant restart in one tap or key press, from any state. |
 
 ## Project layout
 
@@ -56,7 +60,7 @@ uploads/merges changes to GitHub themselves.
 | PART 1 — shared helpers | `paintPixels` (with scale + flip), `paintRoundBlob`, `paintEyes`, the 3×5 pixel font, `paintPixelText` — defined ONCE here, used by mascot, previews and games |
 | PART 2–3 — shelf | Mascot animation, card builder, coming-soon slot |
 | PART 4 — runtime | `GAMES` registry, screen swap, shared keyboard + pad routing, hash routing (`#game=NAME`), stage scaling, the one loop |
-| PART 5 — game modules | One self-contained IIFE per game: its own `SETTINGS`, palette, maps, state — registered into `GAMES` |
+| PART 5 — game modules | One self-contained IIFE per game: its own `SETTINGS`, palette, maps, state — registered into `GAMES`. Private names are prefixed per game (`panda`/`PANDA_*`, `peek`/`boo`/`pip`/`BOO_`/`PIP_*`, `duck`/`mama`/`DUCK_*`); a "READ ME FIRST" boundary block sits at the top of the script and above PART 5 |
 | PART 6 — boot | Stamp version, build shelf, wake mascot, follow hash, start loop |
 
 ### The module contract (how a game plugs in)
@@ -84,8 +88,11 @@ games, feeds events, ticks and paints only the open module, and keeps instant re
 - Difficulty if present is one table of bands unlocked by score/time (BOOPEEK has none —
   the cozy poke game keeps it simple by design).
 - `W A S D` + arrows move; `Space`/action pad is the action (dash in PANDASNACK, poke in
-  BOOPEEK); `R` restarts instantly; stage tap = module's choice (dash in PANDASNACK, poke in
-  BOOPEEK); `ESC` or ⌂ SHELF exits home.
+  BOOPEEK, quack boost in DUCKLINE); `R` restarts instantly; stage tap = the module's
+  action; `ESC` or ⌂ SHELF exits home.
+- Input hygiene: opening a game, leaving to the shelf and window `blur` release every held
+  direction through the module contract, so input never leaks between games. The shared
+  loop catches a failing module instead of dying.
 
 ## Definition of done (per build)
 
@@ -103,6 +110,8 @@ games, feeds events, ticks and paints only the open module, and keeps instant re
 | 20261031-001 | 2026-10-31 | Round 1: PANDASNACK shipped in `games/PANDASNACK/`. DONE. |
 | 20261031-002 | 2026-10-31 | One-file pivot: shelf + game screens + shared helper layer + PANDASNACK folded in as a module; `games/` deleted; hash routing; pads/keys re-routed through the runtime. DONE. |
 | 20261031-003 | 2026-10-31 | Round 2: BOOPEEK shipped as the second module (shy ghost poke) inside the one-file app; CHANGELOG/README/plan/prompt updated; smoke re-run green. DONE. |
+| 20261031-004 | 2026-11-01 | Round 3: DUCKLINE shipped as the third module (duck family). Later superseded for the file build and for BOOPEEK/DUCKLINE art by -005. DONE. |
+| 20261031-005 | 2026-11-01 | Pre-Round-4 cleanup: README/CHANGELOG rewritten; BOOPEEK re-skinned (Pip the lantern mouse + Boo the nightcap ghost, midnight nursery); DUCKLINE re-skinned (mallard family, sunny pond, trail-following ducklings); module independence audit + boundary comments; runtime input hygiene and loop guard; all three games smoke-tested. DONE. |
 
 ## Tool and model log (owner request, 2026-10-31)
 
@@ -115,6 +124,8 @@ the build's prompt copy.
 | 001 | 2026-10-31 | GLM-5.3-Flash Free (OpenCode) |
 | 002 | 2026-10-31 | GLM-5.3-Flash Free (OpenCode) |
 | 003 | 2026-10-31 | GLM-5.3-Flash Free (OpenCode) |
+| 004 | 2026-11-01 | Flint 40B Free (OpenCode) |
+| 005 | 2026-11-01 | DeepSeek V4.1 Flash Free (OpenCode) — ~1 h 55 min active, ≈2.37 M tokens processed |
 
 Rule: every future build truthfully records its model in all four homes.
 
@@ -122,11 +133,11 @@ Rule: every future build truthfully records its model in all four homes.
 
 | Name | One sentence | Verb | Status |
 |---|---|---|---|
-| PANDASNACK | A chubby panda scurries to eat bamboo shoots while wasps drift past. | WASD dodge+dash | in the file (round 1) |
-| DUCKLINE | A mother duck crosses a pond; collected ducklings waddle in a line behind her. | WASD lead-a-chain | round 3 candidate (next) |
+| PANDASNACK | A chubby panda scurries to eat bamboo shoots while wasps drift past. | WASD dodge+dash | in the file (round 1) — frozen at content 20261031-001 |
+| DUCKLINE | A mother duck crosses a pond; collected ducklings waddle in a line behind her. | WASD lead-a-chain | in the file (round 3, re-skinned in -005) |
 | SPROUTUP | A baby sprout climbs a rain of water drops; sun settles, it blooms — short and lovely. | WASD weave | backlog |
 | SLIMEHOP | A bouncing slime must only land on lily pads that float apart over time. | WASD + Space hop timing | backlog |
-| BOOPEEK | A shy ghost peeks from doors; poke it before it hides — cozy not scary. | WASD walk + Space poke | built in round 2 (module content 20261031-003) |
+| BOOPEEK | A shy ghost peeks from doors; poke it before it hides — cozy not scary. | WASD walk + Space poke | in the file (round 2, re-skinned in -005) |
 | SNAILRACE | Race three snails; food pellets speed you up, salt slows — tiny arcade. | WASD steer | backlog |
 | HUGPARADE | Two round friends reunite across a maze that redraws itself every 10 seconds. | WASD only | backlog |
 | CATNAPCATCH | Guard a sleeping cat from falling noise-makers with a paper pillow. | WASD catch | backlog |

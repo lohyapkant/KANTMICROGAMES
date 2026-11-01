@@ -11,7 +11,7 @@
     <style>
         /*
            ============================================================
-           KANTMICROGAME — ONE FILE (since build 20261031-003).
+           KANTMICROGAME — ONE FILE (since build 20261031-002).
            The shelf AND every game live inside this single HTML file:
              * two screens — the shelf, and the currently open game —
                swap inside the page (no navigation, no iframes, no folders)
@@ -390,7 +390,7 @@
     <footer id="meta">
         <span class="v" id="verBox">KANT MICRO</span>
         <br><span class="zzz">one file</span> · runs completely offline · every game lives inside this page ·
-        <span class="zzz">build 20261031-003</span>
+        <span class="zzz">build 20261031-005</span>
     </footer>
 </div>
 
@@ -398,12 +398,41 @@
 "use strict";
 
 /* ==================================================================
+   READ ME FIRST — BOUNDARIES BETWEEN THE SHELF, THE RUNTIME AND THE
+   THREE GAME MODULES (PANDASNACK, BOOPEEK, DUCKLINE).
+
+   The shelf and the runtime are SHARED. The games are NOT shared.
+   Each game is its own IIFE with its own SETTINGS, palette, sprite
+   maps, state and drawing helpers. The only legal handshake between a
+   game and the app is the module contract (see PART 5).
+
+   RULES FOR FUTURE MODELS / LLMs — please respect these:
+   1. Never read or write another game's private names. A name that
+      lives inside one IIFE must never be referenced from another.
+   2. A game may use ONLY: the module contract, the PART 1 pixel
+      helpers (paintPixels / paintRoundBlob / paintEyes / pixel font /
+      paintPixelText), readBest / saveBest, and the shared chrome
+      handles scoreEl / bestEl / msgEl.
+   3. Prefix every private name with the game's own prefix:
+      PANDASNACK -> panda / PAL / PANDA_*, BOOPEEK -> peek / boo / pip /
+      BOO_ / PIP_*, DUCKLINE -> duck / mama / DUCK_*.
+   4. Paint with the ctx passed into paint(ctx). Do not assume the
+      shared stageCtx; that assumption is a PANDASNACK legacy only.
+   5. Do not copy one game's character art into another game. Panda,
+      mouse and mallard shapes must stay visually distinct.
+   6. PANDASNACK (content 20261031-001) is FROZEN by owner request:
+      do not restyle, rebalance or refactor it unless the owner asks.
+   7. Add a new game as a NEW IIFE registered in GAMES; never graft a
+      new game into an existing module.
+   ================================================================== */
+
+/* ==================================================================
    PART 0 — file settings and the shared storage helpers
    ================================================================== */
 
 const APP = {
     name: "KANT MICRO",
-    fileVersion: "20261031-003",       // build number of THIS one-file app
+    fileVersion: "20261031-005",       // build number of THIS one-file app
     savePrefix: "KANTMICROGAME."       // best scores live at prefix + GAMEID + ".best"
 };
 
@@ -621,7 +650,11 @@ const MOON_MAP = [
 const MOON_COLORS = { W: "#F4C764" };
 
 /* PANDASNACK's card preview scene: the panda head, two bamboo shoots,
-   and two wasps drifting around it */
+   and two wasps drifting around it.
+   BOUNDARY NOTE: this preview and the shelf mascot intentionally share the
+   panda sprite maps from PART 2 — they belong to the SHELF layer, not to a
+   game module. BOOPEEK and DUCKLINE define their own preview painters inside
+   their own IIFEs. Do not reuse this panda art in another game. */
 const BAMBOO_PREVIEW = [
     ".DLDDL.",
     "LLLSLLL",
@@ -764,12 +797,18 @@ function openGame(gameId) {
     scoreEl.textContent = "0";
     bestEl.textContent = String(readBest(gameId));
     msgEl.textContent = "";
+    ACTIVE.errorReported = false;
     module2.start();
+    /* INPUT HYGIENE: a direction held while the previous screen closed can
+       otherwise stay "on" inside the newly opened module. Clearing it through
+       the contract keeps every module's private input object honest. */
+    releaseAllDirs(module2);
     fitStage();
     setHash("game=" + gameId);
 }
 
 function openShelf() {
+    releaseAllDirs(ACTIVE.module);
     if (ACTIVE.module) ACTIVE.module.stop();
     ACTIVE.module = null;
     gameScreenEl.hidden = true;
@@ -818,9 +857,19 @@ function frame(now) {
     FRAME.lastTime = now;
     if (dt > 0.25) dt = 0.25;
     if (ACTIVE.module) {
-        ACTIVE.module.update(dt);
-        stageCtx.clearRect(0, 0, stageCanvas.width, stageCanvas.height);
-        ACTIVE.module.paint(stageCtx);
+        try {
+            ACTIVE.module.update(dt);
+            stageCtx.clearRect(0, 0, stageCanvas.width, stageCanvas.height);
+            ACTIVE.module.paint(stageCtx);
+        } catch (error) {
+            /* A broken game must never kill the shared loop, the shelf or the
+               other two games. Report once per open, keep the app alive. */
+            if (!ACTIVE.errorReported) {
+                ACTIVE.errorReported = true;
+                console.error("KANTMICROGAME module error:", error);
+                msgEl.textContent = "the game hiccuped — press R to restart or ESC for the shelf";
+            }
+        }
     }
     window.requestAnimationFrame(frame);
 }
@@ -837,6 +886,20 @@ const DIR_KEYS = {
 function pressPadVisual(dir, on) {
     const el = document.getElementById("p" + dir.charAt(0).toUpperCase() + dir.slice(1));
     if (el) el.classList.toggle("press", !!on);
+}
+
+/* Release every direction on the shared pads. Used when a screen swaps so
+   a held key or thumb never leaks into the next game. */
+function clearPadVisuals() {
+    ["up", "down", "left", "right"].forEach(function (dir) { pressPadVisual(dir, false); });
+}
+
+/* Release every direction inside the open module through the contract.
+   This is the runtime's only legal way to touch a module's private input. */
+function releaseAllDirs(module3) {
+    if (!module3) return;
+    ["up", "down", "left", "right"].forEach(function (dir) { module3.onDir(dir, false); });
+    clearPadVisuals();
 }
 
 window.addEventListener("keydown", function (event) {
@@ -857,6 +920,10 @@ window.addEventListener("keyup", function (event) {
     const dir = DIR_KEYS[event.code];
     if (dir) { ACTIVE.module.onDir(dir, false); pressPadVisual(dir, false); }
 });
+
+/* Losing focus (tab switch, phone call, pad stolen) can swallow the keyup.
+   Release every direction so no character keeps swimming on its own. */
+window.addEventListener("blur", function () { releaseAllDirs(ACTIVE.module); });
 
 /* ---------- shared pads (they serve whichever game is open) ---------- */
 
@@ -910,20 +977,38 @@ wirePad("stage", function () {
 
 /* ==================================================================
    PART 5 — GAME MODULES. One IIFE per game: it owns its own SETTINGS,
-   state and functions inside its own scope, registers itself in GAMES,
-   and talks to the app through the tiny module contract:
+   palette, sprite maps, state and functions inside its own scope,
+   registers itself in GAMES, and talks to the app only through the
+   tiny module contract:
      start / stop / restart / update(dt) / paint(ctx) / onDir / onAction /
-     onStageTap / onAnyKey + name, tagline, concept, actionLabel, hint
+     onStageTap / onAnyKey + name, tagline, concept, actionLabel, hint,
+     versionNumber, previewPaint
+
+   BOUNDARY WARNING (see READ ME FIRST above):
+   * Each IIFE below is a sealed room. Do not reach across rooms.
+   * PANDASNACK is FROZEN — the owner asked that its art and numbers
+     stay exactly as they shipped in content 20261031-001.
+   * BOOPEEK and DUCKLINE are content 20261031-005 and were re-skinned
+     in the pre-Round-4 cleanup; their art is deliberately different
+     from the panda (lantern mouse / nightcap ghost / mallard family).
    ================================================================== */
 
 (function () {
     "use strict";
 
+    /* ------------------------------------------------------------------
+       MODULE: PANDASNACK — content 20261031-001 — FROZEN.
+       Owner request: do not restyle, rebalance or refactor this module.
+       It is the reference game for the shared pixel language, and it
+       intentionally paints through the shared stageCtx (legacy style).
+       New modules must NOT copy that habit: use paint(ctx).
+       ------------------------------------------------------------------ */
+
     /* ---------- PANDASNACK settings (content of round 1, unchanged numbers) ---------- */
 
     const SETTINGS = {
         gameName: "PANDASNACK",
-        versionNumber: "20261031-001",         // the game content build; the file itself is -002
+        versionNumber: "20261031-001",         // the game content build; the file build lives in APP.fileVersion
         stageSize: 100,                        // design pixels; stage is a square
         saveKey: "KANTMICROGAME.PANDASNACK.best",
 
@@ -1526,105 +1611,264 @@ wirePad("stage", function () {
 })();
 
 /* ==================================================================
-   PART 5-B — BOOPEEK module
-   A shy ghost peeks from a cozy door; the visitor walks up and pokes
-   him. Victory at the love target. Small, cozy, one action button.
+   PART 5-B — BOOPEEK module (content 20261031-005)
+   ------------------------------------------------------------------
+   MODULE BOUNDARY — READ BEFORE EDITING
+   * Everything inside this IIFE is PRIVATE to BOOPEEK: SETTINGS, PAL,
+     sprite maps, state, timers and draw helpers.
+   * Do NOT read or write PANDASNACK's or DUCKLINE's names from here,
+     and do NOT let those modules read these names. The only shared
+     things a module may touch are: the module contract (start / stop /
+     restart / update / paint / onDir / onAction / onStageTap /
+     onAnyKey), the pixel helpers in PART 1, readBest / saveBest, and
+     the shared chrome handles scoreEl / bestEl / msgEl.
+   * Every private name in this module is prefixed peek / boo / pip /
+     BOO_ / PIP_ on purpose. Keep that habit when adding art or logic.
+   * Paint with the ctx passed into paint(ctx); never assume stageCtx.
+   * Art direction: Pip the lantern mouse visits Boo, a nightcap ghost,
+     in a midnight nursery. Do not reuse the panda shapes here.
    ================================================================== */
 
 (function () {
     "use strict";
 
+    /* ---------- BOOPEEK settings (private) ---------- */
+
     const SETTINGS = {
         gameName: "BOOPEEK",
-        versionNumber: "20261031-003",
+        versionNumber: "20261031-005",
         stageSize: 100,
         saveKey: "KANTMICROGAME.BOOPEEK.best",
-        playerSettings: { pokeReach: 10, victoryTarget: 10, wiggleSeconds: 0.25, moveSpeedDesignPixelsPerSecond: 22 },
-        worldSettings: { doorX: 89, doorY: 26, doorW: 4, doorH: 6 },
-        roundTimeLimitSeconds: 15,
+
+        playerSettings: {
+            moveSpeedDesignPixelsPerSecond: 30,
+            pokeReach: 20,
+            goalPokes: 10,
+            pokeCooldownSeconds: 0.10,
+            wiggleSeconds: 0.34
+        },
+
+        worldSettings: {
+            startX: 26, startY: 56,
+            ghostHomeX: 78, ghostHomeY: 46
+        },
+
+        roundTimeLimitSeconds: 20,
+
         palette: {
-            booWall: "#F6EFDF", booFloorA: "#E8DFCB", booFloorB: "#DECFB9",
-            booGhostWhite: "#FFFDF6", booGhostDark: "#3B2F27",
-            booStar: "#FFE066", booStarWhite: "#FFFDF4",
-            booTextBrown: "#4A3B32", booTextPink: "#E96AA0",
-            visitorWhite: "#FFFDF6", visitorDark: "#3B2F27", visitorBlush: "#F7A8B8",
-            visitorNose: "#8A6247", visitorShadow: "#7FB36B"
+            booWallA: "#3A3460", booWallB: "#443D6E", booWainscot: "#2C2748",
+            booFloorA: "#6E5273", booFloorB: "#7A5B7E", booFloorLine: "#5B4260",
+            booRug: "#C9628C", booRugLight: "#E88BAE", booRugTrim: "#F6D9C6",
+            booMoon: "#FFE9A8", booStar: "#FFF3C4", booWindow: "#211D3E",
+            booCupboard: "#8B5E3C", booCupboardLight: "#B07A4E",
+            booCupboardDark: "#5E3D26", booCupboardIn: "#241C33",
+            booGold: "#E9C46A", booFrame: "#C9A227",
+            booGhostWhite: "#FBF7FF", booGhostShade: "#DCD4F2", booGhostDark: "#2B2440",
+            booGhostBlush: "#F2A0C0", booGhostTongue: "#F27FA5",
+            booCap: "#6FC7C0", booCapDark: "#4E9E98", booCapPom: "#FFE9A8",
+            pipFur: "#F3D9B1", pipFurShade: "#D9B98A", pipInnerEar: "#F0A6C0",
+            pipScarf: "#E4572E", pipScarfDark: "#B93E1E",
+            pipLantern: "#FFD25E", pipLanternLight: "#FFF3C4", pipHandle: "#8A6247",
+            booSparkle: "#FFE066", booSparkleWhite: "#FFFDF4",
+            booText: "#FFF6E9", booTextPink: "#FFA8C8",
+            booPlant: "#6FBF73", booPlantDark: "#4E8C4A", booPot: "#B07A4E"
         }
     };
 
     const PAL = SETTINGS.palette;
+    const WORLD = SETTINGS.worldSettings;
+    const PLAYER = SETTINGS.playerSettings;
+    const STAGE = SETTINGS.stageSize;
+
+    /* ---------- BOOPEEK private state ---------- */
 
     const STATE = { TITLE: "title", PLAY: "play", OVER: "over" };
-    let state = STATE.TITLE;
-    let stateTime = 0;
-    let score = 0;
-    let storedBest = 0;
-    let winFlag = false;
+    let peekState = STATE.TITLE;
+    let peekStateT = 0;
+    let peekClock = 0;
+    let peekRoundT = 0;
+    let peekScore = 0;
+    let peekBest = 0;
+    let peekWin = false;
 
-    const mover = { x: 44, y: 58, walking: false, leanDir: 0, walkPhase: 0, blinkTimer: 2.0, blinking: false, blinkLeft: 0 };
-    const input = { up: false, down: false, left: false, right: false };
+    const pip = {
+        x: WORLD.startX, y: WORLD.startY,
+        walking: false, leanDir: 1, walkPhase: 0,
+        blinkTimer: 2.0, blinking: false, blinkLeft: 0
+    };
+    const peekInput = { up: false, down: false, left: false, right: false };
 
-    const DOOR = SETTINGS.worldSettings;
-    const PLAYER = SETTINGS.playerSettings;
-
-    let clock = 0;
-    let wiggleT = 0;
-    let pokeT = -1;
-    let roundT = 0;
-    let scoreChanged = false;
-    let sparkles = [];
+    let giggleT = 0;
+    let lastPokeAt = -99;
+    let ghostBlinkTimer = 2.4;
+    let ghostBlinking = false;
+    let ghostBlinkLeft = 0;
+    let peekSparkles = [];
+    let peekRings = [];
     let accumulator = 0;
     const STEP_SECONDS = 1 / 60;
 
-    const SPARK_FRAMES = [
+    /* ---------- BOOPEEK sprite maps (all prefixed, all local) ---------- */
+
+    /* Boo: pom, nightcap, sheet body, blush, tongue, wavy hem. 13 x 17 */
+    const BOO_GHOST = [
+        ".....YYY.....",
+        "....CCCCC....",
+        "...CCCCCCC...",
+        "..CCCCCCCCC..",
+        ".CCCCCCCCCCC.",
+        ".ccccccccccc.",
+        "...WWWWWWW...",
+        "..WWWWWWWWW..",
+        ".WWWWWWWWWWW.",
+        ".WWKKWWWKKWW.",
+        ".WWKKWWWKKWW.",
+        ".WWWWWWWWWWW.",
+        ".WPWWWWWWWPW.",
+        ".WWWWWTTWWWW.",
+        ".WWWWWWWWWWW.",
+        ".WWWWWWWWWWW.",
+        ".WW.WW.WW.WW."
+    ];
+
+    const BOO_COLORS = {
+        Y: PAL.booCapPom, C: PAL.booCap, c: PAL.booCapDark,
+        W: PAL.booGhostWhite, K: PAL.booGhostDark,
+        P: PAL.booGhostBlush, T: PAL.booGhostTongue
+    };
+
+    /* Pip: mouse ears, cream fur, red scarf, big eyes. 13 x 17 */
+    const PIP_MOUSE = [
+        ".EE.......EE.",
+        "EIIE.....EIIE",
+        "EIIE.....EIIE",
+        ".EE.FFFFF.EE.",
+        "...FFFFFFF...",
+        "..FFFFFFFFF..",
+        ".FFKFFFFFKFF.",
+        ".FFFFFFFFFFF.",
+        ".FPFFFFFFFPF.",
+        ".FFFFFKKFFFF.",
+        "..FFFFFFFFF..",
+        "...RRRRRRR...",
+        "..RRRRRRRRR..",
+        "..FFFFFFFFFF.",
+        "..FFFFFFFFFF.",
+        "..FFf....fFF.",
+        "..FF......FF."
+    ];
+
+    const PIP_COLORS = {
+        E: PAL.pipFurShade, I: PAL.pipInnerEar, F: PAL.pipFur, f: PAL.pipFurShade,
+        K: PAL.booGhostDark, P: PAL.pipInnerEar,
+        R: PAL.pipScarf, r: PAL.pipScarfDark
+    };
+
+    /* Pip's little lantern, 5 x 7 */
+    const PIP_LANTERN = [
+        "..H..",
+        ".H.H.",
+        "LLLLL",
+        "LlllL",
+        "LlllL",
+        "LlllL",
+        ".LLL."
+    ];
+
+    const PIP_LANTERN_COLORS = {
+        H: PAL.pipHandle, L: PAL.pipLantern, l: PAL.pipLanternLight
+    };
+
+    const BOO_SPARK_FRAMES = [
         ["..Y..", "..Y..", "YYWYY", "..Y..", "..Y.."],
         [".....", "..Y..", ".YYY.", "..Y..", "....."],
         [".....", ".....", "..Y..", ".....", "....."]
     ];
 
+    /* ---------- BOOPEEK room layout (private constants) ---------- */
+
+    const ROOM = {
+        floorY: 72,
+        window: { x: 8, y: 10, w: 22, h: 28 },
+        cupboard: { x: 72, y: 24, w: 24, h: 48 },
+        frame: { x: 38, y: 13, w: 14, h: 12 },
+        clock: { x: 58, y: 11, w: 9, h: 9 }
+    };
+
+    /* ---------- BOOPEEK run control ---------- */
+
     function startRun() {
-        score = 0;
-        mover.x = 44; mover.y = 58;
-        mover.walking = false; mover.leanDir = 0; mover.walkPhase = 0; mover.blinking = false; mover.blinkLeft = 0;
-        wiggleT = 0;
-        pokeT = -1;
-        roundT = 0;
-        state = STATE.PLAY;
-        stateTime = 0;
+        peekScore = 0;
+        peekRoundT = 0;
+        peekState = STATE.PLAY;
+        peekStateT = 0;
+        pip.x = WORLD.startX;
+        pip.y = WORLD.startY;
+        pip.walking = false;
+        pip.leanDir = 1;
+        pip.walkPhase = 0;
+        pip.blinking = false;
+        pip.blinkLeft = 0;
+        giggleT = 0;
+        lastPokeAt = -99;
+        ghostBlinking = false;
+        ghostBlinkLeft = 0;
+        peekSparkles = [];
+        peekRings = [];
+        accumulator = 0;
         syncChrome(true);
     }
 
     function finishRun(win) {
-        const record = score > storedBest;
-        if (record) { storedBest = score; saveBest(SETTINGS.gameName, score); }
-        winFlag = !!win;
-        state = STATE.OVER;
-        stateTime = 0;
+        const record = peekScore > peekBest;
+        if (record) {
+            peekBest = peekScore;
+            saveBest(SETTINGS.gameName, peekScore);
+        }
+        peekWin = !!win;
+        peekState = STATE.OVER;
+        peekStateT = 0;
         syncChrome(true);
     }
 
-    function triggerPoke() {
-        if (state !== STATE.PLAY) return false;
-        const doorCX = DOOR.doorX + DOOR.doorW / 2;
-        const doorCY = DOOR.doorY + DOOR.doorH / 2;
-        const pandaCX = mover.x + 6.5, pandaCY = mover.y + 7;
-        const inRange = Math.hypot(doorCX - pandaCX, doorCY - pandaCY) <= PLAYER.pokeReach;
-        if (inRange) {
-            score++;
-            scoreChanged = true;
-            syncChrome(true);
-            wiggleT = PLAYER.wiggleSeconds;
-            pokeT = clock;
-            for (let s = 0; s < 6; s++) {
-                sparkles.push({
-                    x: doorCX - 2 + (Math.random() * 8 - 4),
-                    y: doorCY - 2 + (Math.random() * 8 - 4),
-                    t: 0, life: 0.45, colors: { Y: PAL.booStar, W: PAL.booStarWhite }
-                });
-            }
-        }
-        return inRange;
+    /* Boo floats, bobs and does a happy hop after a poke. */
+    function ghostAnchor() {
+        const bob = Math.round(Math.sin(peekClock * 2.1) * 2);
+        const hop = giggleT > 0
+            ? -Math.round(Math.sin((1 - giggleT / PLAYER.wiggleSeconds) * Math.PI) * 2)
+            : 0;
+        return {
+            x: WORLD.ghostHomeX,
+            y: WORLD.ghostHomeY + bob + hop,
+            cx: WORLD.ghostHomeX + 6.5,
+            cy: WORLD.ghostHomeY + bob + hop + 9
+        };
     }
+
+    function triggerPoke() {
+        if (peekState !== STATE.PLAY) return false;
+        if (peekClock - lastPokeAt < PLAYER.pokeCooldownSeconds) return false;
+        const ghost = ghostAnchor();
+        const dx = ghost.cx - (pip.x + 6.5);
+        const dy = ghost.cy - (pip.y + 9);
+        if (Math.hypot(dx, dy) > PLAYER.pokeReach) return false;
+
+        lastPokeAt = peekClock;
+        peekScore++;
+        giggleT = PLAYER.wiggleSeconds;
+        peekRings.push({ x: ghost.cx, y: ghost.cy, t: 0, life: 0.36 });
+        for (let i = 0; i < 6; i++) {
+            peekSparkles.push({
+                x: ghost.cx - 2 + (Math.random() * 8 - 4),
+                y: ghost.cy - 2 + (Math.random() * 8 - 4),
+                t: 0, life: 0.45
+            });
+        }
+        syncChrome(true);
+        return true;
+    }
+
+    /* ---------- BOOPEEK fixed-step update ---------- */
 
     function update(rawDt) {
         let dt = rawDt > 0.25 ? 0.25 : rawDt;
@@ -1639,384 +1883,1218 @@ wirePad("stage", function () {
     }
 
     function stepWorld(dt) {
-        clock += dt;
-        stateTime += dt;
-        updateSparkles(dt);
-        if (state === STATE.TITLE) return;
-        if (state === STATE.OVER) return;
+        peekClock += dt;
+        peekStateT += dt;
+        updatePeekEffects(dt);
+        if (peekState !== STATE.PLAY) return;
 
-        const moveSpeed = SETTINGS.playerSettings.moveSpeedDesignPixelsPerSecond;
-        const mx = (input.right ? 1 : 0) - (input.left ? 1 : 0);
-        const my = (input.down ? 1 : 0) - (input.up ? 1 : 0);
-        mover.walking = (mx !== 0 || my !== 0);
-        if (mover.walking) mover.walkPhase = (mover.walkPhase + dt * 6) % 2; else mover.walkPhase = 0;
-        if (mover.blinkLeft > 0) { mover.blinkLeft -= dt; if (mover.blinkLeft <= 0) mover.blinking = false; }
-        else { mover.blinkTimer -= dt; if (mover.blinkTimer <= 0) { mover.blinking = true; mover.blinkLeft = 0.16; mover.blinkTimer = 2.0 + Math.random() * 2.2; } }
-        let stepSpeed = moveSpeed * (mover.walking ? 1 : 0.4);
-        if (mx !== 0 && my !== 0) stepSpeed *= 0.7071;
-        if (mx !== 0) mover.x += Math.sign(mx) * stepSpeed * dt;
-        if (my !== 0) mover.y += Math.sign(my) * stepSpeed * dt;
-        mover.x = Math.max(2, Math.min(SETTINGS.stageSize - 15, mover.x));
-        mover.y = Math.max(3, Math.min(SETTINGS.stageSize - 19, mover.y));
+        const mx = (peekInput.right ? 1 : 0) - (peekInput.left ? 1 : 0);
+        const my = (peekInput.down ? 1 : 0) - (peekInput.up ? 1 : 0);
+        pip.walking = (mx !== 0 || my !== 0);
+        if (pip.walking) pip.walkPhase = (pip.walkPhase + dt * 7) % 2;
 
-        if (state === STATE.PLAY) {
-            roundT += dt;
-            if (roundT >= SETTINGS.roundTimeLimitSeconds) finishRun(false);
+        let speed = PLAYER.moveSpeedDesignPixelsPerSecond;
+        if (mx !== 0 && my !== 0) speed *= 0.7071;
+        if (mx !== 0) pip.x += Math.sign(mx) * speed * dt;
+        if (my !== 0) pip.y += Math.sign(my) * speed * dt;
+        /* Pip walks the nursery floor: keep him on the boards, never up the
+           wallpaper and never behind the HUD bar. */
+        pip.x = Math.max(2, Math.min(STAGE - 14, pip.x));
+        pip.y = Math.max(54, Math.min(62, pip.y));
+
+        updatePipBlink(dt);
+        updateGhostBlink(dt);
+
+        if (giggleT > 0) giggleT -= dt;
+        peekRoundT += dt;
+        if (peekRoundT >= SETTINGS.roundTimeLimitSeconds) {
+            finishRun(peekScore >= PLAYER.goalPokes);
         }
     }
 
-    function updateSparkles(dt) {
-        for (let i = sparkles.length - 1; i >= 0; i--) {
-            sparkles[i].t += dt;
-            if (sparkles[i].t >= sparkles[i].life) sparkles.splice(i, 1);
-        }
-    }
-
-    const bgCanvas = document.createElement("canvas");
-    bgCanvas.width = SETTINGS.stageSize;
-    bgCanvas.height = SETTINGS.stageSize;
-
-    function paintBackgroundCache() {
-        const ctx = bgCanvas.getContext("2d");
-        for (let by = 0; by < 10; by++) {
-            for (let bx = 0; bx < 10; bx++) {
-                ctx.fillStyle = (bx + by) % 2 === 0 ? PAL.booFloorA : PAL.booFloorB;
-                ctx.fillRect(bx * 10, by * 10, 10, 10);
+    function updatePipBlink(dt) {
+        if (pip.blinkLeft > 0) {
+            pip.blinkLeft -= dt;
+            if (pip.blinkLeft <= 0) pip.blinking = false;
+        } else {
+            pip.blinkTimer -= dt;
+            if (pip.blinkTimer <= 0) {
+                pip.blinking = true;
+                pip.blinkLeft = 0.14;
+                pip.blinkTimer = 2.2 + Math.random() * 2.0;
             }
         }
+    }
+
+    function updateGhostBlink(dt) {
+        if (ghostBlinkLeft > 0) {
+            ghostBlinkLeft -= dt;
+            if (ghostBlinkLeft <= 0) ghostBlinking = false;
+        } else {
+            ghostBlinkTimer -= dt;
+            if (ghostBlinkTimer <= 0) {
+                ghostBlinking = true;
+                ghostBlinkLeft = 0.16;
+                ghostBlinkTimer = 2.6 + Math.random() * 1.8;
+            }
+        }
+    }
+
+    function updatePeekEffects(dt) {
+        for (let i = peekSparkles.length - 1; i >= 0; i--) {
+            peekSparkles[i].t += dt;
+            if (peekSparkles[i].t >= peekSparkles[i].life) peekSparkles.splice(i, 1);
+        }
+        for (let i = peekRings.length - 1; i >= 0; i--) {
+            peekRings[i].t += dt;
+            if (peekRings[i].t >= peekRings[i].life) peekRings.splice(i, 1);
+        }
+    }
+
+    /* ---------- BOOPEEK painting (all on the passed ctx) ---------- */
+
+    function drawRoom(ctx) {
+        /* wallpaper: soft vertical stripes, never a checkerboard */
+        for (let x = 0; x < STAGE; x += 8) {
+            ctx.fillStyle = PAL.booWallA;
+            ctx.fillRect(x, 0, 8, ROOM.floorY);
+            ctx.fillStyle = PAL.booWallB;
+            ctx.fillRect(x + 4, 0, 4, ROOM.floorY);
+        }
+
+        /* wainscot + floorboards */
+        ctx.fillStyle = PAL.booWainscot;
+        ctx.fillRect(0, 66, STAGE, 6);
+        ctx.fillStyle = PAL.booFloorA;
+        ctx.fillRect(0, ROOM.floorY, STAGE, STAGE - ROOM.floorY);
+        for (let y = ROOM.floorY; y < STAGE; y += 7) {
+            ctx.fillStyle = PAL.booFloorB;
+            ctx.fillRect(0, y, STAGE, 3);
+            ctx.fillStyle = PAL.booFloorLine;
+            ctx.fillRect(0, y + 3, STAGE, 1);
+        }
+        ctx.fillStyle = PAL.booFloorLine;
+        for (let i = 0; i < 7; i++) {
+            ctx.fillRect((i * 19 + 5) % STAGE, ROOM.floorY + (i % 4) * 7, 1, 3);
+        }
+
+        /* moonlit window */
+        const W = ROOM.window;
+        ctx.fillStyle = PAL.booCupboardDark;
+        ctx.fillRect(W.x - 2, W.y - 2, W.w + 4, W.h + 4);
+        ctx.fillStyle = PAL.booWindow;
+        ctx.fillRect(W.x, W.y, W.w, W.h);
+        paintRoundBlob(ctx, W.x + 4, W.y + 4, 9, 9, PAL.booMoon);
+        paintRoundBlob(ctx, W.x + 8, W.y + 2, 7, 7, PAL.booWindow);
+        ctx.fillStyle = PAL.booStar;
+        ctx.fillRect(W.x + 15, W.y + 6, 1, 1);
+        ctx.fillRect(W.x + 18, W.y + 15, 1, 1);
+        ctx.fillRect(W.x + 4, W.y + 20, 1, 1);
+        ctx.fillStyle = PAL.booCupboardDark;
+        ctx.fillRect(W.x + 11, W.y, 1, W.h);
+        ctx.fillRect(W.x, W.y + 14, W.w, 1);
+        ctx.fillStyle = PAL.booCupboardLight;
+        ctx.fillRect(W.x - 3, W.y + W.h + 1, W.w + 6, 2);
+
+        /* string lights */
+        for (let x = 0; x <= STAGE; x += 2) {
+            const y = Math.round(3 + Math.sin((x / STAGE) * Math.PI) * 5);
+            ctx.fillStyle = PAL.booWainscot;
+            ctx.fillRect(x, y, 2, 1);
+        }
+        const bulbs = [
+            { x: 10, c: PAL.booGold }, { x: 26, c: PAL.booGhostBlush },
+            { x: 42, c: PAL.booCap }, { x: 58, c: PAL.booGold },
+            { x: 74, c: PAL.booGhostBlush }, { x: 90, c: PAL.booCap }
+        ];
+        for (const bulb of bulbs) {
+            const y = Math.round(3 + Math.sin((bulb.x / STAGE) * Math.PI) * 5);
+            ctx.fillStyle = bulb.c;
+            ctx.fillRect(bulb.x - 1, y + 1, 3, 3);
+            ctx.fillStyle = PAL.booStar;
+            ctx.fillRect(bulb.x, y + 2, 1, 1);
+        }
+
+        /* framed heart */
+        const F = ROOM.frame;
+        ctx.fillStyle = PAL.booFrame;
+        ctx.fillRect(F.x, F.y, F.w, F.h);
+        ctx.fillStyle = PAL.booCupboardIn;
+        ctx.fillRect(F.x + 2, F.y + 2, F.w - 4, F.h - 4);
+        paintPixels(ctx, [".PP.PP.", "PPPPPPP", ".PPPPP.", "..PPP..", "...P..."],
+            { P: PAL.booRugLight }, F.x + 4, F.y + 3);
+
+        /* wall clock */
+        const C = ROOM.clock;
+        paintRoundBlob(ctx, C.x, C.y, 9, 9, PAL.booFrame);
+        paintRoundBlob(ctx, C.x + 1, C.y + 1, 7, 7, PAL.booText);
+        ctx.fillStyle = PAL.booGhostDark;
+        ctx.fillRect(C.x + 4, C.y + 2, 1, 3);
+        ctx.fillRect(C.x + 4, C.y + 4, 3, 1);
+
+        /* open cupboard where Boo lives */
+        const K = ROOM.cupboard;
+        ctx.fillStyle = PAL.booCupboard;
+        ctx.fillRect(K.x, K.y, K.w, K.h);
+        ctx.fillStyle = PAL.booCupboardLight;
+        ctx.fillRect(K.x - 1, K.y - 3, K.w + 2, 3);
+        ctx.fillStyle = PAL.booCupboardDark;
+        ctx.fillRect(K.x + 1, K.y + K.h, 4, 2);
+        ctx.fillRect(K.x + K.w - 5, K.y + K.h, 4, 2);
+        ctx.fillStyle = PAL.booCupboardIn;
+        ctx.fillRect(K.x + 3, K.y + 4, K.w - 6, K.h - 9);
+        ctx.fillStyle = PAL.booCupboardLight;
+        ctx.fillRect(K.x + 2, K.y + 3, 1, K.h - 7);
+        ctx.fillRect(K.x + K.w - 3, K.y + 3, 1, K.h - 7);
+        /* a tiny shelf and jar inside, so the cupboard feels lived in */
+        ctx.fillStyle = PAL.booCupboardDark;
+        ctx.fillRect(K.x + 4, K.y + 34, K.w - 8, 1);
+        ctx.fillStyle = PAL.booCap;
+        ctx.fillRect(K.x + 5, K.y + 31, 3, 3);
+        ctx.fillStyle = PAL.booGold;
+        ctx.fillRect(K.x + 20, K.y + 31, 2, 3);
+        /* knobs */
+        ctx.fillStyle = PAL.booGold;
+        ctx.fillRect(K.x + 2, K.y + 24, 1, 2);
+        ctx.fillRect(K.x + K.w - 3, K.y + 24, 1, 2);
+
+        /* potted plant */
+        ctx.fillStyle = PAL.booPot;
+        ctx.fillRect(4, 66, 8, 6);
+        ctx.fillStyle = PAL.booCupboardDark;
+        ctx.fillRect(3, 65, 10, 2);
+        paintRoundBlob(ctx, 2, 54, 6, 11, PAL.booPlant);
+        paintRoundBlob(ctx, 7, 52, 5, 13, PAL.booPlantDark);
+        paintRoundBlob(ctx, 0, 58, 4, 7, PAL.booPlant);
+
+        /* rug, toy ball and book */
+        paintRoundBlob(ctx, 26, 76, 40, 18, PAL.booRug);
+        paintRoundBlob(ctx, 28, 78, 36, 14, PAL.booRugLight);
+        paintRoundBlob(ctx, 30, 80, 32, 10, PAL.booRug);
+        ctx.fillStyle = PAL.booRugTrim;
+        for (let x = 28; x < 66; x += 3) ctx.fillRect(x, 93, 1, 2);
+        paintRoundBlob(ctx, 17, 84, 6, 6, PAL.booGold);
+        ctx.fillStyle = PAL.booRugLight;
+        ctx.fillRect(19, 85, 2, 4);
+        ctx.fillStyle = PAL.booCupboardLight;
+        ctx.fillRect(67, 86, 9, 3);
+        ctx.fillStyle = PAL.booRugTrim;
+        ctx.fillRect(68, 87, 7, 1);
     }
 
     function drawGhost(ctx) {
-        const wPhase = wiggleT > 0 ? Math.max(0, 1 - (clock - pokeT) / wiggleT) : 0;
-        const wiggle = wiggleT > 0 && wPhase > 0 ? ((Math.floor(clock / 0.05) % 2) * 1) : 0;
-        const hop = (pokeT > 0 && clock - pokeT < 0.12) ? -2 : 0;
-        const gy = Math.round(DOOR.doorY + DOOR.doorH / 2 + wiggle + hop);
-        const cx = DOOR.doorX + DOOR.doorW / 2;
-        paintRoundBlob(ctx, cx - 3, gy - 3, 6, 7, PAL.booGhostWhite);
-        ctx.fillStyle = PAL.booGhostDark;
-        ctx.fillRect(cx - 2, gy, 2, 2);
-        ctx.fillRect(cx, gy, 2, 2);
-        ctx.fillRect(cx - 1, gy + 2, 2, 1);
+        const g = ghostAnchor();
+        /* soft contact shadow, kept right under Boo's hem (not on the floor) */
+        paintRoundBlob(ctx, g.x + 2, g.y + 16, 9, 2, "rgba(20,16,40,0.32)");
+        paintPixels(ctx, BOO_GHOST, BOO_COLORS, g.x, g.y);
+        if (ghostBlinking) {
+            ctx.fillStyle = PAL.booGhostWhite;
+            ctx.fillRect(g.x + 2, g.y + 9, 3, 2);
+            ctx.fillRect(g.x + 8, g.y + 9, 3, 2);
+            ctx.fillStyle = PAL.booGhostDark;
+            ctx.fillRect(g.x + 2, g.y + 9, 3, 1);
+            ctx.fillRect(g.x + 8, g.y + 9, 3, 1);
+        }
+        if (giggleT > 0) {
+            ctx.fillStyle = PAL.booSparkle;
+            ctx.fillRect(g.x - 2, g.y + 4, 1, 1);
+            ctx.fillRect(g.x + 14, g.y + 6, 1, 1);
+        }
     }
 
-    function drawDoor(ctx) {
-        const { doorX, doorY, doorW, doorH } = DOOR;
-        ctx.fillStyle = "#8A6247";
-        ctx.fillRect(doorX - 1, doorY - 1, doorW + 2, doorH + 2);
-        ctx.fillStyle = "#A97C50";
-        ctx.fillRect(doorX, doorY, doorW, doorH);
-        ctx.fillStyle = "#5C4028";
-        ctx.fillRect(doorX + doorW - 1, doorY + 1, 1, 1);
+    function drawPip(ctx) {
+        const px = Math.round(pip.x);
+        const py = Math.round(pip.y + (pip.walking ? (Math.floor(pip.walkPhase) % 2) : 0));
+        const facingLeft = pip.leanDir < 0;
+        /* keep the lantern on-stage even when Pip hugs a wall */
+        let lanternSide = facingLeft ? -1 : 1;
+        if (lanternSide > 0 && px + 18 > STAGE) lanternSide = -1;
+        if (lanternSide < 0 && px - 4 < 0) lanternSide = 1;
+        const lx = lanternSide > 0 ? px + 13 : px - 4;
+        const ly = py + 7;
+
+        ctx.fillStyle = "rgba(20,16,40,0.32)";
+        paintRoundBlob(ctx, px + 2, py + 16, 9, 2, "rgba(20,16,40,0.32)");
+
+        /* warm lantern light pools on the floorboards instead of hazing the wall */
+        const flicker = Math.floor(peekClock * 8) % 2 === 0 ? 0 : 1;
+        paintRoundBlob(ctx, px - 4 - flicker, py + 17, 22 + flicker * 2, 4,
+            "rgba(255,210,100,0.22)");
+        paintRoundBlob(ctx, px - 1, py + 18, 16, 3, "rgba(255,232,160,0.26)");
+
+        paintPixels(ctx, PIP_MOUSE, PIP_COLORS, px, py, facingLeft);
+        paintPixels(ctx, PIP_LANTERN, PIP_LANTERN_COLORS, lx, ly);
+
+        if (pip.blinking) {
+            ctx.fillStyle = PAL.pipFur;
+            ctx.fillRect(px + 3, py + 6, 1, 1);
+            ctx.fillRect(px + 9, py + 6, 1, 1);
+            ctx.fillStyle = PAL.booGhostDark;
+            ctx.fillRect(px + 3, py + 7, 1, 1);
+            ctx.fillRect(px + 9, py + 7, 1, 1);
+        }
+
+        /* whiskers */
+        ctx.fillStyle = PAL.pipFurShade;
+        ctx.fillRect(px + (facingLeft ? 0 : 11), py + 9, 2, 1);
+        ctx.fillRect(px + (facingLeft ? 1 : 10), py + 10, 2, 1);
     }
 
-    function drawSparkle(ctx, sp) {
-        const idx = Math.max(0, Math.min(2, Math.floor((sp.t / sp.life) * 3)));
-        const frame = SPARK_FRAMES[idx];
-        for (let y = 0; y < 5; y++) {
-            for (let x = 0; x < 5; x++) {
-                const ch = frame[y][x];
-                if (ch === " ") continue;
-                ctx.fillStyle = ch === "Y" ? PAL.booStar : PAL.booStarWhite;
-                ctx.fillRect(Math.round(sp.x) + x, Math.round(sp.y) + y, 1, 1);
+    function drawPeekEffects(ctx) {
+        for (const sp of peekSparkles) {
+            const idx = Math.max(0, Math.min(2, Math.floor((sp.t / sp.life) * 3)));
+            const frame = BOO_SPARK_FRAMES[idx];
+            for (let y = 0; y < 5; y++) {
+                for (let x = 0; x < 5; x++) {
+                    const ch = frame[y][x];
+                    if (ch === ".") continue;
+                    ctx.fillStyle = ch === "Y" ? PAL.booSparkle : PAL.booSparkleWhite;
+                    ctx.fillRect(Math.round(sp.x) + x, Math.round(sp.y) + y, 1, 1);
+                }
+            }
+        }
+        for (const ring of peekRings) {
+            const p = ring.t / ring.life;
+            const radius = 2 + p * 7;
+            const alpha = Math.max(0, 1 - p);
+            ctx.fillStyle = "rgba(255,224,102," + alpha.toFixed(2) + ")";
+            const steps = Math.round(radius);
+            for (let i = -steps; i <= steps; i++) {
+                const yy = Math.round(Math.sqrt(Math.max(0, radius * radius - i * i)));
+                ctx.fillRect(Math.round(ring.x) + i, Math.round(ring.y) - yy, 1, 1);
+                ctx.fillRect(Math.round(ring.x) + i, Math.round(ring.y) + yy, 1, 1);
             }
         }
     }
 
-    function paintTitle(ctx) {
-        const cx = 50;
-        paintPixelText(ctx, "BOOPEEK", cx, 14, PAL.booTextBrown, PAL.booWall, 2);
-        paintPixelText(ctx, "POKE THE GHOST!", cx, 30, PAL.booTextPink, PAL.booWall, 1);
-        if (Math.floor(clock / 0.55) % 2 === 0) {
-            paintPixelText(ctx, "PRESS ANY KEY OR TAP", cx, 84, PAL.booTextBrown, null, 1);
+    function drawPeekPlate(ctx, y, h, alpha) {
+        paintRoundBlob(ctx, 3, y, 94, h, "rgba(20,16,40," + (alpha || 0.62) + ")");
+    }
+
+    function paintPeekTitle(ctx) {
+        drawPeekPlate(ctx, 8, 32, 0.80);
+        paintPixelText(ctx, "BOOPEEK", 50, 13, PAL.booTextPink, PAL.booGhostDark, 2);
+        paintPixelText(ctx, "POKE THE SHY GHOST", 50, 29, PAL.booText, null, 1);
+        if (Math.floor(peekClock / 0.55) % 2 === 0) {
+            drawPeekPlate(ctx, 80, 12, 0.72);
+            paintPixelText(ctx, "PRESS ANY KEY OR TAP", 50, 84, PAL.booText, PAL.booGhostDark, 1);
         }
     }
 
-    function paintOver(ctx) {
-        const cx = 50;
-        paintPixelText(ctx, "BOO! YOU FOUND HIS HEART!", cx, 18, PAL.booTextPink, PAL.booWall, 1);
-        paintPixelText(ctx, String(score), cx, 30, PAL.booTextBrown, PAL.booWall, 3);
-        if (Math.floor(clock / 0.55) % 2 === 0) {
-            paintPixelText(ctx, "PRESS ANY KEY OR TAP", cx, 84, PAL.booTextBrown, null, 1);
+    function paintPeekOver(ctx) {
+        drawPeekPlate(ctx, 8, 38, 0.80);
+        paintPixelText(ctx, peekWin ? "BOO! HEART FOUND" : "BOO! TIME IS UP", 50, 12,
+            peekWin ? PAL.booTextPink : PAL.booText, PAL.booGhostDark, 1);
+        paintPixelText(ctx, String(peekScore), 50, 22, PAL.booText, PAL.booGhostDark, 3);
+        paintPixelText(ctx, "BEST " + peekBest, 50, 40, PAL.booText, null, 1);
+        if (Math.floor(peekClock / 0.55) % 2 === 0) {
+            drawPeekPlate(ctx, 80, 12, 0.72);
+            paintPixelText(ctx, "PRESS ANY KEY OR TAP", 50, 84, PAL.booText, PAL.booGhostDark, 1);
         }
     }
 
-    function paintHud(ctx) {
-        paintPixelText(ctx, "BOO LOVE " + score + " OF " + PLAYER.victoryTarget, 50, 88, PAL.booTextPink, null, 1);
-        paintPixelText(ctx, "TIME " + Math.max(0, Math.ceil(SETTINGS.roundTimeLimitSeconds - roundT)), 50, 94, PAL.booGhostWhite, null, 1);
+    function paintPeekHud(ctx) {
+        drawPeekPlate(ctx, 82, 15);
+        paintPixelText(ctx, "BOO LOVE " + peekScore + "  GOAL " + PLAYER.goalPokes,
+            50, 85, PAL.booTextPink, null, 1);
+        paintPixelText(ctx, "TIME " + Math.max(0, Math.ceil(SETTINGS.roundTimeLimitSeconds - peekRoundT)),
+            50, 92, PAL.booText, null, 1);
     }
 
-    function drawVisitor(ctx) {
-        const px = Math.round(mover.x);
-        const py = Math.round(mover.y);
-        const lean = mover.walking ? mover.leanDir : 0;
-        paintRoundBlob(ctx, px + 1, py + 16, 11, 2, PAL.visitorShadow);
-        paintRoundBlob(ctx, px + 1, py + 9, 11, 6, PAL.visitorWhite);
-        paintRoundBlob(ctx, px + lean, py, 13, 9, PAL.visitorWhite);
-        const earY = py - 2;
-        paintRoundBlob(ctx, px + lean, earY, 4, 4, PAL.visitorDark);
-        paintRoundBlob(ctx, px + lean + 9, earY, 4, 4, PAL.visitorDark);
-        paintEyes(ctx, px + lean + 2, py + 3, { patch: PAL.visitorDark, shine: PAL.visitorWhite }, mover.blinking);
-        ctx.fillStyle = PAL.visitorBlush;
-        ctx.fillRect(px + 1, py + 6, 2, 1);
-        ctx.fillRect(px + 10, py + 6, 2, 1);
-        ctx.fillStyle = PAL.visitorNose;
-        ctx.fillRect(px + lean + 6, py + 5, 1, 1);
-        const footA = Math.floor(mover.walkPhase || 0) % 2 === 0;
-        ctx.fillStyle = PAL.visitorDark;
-        ctx.fillRect(px + (footA ? 2 : 3), py + 14, 2, 2);
-        ctx.fillRect(px + (footA ? 9 : 8), py + 14, 2, 2);
+    function paint(ctx) {
+        drawRoom(ctx);
+        drawGhost(ctx);
+        drawPip(ctx);
+        drawPeekEffects(ctx);
+        if (peekState === STATE.TITLE) paintPeekTitle(ctx);
+        else if (peekState === STATE.PLAY) paintPeekHud(ctx);
+        else paintPeekOver(ctx);
     }
 
-    function drawDecor(ctx) {
-        const spots = [[6, 8], [48, 66], [88, 88], [30, 40], [70, 18]];
-        for (const spot of spots) {
-            ctx.fillStyle = PAL.booStar;
-            ctx.fillRect(spot[0], spot[1], 2, 2);
-            ctx.fillStyle = PAL.booGhostWhite;
-            ctx.fillRect(spot[0] + 1, spot[1] + 1, 1, 1);
+    /* ---------- BOOPEEK shelf card preview (private) ---------- */
+
+    function paintBoopeekPreview(ctx) {
+        ctx.fillStyle = PAL.booWallA;
+        ctx.fillRect(0, 0, 200, 96);
+        for (let x = 0; x < 200; x += 16) {
+            ctx.fillStyle = PAL.booWallB;
+            ctx.fillRect(x + 8, 0, 8, 96);
+        }
+        paintRoundBlob(ctx, 160, 8, 16, 16, PAL.booMoon);
+        paintRoundBlob(ctx, 167, 5, 13, 13, PAL.booWallA);
+        ctx.fillStyle = PAL.booStar;
+        ctx.fillRect(140, 14, 2, 2);
+        ctx.fillRect(184, 30, 2, 2);
+        ctx.fillStyle = PAL.booFloorA;
+        ctx.fillRect(0, 78, 200, 18);
+        paintRoundBlob(ctx, 120, 76, 70, 14, PAL.booRug);
+        paintRoundBlob(ctx, 126, 79, 58, 9, PAL.booRugLight);
+        paintPixels(ctx, PIP_MOUSE, PIP_COLORS, 18, 30, false, 3);
+        paintPixels(ctx, PIP_LANTERN, PIP_LANTERN_COLORS, 58, 54, false, 3);
+        paintPixels(ctx, BOO_GHOST, BOO_COLORS, 122, 18, false, 4);
+        paintPixels(ctx, BOO_SPARK_FRAMES[0], { Y: PAL.booSparkle, W: PAL.booSparkleWhite }, 102, 30, false, 3);
+        paintPixels(ctx, BOO_SPARK_FRAMES[1], { Y: PAL.booSparkle, W: PAL.booSparkleWhite }, 176, 56, false, 3);
+    }
+
+    /* ---------- BOOPEEK chrome sync (shared chips, module-owned text) ---------- */
+
+    let peekShownScore = null;
+    let peekShownBest = null;
+    let peekShownMsg = null;
+
+    function syncChrome(force) {
+        const shownBest = Math.max(peekBest, peekScore);
+        if (force || peekShownScore !== peekScore) {
+            peekShownScore = peekScore;
+            scoreEl.textContent = String(peekScore);
+        }
+        if (force || peekShownBest !== shownBest) {
+            peekShownBest = shownBest;
+            bestEl.textContent = String(shownBest);
+        }
+        let msg;
+        if (peekState === STATE.PLAY) msg = "Pip tiptoes in — poke Boo before the clock runs out!";
+        else if (peekState === STATE.TITLE) msg = "press any key or tap to start";
+        else if (peekWin) msg = "boo! you beat the goal — try to beat your score!";
+        else msg = "boo! time ran out — try again!";
+        if (force || peekShownMsg !== msg) {
+            peekShownMsg = msg;
+            msgEl.textContent = msg;
+        }
+    }
+
+    /* ---------- BOOPEEK module contract ---------- */
+
+    function start() {
+        peekBest = readBest(SETTINGS.gameName);
+        peekState = STATE.TITLE;
+        peekStateT = 0;
+        peekScore = 0;
+        peekRoundT = 0;
+        pip.x = WORLD.startX;
+        pip.y = WORLD.startY;
+        pip.walking = false;
+        pip.leanDir = 1;
+        pip.walkPhase = 0;
+        pip.blinking = false;
+        pip.blinkLeft = 0;
+        peekInput.up = false;
+        peekInput.down = false;
+        peekInput.left = false;
+        peekInput.right = false;
+        giggleT = 0;
+        lastPokeAt = -99;
+        peekSparkles = [];
+        peekRings = [];
+        accumulator = 0;
+        syncChrome(true);
+    }
+
+    function stop() { /* nothing to release; the shared loop only ticks the open module */ }
+
+    function restart() { startRun(); }
+
+    function onDir(dir, pressed) {
+        peekInput[dir] = !!pressed;
+        if (pressed) {
+            if (dir === "left") pip.leanDir = -1;
+            else if (dir === "right") pip.leanDir = 1;
+        }
+    }
+
+    function onAction() {
+        if (peekState === STATE.PLAY) triggerPoke();
+        else if (peekStateT > 0.35) startRun();
+    }
+
+    function onStageTap() { onAction(); }
+
+    function onAnyKey() {
+        if (peekState !== STATE.PLAY && peekStateT > 0.35) startRun();
+    }
+
+    GAMES.push({
+        id: SETTINGS.gameName,
+        versionNumber: SETTINGS.versionNumber,
+        name: "Boo Peek",
+        tagline: "poke the nightcap ghost",
+        concept: "Pip the lantern mouse tiptoes through a midnight nursery to poke Boo, a shy nightcap ghost.",
+        actionLabel: "POKE",
+        hint: "desktop: WASD move · SPACE or tap stage to poke · R restart · ESC shelf",
+        previewPaint: paintBoopeekPreview,
+        start, stop, restart,
+        update, paint, onDir, onAction, onStageTap, onAnyKey
+    });
+})();
+
+
+/* ==================================================================
+   PART 5-C — DUCKLINE module (content 20261031-005)
+   ------------------------------------------------------------------
+   MODULE BOUNDARY — READ BEFORE EDITING
+   * Everything inside this IIFE is PRIVATE to DUCKLINE: SETTINGS, PAL,
+     sprite maps, the duck family, the trail and every draw helper.
+   * Do NOT read or write PANDASNACK's or BOOPEEK's names from here,
+     and do NOT let those modules read these names. The only shared
+     things a module may touch are: the module contract (start / stop /
+     restart / update / paint / onDir / onAction / onStageTap /
+     onAnyKey), the pixel helpers in PART 1, readBest / saveBest, and
+     the shared chrome handles scoreEl / bestEl / msgEl.
+   * Every private name in this module is prefixed duck / mama / DUCK_
+     on purpose. Keep that habit when adding art or logic.
+   * Paint with the ctx passed into paint(ctx); never assume stageCtx.
+   * Art direction: a top-down sunny pond, a mallard mother and three
+     hand-drawn ducklings. Do not reuse the panda or the ghost shapes.
+   ================================================================== */
+
+(function () {
+    "use strict";
+
+    /* ---------- DUCKLINE settings (private) ---------- */
+
+    const SETTINGS = {
+        gameName: "DUCKLINE",
+        versionNumber: "20261031-005",
+        stageSize: 100,
+        saveKey: "KANTMICROGAME.DUCKLINE.best",
+
+        playerSettings: {
+            moveSpeedDesignPixelsPerSecond: 26,
+            boostMultiplier: 1.7,
+            boostSeconds: 0.55,
+            boostCooldownSeconds: 2.0,
+            collectRadius: 8,
+            ducklingCount: 3,
+            lineSpacing: 8
+        },
+
+        worldSettings: {
+            startX: 8, startY: 50,
+            shoreX: 84,
+            ducklingSpots: [
+                { x: 30, y: 50, look: "bow" },
+                { x: 52, y: 26, look: "leaf" },
+                { x: 70, y: 68, look: "tuft" }
+            ]
+        },
+
+        roundTimeLimitSeconds: 22,
+
+        palette: {
+            duckWaterDeep: "#5FA8D3", duckWaterMid: "#79C0E6",
+            duckWaterLight: "#A8DDF0", duckFoam: "#E8F7FF",
+            duckGrass: "#8FD06A", duckGrassDark: "#6BB34E", duckSand: "#F2D9A0",
+            duckReed: "#4E8C4A", duckCattail: "#8A5A3B",
+            duckLily: "#6FBF73", duckLilyLight: "#9BDB8E",
+            duckLotus: "#F7A8C8", duckLotusDark: "#E88BAE",
+            duckHead: "#2E8B6F", duckHeadDark: "#24705A",
+            duckBill: "#F2A03D", duckFeet: "#E8873A",
+            duckBody: "#F5EFE2", duckBodyShade: "#DCD2BE",
+            duckChest: "#B07A4E", duckTail: "#8A6247",
+            duckling: "#FFE066", ducklingShade: "#F2C94C", ducklingCheek: "#F7A8B8",
+            duckEye: "#2B2440", duckWhite: "#FFFDF6",
+            duckBow: "#E4572E", duckLeaf: "#6FBF73",
+            duckText: "#FFF6E9", duckTextGold: "#FFE066", duckTextPink: "#FFA8C8",
+            duckFrog: "#7BC96F", duckFrogDark: "#4E8C4A",
+            duckDragon: "#4FA3D9", duckSpark: "#FFF3C4"
+        }
+    };
+
+    const PAL = SETTINGS.palette;
+    const WORLD = SETTINGS.worldSettings;
+    const PLAYER = SETTINGS.playerSettings;
+    const STAGE = SETTINGS.stageSize;
+
+    /* ---------- DUCKLINE private state ---------- */
+
+    const STATE = { TITLE: "title", PLAY: "play", OVER: "over" };
+    let duckState = STATE.TITLE;
+    let duckStateT = 0;
+    let duckClock = 0;
+    let duckRoundT = 0;
+    let duckScore = 0;
+    let duckBest = 0;
+    let duckWin = false;
+    let duckCollected = 0;
+
+    const mama = {
+        x: WORLD.startX, y: WORLD.startY,
+        dir: 1, walking: false, walkPhase: 0
+    };
+    const duckInput = { up: false, down: false, left: false, right: false };
+    let ducklings = [];
+    let duckLine = [];
+    let duckTrail = [];
+    let duckWakes = [];
+    let duckSparkles = [];
+    let duckBoostT = 0;
+    let duckBoostReadyT = 0;
+    let accumulator = 0;
+    const STEP_SECONDS = 1 / 60;
+
+    /* ---------- DUCKLINE sprite maps (all prefixed, all local) ---------- */
+
+    /* Mama mallard, facing right: green head, white ring, cream body,
+       brown chest, orange bill and feet. 16 x 14 */
+    const DUCK_MAMA = [
+        "..........GGGG..",
+        ".........GGGGGG.",
+        "........GGGGGGGG",
+        "........GGKSGGOO",
+        "........GGGGGGOO",
+        ".........WWWWWW.",
+        ".....TCCCCBBBB..",
+        "...TTCCCCCCBBBB.",
+        "..TCCCCCCCCCCCC.",
+        ".CCCCCCCCCCCCC..",
+        "CCCCCCCCCCCCCC..",
+        ".CCCCCCCCCCCC...",
+        "..OO....OO......",
+        "..OO....OO......"
+    ];
+
+    const DUCK_MAMA_COLORS = {
+        G: PAL.duckHead, K: PAL.duckEye, S: PAL.duckWhite, O: PAL.duckBill,
+        W: PAL.duckWhite, T: PAL.duckTail, C: PAL.duckBody, B: PAL.duckChest
+    };
+
+    /* Duckling, facing right: fluffy yellow ball, orange bill, blush. 9 x 9 */
+    const DUCK_BABY = [
+        "..YYYYY..",
+        ".YYYYYYY.",
+        ".YKSYYKY.",
+        ".YYYYYYYO",
+        "YYPYYYYYO",
+        ".YYYYYYY.",
+        "..YYYYY..",
+        "..y...y..",
+        "..O...O.."
+    ];
+
+    const DUCK_BABY_COLORS = {
+        Y: PAL.duckling, y: PAL.ducklingShade, K: PAL.duckEye,
+        S: PAL.duckWhite, O: PAL.duckBill, P: PAL.ducklingCheek
+    };
+
+    /* Pond decorations */
+    const DUCK_LILY = [
+        "..LLLLL..",
+        ".LLLLLLL.",
+        "LLLLLLLLL",
+        ".LLLLLLL.",
+        "..LLLLL.."
+    ];
+    const DUCK_LILY_COLORS = { L: PAL.duckLily };
+
+    const DUCK_LOTUS = [
+        ".P.P.",
+        "PPPPP",
+        ".PPP."
+    ];
+    const DUCK_LOTUS_COLORS = { P: PAL.duckLotus };
+
+    const DUCK_CATTAIL = [
+        ".T.",
+        ".T.",
+        "TTT",
+        "TTT",
+        ".T.",
+        ".T.",
+        ".S.",
+        ".S.",
+        "SS.",
+        ".S.",
+        ".S.",
+        ".S."
+    ];
+    const DUCK_CATTAIL_COLORS = { T: PAL.duckCattail, S: PAL.duckReed };
+
+    const DUCK_FROG = [
+        ".GG.GG.",
+        "GGGGGGG",
+        "GKGGGKG",
+        "GGGGGGG",
+        ".G.G.G."
+    ];
+    const DUCK_FROG_COLORS = { G: PAL.duckFrog, K: PAL.duckEye };
+
+    const DUCK_DRAGONFLY = [
+        "W.....W",
+        ".W...W.",
+        "..BBB..",
+        ".W...W.",
+        "W.....W"
+    ];
+    const DUCK_DRAGONFLY_COLORS = { W: PAL.duckWhite, B: PAL.duckDragon };
+
+    const DUCK_FLOWER = [".P.", "PCP", ".P."];
+    const DUCK_FLOWER_COLORS = { P: PAL.duckLotus, C: PAL.duckTextGold };
+
+    const DUCK_SPARK_FRAMES = [
+        ["..Y..", "..Y..", "YYWYY", "..Y..", "..Y.."],
+        [".....", "..Y..", ".YYY.", "..Y..", "....."],
+        [".....", ".....", "..Y..", ".....", "....."]
+    ];
+
+    /* ---------- DUCKLINE helpers ---------- */
+
+    function makeDucklings() {
+        return WORLD.ducklingSpots.map(function (spot, index) {
+            return {
+                x: spot.x, y: spot.y,
+                homeX: spot.x, homeY: spot.y,
+                look: spot.look,
+                collected: false,
+                follow: 0,
+                dir: 1,
+                bobPhase: index * 1.7,
+                blinkTimer: 1.4 + index * 0.9,
+                blinking: false,
+                blinkLeft: 0
+            };
+        });
+    }
+
+    function seedTrail() {
+        duckTrail = [];
+        for (let i = 0; i < 90; i++) {
+            duckTrail.push({ x: mama.x - i * 1.5, y: mama.y });
+        }
+    }
+
+    function pushTrail(x, y) {
+        const head = duckTrail[0];
+        if (!head || Math.hypot(x - head.x, y - head.y) >= 1.2) {
+            duckTrail.unshift({ x, y });
+            if (duckTrail.length > 140) duckTrail.pop();
+        }
+    }
+
+    /* A point `distance` design-pixels back along the mother's path. */
+    function pointAlongTrail(distance) {
+        let remaining = distance;
+        for (let i = 1; i < duckTrail.length; i++) {
+            const a = duckTrail[i - 1];
+            const b = duckTrail[i];
+            const segment = Math.hypot(a.x - b.x, a.y - b.y);
+            if (segment <= 0.0001) continue;
+            if (remaining <= segment) {
+                const t = remaining / segment;
+                return { x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t };
+            }
+            remaining -= segment;
+        }
+        const tail = duckTrail[duckTrail.length - 1];
+        return tail ? { x: tail.x, y: tail.y } : { x: mama.x, y: mama.y };
+    }
+
+    function startRun() {
+        duckScore = 0;
+        duckCollected = 0;
+        duckRoundT = 0;
+        duckBoostT = 0;
+        duckBoostReadyT = 0;
+        duckState = STATE.PLAY;
+        duckStateT = 0;
+        mama.x = WORLD.startX;
+        mama.y = WORLD.startY;
+        mama.dir = 1;
+        mama.walking = false;
+        mama.walkPhase = 0;
+        ducklings = makeDucklings();
+        duckLine = [];
+        seedTrail();
+        duckWakes = [];
+        duckSparkles = [];
+        duckInput.up = false;
+        duckInput.down = false;
+        duckInput.left = false;
+        duckInput.right = false;
+        accumulator = 0;
+        syncChrome(true);
+    }
+
+    function finishRun(win) {
+        if (win) {
+            duckScore += Math.max(0, Math.ceil(SETTINGS.roundTimeLimitSeconds - duckRoundT));
+        }
+        const record = duckScore > duckBest;
+        if (record) {
+            duckBest = duckScore;
+            saveBest(SETTINGS.gameName, duckScore);
+        }
+        duckWin = !!win;
+        duckState = STATE.OVER;
+        duckStateT = 0;
+        syncChrome(true);
+    }
+
+    function triggerBoost() {
+        if (duckState !== STATE.PLAY) return false;
+        if (duckBoostT > 0 || duckBoostReadyT > 0) return false;
+        duckBoostT = PLAYER.boostSeconds;
+        duckBoostReadyT = PLAYER.boostCooldownSeconds;
+        duckWakes.push({ x: mama.x + 8, y: mama.y + 10, t: 0, life: 0.55, big: true });
+        return true;
+    }
+
+    function collectDuckling(duckling) {
+        duckling.collected = true;
+        duckLine.push(duckling);
+        duckling.follow = duckLine.length;
+        duckCollected++;
+        duckScore = duckCollected * 10;
+        for (let i = 0; i < 5; i++) {
+            duckSparkles.push({
+                x: duckling.x + 1 + (Math.random() * 7 - 3),
+                y: duckling.y + 1 + (Math.random() * 7 - 3),
+                t: 0, life: 0.45
+            });
+        }
+        duckWakes.push({ x: duckling.x + 4, y: duckling.y + 8, t: 0, life: 0.5, big: true });
+        syncChrome(true);
+    }
+
+    /* ---------- DUCKLINE fixed-step update ---------- */
+
+    function update(rawDt) {
+        let dt = rawDt > 0.25 ? 0.25 : rawDt;
+        accumulator += dt;
+        let steps = 0;
+        while (accumulator >= STEP_SECONDS && steps < 4) {
+            stepWorld(STEP_SECONDS);
+            accumulator -= STEP_SECONDS;
+            steps++;
+        }
+        if (steps === 4) accumulator = 0;
+    }
+
+    function stepWorld(dt) {
+        duckClock += dt;
+        duckStateT += dt;
+        updateDuckEffects(dt);
+        if (duckState !== STATE.PLAY) return;
+
+        const mx = (duckInput.right ? 1 : 0) - (duckInput.left ? 1 : 0);
+        const my = (duckInput.down ? 1 : 0) - (duckInput.up ? 1 : 0);
+        mama.walking = (mx !== 0 || my !== 0);
+        if (mx !== 0) mama.dir = mx > 0 ? 1 : -1;
+        if (mama.walking) mama.walkPhase = (mama.walkPhase + dt * 7) % 2;
+
+        let speed = PLAYER.moveSpeedDesignPixelsPerSecond;
+        if (duckBoostT > 0) speed *= PLAYER.boostMultiplier;
+        if (mx !== 0 && my !== 0) speed *= 0.7071;
+        if (mx !== 0) mama.x += Math.sign(mx) * speed * dt;
+        if (my !== 0) mama.y += Math.sign(my) * speed * dt;
+        mama.x = Math.max(2, Math.min(STAGE - 16, mama.x));
+        mama.y = Math.max(3, Math.min(STAGE - 17, mama.y));
+
+        if (duckBoostT > 0) duckBoostT -= dt;
+        if (duckBoostT <= 0 && duckBoostReadyT > 0) duckBoostReadyT -= dt;
+
+        pushTrail(mama.x + 8, mama.y + 7);
+        if (mama.walking && Math.floor(duckClock * 9) % 2 === 0) {
+            duckWakes.push({
+                x: mama.x + (mama.dir > 0 ? 1 : 13),
+                y: mama.y + 10,
+                t: 0, life: 0.7, big: false
+            });
+        }
+
+        /* idle ducklings bob, blink, and join the line when Mama is close */
+        for (const duckling of ducklings) {
+            if (duckling.collected) continue;
+            updateDucklingBlink(duckling, dt);
+            const dx = (duckling.x + 4.5) - (mama.x + 8);
+            const dy = (duckling.y + 4.5) - (mama.y + 7);
+            if (Math.hypot(dx, dy) <= PLAYER.collectRadius) collectDuckling(duckling);
+        }
+
+        /* the collected line follows the trail in a waddling chain */
+        for (const duckling of duckLine) {
+            const slot = pointAlongTrail(duckling.follow * PLAYER.lineSpacing);
+            const beforeX = duckling.x;
+            const ease = Math.min(1, dt * 12);
+            duckling.x += (slot.x - 4.5 - duckling.x) * ease;
+            duckling.y += (slot.y - 4.5 - duckling.y) * ease;
+            if (Math.abs(duckling.x - beforeX) > 0.05) duckling.dir = duckling.x > beforeX ? 1 : -1;
+            updateDucklingBlink(duckling, dt);
+        }
+
+        duckRoundT += dt;
+        if (mama.x + 8 >= WORLD.shoreX) {
+            finishRun(true);
+        } else if (duckRoundT >= SETTINGS.roundTimeLimitSeconds) {
+            finishRun(false);
+        }
+    }
+
+    function updateDucklingBlink(duckling, dt) {
+        if (duckling.blinkLeft > 0) {
+            duckling.blinkLeft -= dt;
+            if (duckling.blinkLeft <= 0) duckling.blinking = false;
+        } else {
+            duckling.blinkTimer -= dt;
+            if (duckling.blinkTimer <= 0) {
+                duckling.blinking = true;
+                duckling.blinkLeft = 0.13;
+                duckling.blinkTimer = 2.0 + Math.random() * 2.4;
+            }
+        }
+    }
+
+    function updateDuckEffects(dt) {
+        for (let i = duckWakes.length - 1; i >= 0; i--) {
+            duckWakes[i].t += dt;
+            if (duckWakes[i].t >= duckWakes[i].life) duckWakes.splice(i, 1);
+        }
+        for (let i = duckSparkles.length - 1; i >= 0; i--) {
+            duckSparkles[i].t += dt;
+            if (duckSparkles[i].t >= duckSparkles[i].life) duckSparkles.splice(i, 1);
+        }
+    }
+
+    /* ---------- DUCKLINE painting (all on the passed ctx) ---------- */
+
+    function drawPond(ctx) {
+        ctx.fillStyle = PAL.duckWaterMid;
+        ctx.fillRect(0, 0, STAGE, STAGE);
+
+        /* drifting horizontal water bands (never a checkerboard) */
+        for (let y = 0; y < STAGE; y += 9) {
+            const offset = Math.floor((duckClock * 7 + y * 2) % 24);
+            ctx.fillStyle = (Math.floor(y / 9) % 2 === 0) ? PAL.duckWaterLight : PAL.duckWaterDeep;
+            for (let x = -24; x < STAGE + 24; x += 24) {
+                ctx.fillRect(x + offset, y + 3, 9, 1);
+            }
+        }
+
+        /* tiny glints */
+        const glints = [[18, 12], [36, 34], [58, 18], [74, 44], [26, 74], [62, 84], [46, 58]];
+        for (let i = 0; i < glints.length; i++) {
+            if ((Math.floor(duckClock * 2.4 + i) % 4) !== 0) continue;
+            ctx.fillStyle = PAL.duckFoam;
+            ctx.fillRect(glints[i][0], glints[i][1], 2, 1);
+        }
+
+        /* lily pads + lotus + one very small frog */
+        const pads = [
+            { x: 20, y: 16, flower: true }, { x: 56, y: 10, flower: false },
+            { x: 38, y: 68, flower: false }, { x: 70, y: 62, flower: true },
+            { x: 24, y: 66, flower: false }, { x: 64, y: 36, flower: false }
+        ];
+        for (const pad of pads) {
+            paintPixels(ctx, DUCK_LILY, DUCK_LILY_COLORS, pad.x, pad.y);
+            ctx.fillStyle = PAL.duckLilyLight;
+            ctx.fillRect(pad.x + 2, pad.y + 2, 4, 1);
+            if (pad.flower) paintPixels(ctx, DUCK_LOTUS, DUCK_LOTUS_COLORS, pad.x + 2, pad.y - 2);
+        }
+        paintPixels(ctx, DUCK_FROG, DUCK_FROG_COLORS, 39, 66);
+
+        /* reeds at the quiet edges */
+        paintPixels(ctx, DUCK_CATTAIL, DUCK_CATTAIL_COLORS, 14, 58);
+        paintPixels(ctx, DUCK_CATTAIL, DUCK_CATTAIL_COLORS, 17, 84);
+        paintPixels(ctx, DUCK_CATTAIL, DUCK_CATTAIL_COLORS, 81, 10);
+        paintPixels(ctx, DUCK_CATTAIL, DUCK_CATTAIL_COLORS, 79, 50);
+
+        /* the two banks */
+        ctx.fillStyle = PAL.duckGrass;
+        ctx.fillRect(0, 0, 12, STAGE);
+        ctx.fillRect(84, 0, 16, STAGE);
+        ctx.fillStyle = PAL.duckSand;
+        ctx.fillRect(10, 0, 2, STAGE);
+        ctx.fillRect(84, 0, 2, STAGE);
+        ctx.fillStyle = PAL.duckGrassDark;
+        for (let y = 3; y < STAGE; y += 9) {
+            ctx.fillRect(3, y, 4, 1);
+            ctx.fillRect(7, y + 4, 3, 1);
+            ctx.fillRect(88, y + 2, 4, 1);
+            ctx.fillRect(94, y + 6, 3, 1);
+        }
+        paintPixels(ctx, DUCK_FLOWER, DUCK_FLOWER_COLORS, 91, 18);
+        paintPixels(ctx, DUCK_FLOWER, DUCK_FLOWER_COLORS, 95, 42);
+        paintPixels(ctx, DUCK_FLOWER, DUCK_FLOWER_COLORS, 89, 70);
+        paintPixels(ctx, DUCK_FLOWER, DUCK_FLOWER_COLORS, 5, 30);
+
+        /* a dragonfly keeps the pond lively */
+        const dx = Math.round(66 + Math.sin(duckClock * 1.4) * 5);
+        const dy = Math.round(6 + Math.sin(duckClock * 2.1) * 2);
+        const wing = Math.floor(duckClock * 12) % 2 === 0 ? DUCK_DRAGONFLY : DUCK_DRAGONFLY.slice(0, 2).concat(
+            ["..BBB.."], ["......."], ["......."]);
+        paintPixels(ctx, wing, DUCK_DRAGONFLY_COLORS, dx, dy);
+    }
+
+    function drawWake(ctx, wake) {
+        const p = wake.t / wake.life;
+        const radius = (wake.big ? 4 : 2) + p * (wake.big ? 9 : 6);
+        const alpha = Math.max(0, 0.55 * (1 - p));
+        ctx.fillStyle = "rgba(232,247,255," + alpha.toFixed(2) + ")";
+        const cx = Math.round(wake.x);
+        const cy = Math.round(wake.y);
+        const steps = Math.max(1, Math.round(radius));
+        for (let i = -steps; i <= steps; i++) {
+            const yy = Math.round(Math.sqrt(Math.max(0, radius * radius - i * i)) * 0.45);
+            ctx.fillRect(cx + i, cy - yy, 1, 1);
+            ctx.fillRect(cx + i, cy + yy, 1, 1);
+        }
+    }
+
+    function drawMama(ctx) {
+        const px = Math.round(mama.x);
+        const py = Math.round(mama.y + (mama.walking ? (Math.floor(mama.walkPhase) % 2) : 0));
+        const flip = mama.dir < 0;
+
+        ctx.fillStyle = "rgba(35,90,120,0.25)";
+        paintRoundBlob(ctx, px + 2, py + 12, 12, 3, "rgba(35,90,120,0.25)");
+        paintPixels(ctx, DUCK_MAMA, DUCK_MAMA_COLORS, px, py, flip);
+
+        /* wing feather detail, mirrored with the body */
+        ctx.fillStyle = PAL.duckBodyShade;
+        const wx = flip ? px + 2 : px + 6;
+        ctx.fillRect(wx, py + 9, 5, 1);
+        ctx.fillRect(wx + 1, py + 10, 3, 1);
+
+        if (duckBoostT > 0) {
+            ctx.fillStyle = PAL.duckFoam;
+            const sx = flip ? px + 15 : px - 4;
+            ctx.fillRect(sx, py + 8, 3, 1);
+            ctx.fillRect(sx + (flip ? -1 : 1), py + 10, 2, 1);
+        }
+    }
+
+    function drawDuckling(ctx, duckling, bob) {
+        const px = Math.round(duckling.x);
+        const py = Math.round(duckling.y + bob);
+        const flip = duckling.dir < 0;
+
+        ctx.fillStyle = "rgba(35,90,120,0.22)";
+        paintRoundBlob(ctx, px + 1, py + 8, 7, 2, "rgba(35,90,120,0.22)");
+        paintPixels(ctx, DUCK_BABY, DUCK_BABY_COLORS, px, py, flip);
+
+        if (duckling.blinking) {
+            ctx.fillStyle = PAL.duckling;
+            ctx.fillRect(px + 2, py + 2, 1, 1);
+            ctx.fillRect(px + 6, py + 2, 1, 1);
+            ctx.fillStyle = PAL.duckEye;
+            ctx.fillRect(px + 2, py + 3, 1, 1);
+            ctx.fillRect(px + 6, py + 3, 1, 1);
+        }
+
+        /* each duckling wears one silly little thing */
+        if (duckling.look === "bow") {
+            ctx.fillStyle = PAL.duckBow;
+            ctx.fillRect(px + 3, py - 2, 3, 1);
+            ctx.fillRect(px + 2, py - 1, 1, 1);
+            ctx.fillRect(px + 6, py - 1, 1, 1);
+        } else if (duckling.look === "leaf") {
+            ctx.fillStyle = PAL.duckLeaf;
+            ctx.fillRect(px + 3, py - 2, 4, 1);
+            ctx.fillRect(px + 4, py - 3, 2, 1);
+        } else {
+            ctx.fillStyle = PAL.ducklingShade;
+            ctx.fillRect(px + 4, py - 2, 1, 1);
+            ctx.fillRect(px + 5, py - 3, 1, 1);
+        }
+    }
+
+    function drawDuckEffects(ctx) {
+        for (const wake of duckWakes) drawWake(ctx, wake);
+        for (const sp of duckSparkles) {
+            const idx = Math.max(0, Math.min(2, Math.floor((sp.t / sp.life) * 3)));
+            const frame = DUCK_SPARK_FRAMES[idx];
+            for (let y = 0; y < 5; y++) {
+                for (let x = 0; x < 5; x++) {
+                    const ch = frame[y][x];
+                    if (ch === ".") continue;
+                    ctx.fillStyle = ch === "Y" ? PAL.duckSpark : PAL.duckWhite;
+                    ctx.fillRect(Math.round(sp.x) + x, Math.round(sp.y) + y, 1, 1);
+                }
+            }
+        }
+    }
+
+    function drawDuckPlate(ctx, y, h) {
+        paintRoundBlob(ctx, 3, y, 94, h, "rgba(24,60,84,0.62)");
+    }
+
+    function paintDuckTitle(ctx) {
+        drawDuckPlate(ctx, 8, 32);
+        paintPixelText(ctx, "DUCKLINE", 50, 13, PAL.duckTextGold, PAL.duckEye, 2);
+        paintPixelText(ctx, "LEAD THE FAMILY HOME", 50, 29, PAL.duckText, null, 1);
+        if (Math.floor(duckClock / 0.55) % 2 === 0) {
+            drawDuckPlate(ctx, 80, 12);
+            paintPixelText(ctx, "PRESS ANY KEY OR TAP", 50, 84, PAL.duckText, PAL.duckEye, 1);
+        }
+    }
+
+    function paintDuckOver(ctx) {
+        drawDuckPlate(ctx, 8, 38);
+        paintPixelText(ctx, duckWin ? "FAMILY COMPLETE" : "QUACK TIME IS UP", 50, 12,
+            duckWin ? PAL.duckTextGold : PAL.duckText, PAL.duckEye, 1);
+        paintPixelText(ctx, String(duckScore), 50, 22, PAL.duckText, PAL.duckEye, 3);
+        paintPixelText(ctx, "DUCKLINGS " + duckCollected + " OF " + PLAYER.ducklingCount, 50, 40,
+            PAL.duckTextPink, null, 1);
+        if (Math.floor(duckClock / 0.55) % 2 === 0) {
+            drawDuckPlate(ctx, 80, 12);
+            paintPixelText(ctx, "PRESS ANY KEY OR TAP", 50, 84, PAL.duckText, PAL.duckEye, 1);
+        }
+    }
+
+    function paintDuckHud(ctx) {
+        drawDuckPlate(ctx, 82, 15);
+        paintPixelText(ctx, "DUCKLINGS " + duckCollected + " OF " + PLAYER.ducklingCount,
+            50, 85, PAL.duckTextGold, null, 1);
+        paintPixelText(ctx, "TIME " + Math.max(0, Math.ceil(SETTINGS.roundTimeLimitSeconds - duckRoundT)),
+            50, 92, PAL.duckText, null, 1);
+
+        /* boost feather gauge, top-left over open water */
+        const ready = duckBoostT > 0 || duckBoostReadyT <= 0;
+        ctx.fillStyle = ready ? PAL.duckTextGold : "rgba(255,246,233,0.35)";
+        ctx.fillRect(16, 4, 1, 3);
+        ctx.fillRect(17, 3, 1, 5);
+        ctx.fillRect(18, 4, 1, 3);
+        paintRoundBlob(ctx, 21, 4, 14, 3, "rgba(24,60,84,0.55)");
+        const fraction = duckBoostT > 0 ? 1 : (duckBoostReadyT <= 0 ? 1
+            : 1 - duckBoostReadyT / PLAYER.boostCooldownSeconds);
+        const fill = Math.round(12 * fraction);
+        if (fill > 0) {
+            ctx.fillStyle = ready ? PAL.duckTextGold : PAL.duckWaterLight;
+            ctx.fillRect(22, 5, fill, 1);
         }
     }
 
     function paint(ctx) {
-        const bgctx = ctx;
-        for (let by = 0; by < 10; by++) {
-            for (let bx = 0; bx < 10; bx++) {
-                bgctx.fillStyle = (bx + by) % 2 === 0 ? PAL.booFloorA : PAL.booFloorB;
-                bgctx.fillRect(bx * 10, by * 10, 10, 10);
-            }
+        drawPond(ctx);
+        for (const duckling of ducklings) {
+            if (duckling.collected) continue;
+            const bob = Math.round(Math.sin(duckClock * 2.4 + duckling.bobPhase) * 1);
+            drawDuckling(ctx, duckling, bob);
         }
-        drawDoor(ctx);
-        drawVisitor(ctx);
-        drawGhost(ctx);
-        for (const sp of sparkles) drawSparkle(ctx, sp);
-        drawDecor(ctx);
-        if (state === STATE.TITLE) paintTitle(ctx);
-        else if (state === STATE.PLAY) paintHud(ctx);
-        else paintOver(ctx);
+        drawDuckEffects(ctx);
+        drawMama(ctx);
+        for (const duckling of duckLine) drawDuckling(ctx, duckling, 0);
+        if (duckState === STATE.TITLE) paintDuckTitle(ctx);
+        else if (duckState === STATE.PLAY) paintDuckHud(ctx);
+        else paintDuckOver(ctx);
     }
 
-    let scScore = null, scBest = null, scMsg = null;
+    /* ---------- DUCKLINE shelf card preview (private) ---------- */
+
+    function paintDuckLinePreview(ctx) {
+        ctx.fillStyle = PAL.duckWaterMid;
+        ctx.fillRect(0, 0, 200, 96);
+        for (let y = 0; y < 96; y += 18) {
+            ctx.fillStyle = PAL.duckWaterLight;
+            for (let x = -20; x < 220; x += 40) ctx.fillRect(x + (y % 36), y + 6, 18, 2);
+        }
+        ctx.fillStyle = PAL.duckGrass;
+        ctx.fillRect(0, 0, 16, 96);
+        ctx.fillRect(184, 0, 16, 96);
+        paintPixels(ctx, DUCK_LILY, DUCK_LILY_COLORS, 24, 66, false, 3);
+        paintPixels(ctx, DUCK_LOTUS, DUCK_LOTUS_COLORS, 30, 60, false, 3);
+        paintPixels(ctx, DUCK_BABY, DUCK_BABY_COLORS, 36, 62, false, 3);
+        paintPixels(ctx, DUCK_BABY, DUCK_BABY_COLORS, 64, 50, false, 3);
+        paintPixels(ctx, DUCK_BABY, DUCK_BABY_COLORS, 92, 40, false, 3);
+        paintPixels(ctx, DUCK_MAMA, DUCK_MAMA_COLORS, 120, 22, false, 3);
+        paintPixels(ctx, DUCK_DRAGONFLY, DUCK_DRAGONFLY_COLORS, 60, 12, false, 3);
+        paintPixels(ctx, DUCK_FLOWER, DUCK_FLOWER_COLORS, 188, 20, false, 3);
+        paintPixels(ctx, DUCK_FLOWER, DUCK_FLOWER_COLORS, 190, 70, false, 3);
+    }
+
+    /* ---------- DUCKLINE chrome sync (shared chips, module-owned text) ---------- */
+
+    let duckShownScore = null;
+    let duckShownBest = null;
+    let duckShownMsg = null;
+
     function syncChrome(force) {
-        const shownBest = Math.max(storedBest, score);
-        if (force || scScore !== score) { scScore = score; scoreEl.textContent = String(score); }
-        if (force || scBest !== shownBest) { scBest = shownBest; bestEl.textContent = String(shownBest); }
+        const shownBest = Math.max(duckBest, duckScore);
+        if (force || duckShownScore !== duckScore) {
+            duckShownScore = duckScore;
+            scoreEl.textContent = String(duckScore);
+        }
+        if (force || duckShownBest !== shownBest) {
+            duckShownBest = shownBest;
+            bestEl.textContent = String(shownBest);
+        }
         let msg;
-        if (state === STATE.PLAY) msg = "BOO peeks from the door — poke him!";
-        else if (state === STATE.TITLE) msg = "press any key or tap to start";
-        else msg = winFlag ? "you found his heart!" : "boo! time ran out!";
-        if (force || scMsg !== msg) { scMsg = msg; msgEl.textContent = msg; }
-    }
-
-    function start() { storedBest = readBest(SETTINGS.gameName); state = STATE.TITLE; stateTime = 0; score = 0; mover.x = 44; mover.y = 58; wiggleT = 0; pokeT = -1; roundT = 0; accumulator = 0; paintBackgroundCache(); syncChrome(true); }
-    function stop() { }
-    function restart() { startRun(); }
-    function onDir(dir, pressed) {
-        input[dir] = !!pressed;
-        if (pressed) {
-            if (dir === "left") mover.leanDir = -1;
-            else if (dir === "right") mover.leanDir = 1;
+        if (duckState === STATE.PLAY) msg = "swim with WASD — collect the ducklings and reach the far bank!";
+        else if (duckState === STATE.TITLE) msg = "press any key or tap to start";
+        else if (duckWin && duckCollected >= PLAYER.ducklingCount) msg = "the whole family made it home!";
+        else if (duckWin) msg = "some ducklings made it home — try for all three!";
+        else msg = "quack! the sun set — try again!";
+        if (force || duckShownMsg !== msg) {
+            duckShownMsg = msg;
+            msgEl.textContent = msg;
         }
     }
-    function onAction() { if (state === STATE.PLAY) { const hit = triggerPoke(); if (hit && score >= PLAYER.victoryTarget) finishRun(true); } else if (stateTime > 0.35) { startRun(); } }
-    function onStageTap() { onAction(); }
-    function onAnyKey() { if (state !== STATE.PLAY && stateTime > 0.35) startRun(); }
 
-    function paintBoopeekPreview(ctx) {
-        for (let by = 0; by < 10; by++) { for (let bx = 0; bx < 10; bx++) { ctx.fillStyle = (bx + by) % 2 === 0 ? PAL.booFloorA : PAL.booFloorB; ctx.fillRect(bx * 10, by * 10, 10, 10); } }
-        drawDoor(ctx);
-        drawVisitor(ctx);
-        drawGhost(ctx);
+    /* ---------- DUCKLINE module contract ---------- */
+
+    function start() {
+        duckBest = readBest(SETTINGS.gameName);
+        duckState = STATE.TITLE;
+        duckStateT = 0;
+        duckScore = 0;
+        duckCollected = 0;
+        duckRoundT = 0;
+        duckBoostT = 0;
+        duckBoostReadyT = 0;
+        mama.x = WORLD.startX;
+        mama.y = WORLD.startY;
+        mama.dir = 1;
+        mama.walking = false;
+        mama.walkPhase = 0;
+        ducklings = makeDucklings();
+        duckLine = [];
+        seedTrail();
+        duckWakes = [];
+        duckSparkles = [];
+        duckInput.up = false;
+        duckInput.down = false;
+        duckInput.left = false;
+        duckInput.right = false;
+        accumulator = 0;
+        syncChrome(true);
+    }
+
+    function stop() { /* nothing to release; the shared loop only ticks the open module */ }
+
+    function restart() { startRun(); }
+
+    function onDir(dir, pressed) {
+        duckInput[dir] = !!pressed;
+        if (pressed) {
+            if (dir === "left") mama.dir = -1;
+            else if (dir === "right") mama.dir = 1;
+        }
+    }
+
+    function onAction() {
+        if (duckState === STATE.PLAY) triggerBoost();
+        else if (duckStateT > 0.35) startRun();
+    }
+
+    function onStageTap() { onAction(); }
+
+    function onAnyKey() {
+        if (duckState !== STATE.PLAY && duckStateT > 0.35) startRun();
     }
 
     GAMES.push({
-        id: SETTINGS.gameName, versionNumber: SETTINGS.versionNumber, name: "Boo Peek",
-        tagline: "BOO the shy ghost peeks — poke him!",
-        concept: "Boo the shy ghost peeks out of a cozy door; tap to poke him.",
-        actionLabel: "POKE", hint: "WASD move · SPACE/POKE pad to poke · R restart · ESC shelf",
-        previewPaint: paintBoopeekPreview, start, stop, restart, update, paint, onDir, onAction, onStageTap, onAnyKey
+        id: SETTINGS.gameName,
+        versionNumber: SETTINGS.versionNumber,
+        name: "Duck Line",
+        tagline: "lead the ducklings home",
+        concept: "Mama mallard swims across a sunny pond, collecting three ducklings into a waddling line before she reaches the far bank.",
+        actionLabel: "GO",
+        hint: "desktop: WASD swim · SPACE or tap stage to quack-boost · R restart · ESC shelf",
+        previewPaint: paintDuckLinePreview,
+        start, stop, restart,
+        update, paint, onDir, onAction, onStageTap, onAnyKey
     });
 })();
 
-    /* =================================================================
-       PART 5-C — DUCKLINE module (Round 3 — build 20261031-004)
-       A mother duck crosses the pond with her ducklings in a waddling
-       line behind her; WASD leads the chain. The round is timer-limited.
-       ================================================================== */
-
-    (function () {
-        "use strict";
-
-        const SETTINGS = {
-            gameName: "DUCKLINE",
-            versionNumber: "20261031-004",
-            stageSize: 100,
-            saveKey: "KANTMICROGAME.DUCKLINE.best",
-            playerSettings: { moveSpeedDesignPixelsPerSecond: 16, victoryTarget: 3, roundTimeLimitSeconds: 12 },
-            worldSettings: { startX: 6, startY: 52, shoreX: 88, ducklingCount: 3 },
-            palette: {
-                pondA: "#A9CCE8", pondB: "#9CC0DE", water: "#7FB6DD",
-                duckWhite: "#FFFDF6", duckYellow: "#F7D774", duckBrown: "#8A6247", duckEgg: "#FFE066"
-            }
-        };
-
-        const PAL = SETTINGS.palette;
-
-        const STATE = { TITLE: "title", PLAY: "play", OVER: "over" };
-        let state = STATE.TITLE;
-        let stateTime = 0;
-        let score = 0;
-        let storedBest = 0;
-        let winFlag = false;
-
-        const mover = { x: 6, y: 52, walking: false, leanDir: 0, walkPhase: 0, blinkTimer: 2.0, blinking: false, blinkLeft: 0 };
-        const ducklings = [0, 1, 2].map(function (i) { return { x: 10 + (i * 4), y: 56, offset: i }; });
-        const input = { up: false, down: false, left: false, right: false };
-
-        let clock = 0;
-        let roundT = 0;
-        let sparkles = [];
-        let accumulator = 0;
-        const STEP_SECONDS = 1 / 60;
-
-        function startRun() {
-            score = 0;
-            mover.x = SETTINGS.worldSettings.startX; mover.y = SETTINGS.worldSettings.startY;
-            mover.walking = false; mover.leanDir = 0; mover.walkPhase = 0; mover.blinking = false; mover.blinkLeft = 0;
-            ducklings.forEach(function (d) { d.x = 10 + (d.offset * 4); d.y = SETTINGS.worldSettings.startY + 4; });
-            roundT = 0;
-            state = STATE.PLAY;
-            stateTime = 0;
-            syncChrome(true);
-        }
-
-        function finishRun(win) {
-            const record = score > storedBest;
-            if (record) { storedBest = score; saveBest(SETTINGS.gameName, score); }
-            winFlag = !!win;
-            state = STATE.OVER;
-            stateTime = 0;
-            syncChrome(true);
-        }
-
-        function update(rawDt) {
-            let dt = rawDt > 0.25 ? 0.25 : rawDt;
-            accumulator += dt;
-            let steps = 0;
-            while (accumulator >= STEP_SECONDS && steps < 4) { stepWorld(STEP_SECONDS); accumulator -= STEP_SECONDS; steps++; }
-            if (steps === 4) accumulator = 0;
-        }
-
-        function stepWorld(dt) {
-            clock += dt;
-            stateTime += dt;
-            updateSparkles(dt);
-            if (state === STATE.TITLE) return;
-            if (state === STATE.OVER) return;
-            const moveSpeed = SETTINGS.playerSettings.moveSpeedDesignPixelsPerSecond;
-            const mx = (input.right ? 1 : 0) - (input.left ? 1 : 0);
-            const my = (input.down ? 1 : 0) - (input.up ? 1 : 0);
-            mover.walking = (mx !== 0 || my !== 0);
-            let stepSpeed = moveSpeed * (mover.walking ? 1 : 0.4);
-            if (mx !== 0 && my !== 0) stepSpeed *= 0.7071;
-            if (mx !== 0) mover.x += Math.sign(mx) * stepSpeed * dt;
-            if (my !== 0) mover.y += Math.sign(my) * stepSpeed * dt;
-            mover.x = Math.max(2, Math.min(SETTINGS.stageSize - 12, mover.x));
-            mover.y = Math.max(3, Math.min(SETTINGS.stageSize - 16, mover.y));
-            ducklings.forEach(function (d) {
-                const dx = mover.x - d.x;
-                const dy = mover.y - d.y;
-                const dist = Math.hypot(dx, dy) || 0.0001;
-                const stepLen = 9;
-                if (dist > stepLen) { d.x += (dx / dist) * stepLen; d.y += (dy / dist) * stepLen; }
-                d.x = Math.max(2, Math.min(SETTINGS.stageSize - 12, d.x));
-                d.y = Math.max(3, Math.min(SETTINGS.stageSize - 16, d.y));
-            });
-            if (state === STATE.PLAY) {
-                roundT += dt;
-                if (roundT >= SETTINGS.playerSettings.roundTimeLimitSeconds) finishRun(false);
-                if (mover.x >= SETTINGS.worldSettings.shoreX) finishRun(true);
-            }
-        }
-
-        function updateSparkles(dt) { for (let i = sparkles.length - 1; i >= 0; i--) { sparkles[i].t += dt; if (sparkles[i].t >= sparkles[i].life) sparkles.splice(i, 1); } }
-
-        function drawDuck(ctx) {
-            const px = Math.round(mover.x); const py = Math.round(mover.y);
-            paintRoundBlob(ctx, px + 1, py + 16, 11, 2, PAL.duckBrown);
-            paintRoundBlob(ctx, px + 1, py + 9, 11, 6, PAL.duckYellow);
-            paintRoundBlob(ctx, px, py, 13, 9, PAL.duckYellow);
-            paintRoundBlob(ctx, px, py - 2, 4, 4, PAL.duckBrown);
-            paintRoundBlob(ctx, px + 9, py - 2, 4, 4, PAL.duckBrown);
-            paintEyes(ctx, px + 2, py + 3, { patch: PAL.duckBrown, shine: PAL.duckWhite }, false);
-            ctx.fillStyle = PAL.duckBrown;
-            ctx.fillRect(px + 6, py + 6, 1, 1);
-            const footA = Math.floor(mover.walkPhase || 0) % 2 === 0;
-            ctx.fillStyle = PAL.duckBrown;
-            ctx.fillRect(px + (footA ? 2 : 3), py + 14, 2, 2);
-            ctx.fillRect(px + (footA ? 9 : 8), py + 14, 2, 2);
-        }
-
-        function drawDuckling(ctx, d) {
-            const px = Math.round(d.x); const py = Math.round(d.y);
-            paintRoundBlob(ctx, px + 1, py + 12, 8, 2, PAL.duckBrown);
-            paintRoundBlob(ctx, px + 1, py + 7, 8, 5, PAL.duckBrown);
-            paintRoundBlob(ctx, px, py, 9, 7, PAL.duckBrown);
-            paintRoundBlob(ctx, px, py - 2, 3, 3, PAL.duckBrown);
-            paintRoundBlob(ctx, px + 6, py - 2, 3, 3, PAL.duckBrown);
-            paintEyes(ctx, px + 1, py + 2, { patch: PAL.duckBrown, shine: PAL.duckYellow }, false);
-            ctx.fillStyle = PAL.duckEgg;
-            ctx.fillRect(px + 4, py + 3, 1, 1);
-            ctx.fillStyle = PAL.duckBrown;
-            ctx.fillRect(px + 3, py + 6, 3, 1);
-        }
-
-        function paintTitle(ctx) { paintPixelText(ctx, "DUCKLINE", 50, 14, PAL.duckBrown, PAL.pondA, 2); paintPixelText(ctx, "DUCK THE FAMILY!", 50, 30, PAL.duckYellow, PAL.pondA, 1); if (Math.floor(clock / 0.55) % 2 === 0) paintPixelText(ctx, "PRESS ANY KEY OR TAP", 50, 84, PAL.duckBrown, null, 1); }
-        function paintOver(ctx) { paintPixelText(ctx, "QUACK! YOU GOT THE FAMILY ACROSS!", 50, 16, PAL.duckYellow, PAL.pondA, 1); paintPixelText(ctx, String(score), 50, 32, PAL.duckBrown, PAL.pondA, 3); if (Math.floor(clock / 0.55) % 2 === 0) paintPixelText(ctx, "PRESS ANY KEY OR TAP", 50, 84, PAL.duckBrown, null, 1); }
-        function paintHud(ctx) { paintPixelText(ctx, "DUCK LOVE " + score + " OF " + SETTINGS.playerSettings.victoryTarget, 50, 88, PAL.duckEgg, null, 1); paintPixelText(ctx, "TIME " + Math.max(0, Math.ceil(SETTINGS.playerSettings.roundTimeLimitSeconds - roundT)), 50, 94, PAL.duckWhite, null, 1); }
-
-        function paint(ctx) {
-            for (let by = 0; by < 10; by++) { for (let bx = 0; bx < 10; bx++) { ctx.fillStyle = (bx + by) % 2 === 0 ? PAL.pondA : PAL.pondB; ctx.fillRect(bx * 10, by * 10, 10, 10); } }
-            drawDuck(ctx);
-            ducklings.forEach(function (d) { drawDuckling(ctx, d); });
-            if (state === STATE.TITLE) paintTitle(ctx);
-            else if (state === STATE.PLAY) paintHud(ctx);
-            else paintOver(ctx);
-        }
-
-        function paintDuckLinePreview(ctx) {
-            for (let by = 0; by < 10; by++) { for (let bx = 0; bx < 10; bx++) { ctx.fillStyle = (bx + by) % 2 === 0 ? PAL.pondA : PAL.pondB; ctx.fillRect(bx * 10, by * 10, 10, 10); } }
-            drawDuck(ctx);
-            ducklings.forEach(function (d) { drawDuckling(ctx, d); });
-        }
-
-        let scScore = null, scBest = null, scMsg = null;
-        function syncChrome(force) {
-            const shownBest = Math.max(storedBest, score);
-            if (force || scScore !== score) { scScore = score; scoreEl.textContent = String(score); }
-            if (force || scBest !== shownBest) { scBest = shownBest; bestEl.textContent = String(shownBest); }
-            let msg;
-            if (state === STATE.PLAY) msg = "QUACK! lead the family across!";
-            else if (state === STATE.TITLE) msg = "press any key or tap to start";
-            else msg = winFlag ? "you got the family across!" : "quack! time ran out!";
-            if (force || scMsg !== msg) { scMsg = msg; msgEl.textContent = msg; }
-        }
-
-        function start() { storedBest = readBest(SETTINGS.gameName); state = STATE.TITLE; stateTime = 0; score = 0; mover.x = SETTINGS.worldSettings.startX; mover.y = SETTINGS.worldSettings.startY; roundT = 0; syncChrome(true); }
-        function stop() { }
-        function restart() { startRun(); }
-        function onDir(dir, pressed) { input[dir] = !!pressed; if (pressed) { if (dir === "left") mover.leanDir = -1; else if (dir === "right") mover.leanDir = 1; } }
-        function onAction() { if (state === STATE.PLAY) { if (mover.x >= SETTINGS.worldSettings.shoreX) finishRun(true); } else if (stateTime > 0.35) { startRun(); } }
-        function onStageTap() { onAction(); }
-        function onAnyKey() { if (state !== STATE.PLAY && stateTime > 0.35) startRun(); }
-
-        GAMES.push({
-            id: SETTINGS.gameName, versionNumber: SETTINGS.versionNumber, name: "Duck Line",
-            tagline: "DUCK the family across!",
-            concept: "A mother duck crosses the pond with her ducklings in a waddling line behind her.",
-            actionLabel: "GO", hint: "WASD move · GO pad to lead · R restart · ESC shelf",
-            previewPaint: paintDuckLinePreview, start, stop, restart, update, paint, onDir, onAction, onStageTap, onAnyKey
-        });
-    })();
 
 /* ==================================================================
    PART 6 — boot: stamp the version, build the shelf, wake the mascot,
