@@ -45,12 +45,14 @@ records one dated experience and may not reflect future versions.
 
 ## 2026-11-01 — Gemini 3.8 Flash (Antigravity)
 
-Builds observed: `006-20261101`.
+Builds observed: `006-20261101`, `007-20261101`.
 
 The owner's notes: picked up cleanly from DeepSeek after token limits were reached.
 Successfully cleaned up code, fixed the BooPeek lower floor traversal bug allowing Pip
 to walk down through the translucent score panel to poke Boo, and refactored and reviewed
-the README and CHANGELOG records cleanly.
+the README and CHANGELOG records cleanly. In Round 4 (`007-20261101`), delivered SPROUTUP
+with cute pixel art, frozen BOOPEEK, and added live in-stage HUD score tracking to
+PANDASNACK before refreezing it, strictly adhering to all architectural and documentation rules.
 
 ---
 

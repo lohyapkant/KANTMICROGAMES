@@ -6,18 +6,18 @@ minute, smile. Fully offline by double-clicking; the rest of the folder is only
 documentation. (After round 1 the owner pivoted from one-folder-per-game to this
 one-file architecture — see `plans/micro-games-v2.md`.)
 
-**Current state:** build `006-20261101` — the one-file app with **three** playable games:
+**Current state:** build `007-20261101` — the one-file app with **four** playable games:
 
 | Game | Module content | One-line pitch |
 |---|---|---|
-| **PANDASNACK** | `001-20261031` (frozen) | Munch bamboo, dodge wasps, keep three hearts. |
-| **BOOPEEK** | `006-20261101` | Pip the lantern mouse chases Boo, a peek-a-boo nightcap ghost. |
+| **PANDASNACK** | `007-20261101` (frozen) | Munch bamboo, dodge wasps, keep three hearts. (Live score HUD added in 007). |
+| **BOOPEEK** | `006-20261101` (frozen) | Pip the lantern mouse chases Boo, a peek-a-boo nightcap ghost. |
 | **DUCKLINE** | `005-20261101` (frozen) | Mama mallard gathers three ducklings and leads them home. |
+| **SPROUTUP** | `007-20261101` | Sproutlet the baby seedling gathers raindrops to bloom in the sun. |
 
-Build `006-20261101` is the **final special-review build before Round 4**: it introduces
-the new build numbering, corrects the model record for builds 000 and 001, freezes
-DUCKLINE, and turns BOOPEEK into a real peek-a-boo chase. PANDASNACK and DUCKLINE were
-deliberately left untouched.
+Build `007-20261101` is the **Round 4 build**: it introduces SPROUTUP (the fourth micro
+game), freezes BOOPEEK, and temporarily unfroze PANDASNACK to add in-stage live score HUD
+tracking matching DuckLine and BooPeek, before refreezing it.
 
 ## Models used thus far
 
@@ -32,7 +32,8 @@ recorded in the CHANGELOG, the plan, the README and the prompt copies.
 | 003-20261031 | GLM-5.3 Flash Free (OpenCode) | Round 2 — BOOPEEK module + wiring + docs + verification | ~45 min | ~27,000 |
 | 004-20261101 | Flint 40B Free (OpenCode) | Round 3 — DUCKLINE module add | ~25 min | ~20,000 |
 | 005-20261101 | DeepSeek V4.1 Flash Free (OpenCode) | Pre-Round-4 cleanup: docs rewrite, BOOPEEK + DUCKLINE re-skin, module independence, runtime hardening | ~1 h 55 min active | ~2.37 M processed |
-| **006-20261101** | **DeepSeek V4.1 Flash Free (OpenCode) / Gemini 3.8 Flash (Antigravity)** | **Final special review: numbering, 000/001 record fix, DuckLine freeze, BooPeek variability, MODELS.md** | **~30 min** | **~1.5 M processed** |
+| 006-20261101 | DeepSeek V4.1 Flash Free (OpenCode) / Gemini 3.8 Flash (Antigravity) | Final special review: numbering, 000/001 record fix, DuckLine freeze, BooPeek variability, MODELS.md | ~30 min | ~1.5 M processed |
+| **007-20261101** | **Gemini 3.8 Flash (Antigravity)** | **Round 4 — SPROUTUP module, BOOPEEK freeze, PANDASNACK in-stage live HUD score tracking & refreeze** | **~25 min** | **~48,000** |
 
 Notes on the `-005` record: duration is **active** working time measured across the two
 sittings that produced this build (2026-10-31 21:06 → 2026-11-01 09:18, owner breaks
@@ -47,13 +48,13 @@ Gemini 3.8 Flash (Antigravity). Tokens and duration reflect the combined session
 
 ## How to open and play
 
-- Double-click `index.html`. The shelf shows one card per game — PANDASNACK, BOOPEEK and
-  DUCKLINE — with a code-drawn pixel preview, a concept line and the best score, plus a
-  dashed COMING SOON slot.
+- Double-click `index.html`. The shelf shows one card per game — PANDASNACK, BOOPEEK,
+  DUCKLINE and SPROUTUP — with a code-drawn pixel preview, a concept line and the best score,
+  plus a dashed COMING SOON slot.
 - Click a card to open the game in the same page (no navigation, no iframes, no folders).
   `ESC` or the ⌂ SHELF button always brings you home.
-- Tip: open `index.html#game=PANDASNACK`, `#game=BOOPEEK` or `#game=DUCKLINE` to land
-  straight in a game.
+- Tip: open `index.html#game=PANDASNACK`, `#game=BOOPEEK`, `#game=DUCKLINE` or `#game=SPROUTUP`
+  to land straight in a game.
 - Every game: `W A S D` (+ arrow keys) move, `SPACE` or the action pad acts, `R` restarts
   instantly. On phones/tablets the four pads + action pad + RESTART appear automatically.
   A stage tap acts too.
@@ -63,6 +64,7 @@ Gemini 3.8 Flash (Antigravity). Tokens and duration reflect the combined session
 | PANDASNACK | scurry | **DASH** (0.7 s at 1.75×, 2.2 s cooldown) | survive: 3 stings end the run |
 | BOOPEEK | tiptoe | **POKE** (reach 20 px, 0.1 s cooldown) | poke Boo while he peeks — 10 in 20 s, then beat your score |
 | DUCKLINE | swim | **GO** = quack boost (0.55 s at 1.7×, 2 s cooldown) | collect 3 ducklings and reach the far bank in 22 s |
+| SPROUTUP | weave | **REACH** = leap burst (0.5 s at 1.85×, 2 s cooldown) | gather 15 drops in 24 s to bloom into a sunny flower |
 
 ## The seven rules
 
@@ -78,7 +80,7 @@ Gemini 3.8 Flash (Antigravity). Tokens and duration reflect the combined session
 
 ## The micro games
 
-### PANDASNACK — module content `001-20261031` (frozen)
+### PANDASNACK — module content `007-20261101` (frozen)
 
 A chubby panda scurries on a tiny pastel meadow, munching the two bamboo shoots that are
 always around (+1 each) while wasps drift past. A sting costs one heart with 1.6 s of shy
@@ -88,12 +90,13 @@ through a four-band table (1→4 wasps, speeds 13→26).
 **Pixel art:** blob-composed panda with lean-and-waddle walking, random blinks, a happy
 munch mouth, dust puffs, droopy ears and a rolling tear at game over; two-frame flapping
 wasps; swaying bamboo; sparkle bursts; dot-flowers on a cached two-tone checker meadow;
-shared 3×5 pixel font for all stage text.
+shared 3×5 pixel font for all stage text; lower translucent score plate added in `007`
+matching DuckLine and BooPeek.
 
-> **Frozen by owner request.** This module's art, numbers and behaviour must not change
-> in later rounds unless the owner asks. See the code banner in PART 5.
+> **Frozen by owner request.** Temporarily unfrozen in build 007 to add live in-stage HUD
+> score tracking matching the other micro games, then refrozen. See code banner in PART 5.
 
-### BOOPEEK — module content `006-20261101`
+### BOOPEEK — module content `006-20261101` (frozen)
 
 **Pip the lantern mouse** plays **peek-a-boo** with **Boo**, a shy ghost in a candy-teal
 nightcap, in a midnight nursery. Boo hides around five spots — the cupboard mouth, the
@@ -110,6 +113,9 @@ lived-in cupboard where Boo hides (with a jar on a tiny shelf), a potted plant, 
 rug, a toy ball and a book. Pip is a cream mouse with pink inner ears, a red scarf and a
 glowing lantern that pools warm light on the floor; Boo is a soft white sheet ghost with a
 nightcap, pom, blush and a little tongue, who bobs, blinks and hops when poked.
+
+> **Frozen by owner request (build 007).** BooPeek's five-spot peek-a-boo chase and art
+> are approved as-is; do not restyle, rebalance or refactor without owner permission.
 
 ### DUCKLINE — module content `005-20261101` (frozen)
 
@@ -128,6 +134,22 @@ the GO boost shows a foam splash and a feather gauge top-left.
 > **Frozen by owner request (build 006).** The pond and the duck family are approved as-is;
 > do not restyle, rebalance or refactor this module unless the owner asks. See the code
 > banner in PART 5.
+
+### SPROUTUP — module content `007-20261101`
+
+**Sproutlet the seedling** weaves through a gentle summer rain shower to drink dewdrops
+and catch warm sunbeams before the sun settles. Gather **15 drops in 24 s** to bloom!
+Clear dewdrops grant +1 drop with water ripples and splash glints; glowing golden sun
+drops grant +3 drops with radiant star bursts; fuzzy thistle burrs drift in the breeze
+and cause a brief flinch and -1 drop. Press REACH (`SPACE` / action pad / tap) for a swift
+upward leaf flutter leap (1.85× speed, 2 s cooldown).
+
+**Pixel art:** Sproutlet is a chubby mint seedling with two fluttery leaves that bob and
+sway, rosy pink cheeks, blinking dark eyes with white shine, and root feet that step as it
+walks; sips drops with an open mouth; when goal is reached or round won, Sproutlet blooms
+with a glorious 5-petal rose-pink flower crown with a golden center while warm morning
+sunbeams stream down from above. Garden has a soft pastel sky with diagonal rain glints,
+mossy loam ground, and tiny clover sprouts.
 
 ## How the one file is organized
 
@@ -162,19 +184,22 @@ future model or LLM meets them before touching anything.
 | 004 | done | Round 3 DUCKLINE: third module (duck family) added. |
 | 005 | done | Pre-Round-4 cleanup: docs, unique BOOPEEK/DUCKLINE art, module independence, runtime hardening. |
 | 006 | done | Final special review: new `NNN-YYYYMMDD` build numbering, model-record correction for 000/001, DUCKLINE frozen, BOOPEEK turned into a peek-a-boo chase. |
-| 007+ | next | Round 4 — a fourth module from the backlog (SPROUTUP, SLIMEHOP, SNAILRACE, HUGPARADE or CATNAPCATCH, at the owner's pick). |
+| 007 | done | Round 4: SPROUTUP module added (summer rain, Sproutlet, dewdrops, sunbeams, victory bloom), BOOPEEK frozen, PANDASNACK in-stage live HUD score tracking added & refrozen. |
+| 008+ | next | Round 5 — a fifth module from the backlog (SLIMEHOP, SNAILRACE, HUGPARADE or CATNAPCATCH, at the owner's pick). |
 
 ## Build numbering and record-keeping
 
-Build IDs are **`NNN-YYYYMMDD`** — for example `006-20261101`.
+Build IDs are **`NNN-YYYYMMDD`** — for example `007-20261101`.
 
 - `NNN` is the project-wide build number, zero-padded and only ever increasing. It is the
   identity of the build; never reuse a number.
 - `YYYYMMDD` is the date the build was **finished** (2026-11-01 → `20261101`). It is a
   human hint, so alphabetical order still equals build order.
 - A game's `versionNumber` is the build in which that game's content last changed. A pure
-  refactor that leaves a game's art and numbers identical does **not** bump it — PANDASNACK
-  is still `001-20261031`, DUCKLINE is frozen at `005-20261101`.
+  refactor that leaves a game's art and numbers identical does **not** bump it — DUCKLINE
+  is frozen at `005-20261101`, BOOPEEK is frozen at `006-20261101`, PANDASNACK was updated
+  for live HUD score tracking and refrozen at `007-20261101`, and SPROUTUP is live at
+  `007-20261101`.
 - Build 006 renamed the earlier builds from the old `YYYYMMDD-NNN` form to this one
   (`20261031-003` → `003-20261031`), and corrected builds 004/005 to their true finish
   date (2026-11-01).
@@ -193,7 +218,7 @@ run on the owner's repo (they upload/merge to GitHub themselves).
 
 ## Files in this folder
 
-- `index.html` — the one-file app (shelf + three games), build `006-20261101`.
+- `index.html` — the one-file app (shelf + four games), build `007-20261101`.
 - `README.md` — this guide.
 - `CHANGELOG.md` — build history with tool/model per build.
 - `MODELS.md` — dated owner observations on model strengths (append-only).
@@ -207,6 +232,7 @@ run on the owner's repo (they upload/merge to GitHub themselves).
   - `P-04_round_3_duckline.txt`
   - `P-05_cleanup_before-round-4.txt`
   - `P-06_final-special-review.txt`
+  - `P-07_round-4_sproutup.txt`
 
 ## Prompt history
 
@@ -224,16 +250,17 @@ the same way our other KANT projects keep them.
   scaling only; `image-rendering: pixelated`; refit on resize and rotation. Fixed-step
   update (60 steps/second) with capped catch-up, inside each module. All stage colors
   referenced by name from the game's own palette. `W A S D` + arrows move; `Space`/action
-  pad is the action (dash / poke / quack boost); `R` restarts instantly; stage tap = the
+  pad is the action (dash / poke / quack boost / reach); `R` restarts instantly; stage tap = the
   module's action; `ESC` or ⌂ SHELF exits home.
 - **Input hygiene (`-005`):** opening a game, returning to the shelf and losing window
   focus all release every held direction through the module contract, so a key or thumb
   held during a screen swap cannot leak into the next game. The shared loop wraps each
   module tick in `try/catch`, so one broken game can never kill the shelf or the others.
-- **PANDASNACK settings and difficulty (module content `001-20261031`, frozen):** stroll
+- **PANDASNACK settings and difficulty (module content `007-20261101`, frozen):** stroll
   speed, dash strength/length and cooldown, starting hearts, protection seconds, sting
-  radii, bamboo counts and spacing, wasp spawn curve and bands unlocked by score.
-- **BOOPEEK settings (module content `006-20261101`):** move speed 30 px/s, poke reach
+  radii, bamboo counts and spacing, wasp spawn curve and bands unlocked by score; lower
+  translucent score plate added in `007` with live score tracking.
+- **BOOPEEK settings (module content `006-20261101`, frozen):** move speed 30 px/s, poke reach
   20 px, goal 10 pokes, poke cooldown 0.10 s, round 20 s, start `(26,56)`, Pip walks the
   floor band y 50–81 (freely traversing through the lower translucent score plate to reach
   Boo anywhere on the floor). Peek-a-boo: five hiding spots `(78,46) (16,40) (5,52) (40,72)
@@ -243,3 +270,6 @@ the same way our other KANT projects keep them.
 - **DUCKLINE settings (module content `005-20261101`, frozen):** swim speed 26 px/s, boost 1.7×
   for 0.55 s with a 2 s cooldown, collect radius 8 px, 3 ducklings, line spacing 8 px,
   round 22 s, start `(8,50)`, shore at x 84; save key `KANTMICROGAME.DUCKLINE.best`.
+- **SPROUTUP settings (module content `007-20261101`):** move speed 30 px/s, reach 1.85×
+  for 0.50 s with a 2.0 s cooldown, collect radius 8 px, burr hit radius 6 px, goal 15
+  drops, round 24 s, start `(44,60)`, soil at y 74; save key `KANTMICROGAME.SPROUTUP.best`.

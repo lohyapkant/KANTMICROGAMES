@@ -15,6 +15,61 @@
   this changelog, and never as a permanent ranking.
 - The same rules are repeated beside `APP.fileVersion` in `index.html`.
 
+## 007-20261101 — 2026-11-01 (Round 4 — SPROUTUP)
+
+Built from prompt: P-07 (Round 4 — SPROUTUP module, BOOPEEK freeze, PANDASNACK in-stage live HUD score tracking & refreeze)  
+Tool and model: **Gemini 3.8 Flash (Antigravity)** — recorded per the owner's standing request in changelog, README, plan and prompt copies  
+Games in the one file: 4 (PANDASNACK module content 007-20261101 **frozen**, BOOPEEK module content 006-20261101 **frozen**, DUCKLINE module content 005-20261101 **frozen**, SPROUTUP module content 007-20261101; file build 007-20261101)
+
+### Added — SPROUTUP module (Round 4, content 007-20261101)
+
+- Added the fourth micro game to the one-file app: **SPROUTUP** — Sproutlet the baby
+  seedling weaves through a gentle summer rain shower to drink dewdrops and reach for warm
+  sunbeams.
+- Gameplay loop: 24 s round timer, target 15 drops. Clear dewdrops grant +1 drop with water
+  splash ripples; rare golden sun drops grant +3 drops with radiant star sparkles; drifting
+  fuzzy thistle burrs cause a brief flinch and -1 drop. Reaching 15 unlocks the Bloom ready
+  state with golden sunbeams; winning crowns Sproutlet with a glorious 5-petal rose-pink flower
+  crown.
+- Verb: **WASD weave** + **REACH** action button (`SPACE`, REACH pad, or stage tap) for a swift
+  upward leaf flutter burst (1.85× move speed for 0.5 s, 2.0 s cooldown).
+- Pixel art: Sproutlet chubby seedling with waddling walk, sway frames, blinking eyes with white
+  highlights, sip mouth, water and sun drop sprites, thistle burr, blooming flower crown, soft
+  pastel misty sky with diagonal rain glints, and mossy loam soil base.
+- Shelf card added: 200×96 code-drawn preview scene with Sproutlet leaping toward a golden sun
+  drop and sparkling dewdrops over a mossy soil base.
+- Scoring: persistent best score saved to `KANTMICROGAME.SPROUTUP.best`.
+
+### Changed — PANDASNACK live score HUD & refreeze (content 007-20261101)
+
+- Temporarily unfroze PANDASNACK by owner request to add in-stage live score HUD tracking
+  inside the 100×100 stage:
+  - Added bottom translucent plate `drawPandaPlate(stageCtx, 82, 15)` matching DuckLine and
+    BooPeek.
+  - Draws `"BAMBOO "` + score and `"BEST "` + storedBest during play in 3×5 pixel font.
+- Refroze PANDASNACK at content version `007-20261101` with an updated code banner in PART 5.
+
+### Changed — BOOPEEK frozen (content 006-20261101)
+
+- Marked BOOPEEK as **FROZEN** at content version `006-20261101` per owner request, with a
+  FROZEN banner in the code and matching documentation.
+
+### Documentation
+
+- Updated README (four-game table, models table through 007, SPROUTUP manual section,
+  technical appendix), plan v2 (status, deliverable table, backlog row), and created
+  `prompts/P-07_round-4_sproutup.txt`.
+
+### Verification
+
+- Script syntax OK; all sprite maps verified for row length consistency; zero external URLs.
+- Headless smoke run green for all four games (1500 frames of full gameplay simulation).
+
+### Build record (owner request: duration + tokens)
+
+- Duration taken to build this round: **~25 min**.
+- Tokens used in this round: **~48,000**.
+
 ## 006-20261101 — 2026-11-01 (final special review)
 
 Built from prompt: P-06 (final special review before Round 4 — numbering, record correction, DuckLine freeze, BooPeek variability)  

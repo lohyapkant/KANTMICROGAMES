@@ -390,7 +390,7 @@
     <footer id="meta">
         <span class="v" id="verBox">KANT MICRO</span>
         <br><span class="zzz">one file</span> · runs completely offline · every game lives inside this page ·
-        <span class="zzz">build 006-20261101</span>
+        <span class="zzz">build 007-20261101</span>
     </footer>
 </div>
 
@@ -399,7 +399,7 @@
 
 /* ==================================================================
    READ ME FIRST — BOUNDARIES BETWEEN THE SHELF, THE RUNTIME AND THE
-   THREE GAME MODULES (PANDASNACK, BOOPEEK, DUCKLINE).
+   FOUR GAME MODULES (PANDASNACK, BOOPEEK, DUCKLINE, SPROUTUP).
 
    The shelf and the runtime are SHARED. The games are NOT shared.
    Each game is its own IIFE with its own SETTINGS, palette, sprite
@@ -415,13 +415,15 @@
       handles scoreEl / bestEl / msgEl.
    3. Prefix every private name with the game's own prefix:
       PANDASNACK -> panda / PAL / PANDA_*, BOOPEEK -> peek / boo / pip /
-      BOO_ / PIP_*, DUCKLINE -> duck / mama / DUCK_*.
+      BOO_ / PIP_*, DUCKLINE -> duck / mama / DUCK_*, SPROUTUP -> sprout /
+      SPROUT_*.
    4. Paint with the ctx passed into paint(ctx). Do not assume the
       shared stageCtx; that assumption is a PANDASNACK legacy only.
    5. Do not copy one game's character art into another game. Panda,
-      mouse and mallard shapes must stay visually distinct.
-   6. PANDASNACK (content 001-20261031) is FROZEN by owner request:
-      do not restyle, rebalance or refactor it unless the owner asks.
+      mouse, mallard and seedling shapes must stay visually distinct.
+   6. PANDASNACK (content 007-20261101), BOOPEEK (content 006-20261101),
+      and DUCKLINE (content 005-20261101) are FROZEN by owner request:
+      do not restyle, rebalance or refactor them unless the owner asks.
    7. Add a new game as a NEW IIFE registered in GAMES; never graft a
       new game into an existing module.
    ================================================================== */
@@ -442,8 +444,9 @@
 
    A game module carries its own versionNumber: the build whose content
    it last changed in. A refactor that keeps a game's art and numbers
-   identical does NOT change that game's number (PANDASNACK has stayed
-   001-20261031 since round 1; DUCKLINE is frozen at 005-20261101).
+   identical does NOT change that game's number (DUCKLINE is frozen at
+   005-20261101; BOOPEEK is frozen at 006-20261101; PANDASNACK content
+   was updated in 007-20261101 for in-stage score HUD and refrozen).
 
    Every finished build records, in FOUR homes — this file's header or
    comments, README.md, CHANGELOG.md and the build's prompt copy — plus
@@ -459,7 +462,7 @@
 
 const APP = {
     name: "KANT MICRO",
-    fileVersion: "006-20261101",       // build number of THIS one-file app
+    fileVersion: "007-20261101",       // build number of THIS one-file app
     savePrefix: "KANTMICROGAME."       // best scores live at prefix + GAMEID + ".best"
 };
 
@@ -1013,31 +1016,33 @@ wirePad("stage", function () {
 
    BOUNDARY WARNING (see READ ME FIRST above):
    * Each IIFE below is a sealed room. Do not reach across rooms.
-   * PANDASNACK is FROZEN at content 001-20261031 — the owner asked
-     that its art and numbers stay exactly as they shipped.
-   * DUCKLINE is FROZEN at content 005-20261101 — the owner approved
-     its pond and family art as-is; do not restyle it.
-   * BOOPEEK is the live one (content 006-20261101): Pip the lantern
-     mouse chases Boo, a nightcap ghost, around five hiding spots.
-     Keep its art clearly different from the panda and the ducks.
+   * PANDASNACK is FROZEN at content 007-20261101 — the owner temporarily
+     unfroze it in build 007 to add live in-stage HUD score tracking
+     (matching BooPeek and DuckLine), then refroze it.
+   * BOOPEEK is FROZEN at content 006-20261101 — Pip the lantern mouse and
+     Boo the nightcap ghost peek-a-boo chase is approved as-is.
+   * DUCKLINE is FROZEN at content 005-20261101 — the pond and mallard family
+     art is approved as-is.
+   * SPROUTUP is the live one (content 007-20261101): Sproutlet the baby
+     seedling weaves through raindrops to bloom when the sun settles.
    ================================================================== */
 
 (function () {
     "use strict";
 
     /* ------------------------------------------------------------------
-       MODULE: PANDASNACK — content 001-20261031 — FROZEN.
-       Owner request: do not restyle, rebalance or refactor this module.
-       It is the reference game for the shared pixel language, and it
-       intentionally paints through the shared stageCtx (legacy style).
-       New modules must NOT copy that habit: use paint(ctx).
+       MODULE: PANDASNACK — content 007-20261101 — FROZEN.
+       Owner request: temporarily unfrozen in build 007 to add live
+       in-stage HUD score tracking matching DuckLine and BooPeek, then
+       refrozen. It is the reference game for the shared pixel language,
+       and it intentionally paints through the shared stageCtx.
        ------------------------------------------------------------------ */
 
-    /* ---------- PANDASNACK settings (content of round 1, unchanged numbers) ---------- */
+    /* ---------- PANDASNACK settings ---------- */
 
     const SETTINGS = {
         gameName: "PANDASNACK",
-        versionNumber: "001-20261031",         // the game content build; the file build lives in APP.fileVersion
+        versionNumber: "007-20261101",         // game content build (updated in 007 for live HUD)
         stageSize: 100,                        // design pixels; stage is a square
         saveKey: "KANTMICROGAME.PANDASNACK.best",
 
@@ -1514,6 +1519,10 @@ wirePad("stage", function () {
         }
     }
 
+    function drawPandaPlate(ctx, y, h, alpha) {
+        paintRoundBlob(ctx, 3, y, 94, h, "rgba(59,47,39," + (alpha || 0.58) + ")");
+    }
+
     function paintHUD() {
         for (let i = 0; i < SETTINGS.playerSettings.startingHearts; i++) {
             paintPixels(stageCtx, HEART_MAP, i < hearts ? HEART_FULL : HEART_EMPTY, 3 + i * 8, 2);
@@ -1527,6 +1536,11 @@ wirePad("stage", function () {
             stageCtx.fillRect(4, 12, fillW, 1);
         }
         paintPixels(stageCtx, LEAF_MAP, { G: fraction >= 1 ? PAL.dashLeaf : PAL.dashLeafField }, 19, 10);
+
+        /* In-stage live score tracking matching DuckLine and BooPeek */
+        drawPandaPlate(stageCtx, 82, 15);
+        paintPixelText(stageCtx, "BAMBOO " + score, 50, 85, PAL.textPink, PAL.pandaDark, 1);
+        paintPixelText(stageCtx, "BEST " + Math.max(storedBest, score), 50, 92, PAL.textCream, null, 1);
     }
 
     function paint(ctx) {
@@ -1640,17 +1654,21 @@ wirePad("stage", function () {
 })();
 
 /* ==================================================================
-   PART 5-B — BOOPEEK module (content 006-20261101)
+   PART 5-B — BOOPEEK module (content 006-20261101) — FROZEN
    ------------------------------------------------------------------
    MODULE BOUNDARY — READ BEFORE EDITING
+   * MODULE: BOOPEEK — content 006-20261101 — FROZEN.
+     Owner request: do not restyle, rebalance or refactor this module
+     without the owner asking. Pip the lantern mouse and Boo the nightcap
+     ghost are approved as-is.
    * Everything inside this IIFE is PRIVATE to BOOPEEK: SETTINGS, PAL,
      sprite maps, state, timers and draw helpers.
-   * Do NOT read or write PANDASNACK's or DUCKLINE's names from here,
-     and do NOT let those modules read these names. The only shared
-     things a module may touch are: the module contract (start / stop /
-     restart / update / paint / onDir / onAction / onStageTap /
-     onAnyKey), the pixel helpers in PART 1, readBest / saveBest, and
-     the shared chrome handles scoreEl / bestEl / msgEl.
+   * Do NOT read or write other modules' names from here, and do NOT
+     let those modules read these names. The only shared things a
+     module may touch are: the module contract (start / stop / restart /
+     update / paint / onDir / onAction / onStageTap / onAnyKey), the
+     pixel helpers in PART 1, readBest / saveBest, and the shared chrome
+     handles scoreEl / bestEl / msgEl.
    * Every private name in this module is prefixed peek / boo / pip /
      BOO_ / PIP_ on purpose. Keep that habit when adding art or logic.
    * Paint with the ctx passed into paint(ctx); never assume stageCtx.
@@ -3227,6 +3245,648 @@ wirePad("stage", function () {
         actionLabel: "GO",
         hint: "desktop: WASD swim · SPACE or tap stage to quack-boost · R restart · ESC shelf",
         previewPaint: paintDuckLinePreview,
+        start, stop, restart,
+        update, paint, onDir, onAction, onStageTap, onAnyKey
+    });
+})();
+
+
+/* ==================================================================
+   PART 5-D — SPROUTUP module (content 007-20261101)
+   ------------------------------------------------------------------
+   MODULE BOUNDARY — READ BEFORE EDITING
+   * Everything inside this IIFE is PRIVATE to SPROUTUP: SETTINGS, PAL,
+     sprite maps, state, timers and draw helpers.
+   * Do NOT read or write other modules' names from here, and do NOT
+     let other modules read these names. The only shared things a
+     module may touch are: the module contract (start / stop / restart /
+     update / paint / onDir / onAction / onStageTap / onAnyKey), the
+     pixel helpers in PART 1, readBest / saveBest, and the shared chrome
+     handles scoreEl / bestEl / msgEl.
+   * Every private name in this module is prefixed sprout / SPROUT_
+     on purpose. Keep that habit when adding art or logic.
+   * Paint with the ctx passed into paint(ctx); never assume stageCtx.
+   * Art direction: Sproutlet the baby seedling weaves through a
+     summer rain shower, gathering clear dewdrops and golden sunbeams
+     to bloom when the sun settles.
+   ================================================================== */
+
+(function () {
+    "use strict";
+
+    /* ---------- SPROUTUP settings (private) ---------- */
+
+    const SETTINGS = {
+        gameName: "SPROUTUP",
+        versionNumber: "007-20261101",
+        stageSize: 100,
+        saveKey: "KANTMICROGAME.SPROUTUP.best",
+
+        playerSettings: {
+            moveSpeedDesignPixelsPerSecond: 30,
+            reachMultiplier: 1.85,
+            reachSeconds: 0.50,
+            reachCooldownSeconds: 2.0,
+            collectRadius: 8.0,
+            burrHitRadius: 6.0,
+            goalDrops: 15,
+            flinchSeconds: 0.75
+        },
+
+        worldSettings: {
+            startX: 44, startY: 60,
+            soilY: 74,
+            rainSpawnInterval: 0.28,
+            maxDrops: 7,
+            dropSpeedMin: 22,
+            dropSpeedMax: 40
+        },
+
+        roundTimeLimitSeconds: 24,
+
+        palette: {
+            skyA: "#D4ECE9", skyB: "#C2E2DE", skyMist: "#EBF6F5",
+            soilBase: "#4E3725", soilTop: "#6E9546", soilDark: "#3A281A",
+            sproutBody: "#6FCF68", sproutShade: "#4E9F48",
+            sproutLeaf: "#8CE67E", sproutLeafDark: "#52B044",
+            sproutCheek: "#FFAEC4", sproutEye: "#1C301D", sproutEyeWhite: "#FFFFFF",
+            sproutMouth: "#1C301D", sproutMouthOpen: "#E05A7B",
+            dropWater: "#5FD1F5", dropWaterDark: "#3AAED6", dropWaterLight: "#FFFFFF",
+            dropSun: "#FFD043", dropSunDark: "#D99D1C", dropSunGlow: "#FFF8D6",
+            burrBody: "#684F70", burrSpike: "#9E7FB0",
+            flowerPetal: "#FF92B4", flowerPetalLight: "#FFBCD0", flowerCenter: "#FFE266", flowerCenterDark: "#D49E1E",
+            sproutPlate: "#1E3B24", sproutText: "#EDF8EE",
+            sproutTextGold: "#FFE98A", sproutTextPink: "#FFAEC4"
+        }
+    };
+
+    const PAL = SETTINGS.palette;
+    const WORLD = SETTINGS.worldSettings;
+    const PLAYER = SETTINGS.playerSettings;
+    const STAGE = SETTINGS.stageSize;
+
+    /* ---------- SPROUTUP private state ---------- */
+
+    const STATE = { TITLE: "title", PLAY: "play", OVER: "over" };
+    let sproutState = STATE.TITLE;
+    let sproutStateT = 0;
+    let sproutClock = 0;
+    let sproutRoundT = 0;
+    let sproutScore = 0;
+    let sproutBest = 0;
+    let sproutWin = false;
+
+    const sprout = {
+        x: WORLD.startX, y: WORLD.startY,
+        walking: false, leanDir: 1, walkPhase: 0,
+        blinkTimer: 2.2, blinking: false, blinkLeft: 0
+    };
+    const sproutInput = { up: false, down: false, left: false, right: false };
+
+    let reachT = 0, reachReadyT = 0;
+    let flinchT = 0, chompT = 0;
+    let rainTimer = 0;
+    let drops = [];
+    let ripples = [];
+    let sparkles = [];
+    let accumulator = 0;
+    const STEP_SECONDS = 1 / 60;
+
+    /* ---------- SPROUTUP sprite maps (all prefixed, all local) ---------- */
+
+    const SPROUT_LEAF_A = [
+        "....LL...LL..", "...LLLl.lLLL.", "....LL...LL..", "......ll.....",
+        "....BBBBBBB..", "...BBBBBBBBB.", "..BBBBBBBBBBB", "..BBKWBBBWKBB",
+        "..BBKWBBBWKBB", "..BPBBBMmBPBB", "..BBBBBBBBBBB", "...bBBBBBBb..",
+        "....bbbbbb...", "....bB...Bb..", "...bb.....bb."
+    ];
+
+    const SPROUT_LEAF_B = [
+        "...LL.....LL.", "..LLLl...lLLL", "...LL.....LL.", "......ll.....",
+        "....BBBBBBB..", "...BBBBBBBBB.", "..BBBBBBBBBBB", "..BBKWBBBWKBB",
+        "..BBKWBBBWKBB", "..BPBBBMmBPBB", "..BBBBBBBBBBB", "...bBBBBBBb..",
+        "....bbbbbb...", "....bb...bB..", ".....bb...bb."
+    ];
+
+    const SPROUT_LEAF_SIP = [
+        "....LL...LL..", "...LLLl.lLLL.", "....LL...LL..", "......ll.....",
+        "....BBBBBBB..", "...BBBBBBBBB.", "..BBBBBBBBBBB", "..BBKWBBBWKBB",
+        "..BBKWBBBWKBB", "..BPBBTTTBPBB", "..BBBBTTTBBBB", "...bBBBBBBb..",
+        "....bbbbbb...", "....bB...Bb..", "...bb.....bb."
+    ];
+
+    const SPROUT_COLORS = {
+        L: PAL.sproutLeaf, l: PAL.sproutLeafDark,
+        B: PAL.sproutBody, b: PAL.sproutShade,
+        K: PAL.sproutEye, W: PAL.sproutEyeWhite,
+        P: PAL.sproutCheek, M: PAL.sproutMouth, m: PAL.sproutLeafDark,
+        T: PAL.sproutMouthOpen
+    };
+
+    const SPROUT_DROP_WATER = [
+        "..W..", ".CCC.", "CCCCC", "CWWCC", "CCCCC", ".CCC.", "..C.."
+    ];
+    const WATER_COLORS = { C: PAL.dropWater, W: PAL.dropWaterLight };
+
+    const SPROUT_DROP_SUN = [
+        "..YYY..", ".YYYYY.", "YYWWYYY", "YYWWYYY", "YYYYYYY", ".YYYYY.", "..YYY.."
+    ];
+    const SUN_COLORS = { Y: PAL.dropSun, W: PAL.dropSunGlow };
+
+    const SPROUT_BURR = [
+        ".p.p.p.", "..DDD..", "pDDDDDp", "..DDD..", "pDDDDDp", "..DDD..", ".p.p.p."
+    ];
+    const BURR_COLORS = { D: PAL.burrBody, p: PAL.burrSpike };
+
+    const SPROUT_CROWN = [
+        "..PPP...PPP..", ".PPPPP.PPPPP.", "PPPPPPPPPPPPP", ".PPPYYYYYPPP.",
+        "..PPYYYYYPP..", "...YYYYYYY...", ".....YYY....."
+    ];
+    const CROWN_COLORS = {
+        P: PAL.flowerPetal, Y: PAL.flowerCenter, W: PAL.flowerCenterDark
+    };
+
+    /* ---------- SPROUTUP run control ---------- */
+
+    function startRun() {
+        sproutScore = 0;
+        sproutRoundT = 0;
+        sproutState = STATE.PLAY;
+        sproutStateT = 0;
+        sprout.x = WORLD.startX;
+        sprout.y = WORLD.startY;
+        sprout.walking = false;
+        sprout.leanDir = 1;
+        sprout.walkPhase = 0;
+        reachT = 0;
+        reachReadyT = 0;
+        flinchT = 0;
+        chompT = 0;
+        rainTimer = 0;
+        drops = [];
+        ripples = [];
+        sparkles = [];
+        accumulator = 0;
+        syncChrome(true);
+    }
+
+    function finishRun(win) {
+        if (sproutScore > sproutBest) {
+            sproutBest = sproutScore;
+            saveBest(SETTINGS.gameName, sproutScore);
+        }
+        sproutWin = !!win;
+        sproutState = STATE.OVER;
+        sproutStateT = 0;
+        syncChrome(true);
+    }
+
+    function triggerReach() {
+        if (sproutState !== STATE.PLAY) return false;
+        if (reachT > 0 || reachReadyT > 0) return false;
+        reachT = PLAYER.reachSeconds;
+        reachReadyT = PLAYER.reachCooldownSeconds;
+        for (let i = 0; i < 4; i++) {
+            sparkles.push({
+                x: sprout.x + 2 + Math.random() * 9,
+                y: sprout.y + 6 + Math.random() * 8,
+                t: 0, life: 0.38, gold: false
+            });
+        }
+        return true;
+    }
+
+    function spawnDrop() {
+        if (drops.length >= WORLD.maxDrops) return;
+        const roll = Math.random();
+        let type = "water";
+        if (roll < 0.18) type = "sun";
+        else if (roll < 0.30) type = "burr";
+        drops.push({
+            type,
+            x: 6 + Math.random() * (STAGE - 18),
+            y: -10,
+            speed: WORLD.dropSpeedMin + Math.random() * (WORLD.dropSpeedMax - WORLD.dropSpeedMin),
+            sway: Math.random() * 6.28
+        });
+    }
+
+    /* ---------- SPROUTUP fixed-step update ---------- */
+
+    function update(rawDt) {
+        let dt = rawDt > 0.25 ? 0.25 : rawDt;
+        accumulator += dt;
+        let steps = 0;
+        while (accumulator >= STEP_SECONDS && steps < 4) {
+            stepWorld(STEP_SECONDS);
+            accumulator -= STEP_SECONDS;
+            steps++;
+        }
+        if (steps === 4) accumulator = 0;
+    }
+
+    function stepWorld(dt) {
+        sproutClock += dt;
+        sproutStateT += dt;
+        updateEffects(dt);
+
+        if (sproutState !== STATE.PLAY) return;
+
+        const mx = (sproutInput.right ? 1 : 0) - (sproutInput.left ? 1 : 0);
+        const my = (sproutInput.down ? 1 : 0) - (sproutInput.up ? 1 : 0);
+        sprout.walking = (mx !== 0 || my !== 0);
+        if (sprout.walking) sprout.walkPhase = (sprout.walkPhase + dt * 7) % 2;
+
+        let speed = PLAYER.moveSpeedDesignPixelsPerSecond;
+        if (reachT > 0) speed *= PLAYER.reachMultiplier;
+        if (mx !== 0 && my !== 0) speed *= 0.7071;
+        if (mx !== 0) sprout.x += Math.sign(mx) * speed * dt;
+        if (my !== 0) sprout.y += Math.sign(my) * speed * dt;
+
+        sprout.x = Math.max(3, Math.min(STAGE - 16, sprout.x));
+        sprout.y = Math.max(14, Math.min(STAGE - 19, sprout.y));
+
+        if (reachT > 0) reachT -= dt;
+        if (reachT <= 0 && reachReadyT > 0) reachReadyT -= dt;
+        if (flinchT > 0) flinchT -= dt;
+        if (chompT > 0) chompT -= dt;
+
+        updateSproutBlink(dt);
+
+        rainTimer -= dt;
+        if (rainTimer <= 0) {
+            rainTimer = WORLD.rainSpawnInterval + Math.random() * 0.14;
+            spawnDrop();
+        }
+
+        const cx = sprout.x + 6.5, cy = sprout.y + 7.5;
+
+        for (let i = drops.length - 1; i >= 0; i--) {
+            const d = drops[i];
+            d.y += d.speed * dt;
+            d.sway += dt * 3.5;
+            const curX = d.x + Math.sin(d.sway) * 1.5;
+            const dcx = curX + (d.type === "sun" ? 3.5 : 2.5);
+            const dcy = d.y + 3.5;
+
+            const dist = Math.hypot(dcx - cx, dcy - cy);
+            if (dist <= PLAYER.collectRadius) {
+                if (d.type === "water") {
+                    sproutScore += 1;
+                    chompT = 0.35;
+                    ripples.push({ x: dcx, y: dcy, r: 2, maxR: 7, t: 0, life: 0.30, gold: false });
+                    for (let s = 0; s < 3; s++) {
+                        sparkles.push({
+                            x: dcx - 2 + Math.random() * 4,
+                            y: dcy - 2 + Math.random() * 4,
+                            t: 0, life: 0.32, gold: false
+                        });
+                    }
+                    drops.splice(i, 1);
+                    syncChrome(true);
+                    continue;
+                } else if (d.type === "sun") {
+                    sproutScore += 3;
+                    chompT = 0.45;
+                    ripples.push({ x: dcx, y: dcy, r: 2, maxR: 9, t: 0, life: 0.38, gold: true });
+                    for (let s = 0; s < 6; s++) {
+                        sparkles.push({
+                            x: dcx - 3 + Math.random() * 6,
+                            y: dcy - 3 + Math.random() * 6,
+                            t: 0, life: 0.42, gold: true
+                        });
+                    }
+                    drops.splice(i, 1);
+                    syncChrome(true);
+                    continue;
+                } else if (d.type === "burr") {
+                    if (flinchT <= 0) {
+                        flinchT = PLAYER.flinchSeconds;
+                        sproutScore = Math.max(0, sproutScore - 1);
+                    }
+                    drops.splice(i, 1);
+                    syncChrome(true);
+                    continue;
+                }
+            }
+
+            if (d.y >= 92) {
+                ripples.push({ x: curX + 2, y: 92, r: 1, maxR: 4, t: 0, life: 0.22, gold: d.type === "sun" });
+                drops.splice(i, 1);
+            }
+        }
+
+        sproutRoundT += dt;
+        if (sproutRoundT >= SETTINGS.roundTimeLimitSeconds) {
+            finishRun(sproutScore >= PLAYER.goalDrops);
+        }
+    }
+
+    function updateSproutBlink(dt) {
+        if (sprout.blinkLeft > 0) {
+            sprout.blinkLeft -= dt;
+            if (sprout.blinkLeft <= 0) sprout.blinking = false;
+        } else {
+            sprout.blinkTimer -= dt;
+            if (sprout.blinkTimer <= 0) {
+                sprout.blinking = true;
+                sprout.blinkLeft = 0.14;
+                sprout.blinkTimer = 2.0 + Math.random() * 2.2;
+            }
+        }
+    }
+
+    function updateEffects(dt) {
+        for (let i = ripples.length - 1; i >= 0; i--) {
+            ripples[i].t += dt;
+            if (ripples[i].t >= ripples[i].life) ripples.splice(i, 1);
+        }
+        for (let i = sparkles.length - 1; i >= 0; i--) {
+            sparkles[i].t += dt;
+            if (sparkles[i].t >= sparkles[i].life) sparkles.splice(i, 1);
+        }
+    }
+
+    /* ---------- SPROUTUP painting ---------- */
+
+    function drawGarden(ctx) {
+        /* misty pastel sky */
+        for (let y = 0; y < WORLD.soilY; y += 4) {
+            ctx.fillStyle = (y % 8 === 0) ? PAL.skyA : PAL.skyB;
+            ctx.fillRect(0, y, STAGE, 4);
+        }
+
+        /* soft diagonal rain streaks */
+        ctx.fillStyle = "rgba(95,209,245,0.22)";
+        for (let i = 0; i < 9; i++) {
+            const rx = (i * 13 + Math.floor(sproutClock * 42)) % STAGE;
+            const ry = (i * 11 + Math.floor(sproutClock * 68)) % (WORLD.soilY - 6);
+            ctx.fillRect(rx, ry, 1, 3);
+        }
+
+        /* warm morning sunbeams when player is blooming */
+        if (sproutScore >= PLAYER.goalDrops || (sproutState === STATE.OVER && sproutWin)) {
+            ctx.fillStyle = "rgba(255,240,180,0.12)";
+            ctx.beginPath();
+            ctx.moveTo(15, 0); ctx.lineTo(35, 0); ctx.lineTo(55, WORLD.soilY); ctx.lineTo(25, WORLD.soilY);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.moveTo(65, 0); ctx.lineTo(85, 0); ctx.lineTo(95, WORLD.soilY); ctx.lineTo(70, WORLD.soilY);
+            ctx.fill();
+        }
+
+        /* soil and moss base */
+        ctx.fillStyle = PAL.soilTop;
+        ctx.fillRect(0, WORLD.soilY, STAGE, 4);
+        for (let x = 2; x < STAGE; x += 5) {
+            ctx.fillRect(x, WORLD.soilY - 1, 1, 1);
+        }
+        ctx.fillStyle = PAL.soilBase;
+        ctx.fillRect(0, WORLD.soilY + 4, STAGE, STAGE - (WORLD.soilY + 4));
+
+        /* tiny soil loam specks */
+        ctx.fillStyle = PAL.soilDark;
+        for (let i = 0; i < 8; i++) {
+            ctx.fillRect((i * 17 + 7) % STAGE, WORLD.soilY + 8 + (i % 3) * 5, 2, 1);
+        }
+    }
+
+    function drawDrops(ctx) {
+        for (const d of drops) {
+            const curX = Math.round(d.x + Math.sin(d.sway) * 1.5);
+            const curY = Math.round(d.y);
+            if (d.type === "water") {
+                paintPixels(ctx, SPROUT_DROP_WATER, WATER_COLORS, curX, curY);
+            } else if (d.type === "sun") {
+                paintRoundBlob(ctx, curX - 1, curY - 1, 9, 9, "rgba(255,208,67,0.25)");
+                paintPixels(ctx, SPROUT_DROP_SUN, SUN_COLORS, curX, curY);
+            } else if (d.type === "burr") {
+                paintPixels(ctx, SPROUT_BURR, BURR_COLORS, curX, curY);
+            }
+        }
+    }
+
+    function drawSproutlet(ctx) {
+        if (flinchT > 0 && Math.floor(sproutClock * 14) % 2 === 0) return;
+
+        const px = Math.round(sprout.x);
+        const py = Math.round(sprout.y + (sprout.walking ? (Math.floor(sprout.walkPhase) % 2) : 0));
+        const flip = sprout.leanDir < 0;
+
+        /* soft ground shadow */
+        paintRoundBlob(ctx, px + 2, py + 14, 9, 2, "rgba(28,48,34,0.30)");
+
+        /* reach glow aura */
+        if (reachT > 0) {
+            paintRoundBlob(ctx, px - 2, py - 2, 17, 18, "rgba(140,230,126,0.28)");
+        }
+
+        let map = SPROUT_LEAF_A;
+        if (chompT > 0) map = SPROUT_LEAF_SIP;
+        else if (sprout.walking && Math.floor(sprout.walkPhase) % 2 === 1) map = SPROUT_LEAF_B;
+
+        paintPixels(ctx, map, SPROUT_COLORS, px, py, flip);
+
+        /* blinking eyes */
+        if (sprout.blinking) {
+            ctx.fillStyle = PAL.sproutEye;
+            ctx.fillRect(px + (flip ? 3 : 4), py + 8, 2, 1);
+            ctx.fillRect(px + (flip ? 8 : 7), py + 8, 2, 1);
+        }
+
+        /* blooming flower crown upon victory */
+        if (sproutState === STATE.OVER && sproutWin) {
+            paintPixels(ctx, SPROUT_CROWN, CROWN_COLORS, px, py - 6, false);
+        }
+    }
+
+    function drawEffects(ctx) {
+        for (const rip of ripples) {
+            const frac = rip.t / rip.life;
+            const r = Math.round(rip.r + (rip.maxR - rip.r) * frac);
+            ctx.fillStyle = rip.gold ? PAL.dropSun : PAL.dropWater;
+            ctx.fillRect(Math.round(rip.x - r), Math.round(rip.y), r * 2, 1);
+        }
+        for (const sp of sparkles) {
+            ctx.fillStyle = sp.gold ? PAL.dropSun : PAL.dropWater;
+            ctx.fillRect(Math.round(sp.x), Math.round(sp.y), 1, 1);
+        }
+    }
+
+    function drawSproutPlate(ctx, y, h, alpha) {
+        paintRoundBlob(ctx, 3, y, 94, h, "rgba(28,48,34," + (alpha || 0.62) + ")");
+    }
+
+    function paintSproutTitle(ctx) {
+        drawSproutPlate(ctx, 8, 32, 0.82);
+        paintPixelText(ctx, "SPROUTUP", 50, 13, PAL.sproutTextGold, PAL.soilDark, 2);
+        paintPixelText(ctx, "WEAVE THROUGH THE RAIN TO BLOOM", 50, 29, PAL.sproutText, null, 1);
+        if (Math.floor(sproutClock / 0.55) % 2 === 0) {
+            drawSproutPlate(ctx, 80, 12, 0.72);
+            paintPixelText(ctx, "PRESS ANY KEY OR TAP", 50, 84, PAL.sproutText, PAL.soilDark, 1);
+        }
+    }
+
+    function paintSproutHud(ctx) {
+        drawSproutPlate(ctx, 82, 15);
+        const win = sproutScore >= PLAYER.goalDrops;
+        paintPixelText(ctx, "DROPS " + sproutScore + "  GOAL " + PLAYER.goalDrops,
+            50, 85, win ? PAL.sproutTextPink : PAL.sproutTextGold, null, 1);
+        paintPixelText(ctx, "TIME " + Math.max(0, Math.ceil(SETTINGS.roundTimeLimitSeconds - sproutRoundT)),
+            50, 92, PAL.sproutText, null, 1);
+
+        /* reach readiness indicator */
+        const ready = reachT > 0 || reachReadyT <= 0;
+        ctx.fillStyle = ready ? PAL.sproutTextGold : "rgba(237,248,238,0.35)";
+        ctx.fillRect(16, 4, 1, 3);
+        ctx.fillRect(17, 3, 1, 5);
+        ctx.fillRect(18, 4, 1, 3);
+        paintRoundBlob(ctx, 21, 4, 14, 3, "rgba(28,48,34,0.55)");
+        const fraction = reachT > 0 ? 1 : (reachReadyT <= 0 ? 1 : 1 - reachReadyT / PLAYER.reachCooldownSeconds);
+        const fill = Math.round(12 * fraction);
+        if (fill > 0) {
+            ctx.fillStyle = ready ? PAL.sproutTextGold : PAL.sproutLeaf;
+            ctx.fillRect(22, 5, fill, 1);
+        }
+    }
+
+    function paintSproutOver(ctx) {
+        drawSproutPlate(ctx, 8, 38, 0.82);
+        paintPixelText(ctx, sproutWin ? "SUNNY BLOOM! FLOWER GROWN" : "NICE TRY! KEEP GROWING", 50, 12,
+            sproutWin ? PAL.sproutTextGold : PAL.sproutText, PAL.soilDark, 1);
+        paintPixelText(ctx, String(sproutScore), 50, 22, PAL.sproutTextGold, PAL.soilDark, 3);
+        paintPixelText(ctx, "BEST " + sproutBest, 50, 40, PAL.sproutText, null, 1);
+        if (Math.floor(sproutClock / 0.55) % 2 === 0) {
+            drawSproutPlate(ctx, 80, 12, 0.72);
+            paintPixelText(ctx, "PRESS ANY KEY OR TAP", 50, 84, PAL.sproutText, PAL.soilDark, 1);
+        }
+    }
+
+    function paint(ctx) {
+        drawGarden(ctx);
+        drawDrops(ctx);
+        drawSproutlet(ctx);
+        drawEffects(ctx);
+        if (sproutState === STATE.TITLE) paintSproutTitle(ctx);
+        else if (sproutState === STATE.PLAY) paintSproutHud(ctx);
+        else paintSproutOver(ctx);
+    }
+
+    /* ---------- SPROUTUP shelf card preview (private) ---------- */
+
+    function paintSproutUpPreview(ctx) {
+        ctx.fillStyle = PAL.skyA;
+        ctx.fillRect(0, 0, 200, 96);
+        for (let y = 0; y < 74; y += 8) {
+            ctx.fillStyle = PAL.skyB;
+            ctx.fillRect(0, y, 200, 4);
+        }
+        ctx.fillStyle = "rgba(95,209,245,0.25)";
+        for (let x = 10; x < 200; x += 22) {
+            ctx.fillRect(x, 12 + (x % 30), 1, 14);
+        }
+        ctx.fillStyle = PAL.soilTop;
+        ctx.fillRect(0, 74, 200, 4);
+        ctx.fillStyle = PAL.soilBase;
+        ctx.fillRect(0, 78, 200, 18);
+
+        paintPixels(ctx, SPROUT_LEAF_A, SPROUT_COLORS, 24, 28, false, 3);
+        paintPixels(ctx, SPROUT_DROP_WATER, WATER_COLORS, 88, 32, false, 3);
+        paintRoundBlob(ctx, 138, 20, 25, 25, "rgba(255,208,67,0.28)");
+        paintPixels(ctx, SPROUT_DROP_SUN, SUN_COLORS, 142, 24, false, 3);
+        paintPixels(ctx, SPROUT_BURR, BURR_COLORS, 176, 50, false, 2);
+    }
+
+    /* ---------- SPROUTUP chrome sync ---------- */
+
+    let sproutShownScore = null;
+    let sproutShownBest = null;
+    let sproutShownMsg = null;
+
+    function syncChrome(force) {
+        const shownBest = Math.max(sproutBest, sproutScore);
+        if (force || sproutShownScore !== sproutScore) {
+            sproutShownScore = sproutScore;
+            scoreEl.textContent = String(sproutScore);
+        }
+        if (force || sproutShownBest !== shownBest) {
+            sproutShownBest = shownBest;
+            bestEl.textContent = String(shownBest);
+        }
+        let msg;
+        if (sproutState === STATE.PLAY) {
+            if (sproutScore >= PLAYER.goalDrops) msg = "sproutlet is ready to bloom — catch more drops!";
+            else msg = "weave through the raindrops — reach for the golden sun!";
+        }
+        else if (sproutState === STATE.TITLE) msg = "press any key or tap to start";
+        else if (sproutWin) msg = "bloom! you grew a gorgeous flower — try to beat your score!";
+        else msg = "rain stopped — gather 15 drops next time to bloom!";
+        if (force || sproutShownMsg !== msg) {
+            sproutShownMsg = msg;
+            msgEl.textContent = msg;
+        }
+    }
+
+    /* ---------- SPROUTUP module contract ---------- */
+
+    function start() {
+        sproutBest = readBest(SETTINGS.gameName);
+        sproutState = STATE.TITLE;
+        sproutStateT = 0;
+        sproutScore = 0;
+        sproutRoundT = 0;
+        sprout.x = WORLD.startX;
+        sprout.y = WORLD.startY;
+        sprout.walking = false;
+        sprout.leanDir = 1;
+        sprout.walkPhase = 0;
+        sproutInput.up = false;
+        sproutInput.down = false;
+        sproutInput.left = false;
+        sproutInput.right = false;
+        reachT = 0;
+        reachReadyT = 0;
+        flinchT = 0;
+        chompT = 0;
+        rainTimer = 0;
+        drops = [];
+        ripples = [];
+        sparkles = [];
+        accumulator = 0;
+        syncChrome(true);
+    }
+
+    function stop() {}
+    function restart() { startRun(); }
+
+    function onDir(dir, pressed) {
+        sproutInput[dir] = !!pressed;
+        if (pressed) {
+            if (dir === "left") sprout.leanDir = -1;
+            else if (dir === "right") sprout.leanDir = 1;
+        }
+    }
+
+    function onAction() {
+        if (sproutState === STATE.PLAY) triggerReach();
+        else if (sproutStateT > 0.35) startRun();
+    }
+
+    function onStageTap() { onAction(); }
+
+    function onAnyKey() {
+        if (sproutState !== STATE.PLAY && sproutStateT > 0.35) startRun();
+    }
+
+    GAMES.push({
+        id: SETTINGS.gameName,
+        versionNumber: SETTINGS.versionNumber,
+        name: "Sprout Up",
+        tagline: "bloom in the summer rain",
+        concept: "Sproutlet the baby seedling weaves through falling raindrops and reaches for sunbeams to bloom into a sunny blossom.",
+        actionLabel: "REACH",
+        hint: "desktop: WASD weave · SPACE or tap stage to reach · R restart · ESC shelf",
+        previewPaint: paintSproutUpPreview,
         start, stop, restart,
         update, paint, onDir, onAction, onStageTap, onAnyKey
     });

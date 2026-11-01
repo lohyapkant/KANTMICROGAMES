@@ -1,15 +1,15 @@
 # Plan: KANTMICROGAME — HTML5 Micro Games (v2 — the one-file pivot)
 
-Today: 2026-11-01. Status: build **006-20261101** done — the shelf and all three games
-(PANDASNACK, BOOPEEK, DUCKLINE) live together in ONE file. Build 006 is the **final
-special review before Round 4**: it adopts the `NNN-YYYYMMDD` build numbering, corrects
-the model record for builds 000/001, freezes DUCKLINE, and turns BOOPEEK into a
-peek-a-boo chase. Round 4 (a fourth module) is next.
+Today: 2026-11-01. Status: build **007-20261101** done — the shelf and all four games
+(PANDASNACK, BOOPEEK, DUCKLINE, SPROUTUP) live together in ONE file. Build 007 is **Round 4**:
+it introduces the SPROUTUP module (summer rain, dewdrops, sunbeams, victory bloom), freezes
+BOOPEEK, and temporarily unfroze PANDASNACK to add live in-stage HUD score tracking before
+refreezing it. Round 5 (a fifth module) is next.
 
-Build IDs are now `NNN-YYYYMMDD` (build number first, finish date second); the earlier
-builds were renamed retroactively. A game's module content number is the build in which
-its content last changed. PANDASNACK is **frozen** at 001-20261031, DUCKLINE is **frozen**
-at 005-20261101, and BOOPEEK is live at 006-20261101.
+Build IDs are `NNN-YYYYMMDD` (build number first, finish date second). A game's module
+content number is the build in which its content last changed. PANDASNACK is **frozen** at
+007-20261101, BOOPEEK is **frozen** at 006-20261101, DUCKLINE is **frozen** at 005-20261101,
+and SPROUTUP is live at 007-20261101.
 
 Supersedes micro-games.md (v1), kept as history: v1 described one file per game in
 separate folders; the owner changed their mind after round 1 — see prompt P-02.
@@ -115,6 +115,7 @@ games, feeds events, ticks and paints only the open module, and keeps instant re
 | 004-20261101 | 2026-11-01 | Round 3: DUCKLINE shipped as the third module (duck family). Later superseded for the file build and for BOOPEEK/DUCKLINE art by -005. DONE. |
 | 005-20261101 | 2026-11-01 | Pre-Round-4 cleanup: README/CHANGELOG rewritten; BOOPEEK re-skinned (Pip the lantern mouse + Boo the nightcap ghost, midnight nursery); DUCKLINE re-skinned (mallard family, sunny pond, trail-following ducklings); module independence audit + boundary comments; runtime input hygiene and loop guard; all three games smoke-tested. DONE. |
 | 006-20261101 | 2026-11-01 | Final special review: new `NNN-YYYYMMDD` build numbering (retro-renamed, 004/005 corrected to their finish date); model record corrected for 000/001; DUCKLINE frozen; BOOPEEK rebuilt as a five-spot peek-a-boo chase; `MODELS.md` added for dated owner observations; numbering guidance added to code, README and CHANGELOG. DONE. |
+| 007-20261101 | 2026-11-01 | Round 4: SPROUTUP shipped as fourth module (summer rain, Sproutlet, dewdrops, sunbeams, victory bloom); BOOPEEK frozen; PANDASNACK in-stage live HUD score tracking added & refrozen; shelf card with custom preview added. DONE. |
 
 ## Tool and model log (owner request, 2026-10-31)
 
@@ -130,6 +131,7 @@ the build's prompt copy.
 | 004 | 2026-11-01 | Flint 40B Free (OpenCode) |
 | 005 | 2026-11-01 | DeepSeek V4.1 Flash Free (OpenCode) — ~1 h 55 min active, ≈2.37 M tokens processed |
 | 006 | 2026-11-01 | DeepSeek V4.1 Flash Free (OpenCode) / Gemini 3.8 Flash (Antigravity) — ~30 min, ~1.5 M tokens (handoff at session limit) |
+| 007 | 2026-11-01 | Gemini 3.8 Flash (Antigravity) — ~25 min, ~48,000 tokens processed |
 
 Rule: every future build truthfully records its model in all four homes.
 
@@ -137,11 +139,11 @@ Rule: every future build truthfully records its model in all four homes.
 
 | Name | One sentence | Verb | Status |
 |---|---|---|---|
-| PANDASNACK | A chubby panda scurries to eat bamboo shoots while wasps drift past. | WASD dodge+dash | in the file (round 1) — frozen at content 001-20261031 |
+| PANDASNACK | A chubby panda scurries to eat bamboo shoots while wasps drift past. | WASD dodge+dash | in the file (round 1) — frozen at content 007-20261101 |
 | DUCKLINE | A mother duck crosses a pond; collected ducklings waddle in a line behind her. | WASD lead-a-chain | in the file (round 3) — frozen at content 005-20261101 |
-| SPROUTUP | A baby sprout climbs a rain of water drops; sun settles, it blooms — short and lovely. | WASD weave | backlog |
+| SPROUTUP | A baby sprout climbs a rain of water drops; sun settles, it blooms — short and lovely. | WASD weave | in the file (round 4) — live at content 007-20261101 |
 | SLIMEHOP | A bouncing slime must only land on lily pads that float apart over time. | WASD + Space hop timing | backlog |
-| BOOPEEK | A shy ghost peeks from five spots; poke it while it is out — cozy not scary. | WASD walk + Space poke | in the file (round 2) — live at content 006-20261101 |
+| BOOPEEK | A shy ghost peeks from five spots; poke it while it is out — cozy not scary. | WASD walk + Space poke | in the file (round 2) — frozen at content 006-20261101 |
 | SNAILRACE | Race three snails; food pellets speed you up, salt slows — tiny arcade. | WASD steer | backlog |
 | HUGPARADE | Two round friends reunite across a maze that redraws itself every 10 seconds. | WASD only | backlog |
 | CATNAPCATCH | Guard a sleeping cat from falling noise-makers with a paper pillow. | WASD catch | backlog |
