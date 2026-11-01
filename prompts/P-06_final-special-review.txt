@@ -1,0 +1,62 @@
+Prompt ID: P-06
+Build: 006-20261101 (final special review and refactor, before Round 4)
+Date first saved: 2026-11-01
+Tool and model that saved this copy: DeepSeek V4.1 Flash Free (OpenCode) / Gemini 3.8 Flash (Antigravity)
+------------------------------------------------------------
+PROMPT ID: P-06 BUILD: 006-20261101 NAME: final-special-review
+
+PART 1. TASK (owner's request, condensed)
+
+Still inside the special editing/refactoring window, before switching to a different model
+for testing. Five jobs:
+
+(a) "Are you able to suggest a better build numbering method? The current method is a bit
+    awkward. Would [build number]-[YYYYMMDD] make sense? If so, maybe you can rename the
+    builds retroactively."
+
+(b) "I recall using you for Build 000 and 001 to create the cute PandaSnack and
+    scaffolding, so please edit the readme and change log to have your model listed
+    instead of the incorrect GLM."
+
+(c) "To ensure that future models preserve the entry method, include notes and guidance in
+    the code, readme, and changelog just to keep track."
+
+(d) "Figure out where to enter my notes on performance of the models — thus far DeepSeek
+    (you) have amazing pixel art graphics capabilities and coding skills, but GLM 5.3 is
+    at this point pretty horrible, and same as Flint. Not sure where to note it, in a
+    polite and diplomatic way as of this date of observation, as future models may
+    change."
+
+(e) "Please freeze DuckLine — it is beautiful! The only problem is BooPeek — the game has
+    a static ghost, and the player just walks to the right and pokes Boo. Perhaps some
+    variability? Consider this the final round of special review and refactoring before I
+    change to a different model for testing."
+
+PART 2. WHAT WAS BUILT
+
+* Numbering: adopted `NNN-YYYYMMDD` (build number, then finish date). Renamed all earlier
+  builds in code, README, CHANGELOG, both plans and every prompt copy. Builds 004 and 005
+  were corrected to their true finish date (20261101).
+* Record: builds 000-20261031 and 001-20261031 changed from GLM-5.3 Flash Free to
+  DeepSeek V4.1 Flash Free, with a dated correction note in every home.
+* Guidance: a "BUILD NUMBERING AND RECORD-KEEPING" comment beside APP.fileVersion, a
+  README section, a CHANGELOG conventions block and a prompt-copy rule.
+* Model notes: new MODELS.md — dated, append-only, polite observations, explicitly not a
+  permanent ranking, with a template for future entries.
+* DuckLine: frozen at 005-20261101 with a code banner and matching docs.
+* BooPeek: rebuilt as a peek-a-boo chase — five hiding spots (cupboard, window sill,
+  plant, rug, book), a 0.26 s warning sparkle, 1.15-1.80 s visible, 0.30-0.60 s hidden,
+  a 0.16 s poof on a hit, and a 55 px preference for the next spot. Poking empty air does
+  nothing.
+
+PART 3. VERIFICATION AND NOTES
+
+* Syntax OK; 27 sprite maps with zero width mismatches; no external URLs; comment-stripped
+  cross-module audit clean.
+* Headless smoke run green for all three games, including the full peek-a-boo cycle and
+  the frozen games' regression checks.
+* Stage output rendered to PNG and inspected by eye for BooPeek and DuckLine (title, play,
+  over) and both shelf cards.
+* A hands-on phone (Safari) play test remains pending and is honestly noted.
+* Next: Round 4 with a different model under test — a fourth module from the backlog
+  (SPROUTUP, SLIMEHOP, SNAILRACE, HUGPARADE or CATNAPCATCH, at the owner's pick).

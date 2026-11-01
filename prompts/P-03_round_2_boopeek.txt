@@ -10,7 +10,7 @@ PART 1. TASK
 
 The owner continued the round-by-round micro game series: Round 2 — build the second
 micro game, BOOPEEK, as a module inside the one-file app (`KANTMICROGAME/index.html`,
-build 20261031-002) that now hosts PANDASNACK (module content 20261031-001).
+build 002-20261031) that now hosts PANDASNACK (module content 001-20261031).
 
 The chosen concept from the backlog (owner picked it): "BOOPEEK — a shy ghost peeks
 from doors; poke it before it hides — cozy not scary", with the verb "WASD walk + SPACE poke".
@@ -19,14 +19,14 @@ The build task:
 
 (a) Add the BOOPEEK module as a self-contained IIFE inside the one-file app — its own
     SETTINGS, palette, state, maps and helpers — registered into the GAMES registry via
-    the module contract, exactly like PANDASNACK did in build 20261031-001 (module content).
+    the module contract, exactly like PANDASNACK did in build 001-20261031 (module content).
 (b) The visitor (the shared panda mover) walks toward the cozy door with WASD / arrows;
     the shared action button (SPACE / POKE pad / stage tap) POPS the ghost.
 (c) Game shape: the ghost peeks out of a small cozy door each round; each successful
     poke scores +1 and pops warm star sparkles; victory is poking him 10 times
     ("BOO! YOU FOUND HIS HEART!"); win-based run — no hearts, no difficulty table
     (cozy one-verb game, short play).
-(d) Update the docs: CHANGELOG entry for build 20261031-003 (with tool/model and the
+(d) Update the docs: CHANGELOG entry for build 003-20261031 (with tool/model and the
     owner's duration + tokens), this prompt copy, README (round 2 status + BOOPEEK
     manual), plan v2 (ledger row, tool/model log, backlog row).
 (e) Re-run lint checks and the headless smoke test (hash route into the game, play,
@@ -51,7 +51,7 @@ PART 3. NOTES KEPT FOR THE OWNER
 
 * The owner asked that the duration taken to build/process and the token count be
   recorded in the CHANGELOG for every build; that convention is followed from Round 0
-  and is on record for build 20261031-003.
+  and is on record for build 003-20261031.
 * A headless smoke test (stubbed DOM, real script) ran the full loop for BOOPEEK: hash
   routing, title start, play, poke via keys, ESC to shelf, reopen — zero exceptions.
   A hands-on phone (Safari) play test is still pending and honestly noted.

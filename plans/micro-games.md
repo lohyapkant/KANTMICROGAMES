@@ -73,7 +73,7 @@ Every game starts with one `SETTINGS` object holding named values, all tuned fro
 ```
 const SETTINGS = {
   gameName: "PANDASNACK",
-  versionNumber: "20261031-001",       // date + increasing 3-digit count
+  versionNumber: "001-20261031",       // date + increasing 3-digit count
   stageSize: 100,
   palette: { ... },                    // every color referenced by NAME, never a raw hex in draw code
   playerSettings: { ... },             // speed, size, animation frames …
@@ -103,10 +103,10 @@ Difficulty if present is one curve from a table (rows = minute/level, values = s
 
 | Round | Version | Deliverable |
 |---|---|---|
-| 0 | 20261031-000 | DONE — Scaffold: selection page (arcade shelf), folder layout, README, CHANGELOG, prompts folder. |
-| 1 | 20261031-001 | DONE — First game, PANDASNACK, translated through the Stage spec, with its shelf card, game README and prompt copy. Hands-on phone test still pending. |
-| 2 | 20261031-002 | NEXT — Second game with a DIFFERENT control verb (one move-only, one action-button). |
-| 3 | 20261031-003 | Third game; then review: were the stage helpers enough? Adjust template. |
+| 0 | 000-20261031 | DONE — Scaffold: selection page (arcade shelf), folder layout, README, CHANGELOG, prompts folder. |
+| 1 | 001-20261031 | DONE — First game, PANDASNACK, translated through the Stage spec, with its shelf card, game README and prompt copy. Hands-on phone test still pending. |
+| 2 | 002-20261031 | NEXT — Second game with a DIFFERENT control verb (one move-only, one action-button). |
+| 3 | 003-20261031 | Third game; then review: were the stage helpers enough? Adjust template. |
 | 4+ | … | One game per round; polish round any time a shelf entry is rough. |
 
 Each round produces exactly one finished, shippable thing. We stop, play, then plan the next round.
@@ -119,8 +119,8 @@ the round's prompt copy. The log itself lives here and grows one row per round.
 
 | Round | Date | Tool and model that did the building |
 |---|---|---|
-| 0 | 2026-10-31 | GLM-5.3-Flash Free (OpenCode) |
-| 1 | 2026-10-31 | GLM-5.3-Flash Free (OpenCode) |
+| 0 | 2026-10-31 | DeepSeek V4.1 Flash Free (OpenCode) — corrected in build 006 (originally recorded as GLM-5.3 Flash Free) |
+| 1 | 2026-10-31 | DeepSeek V4.1 Flash Free (OpenCode) — corrected in build 006 (originally recorded as GLM-5.3 Flash Free) |
 
 Rule for future rounds: every CHANGELOG entry carries its "Tool and model:" line,
 every prompt copy names the model that saved it, and a new row lands in this table.

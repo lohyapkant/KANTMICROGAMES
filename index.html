@@ -11,7 +11,7 @@
     <style>
         /*
            ============================================================
-           KANTMICROGAME — ONE FILE (since build 20261031-002).
+           KANTMICROGAME — ONE FILE (since build 002-20261031).
            The shelf AND every game live inside this single HTML file:
              * two screens — the shelf, and the currently open game —
                swap inside the page (no navigation, no iframes, no folders)
@@ -390,7 +390,7 @@
     <footer id="meta">
         <span class="v" id="verBox">KANT MICRO</span>
         <br><span class="zzz">one file</span> · runs completely offline · every game lives inside this page ·
-        <span class="zzz">build 20261031-005</span>
+        <span class="zzz">build 006-20261101</span>
     </footer>
 </div>
 
@@ -420,7 +420,7 @@
       shared stageCtx; that assumption is a PANDASNACK legacy only.
    5. Do not copy one game's character art into another game. Panda,
       mouse and mallard shapes must stay visually distinct.
-   6. PANDASNACK (content 20261031-001) is FROZEN by owner request:
+   6. PANDASNACK (content 001-20261031) is FROZEN by owner request:
       do not restyle, rebalance or refactor it unless the owner asks.
    7. Add a new game as a NEW IIFE registered in GAMES; never graft a
       new game into an existing module.
@@ -430,9 +430,36 @@
    PART 0 — file settings and the shared storage helpers
    ================================================================== */
 
+/* ==================================================================
+   BUILD NUMBERING AND RECORD-KEEPING — READ BEFORE BUMPING A BUILD.
+
+   Build IDs use:  <NNN>-<YYYYMMDD>
+     * NNN      = zero-padded, project-wide build number (000, 001, ...).
+                  It only ever goes up; never reuse a number.
+     * YYYYMMDD = the date the build was finished (2026-11-01 ->
+                  20261101), kept as a human hint, not as the identity.
+   Sorting the strings alphabetically therefore sorts them by build.
+
+   A game module carries its own versionNumber: the build whose content
+   it last changed in. A refactor that keeps a game's art and numbers
+   identical does NOT change that game's number (PANDASNACK has stayed
+   001-20261031 since round 1; DUCKLINE is frozen at 005-20261101).
+
+   Every finished build records, in FOUR homes — this file's header or
+   comments, README.md, CHANGELOG.md and the build's prompt copy — plus
+   the plan's tool log:
+     * the full model name and tool,
+     * the effort/round summary,
+     * the duration taken,
+     * the token count.
+   The owner's standing request; keep it exact and keep it honest.
+   Owner observations about model strengths are dated entries in
+   MODELS.md — add a new dated line, never rewrite an old one.
+   ================================================================== */
+
 const APP = {
     name: "KANT MICRO",
-    fileVersion: "20261031-005",       // build number of THIS one-file app
+    fileVersion: "006-20261101",       // build number of THIS one-file app
     savePrefix: "KANTMICROGAME."       // best scores live at prefix + GAMEID + ".best"
 };
 
@@ -986,18 +1013,20 @@ wirePad("stage", function () {
 
    BOUNDARY WARNING (see READ ME FIRST above):
    * Each IIFE below is a sealed room. Do not reach across rooms.
-   * PANDASNACK is FROZEN — the owner asked that its art and numbers
-     stay exactly as they shipped in content 20261031-001.
-   * BOOPEEK and DUCKLINE are content 20261031-005 and were re-skinned
-     in the pre-Round-4 cleanup; their art is deliberately different
-     from the panda (lantern mouse / nightcap ghost / mallard family).
+   * PANDASNACK is FROZEN at content 001-20261031 — the owner asked
+     that its art and numbers stay exactly as they shipped.
+   * DUCKLINE is FROZEN at content 005-20261101 — the owner approved
+     its pond and family art as-is; do not restyle it.
+   * BOOPEEK is the live one (content 006-20261101): Pip the lantern
+     mouse chases Boo, a nightcap ghost, around five hiding spots.
+     Keep its art clearly different from the panda and the ducks.
    ================================================================== */
 
 (function () {
     "use strict";
 
     /* ------------------------------------------------------------------
-       MODULE: PANDASNACK — content 20261031-001 — FROZEN.
+       MODULE: PANDASNACK — content 001-20261031 — FROZEN.
        Owner request: do not restyle, rebalance or refactor this module.
        It is the reference game for the shared pixel language, and it
        intentionally paints through the shared stageCtx (legacy style).
@@ -1008,7 +1037,7 @@ wirePad("stage", function () {
 
     const SETTINGS = {
         gameName: "PANDASNACK",
-        versionNumber: "20261031-001",         // the game content build; the file build lives in APP.fileVersion
+        versionNumber: "001-20261031",         // the game content build; the file build lives in APP.fileVersion
         stageSize: 100,                        // design pixels; stage is a square
         saveKey: "KANTMICROGAME.PANDASNACK.best",
 
@@ -1611,7 +1640,7 @@ wirePad("stage", function () {
 })();
 
 /* ==================================================================
-   PART 5-B — BOOPEEK module (content 20261031-005)
+   PART 5-B — BOOPEEK module (content 006-20261101)
    ------------------------------------------------------------------
    MODULE BOUNDARY — READ BEFORE EDITING
    * Everything inside this IIFE is PRIVATE to BOOPEEK: SETTINGS, PAL,
@@ -1636,7 +1665,7 @@ wirePad("stage", function () {
 
     const SETTINGS = {
         gameName: "BOOPEEK",
-        versionNumber: "20261031-005",
+        versionNumber: "006-20261101",
         stageSize: 100,
         saveKey: "KANTMICROGAME.BOOPEEK.best",
 
@@ -1645,12 +1674,28 @@ wirePad("stage", function () {
             pokeReach: 20,
             goalPokes: 10,
             pokeCooldownSeconds: 0.10,
-            wiggleSeconds: 0.34
+            wiggleSeconds: 0.34,
+            /* peek-a-boo rhythm: a tell, a window to poke, then a hide */
+            peekTellSeconds: 0.26,
+            peekVisibleMinSeconds: 1.15,
+            peekVisibleMaxSeconds: 1.80,
+            peekHiddenMinSeconds: 0.30,
+            peekHiddenMaxSeconds: 0.60,
+            pokePoofSeconds: 0.16
         },
 
         worldSettings: {
             startX: 26, startY: 56,
-            ghostHomeX: 78, ghostHomeY: 46
+            /* Boo hides around the nursery floor and pops out one spot at a
+               time. Every spot is reachable from Pip's floor band. */
+            booSpots: [
+                { x: 78, y: 46 },   // the cupboard mouth
+                { x: 16, y: 40 },   // the window sill
+                { x: 5,  y: 52 },   // behind the plant
+                { x: 40, y: 72 },   // over the rug
+                { x: 66, y: 74 }    // behind the book
+            ],
+            booSpotMaxJump: 55      // prefer a nearby next spot, so chasing is fair
         },
 
         roundTimeLimitSeconds: 20,
@@ -1703,6 +1748,11 @@ wirePad("stage", function () {
     let ghostBlinkTimer = 2.4;
     let ghostBlinking = false;
     let ghostBlinkLeft = 0;
+    /* Boo plays peek-a-boo: hidden -> tell -> peek -> hidden ... */
+    let booSpotIndex = 0;
+    let booPhase = "hidden";
+    let booPhaseT = 0;
+    let booPhaseLen = 0.4;
     let peekSparkles = [];
     let peekRings = [];
     let accumulator = 0;
@@ -1813,6 +1863,10 @@ wirePad("stage", function () {
         lastPokeAt = -99;
         ghostBlinking = false;
         ghostBlinkLeft = 0;
+        booSpotIndex = 0;
+        booPhase = "tell";
+        booPhaseT = 0;
+        booPhaseLen = PLAYER.peekTellSeconds;
         peekSparkles = [];
         peekRings = [];
         accumulator = 0;
@@ -1831,22 +1885,76 @@ wirePad("stage", function () {
         syncChrome(true);
     }
 
+    /* ---------- BOOPEEK peek-a-boo cycle ---------- */
+
+    function booSpot() { return WORLD.booSpots[booSpotIndex]; }
+
+    function pickBooSpot() {
+        const spots = WORLD.booSpots;
+        if (spots.length < 2) return;
+        const here = spots[booSpotIndex];
+        const near = [];
+        for (let i = 0; i < spots.length; i++) {
+            if (i === booSpotIndex) continue;
+            const d = Math.hypot(spots[i].x - here.x, spots[i].y - here.y);
+            if (d <= WORLD.booSpotMaxJump) near.push(i);
+        }
+        const pool = near.length ? near : spots.map(function (_, i) { return i; })
+            .filter(function (i) { return i !== booSpotIndex; });
+        booSpotIndex = pool[Math.floor(Math.random() * pool.length)];
+    }
+
+    function booPopSparkles() {
+        const spot = booSpot();
+        const cx = spot.x + 6.5, cy = spot.y + 9;
+        peekRings.push({ x: cx, y: cy, t: 0, life: 0.34 });
+        for (let i = 0; i < 4; i++) {
+            peekSparkles.push({
+                x: cx - 3 + (Math.random() * 6 - 3),
+                y: cy - 3 + (Math.random() * 6 - 3),
+                t: 0, life: 0.38
+            });
+        }
+    }
+
+    function updateBooCycle(dt) {
+        booPhaseT += dt;
+        if (booPhaseT < booPhaseLen) return;
+        booPhaseT = 0;
+        if (booPhase === "hidden") {
+            pickBooSpot();
+            booPhase = "tell";
+            booPhaseLen = PLAYER.peekTellSeconds;
+        } else if (booPhase === "tell") {
+            booPhase = "peek";
+            booPhaseLen = PLAYER.peekVisibleMinSeconds +
+                Math.random() * (PLAYER.peekVisibleMaxSeconds - PLAYER.peekVisibleMinSeconds);
+            booPopSparkles();
+        } else {
+            booPhase = "hidden";
+            booPhaseLen = PLAYER.peekHiddenMinSeconds +
+                Math.random() * (PLAYER.peekHiddenMaxSeconds - PLAYER.peekHiddenMinSeconds);
+        }
+    }
+
     /* Boo floats, bobs and does a happy hop after a poke. */
     function ghostAnchor() {
+        const spot = booSpot();
         const bob = Math.round(Math.sin(peekClock * 2.1) * 2);
         const hop = giggleT > 0
             ? -Math.round(Math.sin((1 - giggleT / PLAYER.wiggleSeconds) * Math.PI) * 2)
             : 0;
         return {
-            x: WORLD.ghostHomeX,
-            y: WORLD.ghostHomeY + bob + hop,
-            cx: WORLD.ghostHomeX + 6.5,
-            cy: WORLD.ghostHomeY + bob + hop + 9
+            x: spot.x,
+            y: spot.y + bob + hop,
+            cx: spot.x + 6.5,
+            cy: spot.y + bob + hop + 9
         };
     }
 
     function triggerPoke() {
         if (peekState !== STATE.PLAY) return false;
+        if (booPhase !== "peek") return false;
         if (peekClock - lastPokeAt < PLAYER.pokeCooldownSeconds) return false;
         const ghost = ghostAnchor();
         const dx = ghost.cx - (pip.x + 6.5);
@@ -1864,6 +1972,10 @@ wirePad("stage", function () {
                 t: 0, life: 0.45
             });
         }
+        /* a short happy hop, then Boo vanishes and hides somewhere new */
+        booPhase = "peek";
+        booPhaseT = 0;
+        booPhaseLen = PLAYER.pokePoofSeconds;
         syncChrome(true);
         return true;
     }
@@ -1904,6 +2016,7 @@ wirePad("stage", function () {
 
         updatePipBlink(dt);
         updateGhostBlink(dt);
+        updateBooCycle(dt);
 
         if (giggleT > 0) giggleT -= dt;
         peekRoundT += dt;
@@ -2082,7 +2195,22 @@ wirePad("stage", function () {
         ctx.fillRect(68, 87, 7, 1);
     }
 
+    function drawBooTell(ctx) {
+        const spot = booSpot();
+        const cx = Math.round(spot.x + 6), cy = Math.round(spot.y + 8);
+        const wide = Math.floor(peekClock * 12) % 2 === 0;
+        const r = wide ? 3 : 2;
+        ctx.fillStyle = PAL.booSparkle;
+        ctx.fillRect(cx - r, cy, 1, 1);
+        ctx.fillRect(cx + r, cy, 1, 1);
+        ctx.fillRect(cx, cy - r, 1, 1);
+        ctx.fillRect(cx, cy + r, 1, 1);
+        ctx.fillStyle = PAL.booSparkleWhite;
+        if (!wide) ctx.fillRect(cx, cy, 1, 1);
+    }
+
     function drawGhost(ctx) {
+        if (booPhase !== "peek") return;
         const g = ghostAnchor();
         /* soft contact shadow, kept right under Boo's hem (not on the floor) */
         paintRoundBlob(ctx, g.x + 2, g.y + 16, 9, 2, "rgba(20,16,40,0.32)");
@@ -2174,7 +2302,7 @@ wirePad("stage", function () {
     function paintPeekTitle(ctx) {
         drawPeekPlate(ctx, 8, 32, 0.80);
         paintPixelText(ctx, "BOOPEEK", 50, 13, PAL.booTextPink, PAL.booGhostDark, 2);
-        paintPixelText(ctx, "POKE THE SHY GHOST", 50, 29, PAL.booText, null, 1);
+        paintPixelText(ctx, "POKE HIM WHEN HE POPS OUT", 50, 29, PAL.booText, null, 1);
         if (Math.floor(peekClock / 0.55) % 2 === 0) {
             drawPeekPlate(ctx, 80, 12, 0.72);
             paintPixelText(ctx, "PRESS ANY KEY OR TAP", 50, 84, PAL.booText, PAL.booGhostDark, 1);
@@ -2203,6 +2331,7 @@ wirePad("stage", function () {
 
     function paint(ctx) {
         drawRoom(ctx);
+        if (booPhase === "tell") drawBooTell(ctx);
         drawGhost(ctx);
         drawPip(ctx);
         drawPeekEffects(ctx);
@@ -2253,7 +2382,7 @@ wirePad("stage", function () {
             bestEl.textContent = String(shownBest);
         }
         let msg;
-        if (peekState === STATE.PLAY) msg = "Pip tiptoes in — poke Boo before the clock runs out!";
+        if (peekState === STATE.PLAY) msg = "Boo plays peek-a-boo — poke him when he pops out!";
         else if (peekState === STATE.TITLE) msg = "press any key or tap to start";
         else if (peekWin) msg = "boo! you beat the goal — try to beat your score!";
         else msg = "boo! time ran out — try again!";
@@ -2318,7 +2447,7 @@ wirePad("stage", function () {
         versionNumber: SETTINGS.versionNumber,
         name: "Boo Peek",
         tagline: "poke the nightcap ghost",
-        concept: "Pip the lantern mouse tiptoes through a midnight nursery to poke Boo, a shy nightcap ghost.",
+        concept: "Pip the lantern mouse chases Boo, a shy nightcap ghost, around a midnight nursery — poke him whenever he pops out of hiding.",
         actionLabel: "POKE",
         hint: "desktop: WASD move · SPACE or tap stage to poke · R restart · ESC shelf",
         previewPaint: paintBoopeekPreview,
@@ -2329,7 +2458,7 @@ wirePad("stage", function () {
 
 
 /* ==================================================================
-   PART 5-C — DUCKLINE module (content 20261031-005)
+   PART 5-C — DUCKLINE module (content 005-20261101) — FROZEN
    ------------------------------------------------------------------
    MODULE BOUNDARY — READ BEFORE EDITING
    * Everything inside this IIFE is PRIVATE to DUCKLINE: SETTINGS, PAL,
@@ -2350,11 +2479,18 @@ wirePad("stage", function () {
 (function () {
     "use strict";
 
+    /* ------------------------------------------------------------------
+       MODULE: DUCKLINE — content 005-20261101 — FROZEN.
+       Owner request (build 006): the sunny pond, the mallard mother and
+       the three ducklings are approved as-is. Do not restyle, rebalance
+       or refactor this module; ask the owner before touching its art.
+       ------------------------------------------------------------------ */
+
     /* ---------- DUCKLINE settings (private) ---------- */
 
     const SETTINGS = {
         gameName: "DUCKLINE",
-        versionNumber: "20261031-005",
+        versionNumber: "005-20261101",
         stageSize: 100,
         saveKey: "KANTMICROGAME.DUCKLINE.best",
 

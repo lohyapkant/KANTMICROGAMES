@@ -1,9 +1,9 @@
 Prompt ID: P-05
-Build: 20261031-005 (special in-between cleanup, before Round 4)
+Build: 005-20261101 (special in-between cleanup, before Round 4)
 Date first saved: 2026-11-01
 Tool and model that saved this copy: DeepSeek V4.1 Flash Free (OpenCode)
 ------------------------------------------------------------
-PROMPT ID: P-05 BUILD: 20261031-005 NAME: cleanup-before-round-4
+PROMPT ID: P-05 BUILD: 005-20261101 NAME: cleanup-before-round-4
 
 PART 1. TASK (owner's request, condensed)
 
@@ -33,13 +33,13 @@ PART 2. WHAT WAS BUILT
 
 * Documentation: README rewritten for all three games (concept, controls, art
   highlights, module-boundary warning, models table through -005, build history,
-  technical appendix). CHANGELOG entry 20261031-005 added; 20261031-004 marked
+  technical appendix). CHANGELOG entry 005-20261101 added; 004-20261101 marked
   superseded for the file build and for BOOPEEK/DUCKLINE art.
-* BOOPEEK re-skin (module content 20261031-005): Pip the lantern mouse (cream fur, pink
+* BOOPEEK re-skin (module content 005-20261101): Pip the lantern mouse (cream fur, pink
   inner ears, red scarf, glowing lantern) and Boo the nightcap ghost, in a midnight
   nursery (moonlit window, string lights, framed heart, clock, lived-in cupboard, plant,
   rug, toy ball, book). Round 20 s; goal 10 pokes is a target, not a cap.
-* DUCKLINE re-skin (module content 20261031-005): sunny top-down pond (water bands,
+* DUCKLINE re-skin (module content 005-20261101): sunny top-down pond (water bands,
   glints, lily pads, lotus, cattails, frog, flowered banks, dragonfly); a mallard mother
   and three ducklings with silly accessories (red bow, leaf hat, tuft) that fall into a
   trail-following waddling line when collected. Round 22 s; GO is a quack boost.

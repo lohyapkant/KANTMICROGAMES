@@ -10,8 +10,8 @@ PART 1. TASK
 
 The owner continued the round-by-round micro game series: Round 3 — build the third
 micro game, DUCKLINE, as a module inside the one-file app (`KANTMICROGAME/index.html`,
-build 20261031-003) that already hosts PANDASNACK (module content 20261031-001) and
-BOOPEEK (module content 20261031-003).
+build 003-20261031) that already hosts PANDASNACK (module content 001-20261031) and
+BOOPEEK (module content 003-20261031).
 
 The chosen concept from the backlog: "DUCKLINE — a mother duck crosses a pond; collected
 ducklings waddle in a line behind her" — verb: WASD lead-a-chain.
@@ -22,8 +22,8 @@ The build task:
     SETTINGS, palette, state, duckling line, round timer — registered into the GAMES
     registry via the module contract (start/stop/restart/update/paint/onDir/onAction/
     onStageTap/onAnyKey plus name, tagline, concept, actionLabel, hint, versionNumber,
-    previewPaint). Module content version 20261031-004; the file itself stays at
-    build 20261031-003 until the next finished build stamps it.
+    previewPaint). Module content version 004-20261101; the file itself stays at
+    build 003-20261031 until the next finished build stamps it.
 (b) Controls: WASD / arrows lead the mother duck; the shared action button (GO) makes her
     step across the pond; R restarts instantly; ESC to shelf; stage tap = action.
 (c) Game shape: mother duck + trailing ducklings in a waddling line; the round is
@@ -45,7 +45,7 @@ PART 3. NOTES KEPT FOR THE OWNER
 
 * The owner asked that the duration taken to build/process and the token count be recorded
   in the CHANGELOG for every build; that convention is followed from Round 0 and is on
-  record for build 20261031-003 and onward.
+  record for build 003-20261031 and onward.
 * A headless smoke test (stubbed DOM, real script) ran the full loop for the shipped games;
   a hands-on phone (Safari) play test is still pending and honestly noted.
 * Round 4 (next): a fourth module from the backlog (SNAILRACE, HUGPARADE, CATNAPCATCH or

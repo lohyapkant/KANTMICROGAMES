@@ -2,7 +2,7 @@ Game name: PANDASNACK
 Prompt ID: P-01
 Round: 1
 Date first saved: 2026-10-31
-Tool and model that saved this copy: GLM-5.3-Flash Free (OpenCode)
+Tool and model that saved this copy: DeepSeek V4.1 Flash Free (OpenCode) — corrected in build 006 (originally recorded as GLM-5.3 Flash Free)
 ------------------------------------------------------------
 PROMPT ID: P-01 ROUND: 1 NAME: pandasnack GAME NAME: PANDASNACK
 

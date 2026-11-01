@@ -1,6 +1,6 @@
 Game name: KANTMICROGAME (application) / PANDASNACK (module content)
 Prompt ID: P-02
-Round: 1.5 — "the one-file pivot" (build 20261031-002)
+Round: 1.5 — "the one-file pivot" (build 002-20261031)
 Date first saved: 2026-10-31
 Tool and model that saved this copy: GLM-5.3-Flash Free (OpenCode)
 ------------------------------------------------------------
@@ -15,14 +15,14 @@ internally to the KANTMICROGAMES folder."
 
 PART 2. WHAT THIS REWRITE MEANS
 
-1. The micro games no longer live one-folder-per-game. From build 20261031-002 the
+1. The micro games no longer live one-folder-per-game. From build 002-20261031 the
    arcade shelf AND every game live inside the single `index.html`.
 2. The folder beside the file keeps only documentation: README.md, CHANGELOG.md,
    plans/ (v1 history + this v2) and prompts/.
 3. The owner handles git/GitHub themselves: we do not commit, push or touch anything
    outside the KANTMICROGAME project folder.
 
-PART 3. BUILD TASK (ROUND 1.5 = BUILD 20261031-002)
+PART 3. BUILD TASK (ROUND 1.5 = BUILD 002-20261031)
 
 (a) Rewrite `index.html` as the one-file app: shelf screen + game screen that swap
     inside the page; ONE shared stage canvas, ONE shared pad deck, ONE shared input
@@ -31,7 +31,7 @@ PART 3. BUILD TASK (ROUND 1.5 = BUILD 20261031-002)
     palette, maps and state) registered into a GAMES registry through a small module
     contract (start/stop/restart/update/paint/onDir/onAction/onStageTap/onAnyKey and
     shelf metadata). PANDASNACK's game content is unchanged — its module version stays
-    20261031-001 while the FILE steps to 20261031-002.
+    001-20261031 while the FILE steps to 002-20261031.
 (c) Cards on the shelf now open games in-page (no links between files, no iframes),
     with a ⌂ SHELF back button, ESC-to-shelf, and a tiny hash router so that
     opening `index.html#game=PANDASNACK` lands straight in the game.
