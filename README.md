@@ -13,9 +13,10 @@ shelf.
 ## Models used thus far
 
 All builds so far were made with the same model, **GLM-5.3 Flash Free** (full name:
-GLM-5.3 Flash Free), through the **OpenCode** tool. Per the owner's standing request, the
-model, effort, duration and token count are recorded in the CHANGELOG, the plan, the
-README and the prompt copies.
+GLM-5.3 Flash Free), through the **OpenCode** tool — except build 20261031-004, which is
+now recorded with the current model, **Flint 40B Free**, also through the **OpenCode**
+tool. Per the owner's standing request, the model, effort, duration and token count are
+recorded in the CHANGELOG, the plan, the README and the prompt copies.
 
 | Build | Full model name | Effort | Duration | Tokens |
 |---|---|---|---:|---:|
@@ -23,9 +24,10 @@ README and the prompt copies.
 | 20261031-001 | GLM-5.3 Flash Free (OpenCode) | Round 1 — PANDASNACK module + docs | not recorded | not recorded |
 | 20261031-002 | GLM-5.3 Flash Free (OpenCode) | Round 1.5 — one-file pivot rewrite | not recorded | not recorded |
 | 20261031-003 | GLM-5.3 Flash Free (OpenCode) | Round 2 — BOOPEEK module + wiring + docs + verification | **~45 min** | **~27,000** |
+| 20261031-004 | Flint 40B Free (OpenCode) | Round 3 — DUCKLINE module add | **~25 min** | **~20,000** |
 
-Build 20261031-003 is the first whose effort, duration and token count were recorded; the
-earlier builds predate that recording.
+Builds 20261031-003 and 20261031-004 have their effort, duration and token counts recorded;
+the earlier builds predate that recording.
 
 ## How to open and play
 

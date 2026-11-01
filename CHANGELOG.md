@@ -1,5 +1,25 @@
 # KANTMICROGAME Changelog
 
+## 20261031-004 — 2026-11-01
+
+Built from prompt: P-04 (Round 3 — DUCKLINE module add, the duck-family micro game)  
+Tool and model: Flint 40B Free (OpenCode) — recorded per the owner's standing request in changelog, README, plan and prompt copies  
+Games in the one file: 3 (PANDASNACK module content 20261031-001, BOOPEEK module content 20261031-003, DUCKLINE module content 20261031-004; file build 20261031-003)
+
+### Added
+
+- Added the DUCKLINE module as the third game inside the one-file app (module content 20261031-004): a mother duck crosses the pastel pond with three ducklings in a waddling line behind her (WASD lead-a-chain), timer-limited round (12 s), victory at the far shore.
+
+### Documentation
+
+- Added prompt copy: prompts/P-04_round_3_duckline.txt.
+- Updated the project README (round 3 status), the current plan (v2 backlog row for DUCKLINE).
+
+### Build record (owner request: duration + tokens)
+
+- Duration taken to build this round: about 25 minutes (DUCKLINE module add, prompt and plan updates, verification).
+- Tokens used in this change: approximately 20,000 (DUCKLINE module add, prompt and plan updates, verification).
+
 ## 20261031-003 — 2026-10-31
 
 Built from prompt: P-03 (Round 2 — BOOPEEK, the poke-the-ghost micro game)  
