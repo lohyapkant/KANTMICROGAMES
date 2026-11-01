@@ -29,7 +29,7 @@ Two older forms are kept deliberately and are not typos:
 Everything current — the app, README, CONTROLS, plan and the build records from 010 on —
 uses **KANTMICROGAMES**.
 
-**Current state:** build `010-20261101` — the one-file app with **five** playable games
+**Current state:** build `011-20261101` — the one-file app with **six** playable games
 and the responsive shell from build 009:
 
 | Game | Module content | One-line pitch |
@@ -37,16 +37,18 @@ and the responsive shell from build 009:
 | **PANDASNACK** | `007-20261101` (frozen) | Munch bamboo, dodge wasps, keep three hearts. (Live score HUD added in 007). |
 | **BOOPEEK** | `006-20261101` (frozen) | Pip the lantern mouse chases Boo, a peek-a-boo nightcap ghost. |
 | **DUCKLINE** | `005-20261101` (frozen) | Mama mallard gathers three ducklings and leads them home. |
-| **SPROUTUP** | `007-20261101` | Sproutlet the baby seedling gathers raindrops to bloom in the sun. |
-| **SLIMEHOP** | `010-20261101` | Slimey hops a 3×3 lily-pad pond, blooming every pad before a sleepy snail undoes the work. |
+| **SPROUTUP** | `007-20261101` (frozen) | Sproutlet the baby seedling gathers raindrops to bloom in the sun. |
+| **SLIMEHOP** | `010-20261101` (frozen) | Slimey hops a 3×3 lily-pad pond, blooming every pad before a sleepy snail undoes the work. |
+| **SNAILRACE** | `011-20261101` | Nibbles races two garden snails to a picnic strawberry; lettuce zooms, salt stings. |
 
-Build `010-20261101` adds **SLIMEHOP** as the fifth module and renames the on-screen brand,
-save-key prefix and console tag to **KANTMICROGAMES**. The shell is unchanged. The four
-older game IIFEs are byte-identical apart from their unused `saveKey` label string (proved
-by SHA-256 with that label normalised). Build `009-20261101` was the **responsive-shell
-build**: the shelf and game screen were rebuilt for every screen from 280 × 653 to
-3440 × 1440 — no horizontal overflow, no page scroll during play, whole-number stage
-scaling, safe-area padding, input-aware pads and hints, a persisted pads/left-hand
+Build `011-20261101` adds **SNAILRACE** as the sixth module and freezes **SPROUTUP** and
+**SLIMEHOP** at the owner's request. The shell is unchanged, and all five frozen game IIFEs
+are byte-identical to build 010 (proved by SHA-256 of each IIFE; only comments outside the
+IIFEs changed). Build `010-20261101` added SLIMEHOP and renamed the on-screen brand,
+save-key prefix and console tag to **KANTMICROGAMES**. Build `009-20261101` was the
+**responsive-shell build**: the shelf and game screen were rebuilt for every screen from
+280 × 653 to 3440 × 1440 — no horizontal overflow, no page scroll during play, whole-number
+stage scaling, safe-area padding, input-aware pads and hints, a persisted pads/left-hand
 preference, a pause on tab hide, and keyboard shortcuts that no longer leak into a game.
 Build `007-20261101` was the Round 4 build (SPROUTUP added, BOOPEEK frozen, PANDASNACK HUD
 added and refrozen); build 008 was the documentation cleanup. See
@@ -75,6 +77,7 @@ under build 008, and the Qwen3.8-Flash documentation pass under build 009).
 | **008-20261101** | **Claude Opus 4.6 Thinking (Antigravity) / Qwen3.8-Flash (Qoder CLI)** | **Documentation cleanup: GitHub/public-site/model links, `deploy/` move documented, MIT license in index.html, GPT-OSS 120B attempt recorded; recovery pass closed the remaining gaps** | **~20 min + ~15 min** | **~60,000 + ~30,000 est.** |
 | **009-20261101** | **Qwen3.8-Flash (Qoder CLI)** — prompt authored by **Claude.ai Sonnet 5.5 Extra** | **Responsive shell: shelf, no-scroll game screen, measured stage fit, input-aware pads/hints, keyboard hygiene, lifecycle pause, sliding direction cluster, accessibility polish; 24-viewport verification; new CONTROLS.md and tests** | **~30 min wall-clock** | **19.7809 credits used** (157 billable requests; tokens not exposed by Qoder) |
 | **010-20261101** | **Qwen3.8-Flash (Qoder CLI)** | **Round 5 — SLIMEHOP module (lily-pad hopping, bloom states, stomp + snail saboteur, 30 s round), shelf card and preview; page brand, save prefix and console tag renamed to KANTMICROGAMES; all-viewport and touch verification** | **~30 min** | **9.0583 credits used** (186 billable requests; tokens not exposed by Qoder) |
+| **011-20261101** | **Qwen3.8-Flash (Qoder CLI)** | **Round 6 — SNAILRACE module (picnic-blanket race, lettuce zoom, salt lock, two rivals, 20 s), shelf card and preview; SPROUTUP and SLIMEHOP frozen; all-six-games, touch, viewport and balance verification** | **~30 min** | **8.2768 credits used** (115 billable requests; tokens not exposed by Qoder) |
 
 Notes on the `-005` record: duration is **active** working time measured across the two
 sittings that produced this build (2026-10-31 21:06 → 2026-11-01 09:18, owner breaks
@@ -121,18 +124,29 @@ normalised: byte-identical. The SLIMEHOP card preview and the game's in-stage HU
 inspected at 6× and 2× scale, and the game was played by keyboard and by touch in headless
 Chrome.
 
+Notes on the `-011` record: Round 6, built in one sitting by **Qwen3.8-Flash (Qoder CLI)**
+from the owner's request (saved as `P-11_snailrace.txt`). Duration is wall-clock from the
+request to the finished records (2026-11-01, 19:46 → 20:15 WIB, `~30 min`).
+Qoder exposes no token counts, so the record uses the same credits method as builds 009
+and 010: **8.2768 credits used** across 115 billable requests
+(19:46–20:12 WIB), summed from the per-request `credits` telemetry in the session
+transcript. The owner also asked that **SPROUTUP** and **SLIMEHOP** be frozen; both keep
+their content numbers (`007-20261101`, `010-20261101`) and all five frozen IIFEs were
+proved byte-identical to build 010. The owner's praise for SLIMEHOP is quoted verbatim in
+`MODELS.md`.
+
 ## How to open and play
 
 - **Play online:** <https://kantmicrogames.lohyapkant.workers.dev/> (hosted on
   [Cloudflare Workers](https://workers.cloudflare.com/)).
 - **Source code:** <https://github.com/lohyapkant/KANTMICROGAMES>
-- **Play offline:** double-click `deploy/index.html`. The shelf shows one card per game — PANDASNACK, BOOPEEK,
-  DUCKLINE, SPROUTUP and SLIMEHOP — with a code-drawn pixel preview, a concept line and the
-  best score, plus a dashed COMING SOON slot.
+- **Play offline:** double-click `deploy/index.html`. The shelf shows one card per game —
+  PANDASNACK, BOOPEEK, DUCKLINE, SPROUTUP, SLIMEHOP and SNAILRACE — with a code-drawn pixel
+  preview, a concept line and the best score, plus a dashed COMING SOON slot.
 - Click a card to open the game in the same page (no navigation, no iframes, no folders).
   `ESC` or the ⌂ SHELF button always brings you home.
 - Tip: open `deploy/index.html#game=PANDASNACK`, `#game=BOOPEEK`, `#game=DUCKLINE`,
-  `#game=SPROUTUP` or `#game=SLIMEHOP` to land straight in a game.
+  `#game=SPROUTUP`, `#game=SLIMEHOP` or `#game=SNAILRACE` to land straight in a game.
 - Every game: `W A S D` (+ arrow keys) move, `SPACE` or the action pad acts, `R` restarts
   instantly. On phones/tablets the four pads + action pad + RESTART appear automatically.
   A stage tap acts too.
@@ -151,6 +165,7 @@ Chrome.
 | DUCKLINE | swim | **GO** = quack boost (0.55 s at 1.7×, 2 s cooldown) | collect 3 ducklings and reach the far bank in 22 s |
 | SPROUTUP | weave | **REACH** = leap burst (0.5 s at 1.85×, 2 s cooldown) | gather 15 drops in 24 s to bloom into a sunny flower |
 | SLIMEHOP | hop pad to pad (one hop per press) | **STOMP** = bloom the pad underfoot (1.2 s cooldown) and stun a nearby snail | bloom all 9 pads in 30 s while the snail un-blooms them |
+| SNAILRACE | steer in four directions | **ZOOM** = 1.55× dash for 0.7 s (2.6 s cooldown) | reach the strawberry first in 20 s; lettuce +5 and a speed boost, salt slows |
 
 ## The seven rules
 
@@ -221,7 +236,7 @@ the GO boost shows a foam splash and a feather gauge top-left.
 > do not restyle, rebalance or refactor this module unless the owner asks. See the code
 > banner in PART 5.
 
-### SPROUTUP — module content `007-20261101`
+### SPROUTUP — module content `007-20261101` (frozen)
 
 **Sproutlet the seedling** weaves through a gentle summer rain shower to drink dewdrops
 and catch warm sunbeams before the sun settles. Gather **15 drops in 24 s** to bloom!
@@ -237,7 +252,11 @@ with a glorious 5-petal rose-pink flower crown with a golden center while warm m
 sunbeams stream down from above. Garden has a soft pastel sky with diagonal rain glints,
 mossy loam ground, and tiny clover sprouts.
 
-### SLIMEHOP — module content `010-20261101`
+> **Frozen by owner request (build 011).** The summer-rain bloom is approved as-is; do not
+> restyle, rebalance or refactor this module without owner permission. The IIFE is
+> byte-identical to build 010.
+
+### SLIMEHOP — module content `010-20261101` (frozen)
 
 **Slimey the springy slime** lives on a 3×3 pond of nine lily pads. Every direction press
 is exactly **one hop** (0.24 s arc); hopping into the pond edge is a harmless squash.
@@ -259,6 +278,40 @@ cream foot, sleepy eyes, a gentle wobble and dizzy stars when stunned. The in-st
 the same 3×5 pixel font as the other games (`BLOOM n/9`, `TIME n`), and the shelf card
 preview shows the slime, the bloom and the snail on their pads.
 
+> **Frozen by owner request (build 011).** The lily-pad bloom chase is approved as-is; do
+> not restyle, rebalance or refactor this module without owner permission. The IIFE is
+> byte-identical to build 010. The owner's praise for this game is quoted in `MODELS.md`.
+
+### SNAILRACE — module content `011-20261101`
+
+**Nibbles the garden snail** races **Crumb** and **Dottie** across a peach gingham picnic
+blanket toward a fat strawberry on the right. Steer with `W A S D`; each axis runs at
+6.8 px/s, so changing lanes never costs forward ground. Four lettuce leaves are
+scattered along the track: each is **+5** and a **1.1 s 1.7× boost**. Three salt spills
+sting — hitting one slows Nibbles to 0.35× for 1 s and locks the controls for **1.6 s**
+(stars spin overhead) while the rivals keep racing. **ZOOM** (`SPACE` / action pad / stage
+tap) gives a 0.7 s 1.55× burst on a **2.6 s cooldown**, shown as five readiness pips
+bottom-left.
+
+The race ends when Nibbles reaches the checkered ribbon at x 84 or when the **20 s** clock
+runs out. Finishing earns a placement bonus — **+120 / +70 / +30** for 1st / 2nd / 3rd —
+added to any lettuce points; the HUD shows the live place and clock. The best score is
+saved under `KANTMICROGAMES.SNAILRACE.best` (a full lettuce run plus first place is 140).
+Crumb and Dottie run at slightly different base speeds, weave gently, take random 1.5×
+boosts, and can also hit salt, so the race stays close without scripting a winner.
+
+**Pixel art:** a soft three-tone peach gingham cloth with chalk start dashes and a tiny
+crumb trail; a red-and-cream checkered finish ribbon; a 12×14 strawberry with a leafy crown,
+pale seeds and a highlight; bobbing lettuce leaves, salt piles with a white cap, shade and
+shadow, dust trails, speed lines and salt stars. The snails are 16×10 side-on sprites with
+a three-tone spiral shell, a cream foot, a forward head and two eye stalks; Nibbles has a
+coral shell, Crumb teal and Dottie lilac. The HUD, title (`SNAILRACE` / `RACE TO THE
+STRAWBERRY`) and over plates (`1ST PLACE!` / `2ND PLACE` / `3RD PLACE` / `TIME UP`) use the
+shared 3×5 pixel font. The shelf card preview shows all three snails, lettuce, salt and the
+strawberry on the cloth.
+
+> **Live module.** This is the newest game; its content number is the current build.
+
 ## How the one file is organized
 
 The file holds four layers:
@@ -277,8 +330,8 @@ helpers. The **only** legal handshake with the app is the module contract plus t
 pixel helpers, `readBest` / `saveBest`, and the three chrome elements `scoreEl`, `bestEl`,
 `msgEl`. Private names carry a game prefix on purpose (`panda` / `PANDA_*`, `peek` / `boo`
 / `pip` / `BOO_` / `PIP_*`, `duck` / `mama` / `DUCK_*`, `sprout` / `SPROUT_*`, `slime` /
-`SLIME_*`). New modules must paint with the `ctx` passed to `paint(ctx)` — the shared
-`stageCtx` habit is a PANDASNACK legacy only.
+`SLIME_*`, `race` / `RACE_*`). New modules must paint with the `ctx` passed to `paint(ctx)`
+— the shared `stageCtx` habit is a PANDASNACK legacy only.
 
 The same rules are repeated at the top of the `<script>` and above PART 5 in the code, so a
 future model or LLM meets them before touching anything.
@@ -297,7 +350,8 @@ future model or LLM meets them before touching anything.
 | 008 | done | Documentation cleanup: GitHub/public-site links added to all docs and index footer, `deploy/` move documented, MIT license header added to `index.html`, model links for educational reference, GPT-OSS 120B (Medium) attempt recorded. Started by Claude Opus 4.6 Thinking, gaps closed by a Qwen3.8-Flash recovery pass. |
 | 009 | done | Responsive shell (prompt by Claude.ai Sonnet 5.5 Extra, built by Qwen3.8-Flash): shelf and game screen fit 280–3440 px, no scroll during play, measured whole-number stage fit, safe areas, input-aware pads/hints + persisted preferences, keyboard shortcut hygiene, pause on hide/blur, sliding direction cluster, focus/live-region/reduced-motion polish. Game modules unchanged. |
 | 010 | done | Round 5: SLIMEHOP module added (nine-pad pond, hop/stomp, bloom states, snail saboteur, 30 s round, custom shelf preview and in-stage HUD); page brand, save-key prefix and console tag renamed to **KANTMICROGAMES** on a fresh page. Frozen modules unchanged apart from their unused `saveKey` labels. |
-| 011+ | next | Round 6 — a sixth module from the backlog (SNAILRACE, HUGPARADE or CATNAPCATCH, at the owner's pick). |
+| 011 | done | Round 6: SNAILRACE module added (peach gingham picnic-blanket race, three snails, lettuce zoom, salt sting, ZOOM action, 20 s round, custom shelf preview and in-stage HUD); SPROUTUP and SLIMEHOP frozen at the owner's request. Frozen modules proved byte-identical to build 010. |
+| 012+ | next | Round 7 — a seventh module from the backlog (HUGPARADE or CATNAPCATCH, at the owner's pick). |
 
 ## Build numbering and record-keeping
 
@@ -310,14 +364,15 @@ Build IDs are **`NNN-YYYYMMDD`** — for example `007-20261101`.
 - A game's `versionNumber` is the build in which that game's content last changed. A pure
   refactor that leaves a game's art and numbers identical does **not** bump it — DUCKLINE
   is frozen at `005-20261101`, BOOPEEK is frozen at `006-20261101`, PANDASNACK was updated
-  for live HUD score tracking and refrozen at `007-20261101`, and SPROUTUP is live at
-  `007-20261101`. SLIMEHOP is new at `010-20261101`. Builds 008 and 009 changed no game
-  content, and build 010 only replaced the four frozen modules' unused `saveKey` label
-  strings, so no existing module number moved.
+  for live HUD score tracking and refrozen at `007-20261101`, SPROUTUP is frozen at
+  `007-20261101`, SLIMEHOP is frozen at `010-20261101`, and SNAILRACE is new at
+  `011-20261101`. Builds 008 and 009 changed no game content; build 010 only replaced the
+  four frozen modules' unused `saveKey` label strings; build 011 changed no frozen module
+  content at all, so no existing module number moved.
 - Build 006 renamed the earlier builds from the old `YYYYMMDD-NNN` form to this one
   (`20261031-003` → `003-20261031`), and corrected builds 004/005 to their true finish
   date (2026-11-01).
-- Every finished build records **model, effort, duration and tokens** in four homes: this
+- Every finished build records **model, effort, duration and tokens/credits** in four homes: this
   README, `CHANGELOG.md`, the plan's tool log and the build's prompt copy. The same rule is
   written in a comment beside `APP.fileVersion` in `deploy/index.html` so a future model sees it.
 - **Documentation review/edit attempts are part of the record.** Every attempt to review,
@@ -335,7 +390,7 @@ run on the owner's repo (they upload/merge to GitHub themselves).
 
 ## Files in this folder
 
-- `deploy/index.html` — the one-file app (shelf + five games), build `010-20261101`.
+- `deploy/index.html` — the one-file app (shelf + six games), build `011-20261101`.
   Moved from the project root into `deploy/` for Cloudflare Workers deployment (see
   `wrangler.jsonc`).
 - `wrangler.jsonc` — Cloudflare Workers configuration pointing to the `deploy/` directory.
@@ -346,10 +401,11 @@ run on the owner's repo (they upload/merge to GitHub themselves).
 - `MODELS.md` — dated owner observations on model strengths (append-only).
 - `LICENSE` — MIT licence (© Loh Yap Kant).
 - `plans/micro-games.md`, `plans/micro-games-v2.md` — plan v1 (history) and v2 (current).
-- `tests/` — build 009 evidence: the responsive-shell test report, the real-device
-  checklist, three contact sheets (120 screenshots), eight full-size samples, and the
-  machine-readable results (verification JSON, frozen-module hashes). Documentation and
-  screenshots only — no app code.
+- `tests/` — verification evidence: the build-009 responsive-shell report, real-device
+  checklist, three contact sheets (120 screenshots), eight full-size samples and the
+  machine-readable results (verification JSON, frozen-module hashes), plus the build-011
+  SNAILRACE report and eight screenshots under `tests/screenshots/build-011/`.
+  Documentation and screenshots only — no app code.
 - `prompts/` — one prompt copy per build:
   - `P-00_round-0_project-kickoff.txt`
   - `P-01_round-1_pandasnack.txt`
@@ -363,6 +419,8 @@ run on the owner's repo (they upload/merge to GitHub themselves).
   - `P-09_responsive-shell.txt` (prompt authored by Claude.ai Sonnet 5.5 Extra, saved
     verbatim; executed by Qwen3.8-Flash / Qoder CLI)
   - `P-10_slimehop.txt` (owner's Round 5 request, saved verbatim; executed by
+    Qwen3.8-Flash / Qoder CLI)
+  - `P-11_snailrace.txt` (owner's Round 6 request, saved verbatim; executed by
     Qwen3.8-Flash / Qoder CLI)
 
 ## Prompt history
@@ -413,8 +471,8 @@ Copyright © 2026 **Loh Yap Kant**.
   `visualViewport` changes. Fixed-step update (60 steps/second) with capped catch-up,
   inside each module. All stage colors referenced by name from the game's own palette.
   `W A S D` + arrows move; `Space`/action pad is the action (dash / poke / quack boost /
-  reach / stomp); `R` restarts instantly; stage tap = the module's action; `ESC` or ⌂ SHELF
-  exits home. Full input details: [`CONTROLS.md`](CONTROLS.md).
+  reach / stomp / zoom); `R` restarts instantly; stage tap = the module's action; `ESC` or
+  ⌂ SHELF exits home. Full input details: [`CONTROLS.md`](CONTROLS.md).
 - **Responsive shell (`-009`):** viewport `width=device-width, initial-scale=1.0,
   viewport-fit=cover` (zoom allowed); the game screen is a `100dvh` app shell with a
   `100vh` fallback, `overscroll-behavior: none`, `touch-action: none` on stage and pads;
@@ -445,12 +503,19 @@ Copyright © 2026 **Loh Yap Kant**.
 - **DUCKLINE settings (module content `005-20261101`, frozen):** swim speed 26 px/s, boost 1.7×
   for 0.55 s with a 2 s cooldown, collect radius 8 px, 3 ducklings, line spacing 8 px,
   round 22 s, start `(8,50)`, shore at x 84; save key `KANTMICROGAMES.DUCKLINE.best`.
-- **SPROUTUP settings (module content `007-20261101`):** move speed 30 px/s, reach 1.85×
-  for 0.50 s with a 2.0 s cooldown, collect radius 8 px, burr hit radius 6 px, goal 15
+- **SPROUTUP settings (module content `007-20261101`, frozen):** move speed 30 px/s, reach
+  1.85× for 0.50 s with a 2.0 s cooldown, collect radius 8 px, burr hit radius 6 px, goal 15
   drops, round 24 s, start `(44,60)`, soil at y 74; save key `KANTMICROGAMES.SPROUTUP.best`.
-- **SLIMEHOP settings (module content `010-20261101`):** hop 0.24 s with an 11 px arc,
+- **SLIMEHOP settings (module content `010-20261101`, frozen):** hop 0.24 s with an 11 px arc,
   landing squash 0.14 s, 3 × 3 pads at x `[26, 50, 74]` and y `[38, 59, 80]`, pad 18 × 12,
   start pad 4, stomp cooldown 1.2 s, stun 1.8 s within 30 px, bloom step +10, win bonus
   +100, round 30 s; snail starts on pad 2, moves every 3.2 s easing to 1.5 s by 0.05 s per
   elapsed second (plus up to 0.5 s of jitter), takes 0.7 s per crawl and un-blooms the pad
   it reaches; save key `KANTMICROGAMES.SLIMEHOP.best`.
+- **SNAILRACE settings (module content `011-20261101`):** steer speed 6.8 px/s per axis
+  (lane changes cost no forward ground); track y 32–84, start `(14,57)`, finish x 84;
+  4 of 7 lettuce slots per race, lettuce +5 and a 1.1 s 1.7× boost; 3 of 6 salt slots,
+  salt 0.35× for 1.0 s and a 1.6 s lock; ZOOM 1.55× for 0.7 s with a 2.6 s cooldown;
+  rivals start `(11,42)` at 6.6 px/s and `(11,72)` at 6.9 px/s, weave ±3 px, take a 0.9 s
+  1.5× boost every 3.0–4.4 s and slow to 0.45× for 0.9 s on salt; placement bonuses
+  120 / 70 / 30; round 20 s; save key `KANTMICROGAMES.SNAILRACE.best`.

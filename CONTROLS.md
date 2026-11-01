@@ -2,11 +2,11 @@
 
 Which controls exist, how they behave on each kind of device, and why. The shell
 was made responsive and input-aware in build **009-20261101**. Build **010-20261101**
-adds the fifth game (SLIMEHOP) using the same contract and controls; the four older
-modules were not touched (PANDASNACK, BOOPEEK and DUCKLINE are frozen, and SPROUTUP
-needed no change).
+added the fifth game (SLIMEHOP) using the same contract and controls. Build
+**011-20261101** adds the sixth game (SNAILRACE) with the same contract and freezes
+SPROUTUP and SLIMEHOP; the five older modules were not touched.
 
-## One table for all five games
+## One table for all six games
 
 | Game | Move | Action (`SPACE`, action pad, stage tap) | Goal |
 |---|---|---|---|
@@ -15,11 +15,14 @@ needed no change).
 | DUCKLINE | swim with `W A S D` / arrows / the direction pad | **GO** — quack boost, 0.55 s at 1.7×, 2 s cooldown | gather three ducklings, reach the far bank in 22 s |
 | SPROUTUP | weave with `W A S D` / arrows / the direction pad | **REACH** — leap burst, 0.5 s at 1.85×, 2 s cooldown | gather 15 drops in 24 s to bloom |
 | SLIMEHOP | hop one pad per press with `W A S D` / arrows / the direction pad | **STOMP** — bloom the pad underfoot, 1.2 s cooldown, stuns a nearby snail | bloom all nine pads in 30 s before the snail eats them |
+| SNAILRACE | steer with `W A S D` / arrows / the direction pad | **ZOOM** — 1.55× burst for 0.7 s, 2.6 s cooldown | reach the strawberry first in 20 s; lettuce boosts, salt locks |
 
-The action button carries the game's own label (DASH / POKE / GO / REACH / STOMP), so
-one pad serves every game. SLIMEHOP is the one game where a direction press is a single
+The action button carries the game's own label (DASH / POKE / GO / REACH / STOMP / ZOOM),
+so one pad serves every game. SLIMEHOP is the one game where a direction press is a single
 **discrete hop** rather than a continuous walk: holding a direction does not repeat, and
-each new press hops one pad (or bonks harmlessly at the pond edge).
+each new press hops one pad (or bonks harmlessly at the pond edge). SNAILRACE steers
+continuously on both axes; holding right and up moves diagonally with each axis at full
+speed, so a lane change does not cost forward ground.
 
 ## Input devices
 

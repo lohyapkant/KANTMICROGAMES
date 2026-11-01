@@ -26,6 +26,115 @@
   this changelog, and never as a permanent ranking.
 - The same rules are repeated beside `APP.fileVersion` in `deploy/index.html`.
 
+## 011-20261101 — 2026-11-01 (Round 6 — SNAILRACE, SPROUTUP + SLIMEHOP frozen)
+
+Built from prompt: P-11 (the owner's Round 6 request, saved verbatim in
+`prompts/P-11_snailrace.txt`)  
+Tool and model: **Qwen3.8-Flash (Qoder CLI)** — recorded per the owner's standing request in
+changelog, README, plan, MODELS.md and the prompt copy  
+Games in the one file: 6 (PANDASNACK 007-20261101 **frozen**, BOOPEEK 006-20261101
+**frozen**, DUCKLINE 005-20261101 **frozen**, SPROUTUP 007-20261101 **frozen**,
+SLIMEHOP 010-20261101 **frozen**, **SNAILRACE 011-20261101**; file build
+**011-20261101**)
+
+### Added — SNAILRACE module (PART 5-F)
+
+- A new sealed IIFE using only the module contract, the shared pixel helpers,
+  `readBest` / `saveBest` and `scoreEl` / `bestEl` / `msgEl`; its names are sealed in the
+  IIFE, with settings, state and sprite maps using the `race` / `RACE_*` prefix.
+- **Race:** Nibbles (coral shell) races Crumb (teal) and Dottie (lilac) across a peach
+  gingham picnic blanket from x 14 to the checkered ribbon at x 84. Steering runs each
+  axis at 6.8 px/s, so lane changes cost no forward ground. The round is **20 s**.
+- **Lettuce:** 4 of 7 slots per race; each leaf is **+5** and a **1.1 s 1.7×** boost with a
+  ring and leaf sparkles.
+- **Salt:** 3 of 6 slots per race; a spill slows Nibbles to **0.35× for 1.0 s** and locks
+  steering for **1.6 s** with spinning salt stars. Rivals can hit salt too (0.45× for
+  0.9 s), so the hazards are shared.
+- **ZOOM** (`SPACE`, action pad or stage tap): **1.55× for 0.7 s** on a **2.6 s cooldown**,
+  shown as five readiness pips bottom-left.
+- **Rivals:** base speeds 6.6 and 6.9 px/s, ±3 px lane weave, random 0.9 s 1.5× boosts
+  every 3.0–4.4 s, and a finish hop at x 84.
+- **Scoring:** lettuce points plus a placement bonus of **120 / 70 / 30** for 1st / 2nd /
+  3rd, awarded only on a real finish; a timeout reports the live place. Best saved under
+  `KANTMICROGAMES.SNAILRACE.best`.
+- **In-stage HUD:** `PLACE n/3` and `TIME n` on an opaque top plate, five ZOOM pips on a
+  lower plate, and `SNAILRACE` / `RACE TO THE STRAWBERRY`, `1ST PLACE!` / `2ND PLACE` /
+  `3RD PLACE` / `TIME UP` plates in the shared 3×5 pixel font.
+- **Pixel art:** three-tone peach gingham cloth, chalk start dashes, a red-and-cream
+  checkered ribbon, a 12×14 strawberry with leafy crown, pale seeds and a shine, bobbing
+  lettuce, salt piles with cap/shade/shadow, dust trails, speed lines, salt stars and soft
+  shadows. The snail is a **16×10** side-on sprite with a three-tone spiral shell, cream
+  foot, forward head and two eye stalks, recoloured for the three racers.
+- **Shelf:** a custom 200×96 preview (cloth, start dashes, ribbon, strawberry, lettuce,
+  salt, three snails at 3×), a concept line and the `ZOOM` action label.
+- While polishing, four visual/gameplay issues were found by eye and by tests and fixed:
+  the first 14×10 snail looked like a detached shell with floating eye dots (redrawn as
+  16×10 with a head, neck and stalks); the gingham and HUD plate were too heavy (softer
+  cloth, plate alpha 0.9); a salt pile crowded the finish ribbon (last slot moved from
+  `[82,72]` to `[76,78]`); and normalising diagonal speed made a straight race
+  unwinnable, so each axis now runs at full speed.
+
+### Changed — SPROUTUP and SLIMEHOP frozen
+
+- The owner froze **SPROUTUP** (content `007-20261101`) and **SLIMEHOP** (content
+  `010-20261101`) at the same time as requesting Round 6. Both keep their content numbers,
+  their art and their tuning; their section headers and freeze banners now say FROZEN.
+- All five frozen IIFEs (PANDASNACK, BOOPEEK, DUCKLINE, SPROUTUP, SLIMEHOP) were compared
+  with build 010 by extracting each IIFE: **byte-identical** (24,903 / 29,235 / 27,309 /
+  22,575 / 28,652 characters). The only edits in the frozen region are comments outside
+  the IIFEs (section headers and the shared boundary warning).
+
+### Note — concept details beyond the backlog sketch
+
+The plan's backlog line for SNAILRACE read "Race three snails; food pellets speed you up,
+salt slows — tiny arcade." The shipped game keeps the three snails and the salt, names the
+racers (Nibbles, Crumb, Dottie), uses lettuce instead of generic pellets, and adds the
+shared-contract **ZOOM** action so the action button stays meaningful in every game. A
+straight race is winnable but not guaranteed; salt and rival boosts decide the finish. The
+backlog row in the plan is updated to match.
+
+### Verification and limits
+
+- `node --check` on the extracted inline script (203,320 characters): clean.
+- Headless **Chrome 156** via Playwright-core 1.64.1, loading `file://`; console and page
+  errors collected on every run — zero.
+- SNAILRACE full loop: shelf card → title → play; lettuce (+5), salt messages, ZOOM; the
+  race finished **1st with 130 points**; best saved under
+  `KANTMICROGAMES.SNAILRACE.best`; `R` restart back to 0; `ESC` back to the shelf.
+- No auto-movement: a fresh page with no input left the coral snail at x 7–12 for 10 s,
+  score 0, round still running.
+- Balance: holding right finished 2nd at 10.4 s (75) and 1st at 9.2 s (125); zigzagging
+  finished 2nd at 10.9 s (80) and 10.2 s (75). Salt caused the intended setbacks. (An
+  "idle" row printed by the balance script is invalid — it inherited stale input from the
+  previous scenario; the dedicated idle test above is the evidence.)
+- All six games opened and fed a short input burst: correct titles/taglines, non-blank
+  stage, `ESC` returns to the shelf, zero errors.
+- Touch (iPhone 13 emulation): tap the card, tap the stage to start, hold the direction
+  pad (coral snail moved from max x 12 to 30 over 2.6 s), tap the stage to ZOOM; stage
+  200 px; no overflow and no page scroll.
+- Viewports 1280×800, 360×640, 320×653 and 280×653: 7 shelf cards, no horizontal
+  overflow; stage 600 / 300 / 200 / 200 px (whole-number scaling) and fits the viewport.
+- Frozen-module proof: each IIFE compared with build 010 — byte-identical (see above).
+- **Not verified:** physical phones/tablets, Safari/Firefox/Edge, screen readers, real
+  notches, 120 Hz, or any device the headless run cannot model. No sound exists.
+
+### Build record (owner request: duration + credits)
+
+- Duration: **~30 min** wall-clock, one sitting (2026-11-01, 19:46 → 20:15 WIB,
+  from the owner's request to the finished records).
+- Tokens: **not exposed by the tool.** As in builds 009 and 010, Qoder reports a `credits`
+  value per request instead of token counts, so this build records **8.2768 credits
+  used** across 115 billable requests (19:46–20:12 WIB), summed from the
+  per-request `credits` telemetry in the session transcript. Labelled as credits, never
+  presented as tokens, and no token number is invented.
+
+### Documentation review/edit attempts (standing rule)
+
+- One documentation pass by **Qwen3.8-Flash (Qoder CLI)** during this build, covering
+  README, CHANGELOG, MODELS.md, CONTROLS.md, the plan, the new prompt copy and a build-011
+  verification report. Edits were append-only or in place following each file's template;
+  no content was deleted and no documentation attempt failed in this round.
+
 ## 010-20261101 — 2026-11-01 (SLIMEHOP + KANTMICROGAMES rename)
 
 Built from prompt: P-10 (the owner's Round 5 request, saved verbatim in

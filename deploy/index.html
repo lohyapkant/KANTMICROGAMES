@@ -6,10 +6,16 @@
   Repository : https://github.com/lohyapkant/KANTMICROGAMES
   Play online: https://kantmicrogames.lohyapkant.workers.dev/
   Hosting    : Cloudflare Workers (https://workers.cloudflare.com/)
-  Current    : build 010-20261101 — SLIMEHOP added; five games
+  Current    : build 011-20261101 — SNAILRACE added; six games;
+               SPROUTUP and SLIMEHOP frozen
   Names      : project and on-screen brand KANTMICROGAMES ·
                save keys and the console tag use the KANTMICROGAMES prefix
-  Build log  : 010 — Qwen3.8-Flash (Qoder CLI) · Round 5 (SLIMEHOP +
+  Build log  : 011 — Qwen3.8-Flash (Qoder CLI) · Round 6 (SNAILRACE;
+               SPROUTUP + SLIMEHOP frozen) · ~30 min wall-clock ·
+               8.2768 credits used (115 billable requests;
+               Qoder exposes no token counts) — full records in README,
+               CHANGELOG and prompts/P-11_snailrace.txt
+               010 — Qwen3.8-Flash (Qoder CLI) · Round 5 (SLIMEHOP +
                rename) · ~30 min wall-clock · 9.0583 credits
                used (186 billable requests; Qoder exposes no
                token counts) — full records in README, CHANGELOG and
@@ -743,18 +749,19 @@
    3. Prefix every private name with the game's own prefix:
       PANDASNACK -> panda / PAL / PANDA_*, BOOPEEK -> peek / boo / pip /
       BOO_ / PIP_*, DUCKLINE -> duck / mama / DUCK_*, SPROUTUP -> sprout /
-      SPROUT_*, SLIMEHOP -> slime / SLIME_*.
+      SPROUT_*, SLIMEHOP -> slime / SLIME_*, SNAILRACE -> race / RACE_*.
    4. Paint with the ctx passed into paint(ctx). Do not assume the
       shared stageCtx; that assumption is a PANDASNACK legacy only.
    5. Do not copy one game's character art into another game. Panda,
       mouse, mallard, seedling and slime shapes must stay visually
       distinct.
    6. PANDASNACK (content 007-20261101), BOOPEEK (content 006-20261101),
-      and DUCKLINE (content 005-20261101) are FROZEN by owner request:
+      DUCKLINE (content 005-20261101), SPROUTUP (content 007-20261101)
+      and SLIMEHOP (content 010-20261101) are FROZEN by owner request:
       do not restyle, rebalance or refactor them unless the owner asks.
       (Build 010 changed only their unused `saveKey` label string when
       the storage prefix was renamed; art, tuning and behaviour are
-      untouched.)
+      untouched. Build 011 left all five byte-identical.)
    7. Add a new game as a NEW IIFE registered in GAMES; never graft a
       new game into an existing module.
    ================================================================== */
@@ -800,7 +807,7 @@
 
 const APP = {
     name: "KANTMICROGAMES",
-    fileVersion: "010-20261101",       // build number of THIS one-file app
+    fileVersion: "011-20261101",       // build number of THIS one-file app
     savePrefix: "KANTMICROGAMES."      // best scores live at prefix + GAMEID + ".best"
 };
 
@@ -1652,8 +1659,12 @@ applyUi();
      Boo the nightcap ghost peek-a-boo chase is approved as-is.
    * DUCKLINE is FROZEN at content 005-20261101 — the pond and mallard family
      art is approved as-is.
-   * SPROUTUP is the live one (content 007-20261101): Sproutlet the baby
-     seedling weaves through raindrops to bloom when the sun settles.
+   * SPROUTUP is FROZEN at content 007-20261101 — the summer-rain bloom
+     is approved as-is (frozen by the owner after SLIMEHOP shipped).
+   * SLIMEHOP is FROZEN at content 010-20261101 — the lily-pad bloom
+     chase is approved as-is.
+   * SNAILRACE is the live one (content 011-20261101): Nibbles races
+     two garden rivals across a picnic blanket to the strawberry.
    ================================================================== */
 
 (function () {
@@ -3881,7 +3892,7 @@ applyUi();
 
 
 /* ==================================================================
-   PART 5-D — SPROUTUP module (content 007-20261101)
+   PART 5-D — SPROUTUP module (content 007-20261101) — FROZEN
    ------------------------------------------------------------------
    MODULE BOUNDARY — READ BEFORE EDITING
    * Everything inside this IIFE is PRIVATE to SPROUTUP: SETTINGS, PAL,
@@ -4523,7 +4534,7 @@ applyUi();
 
 
 /* ==================================================================
-   PART 5-E — SLIMEHOP module (content 010-20261101)
+   PART 5-E — SLIMEHOP module (content 010-20261101) — FROZEN
    ------------------------------------------------------------------
    MODULE BOUNDARY — READ BEFORE EDITING
    * Everything inside this IIFE is PRIVATE to SLIMEHOP: SETTINGS, PAL,
@@ -5401,6 +5412,800 @@ applyUi();
         actionLabel: "STOMP",
         hint: "desktop: WASD hop · SPACE or tap stage to stomp · R restart · ESC shelf",
         previewPaint: paintSlimeHopPreview,
+        start, stop, restart,
+        update, paint, onDir, onAction, onStageTap, onAnyKey
+    });
+})();
+
+
+/* ==================================================================
+   PART 5-F — SNAILRACE module (content 011-20261101)
+   ------------------------------------------------------------------
+   MODULE BOUNDARY — READ BEFORE EDITING
+   * Everything inside this IIFE is PRIVATE to SNAILRACE: SETTINGS, PAL,
+     sprite maps, state, timers and draw helpers.
+   * Do NOT read or write other modules' names from here, and do NOT
+     let other modules read these names. The only shared things a
+     module may touch are: the module contract (start / stop / restart /
+     update / paint / onDir / onAction / onStageTap / onAnyKey), the
+     pixel helpers in PART 1, readBest / saveBest, and the shared chrome
+     handles scoreEl / bestEl / msgEl.
+   * Every name here is sealed inside this IIFE. Settings, state,
+     sprite maps and draw helpers use the race / RACE_ prefix where it
+     aids the habit; keep new names prefixed so they cannot collide.
+   * Paint with the ctx passed into paint(ctx); never assume stageCtx.
+   * Art direction: a peach gingham picnic blanket, three garden snails
+     racing left to right toward a fat strawberry. Nibbles (coral shell)
+     races Crumb (teal) and Dottie (lilac); lettuce leaves give a zoom,
+     salt spills make everyone waddle. Slow, silly, colourful.
+   ================================================================== */
+
+(function () {
+    "use strict";
+
+    /* ---------- SNAILRACE settings (private) ---------- */
+
+    const SETTINGS = {
+        gameName: "SNAILRACE",
+        versionNumber: "011-20261101",
+        stageSize: 100,
+        saveKey: "KANTMICROGAMES.SNAILRACE.best",
+
+        playerSettings: {
+            moveSpeed: 6.8,
+            boostMultiplier: 1.7,
+            boostSeconds: 1.1,
+            zoomMultiplier: 1.55,
+            zoomSeconds: 0.7,
+            zoomCooldownSeconds: 2.6,
+            saltSlowMultiplier: 0.35,
+            saltSlowSeconds: 1.0,
+            saltLockSeconds: 1.6,
+            lettucePoints: 5,
+            placeBonuses: [120, 70, 30]
+        },
+
+        worldSettings: {
+            startX: 14,
+            startY: 57,
+            finishX: 84,
+            trackTop: 32,
+            trackBottom: 84,
+            rivalStarts: [[11, 42, 6.6, 0.6], [11, 72, 6.9, 2.3]],
+            rivalBoostMin: 3.0,
+            rivalBoostMax: 4.4,
+            rivalBoostSeconds: 0.9,
+            rivalBoostMultiplier: 1.5,
+            rivalSlowMultiplier: 0.45,
+            rivalSlowSeconds: 0.9,
+            rivalLaneSway: 3,
+            lettuceSlots: [[28, 42], [34, 74], [44, 54], [53, 38], [62, 72], [70, 50], [79, 66]],
+            lettuceCount: 4,
+            saltSlots: [[38, 60], [47, 44], [57, 66], [65, 38], [74, 56], [76, 78]],
+            saltCount: 3
+        },
+
+        roundTimeLimitSeconds: 20,
+
+        palette: {
+            clothCream: "#FFF6EA", clothBand: "#FFE2CD", clothDeep: "#FFCFB4",
+            chalk: "#FFFDF6", chalkShadow: "#EAD9C4", ribbonRed: "#F26B76",
+            crumb: "#C98A5B", crumbLight: "#E8B889",
+            saltWhite: "#FFFFFF", saltShade: "#DCE9F0", saltShadow: "#B9CFDC",
+            lettuceDark: "#3E7C33", lettuce: "#4FA83F", lettuceLight: "#8FD969", lettuceStem: "#2F5E28",
+            berry: "#F2555F", berrySeed: "#FFE9A6", berryShine: "#FFF3E8",
+            berryLeaf: "#4FA83F", berryLeafDark: "#3E7C33",
+            shellCoral: "#FF8FA3", shellCoralDark: "#D9576E", shellCoralLight: "#FFC3CF",
+            shellTeal: "#5FC7C2", shellTealDark: "#2F8F8C", shellTealLight: "#A7EDE7",
+            shellLilac: "#B99CF0", shellLilacDark: "#8465C4", shellLilacLight: "#DCCBF9",
+            foot: "#FFEDCE", footShade: "#E8CFA4", eye: "#3A2E22",
+            zoomLine: "#FFF1A8",
+            plate: "#5A3446", text: "#FFF7EE", textGold: "#FFE98A", textPink: "#FFC0D0"
+        }
+    };
+
+    const PAL = SETTINGS.palette;
+    const WORLD = SETTINGS.worldSettings;
+    const PLAYER = SETTINGS.playerSettings;
+    const STAGE = SETTINGS.stageSize;
+
+    /* ---------- SNAILRACE private state ---------- */
+
+    const STATE = { TITLE: "title", PLAY: "play", OVER: "over" };
+    const STEP_SECONDS = 1 / 60;
+
+    let raceState = STATE.TITLE;
+    let raceStateT = 0;
+    let raceClock = 0;
+    let raceT = 0;
+    let raceScore = 0;
+    let raceBest = 0;
+    let racePlace = 1;
+    let raceFinished = false;
+    let accumulator = 0;
+
+    const held = { left: false, right: false, up: false, down: false };
+
+    const nibbles = {
+        x: WORLD.startX, y: WORLD.startY, moving: false,
+        boostT: 0, zoomT: 0, zoomReadyT: 0, slowT: 0, saltLock: 0
+    };
+
+    let rivals = [];
+    let lettuce = [];
+    let saltPiles = [];
+    let sparkles = [];
+    let rings = [];
+
+    /* ---------- SNAILRACE sprite maps (all prefixed, all local) ---------- */
+
+    /* a side-on snail facing right: shell at the back, foot forward,
+       two little eye stalks at the front */
+    const RACE_SNAIL_MAP = [
+        "..BBBB..........",
+        ".BSSSSB.........",
+        "BSSssSSB........",
+        "BSsSSsSB...E.E..",
+        "BSSssSSB...K.K..",
+        ".BSSSSB....N.N..",
+        "..BBBB....NNNN..",
+        ".NNNNNNNNNNNNNN.",
+        "NNNNNNNNNNNNNNNN",
+        ".ffffffffffffff."
+    ];
+
+    const RACE_LETTUCE_MAP = [
+        "...GG.GG..",
+        "..GggGggG.",
+        ".GgGGgGGgG",
+        "GgGGGGGgG.",
+        ".GgGGGgG..",
+        "..GgGgG...",
+        "...GGG....",
+        "....S....."
+    ];
+
+    const RACE_SALT_MAP = [
+        "..WWWWWW..",
+        ".WWWWWWWW.",
+        "WWWWWWWWWW",
+        ".wwwwwwww.",
+        "..ssssss.."
+    ];
+
+    const RACE_STRAWBERRY_MAP = [
+        "...G.G.G....",
+        "..GGGGGGG...",
+        ".GGGGGGGGG..",
+        ".RRRRRRRRR..",
+        "RRrRRRRRrRR.",
+        "RRRRRRRRRRR.",
+        "RRrRRWRRrRR.",
+        "RRRRRRRRRRR.",
+        ".RRrRRRrRRR.",
+        ".RRRRRRRRR..",
+        "..RRrRRRR...",
+        "...RRRRR....",
+        "....RRR.....",
+        ".....R......"
+    ];
+
+    function makeSnailColors(shell, shellDark, shellLight) {
+        return {
+            B: shellDark, S: shell, s: shellLight,
+            N: PAL.foot, f: PAL.footShade, E: PAL.eye, K: PAL.footShade
+        };
+    }
+
+    const RACE_PLAYER_COLORS = makeSnailColors(PAL.shellCoral, PAL.shellCoralDark, PAL.shellCoralLight);
+    const RACE_TEAL_COLORS = makeSnailColors(PAL.shellTeal, PAL.shellTealDark, PAL.shellTealLight);
+    const RACE_LILAC_COLORS = makeSnailColors(PAL.shellLilac, PAL.shellLilacDark, PAL.shellLilacLight);
+
+    const RACE_LETTUCE_COLORS = {
+        G: PAL.lettuce, g: PAL.lettuceLight, S: PAL.lettuceStem
+    };
+
+    const RACE_SALT_COLORS = {
+        W: PAL.saltWhite, w: PAL.saltShade, s: PAL.saltShadow
+    };
+
+    const RACE_STRAWBERRY_COLORS = {
+        R: PAL.berry, r: PAL.berrySeed, W: PAL.berryShine, G: PAL.berryLeaf
+    };
+
+    /* ---------- SNAILRACE helpers ---------- */
+
+    function burst(x, y, color, count) {
+        for (let i = 0; i < count; i++) {
+            sparkles.push({
+                x: x + (Math.random() * 6 - 3),
+                y: y + (Math.random() * 4 - 2),
+                vy: -6 - Math.random() * 10,
+                t: 0, life: 0.36 + Math.random() * 0.18, color: color
+            });
+        }
+    }
+
+    function ring(x, y, maxR) {
+        rings.push({ x: x, y: y, r: 2, maxR: maxR, t: 0, life: 0.34 });
+    }
+
+    function shuffle(list) {
+        for (let i = list.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            const tmp = list[i];
+            list[i] = list[j];
+            list[j] = tmp;
+        }
+        return list;
+    }
+
+    function livePlace() {
+        let ahead = 0;
+        for (const r of rivals) if (r.finished || r.x > nibbles.x) ahead++;
+        return 1 + ahead;
+    }
+
+    function clearHeld() {
+        held.left = false;
+        held.right = false;
+        held.up = false;
+        held.down = false;
+    }
+
+    /* ---------- SNAILRACE setup ---------- */
+
+    function placeSnails() {
+        nibbles.x = WORLD.startX;
+        nibbles.y = WORLD.startY;
+        nibbles.moving = false;
+        nibbles.boostT = 0;
+        nibbles.zoomT = 0;
+        nibbles.zoomReadyT = 0;
+        nibbles.slowT = 0;
+        nibbles.saltLock = 0;
+
+        rivals = WORLD.rivalStarts.map(function (start, i) {
+            return {
+                x: start[0], y: start[1], lane: start[1],
+                baseSpeed: start[2], phase: start[3],
+                colors: i === 0 ? RACE_TEAL_COLORS : RACE_LILAC_COLORS,
+                boostT: 0, slowT: 0, saltLock: 0,
+                nextBoost: WORLD.rivalBoostMin + i * 0.6,
+                finished: false, finishT: 0, hopT: 0
+            };
+        });
+    }
+
+    function buildPickups() {
+        const lettucePool = shuffle(WORLD.lettuceSlots.slice());
+        lettuce = lettucePool.slice(0, WORLD.lettuceCount).map(function (slot) {
+            return { x: slot[0], y: slot[1] };
+        });
+
+        const saltPool = shuffle(WORLD.saltSlots.slice());
+        saltPiles = [];
+        for (const slot of saltPool) {
+            if (saltPiles.length >= WORLD.saltCount) break;
+            let clear = true;
+            for (const leaf of lettuce) {
+                if (Math.hypot(slot[0] - leaf.x, slot[1] - leaf.y) < 9) clear = false;
+            }
+            for (const pile of saltPiles) {
+                if (Math.hypot(slot[0] - pile.x, slot[1] - pile.y) < 10) clear = false;
+            }
+            if (clear) saltPiles.push({ x: slot[0], y: slot[1] });
+        }
+        for (const slot of saltPool) {
+            if (saltPiles.length >= WORLD.saltCount) break;
+            const already = saltPiles.some(function (p) {
+                return p.x === slot[0] && p.y === slot[1];
+            });
+            if (!already) saltPiles.push({ x: slot[0], y: slot[1] });
+        }
+    }
+
+    /* ---------- SNAILRACE run control ---------- */
+
+    function startRun() {
+        placeSnails();
+        buildPickups();
+        raceT = 0;
+        raceScore = 0;
+        racePlace = 1;
+        raceFinished = false;
+        raceState = STATE.PLAY;
+        raceStateT = 0;
+        sparkles = [];
+        rings = [];
+        accumulator = 0;
+        syncChrome(true);
+    }
+
+    function finishRun(finished) {
+        raceFinished = !!finished;
+        racePlace = finished
+            ? 1 + rivals.filter(function (r) { return r.finished; }).length
+            : livePlace();
+        if (finished) {
+            raceScore += PLAYER.placeBonuses[racePlace - 1] || 0;
+            const cx = Math.round(nibbles.x);
+            const cy = Math.round(nibbles.y) - 8;
+            for (let i = 0; i < 8; i++) {
+                burst(cx - 21 + i * 6, cy - 8 + (i % 3) * 6,
+                    (i % 2) ? PAL.berrySeed : PAL.lettuceLight, 5);
+            }
+            ring(cx, cy, 22);
+        }
+        if (raceScore > raceBest) {
+            raceBest = raceScore;
+            saveBest(SETTINGS.gameName, raceScore);
+        }
+        raceState = STATE.OVER;
+        raceStateT = 0;
+        syncChrome(true);
+    }
+
+    /* ---------- SNAILRACE movement and collisions ---------- */
+
+    function checkSalt(mover) {
+        if (mover.saltLock > 0) return;
+        for (const pile of saltPiles) {
+            if (Math.hypot(mover.x - pile.x, (mover.y - 4) - pile.y) > 7) continue;
+            mover.slowT = (mover === nibbles) ? PLAYER.saltSlowSeconds : WORLD.rivalSlowSeconds;
+            mover.saltLock = PLAYER.saltLockSeconds;
+            if (mover === nibbles) {
+                burst(pile.x, pile.y - 3, PAL.saltWhite, 5);
+                ring(pile.x, pile.y - 2, 10);
+                syncChrome(true);
+            } else {
+                burst(pile.x, pile.y - 3, PAL.saltShade, 3);
+            }
+            return;
+        }
+    }
+
+    function pickLettuce() {
+        for (let i = lettuce.length - 1; i >= 0; i--) {
+            const leaf = lettuce[i];
+            if (Math.hypot(nibbles.x - leaf.x, (nibbles.y - 4) - leaf.y) > 8) continue;
+            lettuce.splice(i, 1);
+            raceScore += PLAYER.lettucePoints;
+            nibbles.boostT = PLAYER.boostSeconds;
+            burst(leaf.x, leaf.y, PAL.lettuceLight, 7);
+            ring(leaf.x, leaf.y, 12);
+            syncChrome(true);
+        }
+    }
+
+    function updatePlayer(dt) {
+        if (nibbles.boostT > 0) nibbles.boostT -= dt;
+        if (nibbles.zoomT > 0) nibbles.zoomT -= dt;
+        if (nibbles.zoomReadyT > 0) nibbles.zoomReadyT -= dt;
+        if (nibbles.slowT > 0) nibbles.slowT -= dt;
+        if (nibbles.saltLock > 0) nibbles.saltLock -= dt;
+
+        const dx = (held.right ? 1 : 0) - (held.left ? 1 : 0);
+        const dy = (held.down ? 1 : 0) - (held.up ? 1 : 0);
+        nibbles.moving = !!(dx || dy);
+
+        if (nibbles.moving) {
+            /* each axis runs at full speed: a lane change never costs
+               forward ground, which keeps the race about steering */
+            let speed = PLAYER.moveSpeed;
+            if (nibbles.boostT > 0) speed *= PLAYER.boostMultiplier;
+            if (nibbles.zoomT > 0) speed *= PLAYER.zoomMultiplier;
+            if (nibbles.slowT > 0) speed *= PLAYER.saltSlowMultiplier;
+            nibbles.x += dx * speed * dt;
+            nibbles.y += dy * speed * dt;
+        }
+
+        nibbles.x = Math.max(WORLD.startX - 6, Math.min(WORLD.finishX, nibbles.x));
+        nibbles.y = Math.max(WORLD.trackTop + 6, Math.min(WORLD.trackBottom - 6, nibbles.y));
+
+        checkSalt(nibbles);
+        pickLettuce();
+    }
+
+    function updateRival(r, dt) {
+        if (r.finished) {
+            r.hopT += dt;
+            return;
+        }
+        if (r.boostT > 0) r.boostT -= dt;
+        if (r.slowT > 0) r.slowT -= dt;
+        if (r.saltLock > 0) r.saltLock -= dt;
+
+        r.nextBoost -= dt;
+        if (r.nextBoost <= 0 && r.boostT <= 0) {
+            r.boostT = WORLD.rivalBoostSeconds;
+            r.nextBoost = WORLD.rivalBoostMin + Math.random() * (WORLD.rivalBoostMax - WORLD.rivalBoostMin);
+            burst(r.x - 5, r.y - 6, PAL.zoomLine, 3);
+        }
+
+        let speed = r.baseSpeed;
+        if (r.boostT > 0) speed *= WORLD.rivalBoostMultiplier;
+        if (r.slowT > 0) speed *= WORLD.rivalSlowMultiplier;
+        r.x += speed * dt;
+        r.y = r.lane + Math.sin(raceClock * 0.9 + r.phase) * WORLD.rivalLaneSway;
+
+        checkSalt(r);
+
+        if (r.x >= WORLD.finishX) {
+            r.x = WORLD.finishX;
+            r.finished = true;
+            r.finishT = raceT;
+            r.hopT = 0;
+            ring(r.x, r.y - 4, 12);
+            burst(r.x, r.y - 6, PAL.berrySeed, 5);
+            syncChrome(true);
+        }
+    }
+
+    function triggerZoom() {
+        if (raceState !== STATE.PLAY) return false;
+        if (nibbles.zoomReadyT > 0) return false;
+        nibbles.zoomT = PLAYER.zoomSeconds;
+        nibbles.zoomReadyT = PLAYER.zoomCooldownSeconds;
+        ring(nibbles.x, nibbles.y - 4, 14);
+        burst(nibbles.x - 6, nibbles.y - 4, PAL.zoomLine, 4);
+        syncChrome(true);
+        return true;
+    }
+
+    /* ---------- SNAILRACE fixed-step update ---------- */
+
+    function update(rawDt) {
+        let dt = rawDt > 0.25 ? 0.25 : rawDt;
+        accumulator += dt;
+        let steps = 0;
+        while (accumulator >= STEP_SECONDS && steps < 4) {
+            stepWorld(STEP_SECONDS);
+            accumulator -= STEP_SECONDS;
+            steps++;
+        }
+        if (steps === 4) accumulator = 0;
+    }
+
+    function stepWorld(dt) {
+        raceClock += dt;
+        raceStateT += dt;
+        updateEffects(dt);
+
+        if (raceState !== STATE.PLAY) return;
+
+        raceT += dt;
+        updatePlayer(dt);
+        for (const r of rivals) updateRival(r, dt);
+
+        if (nibbles.x >= WORLD.finishX) {
+            finishRun(true);
+        } else if (raceT >= SETTINGS.roundTimeLimitSeconds) {
+            finishRun(false);
+        }
+    }
+
+    function updateEffects(dt) {
+        for (let i = sparkles.length - 1; i >= 0; i--) {
+            const sp = sparkles[i];
+            sp.t += dt;
+            sp.y += sp.vy * dt;
+            sp.vy += 26 * dt;
+            if (sp.t >= sp.life) sparkles.splice(i, 1);
+        }
+        for (let i = rings.length - 1; i >= 0; i--) {
+            rings[i].t += dt;
+            if (rings[i].t >= rings[i].life) rings.splice(i, 1);
+        }
+    }
+
+    /* ---------- SNAILRACE painting ---------- */
+
+    function drawClothArea(ctx, width, height, cell, band) {
+        ctx.fillStyle = PAL.clothCream;
+        ctx.fillRect(0, 0, width, height);
+        ctx.fillStyle = PAL.clothBand;
+        for (let x = 0; x < width; x += cell) ctx.fillRect(x, 0, band, height);
+        for (let y = 0; y < height; y += cell) ctx.fillRect(0, y, width, band);
+        ctx.fillStyle = PAL.clothDeep;
+        for (let x = 0; x < width; x += cell) {
+            for (let y = 0; y < height; y += cell) ctx.fillRect(x, y, band, band);
+        }
+    }
+
+    function drawStartLine(ctx) {
+        ctx.fillStyle = PAL.chalk;
+        for (let y = 33; y < 84; y += 6) ctx.fillRect(10, y, 2, 3);
+        ctx.fillStyle = PAL.chalkShadow;
+        for (let y = 36; y < 84; y += 6) ctx.fillRect(9, y, 1, 1);
+    }
+
+    function drawRibbon(ctx, x, top, bottom, block) {
+        for (let y = top, i = 0; y < bottom; y += block, i++) {
+            for (let c = 0; c < 2; c++) {
+                ctx.fillStyle = ((i + c) % 2 === 0) ? PAL.ribbonRed : PAL.chalk;
+                ctx.fillRect(x + c * (block / 2), y, block / 2, block);
+            }
+        }
+    }
+
+    function drawStrawberry(ctx) {
+        paintRoundBlob(ctx, 87, 50, 15, 18, "rgba(255,255,255,0.26)");
+        paintPixels(ctx, RACE_STRAWBERRY_MAP, RACE_STRAWBERRY_COLORS, 88, 52, false);
+    }
+
+    function drawCrumbs(ctx) {
+        ctx.fillStyle = PAL.crumb;
+        ctx.fillRect(6, 27, 1, 1);
+        ctx.fillRect(92, 29, 1, 1);
+        ctx.fillRect(71, 91, 1, 1);
+        ctx.fillRect(24, 88, 1, 1);
+        ctx.fillStyle = PAL.crumbLight;
+        ctx.fillRect(7, 28, 1, 1);
+        ctx.fillRect(93, 30, 1, 1);
+        ctx.fillRect(25, 89, 1, 1);
+    }
+
+    function drawSaltPiles(ctx) {
+        for (const pile of saltPiles) {
+            const x = Math.round(pile.x);
+            const y = Math.round(pile.y);
+            paintPixels(ctx, RACE_SALT_MAP, RACE_SALT_COLORS, x - 5, y - 3, false);
+        }
+    }
+
+    function drawLettuce(ctx) {
+        for (const leaf of lettuce) {
+            const lift = Math.round(Math.sin(raceClock * 2 + leaf.x) * 1);
+            paintPixels(ctx, RACE_LETTUCE_MAP, RACE_LETTUCE_COLORS,
+                Math.round(leaf.x) - 5, Math.round(leaf.y) - 5 + lift, false);
+        }
+    }
+
+    function drawTrail(ctx, x, y, moving) {
+        if (!moving) return;
+        ctx.fillStyle = "rgba(255,255,255,0.55)";
+        ctx.fillRect(x - 12, y + 1, 3, 1);
+        ctx.fillRect(x - 16, y + 2, 2, 1);
+        ctx.fillStyle = "rgba(255,255,255,0.32)";
+        ctx.fillRect(x - 19, y + 1, 1, 1);
+    }
+
+    function drawSpeedLines(ctx, x, y) {
+        if (nibbles.boostT <= 0 && nibbles.zoomT <= 0) return;
+        ctx.fillStyle = PAL.zoomLine;
+        ctx.fillRect(x - 15, y - 5, 4, 1);
+        ctx.fillRect(x - 13, y + 1, 5, 1);
+        ctx.fillRect(x - 17, y - 2, 2, 1);
+    }
+
+    function drawSaltStars(ctx, x, y) {
+        const sway = Math.round(Math.sin(raceClock * 18) * 2);
+        ctx.fillStyle = PAL.textGold;
+        ctx.fillRect(x - 3 + sway, y - 14, 1, 1);
+        ctx.fillRect(x + sway, y - 16, 1, 1);
+        ctx.fillRect(x + 3 + sway, y - 14, 1, 1);
+    }
+
+    function drawPlayer(ctx) {
+        const bob = nibbles.moving ? (Math.floor(raceClock * 9) % 2) : 0;
+        const x = Math.round(nibbles.x);
+        const y = Math.round(nibbles.y) - bob;
+
+        paintRoundBlob(ctx, x - 7, y + 1, 15, 2, "rgba(90,54,40,0.16)");
+        drawTrail(ctx, x, y, nibbles.moving);
+        drawSpeedLines(ctx, x, y);
+        paintPixels(ctx, RACE_SNAIL_MAP, RACE_PLAYER_COLORS, x - 8, y - 10, false);
+        if (nibbles.slowT > 0) drawSaltStars(ctx, x, y);
+    }
+
+    function drawRival(ctx, r) {
+        const moving = !r.finished;
+        const bob = moving
+            ? (Math.floor(raceClock * 9 + r.phase) % 2)
+            : Math.round(Math.abs(Math.sin(r.hopT * 6)) * 1);
+        const x = Math.round(r.x);
+        const y = Math.round(r.y) - bob;
+
+        paintRoundBlob(ctx, x - 7, y + 1, 15, 2, "rgba(90,54,40,0.13)");
+        drawTrail(ctx, x, y, moving);
+        paintPixels(ctx, RACE_SNAIL_MAP, r.colors, x - 8, y - 10, false);
+        if (r.slowT > 0) drawSaltStars(ctx, x, y);
+    }
+
+    function drawEffects(ctx) {
+        for (const r of rings) {
+            const frac = r.t / r.life;
+            const radius = Math.round(r.r + (r.maxR - r.r) * frac);
+            ctx.fillStyle = "rgba(255,255,255," + (0.8 * (1 - frac)).toFixed(2) + ")";
+            ctx.fillRect(Math.round(r.x - radius), Math.round(r.y), radius * 2, 1);
+        }
+        for (const sp of sparkles) {
+            ctx.fillStyle = sp.color;
+            ctx.fillRect(Math.round(sp.x), Math.round(sp.y), 1, 1);
+        }
+    }
+
+    function drawRacePlate(ctx, y, h, alpha) {
+        paintRoundBlob(ctx, 3, y, 94, h, "rgba(90,52,70," + (alpha || 0.9) + ")");
+    }
+
+    function paintRaceTitle(ctx) {
+        drawRacePlate(ctx, 6, 38, 1);
+        paintPixelText(ctx, "SNAILRACE", 50, 13, PAL.textGold, PAL.plate, 2);
+        paintPixelText(ctx, "RACE TO THE STRAWBERRY", 50, 30, PAL.text, null, 1);
+        if (Math.floor(raceClock / 0.55) % 2 === 0) {
+            drawRacePlate(ctx, 85, 12, 1);
+            paintPixelText(ctx, "PRESS ANY KEY OR TAP", 50, 89, PAL.text, PAL.plate, 1);
+        }
+    }
+
+    function paintRaceHud(ctx) {
+        drawRacePlate(ctx, 2, 21);
+        paintPixelText(ctx, "PLACE " + livePlace() + "/3", 50, 6, PAL.textGold, null, 1);
+        paintPixelText(ctx, "TIME " + Math.max(0, Math.ceil(SETTINGS.roundTimeLimitSeconds - raceT)),
+            50, 14, PAL.text, null, 1);
+
+        drawRacePlate(ctx, 89, 9, 0.72);
+        const ready = nibbles.zoomReadyT <= 0;
+        const fraction = ready ? 1 : 1 - nibbles.zoomReadyT / PLAYER.zoomCooldownSeconds;
+        for (let i = 0; i < 5; i++) {
+            ctx.fillStyle = (i + 0.5) / 5 <= fraction
+                ? (ready ? PAL.textGold : PAL.lettuceLight)
+                : "rgba(255,247,238,0.28)";
+            ctx.fillRect(7 + i * 5, 93, 3, 2);
+        }
+    }
+
+    function paintRaceOver(ctx) {
+        drawRacePlate(ctx, 6, 44, 1);
+        const label = !raceFinished
+            ? "TIME UP"
+            : (racePlace === 1 ? "1ST PLACE!" : (racePlace === 2 ? "2ND PLACE" : "3RD PLACE"));
+        paintPixelText(ctx, label, 50, 12,
+            (raceFinished && racePlace === 1) ? PAL.textGold : PAL.text, PAL.plate, 1);
+        paintPixelText(ctx, String(raceScore), 50, 22, PAL.textGold, PAL.plate, 3);
+        paintPixelText(ctx, "BEST " + raceBest, 50, 44, PAL.text, null, 1);
+        if (Math.floor(raceClock / 0.55) % 2 === 0) {
+            drawRacePlate(ctx, 85, 12, 1);
+            paintPixelText(ctx, "PRESS ANY KEY OR TAP", 50, 89, PAL.text, PAL.plate, 1);
+        }
+    }
+
+    function paint(ctx) {
+        drawClothArea(ctx, STAGE, STAGE, 12, 4);
+        drawStartLine(ctx);
+        drawRibbon(ctx, 84, 32, 84, 4);
+        drawStrawberry(ctx);
+        drawCrumbs(ctx);
+        drawSaltPiles(ctx);
+        drawLettuce(ctx);
+        for (const r of rivals) drawRival(ctx, r);
+        drawPlayer(ctx);
+        drawEffects(ctx);
+
+        if (raceState === STATE.TITLE) paintRaceTitle(ctx);
+        else if (raceState === STATE.PLAY) paintRaceHud(ctx);
+        else paintRaceOver(ctx);
+    }
+
+    /* ---------- SNAILRACE shelf card preview (private) ---------- */
+
+    function paintSnailRacePreview(ctx) {
+        drawClothArea(ctx, 200, 96, 16, 6);
+
+        ctx.fillStyle = PAL.chalk;
+        for (let y = 6; y < 90; y += 10) ctx.fillRect(10, y, 3, 5);
+
+        drawRibbon(ctx, 160, 8, 88, 6);
+        paintPixels(ctx, RACE_STRAWBERRY_MAP, RACE_STRAWBERRY_COLORS, 170, 40, false, 2);
+
+        paintPixels(ctx, RACE_LETTUCE_MAP, RACE_LETTUCE_COLORS, 22, 72, false, 2);
+        paintPixels(ctx, RACE_SALT_MAP, RACE_SALT_COLORS, 120, 74, false, 2);
+
+        paintPixels(ctx, RACE_SNAIL_MAP, RACE_PLAYER_COLORS, 4, 2, false, 3);
+        paintPixels(ctx, RACE_SNAIL_MAP, RACE_TEAL_COLORS, 56, 30, false, 3);
+        paintPixels(ctx, RACE_SNAIL_MAP, RACE_LILAC_COLORS, 106, 4, false, 3);
+
+        ctx.fillStyle = PAL.crumb;
+        ctx.fillRect(60, 88, 2, 2);
+        ctx.fillRect(146, 12, 2, 2);
+        ctx.fillRect(8, 12, 2, 2);
+        ctx.fillStyle = PAL.crumbLight;
+        ctx.fillRect(61, 89, 1, 1);
+        ctx.fillRect(147, 13, 1, 1);
+    }
+
+    /* ---------- SNAILRACE chrome sync ---------- */
+
+    let raceShownScore = null;
+    let raceShownBest = null;
+    let raceShownMsg = null;
+
+    function syncChrome(force) {
+        const shownBest = Math.max(raceBest, raceScore);
+        if (force || raceShownScore !== raceScore) {
+            raceShownScore = raceScore;
+            scoreEl.textContent = String(raceScore);
+        }
+        if (force || raceShownBest !== shownBest) {
+            raceShownBest = shownBest;
+            bestEl.textContent = String(shownBest);
+        }
+
+        let msg;
+        if (raceState === STATE.PLAY) {
+            if (nibbles.slowT > 0) msg = "salt sting! waddle it off and keep going!";
+            else if (nibbles.boostT > 0) msg = "lettuce zoom! the strawberry is getting closer!";
+            else msg = "steer with WASD to the strawberry — lettuce zooms, salt stings!";
+        } else if (raceState === STATE.TITLE) {
+            msg = "press any key or tap to start";
+        } else if (!raceFinished) {
+            msg = "time up — steer to the strawberry and dodge the salt!";
+        } else if (racePlace === 1) {
+            msg = "first to the strawberry! try to beat your score!";
+        } else if (racePlace === 2) {
+            msg = "second place — so close! one more race?";
+        } else {
+            msg = "third place — snag more lettuce next time!";
+        }
+        if (force || raceShownMsg !== msg) {
+            raceShownMsg = msg;
+            msgEl.textContent = msg;
+        }
+    }
+
+    /* ---------- SNAILRACE module contract ---------- */
+
+    function start() {
+        raceBest = readBest(SETTINGS.gameName);
+        placeSnails();
+        buildPickups();
+        raceState = STATE.TITLE;
+        raceStateT = 0;
+        raceT = 0;
+        raceScore = 0;
+        racePlace = 1;
+        raceFinished = false;
+        sparkles = [];
+        rings = [];
+        accumulator = 0;
+        clearHeld();
+        syncChrome(true);
+    }
+
+    function stop() { clearHeld(); }
+    function restart() { clearHeld(); startRun(); }
+
+    function onDir(dir, pressed) {
+        if (!pressed) {
+            if (dir in held) held[dir] = false;
+            return;
+        }
+        if (dir in held) held[dir] = true;
+        if (raceState !== STATE.PLAY && raceStateT > 0.35) startRun();
+    }
+
+    function onAction() {
+        if (raceState === STATE.PLAY) triggerZoom();
+        else if (raceStateT > 0.35) startRun();
+    }
+
+    function onStageTap() { onAction(); }
+
+    function onAnyKey() {
+        if (raceState !== STATE.PLAY && raceStateT > 0.35) startRun();
+    }
+
+    GAMES.push({
+        id: SETTINGS.gameName,
+        versionNumber: SETTINGS.versionNumber,
+        name: "Snail Race",
+        tagline: "a slow dash to the strawberry",
+        concept: "Nibbles the garden snail races Crumb and Dottie across a picnic blanket, nibbling lettuce to zoom and dodging salty spills to reach the strawberry first.",
+        actionLabel: "ZOOM",
+        hint: "desktop: WASD steer · SPACE or tap stage to zoom · R restart · ESC shelf",
+        previewPaint: paintSnailRacePreview,
         start, stop, restart,
         update, paint, onDir, onAction, onStageTap, onAnyKey
     });

@@ -163,6 +163,48 @@ games, four viewports and touch emulation in headless Chrome. Honest limits are 
 the changelog: no physical devices, no other browsers, and Qoder exposes credits but not
 tokens. This is a snapshot of one build on one date.
 
+## 2026-11-01 — Owner observation — SLIMEHOP (build 010) and the Round 6 brief
+
+Builds observed: `010-20261101`, `011-20261101`.
+
+The owner's notes: after playing SLIMEHOP, the owner asked for this assessment to be kept
+for historical reference, verbatim:
+
+> "This looks very very very good - thank you. Please note that i am impressed with the
+> gameplay, pixel art, design of the SlimeHop game in one pass thanks to your model in a
+> single session. Have this recorded for historical reference in the model file for
+> documentation. Please proceed to freeze Sproutup and Slimehop. And please proceed with
+> SNAILRACE for Round 6, and still following the same required concept for pixel art,
+> simple and fun and quirky and colourful pixel art for the game design and shelf art
+> work, and intended for the 100x100 play area with scoring and time as needed - dependent
+> on your game design for this project. Please continue to document in detail for
+> reference in readme file, prompt file, changelog file, and continue to test as needed
+> within the rules of the intended design. Please also track the time taken, and the token
+> or credit used as usual for records and record keeping."
+
+The owner froze **SPROUTUP** and **SLIMEHOP** in the same message; both keep their content
+numbers (`007-20261101`, `010-20261101`) and their IIFEs are byte-identical to build 010.
+This is a dated owner note, not a model-written summary.
+
+## 2026-11-01 — Qwen3.8-Flash (Qoder CLI) — Round 6, SNAILRACE
+
+Builds observed: `011-20261101` (full build).
+
+The owner's notes: delivered Round 6 in one sitting after the SLIMEHOP praise above.
+SNAILRACE shipped as a sixth sealed IIFE: three garden snails race across a peach gingham
+picnic blanket to a strawberry, with lettuce giving points and a boost, salt locking the
+controls, a ZOOM action on a cooldown, two auto-running rivals and a 20 s clock. The art
+went through several screenshot-driven revisions: the first 14×10 snail read as a shell
+with a detached foot and floating eyes (redrawn as 16×10 with a head, neck and eyestalks),
+the gingham and HUD plate were too heavy (softened cloth, plate alpha 0.9), a salt pile
+crowded the finish ribbon (moved), and normalising diagonal speed made a straight race
+unwinnable (per-axis full speed fixed it; "hold right + zoom" then won twice). The model
+froze SPROUTUP and SLIMEHOP on request, kept all five frozen IIFEs byte-identical to build
+010, and recorded the proof. Verification covered six games, four viewports, touch
+emulation, a no-auto-movement test and balance runs in headless Chrome. Honest limits are
+in the changelog: no physical devices, no other browsers, and Qoder exposes credits but not
+tokens. This is a snapshot of one build on one date.
+
 ---
 
 *Template for a new entry:*
