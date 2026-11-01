@@ -1,0 +1,32 @@
+{
+ "checkedAt": "2026-11-01",
+ "method": "SHA-256 of the PART 5 game-module region and of each module slice (split at the PART 5-B/C/D banners), baseline build 008 file vs build 009 file",
+ "allIdentical": true,
+ "span": {
+  "beforeSha256": "2ea0a919166e629b7fa016deb42336364527b37bc9f3e3447c10481ff570b3e0",
+  "afterSha256": "2ea0a919166e629b7fa016deb42336364527b37bc9f3e3447c10481ff570b3e0",
+  "identical": true
+ },
+ "modules": {
+  "PANDASNACK": {
+   "lengthBytes": 26177,
+   "sha256": "0c3a1321a90c52eeeea1dbca896f64ed325b309c45db147b60866de0c3db2ecf",
+   "identical": true
+  },
+  "BOOPEEK": {
+   "lengthBytes": 30660,
+   "sha256": "a9d7a5486e2960872ae518574eb7dba4409ac44dbf77656733a89ca6d8c1cf4c",
+   "identical": true
+  },
+  "DUCKLINE": {
+   "lengthBytes": 28528,
+   "sha256": "650ebc844a8b9c3f3c27883806bde4d70e95ad9de1e18509cc718cb108b64bf4",
+   "identical": true
+  },
+  "SPROUTUP": {
+   "lengthBytes": 23779,
+   "sha256": "fcd91ebfe0ac86386ac1134141550cea9021cbbe314ac99bb4a1fe9eb26b7106",
+   "identical": true
+  }
+ }
+}

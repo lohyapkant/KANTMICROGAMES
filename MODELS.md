@@ -97,6 +97,35 @@ never added; the model home-page links were missing from the CHANGELOG and the p
 build record per the owner's standing request. Existing content was preserved throughout —
 append and edit-in-place only, following each file's template.
 
+## 2026-11-01 — Claude.ai Sonnet 5.5 Extra (Anthropic, chat) — prompt author
+
+Builds observed: `009-20261101` (authored the P-09 prompt; did not edit the repository).
+
+The owner's notes: this build's prompt was written by Claude.ai Sonnet 5.5 Extra and
+pasted unaltered. It is unusually specific for this project: it states the editing
+boundaries (frozen IIFEs, no contract changes, stage stays 100×100), fixes the three owner
+decisions (zoom allowed, pads auto with overrides, whole-number scaling with a documented
+fallback), lists thirteen measured baseline findings and seven ordered steps, and defines
+the verification matrix, assertions, screenshots, deliverables and definition of done. In
+practice this kept the work inside the shell and made the build auditable. Its only
+mismatch was the build number — it says 008, but 008 had already been used — which was
+handled as a documented deviation rather than by editing the prompt. This is a snapshot of
+one prompt on one date.
+
+## 2026-11-01 — Qwen3.8-Flash (Qoder CLI) — responsive shell build
+
+Builds observed: `009-20261101` (full build; see also the completion pass entry above).
+
+The owner's notes: implemented all seven steps of P-09 in the shared shell only. The four
+game IIFEs were left byte-identical (proved by SHA-256 of the PART 5 region). Built a
+Playwright matrix over 24 viewports × 4 games, inspected 120 screenshots, and fixed two
+layout issues that the DOM metrics alone did not catch (the stage stayed small because its
+measurement box was content-sized; the pads sat at the screen edges in landscape). The
+resulting suite runs 1,409 assertions with zero failures, and the build added `CONTROLS.md`,
+a test report, a real-device checklist and the build's records. Honest limits recorded in
+the report: headless Chrome only, no physical device or other browser, and the token count
+is unknown because the tool surfaced no telemetry.
+
 ---
 
 *Template for a new entry:*

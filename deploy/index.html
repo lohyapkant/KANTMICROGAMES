@@ -6,6 +6,7 @@
   Repository : https://github.com/lohyapkant/KANTMICROGAMES
   Play online: https://kantmicrogames.lohyapkant.workers.dev/
   Hosting    : Cloudflare Workers (https://workers.cloudflare.com/)
+  Current    : build 009-20261101 — responsive shell (shell only; game content frozen)
   ================================================================
 
   MIT License
@@ -34,8 +35,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <!-- Fits phone screens and stops pinch-zoom mischief during a scurry. -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <!-- Fits phone screens; zoom stays allowed (WCAG 1.4.4). Double-tap zoom is
+         suppressed with touch-action on the chrome instead of locking the page. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#FFF3E2">
@@ -61,6 +63,18 @@
             --ink:        #4A3B32;
             --ink-soft:   #8A776A;
             --outline:    #E8D8C2;
+
+            /* Safe-area insets once, used everywhere. Tests can simulate a
+               notch by overriding these four variables on <body>. */
+            --sai-t: env(safe-area-inset-top, 0px);
+            --sai-r: env(safe-area-inset-right, 0px);
+            --sai-b: env(safe-area-inset-bottom, 0px);
+            --sai-l: env(safe-area-inset-left, 0px);
+
+            /* Pad geometry: 58 px by default, 48 px (still a comfortable
+               target) on narrow or short screens. */
+            --pad: 58px;
+            --pad-gap: 9px;
         }
 
         * {
@@ -74,7 +88,10 @@
 
         [hidden] { display: none !important; }
 
+        html { overflow-x: hidden; }
+
         body {
+            min-height: 100vh;  /* fallback for browsers without dvh */
             min-height: 100dvh; /* iPhone Safari: true screen height while the address bar moves */
             overflow-x: hidden;
             color: var(--ink);
@@ -85,19 +102,66 @@
                 linear-gradient(180deg, var(--cream) 0%, var(--cream-deep) 100%);
             user-select: none;
             -webkit-user-select: none;
+            touch-action: manipulation; /* no accidental double-tap zoom on chrome */
+        }
+
+        /* While a game is open the page is an app shell: it never scrolls. */
+        body.playing {
+            height: 100vh;
+            height: 100dvh;
+            overflow: hidden;
+            overscroll-behavior: none;
         }
 
         #page {
+            min-height: 100vh;
             min-height: 100dvh;
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: calc(env(safe-area-inset-top, 0px) + 20px) 14px calc(env(safe-area-inset-bottom, 0px) + 16px);
+            padding: calc(var(--sai-t) + 16px) calc(var(--sai-r) + 14px) calc(var(--sai-b) + 14px) calc(var(--sai-l) + 14px);
+        }
+
+        body.playing #page {
+            min-height: 0;
+            height: 100%;
+            padding-top: calc(var(--sai-t) + 6px);
+            padding-bottom: calc(var(--sai-b) + 6px);
+        }
+
+        :focus-visible {
+            outline: 3px solid #E9A93D;
+            outline-offset: 3px;
+        }
+
+        .card:focus-visible, .pill:focus-visible, .pbtn:focus-visible,
+        #btnRestart:focus-visible, .pref:focus-visible {
+            outline: 3px solid #E9A93D;
+            outline-offset: 3px;
         }
 
         /* =============== shelf screen =============== */
 
-        #banner { display: flex; align-items: center; gap: 18px; max-width: 640px; margin-bottom: 16px; }
+        /* The shelf is a shrink-wrapping flex child: without this it keeps its
+           716 px 3-column grid and spills off both sides of a phone. */
+        #shelfScreen {
+            width: 100%;
+            max-width: 760px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #banner {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 18px;
+            width: 100%;
+            max-width: 640px;
+            margin-bottom: 16px;
+        }
 
         #mascot {
             display: block;
@@ -106,6 +170,8 @@
             image-rendering: pixelated;
             image-rendering: crisp-edges;
         }
+
+        #bannerText { min-width: 0; }
 
         #bannerText h1 {
             font-size: clamp(30px, 8vw, 44px);
@@ -117,7 +183,7 @@
 
         #bannerText .tagline {
             margin-top: 9px;
-            font-size: 14px;
+            font-size: 0.875rem;
             font-weight: 600;
             color: var(--ink-soft);
         }
@@ -127,8 +193,33 @@
             flex-wrap: wrap;
             justify-content: center;
             gap: 8px;
+            width: 100%;
+            max-width: 640px;
+            margin-bottom: 12px;
+        }
+
+        #prefs {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
             max-width: 640px;
             margin-bottom: 20px;
+        }
+
+        .pref {
+            min-height: 48px;
+            padding: 8px 16px;
+            border-radius: 999px;
+            border: 1px dashed var(--outline);
+            background: var(--panel);
+            color: var(--ink-soft);
+            font-family: inherit;
+            font-size: 0.75rem;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            cursor: pointer;
         }
 
         .chip {
@@ -140,13 +231,13 @@
             background: var(--panel);
             border: 1px solid var(--outline);
             box-shadow: 0 4px 10px rgba(74, 59, 50, 0.06);
-            font-size: 12.5px;
+            font-size: 0.78rem;
             font-weight: 800;
             font-style: normal;
         }
 
-        .chip i { font-style: normal; color: var(--ink-soft); font-size: 11px; letter-spacing: 0.5px; }
-        .chip b { font-size: 15px; }
+        .chip i { font-style: normal; color: var(--ink-soft); font-size: 0.69rem; letter-spacing: 0.5px; }
+        .chip b { font-size: 0.94rem; }
         .chip.pulse b { animation: pulse 0.3s ease; }
 
         @keyframes pulse {
@@ -159,7 +250,8 @@
             width: 100%;
             max-width: 760px;
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(228px, 1fr));
+            /* min() keeps the 228 px card from overflowing a 252 px phone column */
+            grid-template-columns: repeat(auto-fill, minmax(min(228px, 100%), 1fr));
             gap: 16px;
         }
 
@@ -177,9 +269,14 @@
             font-family: inherit;
             cursor: pointer;
             transition: transform 0.16s ease;
+            touch-action: manipulation; /* tap = open, drag = scroll */
         }
 
-        .card:hover { transform: translateY(-4px) rotate(-0.5deg); }
+        /* A hover lift only on devices that really hover; touchscreens keep
+           the lifted state otherwise. */
+        @media (hover: hover) and (pointer: fine) {
+            .card:hover { transform: translateY(-4px) rotate(-0.5deg); }
+        }
 
         .card .preview {
             display: block;
@@ -207,45 +304,151 @@
 
         /* =============== game screen =============== */
 
-        .gameTop { display: flex; flex-direction: column; align-items: center; gap: 10px; margin-bottom: 12px; width: 100%; max-width: 720px; }
+        /* App shell: the game screen fills the viewport and never scrolls.
+           fitStage() measures #stageBlock's real box and scales the 100x100
+           canvas to fit. Whole-number scales (2-6) are used whenever the box
+           allows at least 200 px; below that threshold a fractional CSS scale
+           (still pixelated, D3) keeps the page scroll-free instead. */
+        #gameScreen {
+            width: 100%;
+            max-width: 1100px;
+            flex: 1 1 auto;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+        }
 
-        .topRow { display: flex; align-items: center; gap: 10px; width: 100%; justify-content: center; flex-wrap: wrap; }
+        .gameTop {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            width: 100%;
+            margin-bottom: 6px;
+            flex: none;
+        }
+
+        .topRow {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
 
         .pill {
-            padding: 9px 16px;
+            min-height: 48px;
+            padding: 8px 16px;
             border-radius: 999px;
             border: 1px solid var(--outline);
             background: var(--panel);
             box-shadow: 0 4px 0 rgba(74, 59, 50, 0.12);
             font-family: inherit;
             font-weight: 800;
-            font-size: 13px;
+            font-size: 0.81rem;
             color: var(--ink);
             cursor: pointer;
-            touch-action: none;
+            touch-action: manipulation;
         }
 
         .pill.press { transform: translateY(3px); box-shadow: 0 1px 0 rgba(74, 59, 50, 0.12); }
 
         #gameTitle {
-            font-size: clamp(24px, 6.5vw, 36px);
+            font-size: clamp(1rem, 3.2vw, 1.63rem);
             font-weight: 800;
             letter-spacing: 0.5px;
             text-shadow: 0 3px 0 rgba(74, 59, 50, 0.08);
             text-align: center;
         }
 
-        #gameTagline { font-size: 13px; font-weight: 700; color: var(--ink-soft); text-align: center; }
+        #gameTagline { font-size: 0.81rem; font-weight: 700; color: var(--ink-soft); text-align: center; }
 
-        #arena { display: flex; flex-direction: column; align-items: center; gap: 16px; width: 100%; }
-
-        @media (min-width: 680px) {
-            #arena { flex-direction: row; align-items: center; gap: 34px; }
+        #inputHint {
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: var(--ink-soft);
+            text-align: center;
+            line-height: 1.35;
+            max-width: 60rem;
         }
 
-        #stageBlock { display: flex; flex-direction: column; align-items: center; min-width: 0; }
+        #arena {
+            flex: 1 1 auto;
+            min-height: 0;
+            width: 100%;
+            display: grid;
+            gap: 10px 12px;
+            align-items: stretch;
+            justify-content: center;
+        }
+
+        /* Portrait (the default): stage on top, one controls row under it. */
+        #arena {
+            grid-template-columns: minmax(0, 1fr);
+            grid-template-rows: minmax(0, 1fr) auto;
+            grid-template-areas:
+                "stage"
+                "controls";
+        }
+
+        #stageBlock { grid-area: stage; }
+
+        #controlsRow {
+            grid-area: controls;
+            display: flex;
+            flex-wrap: wrap;   /* 280 px phones: the action column wraps under the pad */
+            align-items: center;
+            justify-content: center;
+            gap: 8px 16px;
+            width: 100%;
+        }
+
+        /* Landscape: direction cluster in the lower-left thumb zone, action
+           button on the right, stage in the middle. The mirror option swaps
+           the two control columns. */
+        body[data-layout="land"] #arena {
+            grid-template-columns: auto minmax(0, 1fr) auto;
+            grid-template-rows: minmax(0, 1fr);
+            grid-template-areas: "dir stage action";
+            justify-content: stretch;
+            /* keep the pads beside the biggest stage (6 x 100 px + bezel),
+               not out at the screen edges on tablets and desktops */
+            max-width: 960px;
+            margin-inline: auto;
+        }
+
+        body[data-layout="land"][data-hand="right"] #arena {
+            grid-template-areas: "action stage dir";
+        }
+
+        /* Portrait with the right-hand preference: pad on the right, action
+           on the left, so the same setting means the same thing in both
+           layouts. */
+        body[data-layout="port"][data-hand="right"] #controlsRow {
+            flex-direction: row-reverse;
+        }
+
+        body[data-layout="land"] #controlsRow { display: contents; }
+        body[data-layout="land"] #dirCluster { grid-area: dir; }
+        body[data-layout="land"] #actionCluster { grid-area: action; }
+
+        #stageBlock {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            min-width: 0;
+            min-height: 0;
+            overflow: hidden;
+            align-self: stretch;   /* fill the grid area so fitStage can measure it */
+        }
+
+        #dirCluster, #actionCluster { align-self: center; }
 
         #bezel {
+            position: relative;
             padding: 12px;
             border-radius: 24px;
             background: var(--panel);
@@ -259,36 +462,71 @@
             image-rendering: pixelated;
             image-rendering: crisp-edges;
             border-radius: 10px;
+            touch-action: none; /* a swipe on the stage never scrolls or refreshes */
         }
 
         #msg {
-            margin-top: 11px;
-            font-size: 12.5px;
+            font-size: 0.78rem;
             font-weight: 800;
             color: var(--ink-soft);
             text-align: center;
             letter-spacing: 0.3px;
         }
 
-        #controls { display: flex; flex-direction: column; align-items: center; gap: 13px; touch-action: none; }
+        #msg:empty { display: none; }
 
-        #pad {
+        #pauseOverlay {
+            position: absolute;
+            inset: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            border-radius: 10px;
+            background: rgba(255, 253, 248, 0.86);
+            color: var(--ink);
+            font-weight: 800;
+            letter-spacing: 1px;
+            text-align: center;
+            cursor: pointer;
+            touch-action: none;
+        }
+
+        #pauseOverlay span { font-size: 0.75rem; font-weight: 700; color: var(--ink-soft); letter-spacing: 0.3px; }
+
+        /* ---- direction cluster: one sliding touch surface ---- */
+        #dirCluster {
             display: grid;
-            grid-template-columns: 58px 58px 58px;
-            grid-template-rows: 58px 58px 58px;
-            gap: 9px;
+            grid-template-columns: repeat(3, var(--pad));
+            grid-template-rows: repeat(3, var(--pad));
+            gap: var(--pad-gap);
             grid-template-areas:
-                ".      up    ."
-                "left   dash  right"
-                ".      down  .";
+                ".    up    ."
+                "left .     right"
+                ".    down  .";
+            touch-action: none;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        #actionCluster {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            touch-action: manipulation;
         }
 
         .pbtn {
+            width: var(--pad);
+            height: var(--pad);
             border: 0;
             border-radius: 16px;
             font-family: inherit;
             font-weight: 800;
-            font-size: 19px;
+            font-size: 1.19rem;
             color: #4A3B32;
             box-shadow: 0 5px 0 var(--btn-shade, #D9C7B2), 0 8px 14px rgba(74, 59, 50, 0.10);
             transition: transform 0.05s ease, box-shadow 0.05s ease;
@@ -303,27 +541,53 @@
 
         #pUp    { grid-area: up;    background: #E2F3E6; --btn-shade: #A9CBB1; }
         #pLeft  { grid-area: left;  background: #E4F1FA; --btn-shade: #A9C8DC; }
-        #pDash  { grid-area: dash;  background: #FFE5C5; --btn-shade: #DBB07E; font-size: 13px; letter-spacing: 0.5px; }
         #pRight { grid-area: right; background: #FCE4ED; --btn-shade: #DFAEC3; }
         #pDown  { grid-area: down;  background: #FFF2D6; --btn-shade: #DFC386; }
 
+        #pDash {
+            width: calc(var(--pad) * 1.5);
+            height: calc(var(--pad) * 1.5);
+            border-radius: 999px;
+            background: #FFE5C5;
+            --btn-shade: #DBB07E;
+            font-size: 0.81rem;
+            letter-spacing: 0.5px;
+        }
+
         #btnRestart {
-            padding: 11px 24px;
+            min-height: 48px;
+            min-width: 48px;
+            padding: 10px 18px;
             border-radius: 999px;
             border: 1px solid var(--outline);
             background: var(--panel);
             box-shadow: 0 4px 0 rgba(74, 59, 50, 0.12);
             font-family: inherit;
             font-weight: 800;
-            font-size: 13px;
+            font-size: 0.81rem;
             color: var(--ink);
             cursor: pointer;
-            touch-action: none;
+            touch-action: manipulation;
         }
 
         #btnRestart.press { transform: translateY(3px); box-shadow: 0 1px 0 rgba(74, 59, 50, 0.12); }
 
-        .hint { font-size: 11.5px; font-weight: 700; color: var(--ink-soft); text-align: center; }
+        /* Keyboard mode: the pointer pads are duplicates of WASD/SPACE, so
+           they collapse (the manual override can force them back on). */
+        body[data-pads="hide"] #dirCluster,
+        body[data-pads="hide"] #pDash,
+        body[data-pads="auto"][data-input="keys"] #dirCluster,
+        body[data-pads="auto"][data-input="keys"] #pDash {
+            display: none;
+        }
+
+        @media (max-width: 380px), (max-height: 620px) {
+            :root { --pad: 48px; --pad-gap: 8px; }
+        }
+
+        @media (max-height: 700px) {
+            #gameTagline { display: none; }
+        }
 
         /* =============== footer =============== */
 
@@ -331,10 +595,12 @@
             margin-top: auto;
             padding-top: 24px;
             text-align: center;
-            font-size: 11.5px;
+            font-size: 0.72rem;
             font-weight: 600;
             color: var(--ink-soft);
         }
+
+        body.playing #meta { display: none; }
 
         #meta .v {
             display: inline-block;
@@ -356,6 +622,8 @@
 
         @media (prefers-reduced-motion: reduce) {
             .card, .card:hover, .chip.pulse b { animation: none; transition: none; transform: none; }
+            .pbtn, .pill, #btnRestart { transition: none; }
+            .pbtn.press, .pill.press, #btnRestart.press { transform: none; }
         }
     </style>
 </head>
@@ -373,11 +641,16 @@
         </header>
 
         <nav id="howto" aria-label="How to play the games">
-            <span class="chip"><i>⌨</i> WASD to move</span>
-            <span class="chip"><i>⎵</i> SPACE for the action</span>
-            <span class="chip"><i>📱</i> on-screen pads on phone</span>
+            <span class="chip" id="chipMove"><i>⌨</i> WASD / arrows to move</span>
+            <span class="chip" id="chipAct"><i>⎵</i> SPACE for the action</span>
+            <span class="chip" id="chipPads"><i>📱</i> pads appear for touch</span>
             <span class="chip"><i>✓</i> no ads, no accounts</span>
         </nav>
+
+        <div id="prefs" role="group" aria-label="Control preferences">
+            <button type="button" id="btnPadMode" class="pref" aria-label="On-screen pads: auto">PADS · AUTO</button>
+            <button type="button" id="btnHandMode" class="pref" aria-label="Direction pad side: left">DIR PAD · LEFT</button>
+        </div>
 
         <main id="shelf" aria-label="Micro games"></main>
     </section>
@@ -387,13 +660,12 @@
         <div class="gameTop">
             <div class="topRow">
                 <button id="btnBack" class="pill" aria-label="Back to the shelf">⌂ SHELF</button>
-            </div>
-            <h2 id="gameTitle"></h2>
-            <p id="gameTagline"></p>
-            <div class="topRow">
+                <h2 id="gameTitle"></h2>
                 <span class="chip"><i>SCORE</i><b id="scoreVal">0</b></span>
                 <span class="chip"><i>★ BEST</i><b id="bestVal">0</b></span>
             </div>
+            <p id="gameTagline"></p>
+            <p id="inputHint"></p>
         </div>
 
         <main id="arena">
@@ -401,28 +673,31 @@
                 <div id="bezel">
                     <canvas id="stage" width="100" height="100"
                             aria-label="The tiny game stage"></canvas>
+                    <div id="pauseOverlay" hidden><strong>PAUSED</strong><span>tap or press a key</span></div>
                 </div>
-                <p id="msg"></p>
+                <p id="msg" role="status" aria-live="polite"></p>
             </section>
 
-            <section id="controls">
-                <div id="pad">
-                    <button id="pUp"     class="pbtn" data-dir="up"    aria-label="Move up (W)">↑</button>
-                    <button id="pLeft"   class="pbtn" data-dir="left"  aria-label="Move left (A)">←</button>
-                    <button id="pDash"   class="pbtn" aria-label="Action button (SPACE)">DASH</button>
-                    <button id="pRight"  class="pbtn" data-dir="right" aria-label="Move right (D)">→</button>
-                    <button id="pDown"   class="pbtn" data-dir="down"   aria-label="Move down (S)">↓</button>
+            <div id="controlsRow">
+                <div id="dirCluster" role="group" aria-label="Direction pad">
+                    <button id="pUp" class="pbtn" data-dir="up" tabindex="-1" aria-label="Move up (W)">↑</button>
+                    <button id="pLeft" class="pbtn" data-dir="left" tabindex="-1" aria-label="Move left (A)">←</button>
+                    <button id="pRight" class="pbtn" data-dir="right" tabindex="-1" aria-label="Move right (D)">→</button>
+                    <button id="pDown" class="pbtn" data-dir="down" tabindex="-1" aria-label="Move down (S)">↓</button>
                 </div>
-                <button id="btnRestart">RESTART · R</button>
-                <p class="hint" id="inputHint"></p>
-            </section>
+
+                <div id="actionCluster">
+                    <button id="pDash" class="pbtn" tabindex="-1" aria-label="Action button (SPACE)">DASH</button>
+                    <button id="btnRestart">RESTART · R</button>
+                </div>
+            </div>
         </main>
     </section>
 
     <footer id="meta">
         <span class="v" id="verBox">KANT MICRO</span>
         <br><span class="zzz">one file</span> · runs completely offline · every game lives inside this page ·
-        <span class="zzz">build 007-20261101</span>
+        <span class="zzz">build 009-20261101</span>
         <br><a href="https://github.com/lohyapkant/KANTMICROGAMES" style="color:inherit">GitHub</a> ·
         <a href="https://kantmicrogames.lohyapkant.workers.dev/" style="color:inherit">Play Online</a> ·
         MIT License © 2026 Loh Yap Kant
@@ -497,7 +772,7 @@
 
 const APP = {
     name: "KANT MICRO",
-    fileVersion: "007-20261101",       // build number of THIS one-file app
+    fileVersion: "009-20261101",       // build number of THIS one-file app
     savePrefix: "KANTMICROGAME."       // best scores live at prefix + GAMEID + ".best"
 };
 
@@ -756,9 +1031,16 @@ function paintPandaSnackPreview(ctx) {
 
 function buildCard(game) {
     const card = document.createElement("button");
+    card.type = "button";
     card.className = "card";
-    card.addEventListener("pointerdown", function (event) {
-        event.preventDefault();
+    card.setAttribute("aria-label", "Play " + game.name);
+    /* A click opens the game: mouse, tap, keyboard Enter/Space and assistive
+       tech all produce one. A drag that starts on a card scrolls and never
+       activates it, and the brief gate after a screen swap stops the click
+       that closes a game from landing on the card that just appeared below
+       the finger (ghost click). */
+    card.addEventListener("click", function () {
+        if (!screenSettled()) return;
         openGame(game.id);
     });
 
@@ -831,12 +1113,17 @@ function buildShelf() {
    ================================================================== */
 
 const GAMES = [];               // every game module pushes itself in here
-const ACTIVE = { module: null };
+const ACTIVE = { module: null, paused: false, errorReported: false };
 
+const bodyEl = document.body;
 const shelfScreenEl = document.getElementById("shelfScreen");
 const gameScreenEl = document.getElementById("gameScreen");
 const stageCanvas = document.getElementById("stage");
 const stageCtx = stageCanvas.getContext("2d");
+const stageBlockEl = document.getElementById("stageBlock");
+const bezelEl = document.getElementById("bezel");
+const pauseOverlayEl = document.getElementById("pauseOverlay");
+const dirClusterEl = document.getElementById("dirCluster");
 const scoreEl = document.getElementById("scoreVal");
 const bestEl = document.getElementById("bestVal");
 const msgEl = document.getElementById("msg");
@@ -844,42 +1131,69 @@ const gameTitleEl = document.getElementById("gameTitle");
 const gameTaglineEl = document.getElementById("gameTagline");
 const inputHintEl = document.getElementById("inputHint");
 const dashBtnEl = document.getElementById("pDash");
+const restartBtnEl = document.getElementById("btnRestart");
+const backBtnEl = document.getElementById("btnBack");
 const verEl = document.getElementById("verBox");
+const chipMoveEl = document.getElementById("chipMove");
+const chipActEl = document.getElementById("chipAct");
+const chipPadsEl = document.getElementById("chipPads");
+const padModeBtnEl = document.getElementById("btnPadMode");
+const handModeBtnEl = document.getElementById("btnHandMode");
 
 const STAGE_SIZE = 100;
+const STAGE_MIN_WHOLE = 2;      // D3: below 200 px the scale becomes fractional
+const STAGE_MAX_SCALE = 6;
+const SCREEN_SETTLE_MS = 400;   // ghost-click gate after a screen swap
+
+let lastScreenSwap = 0;
+
+/* Cards ignore clicks fired in the short window after a screen swap, so the
+   tap that closes a game cannot also open the card that appears underneath. */
+function screenSettled() { return performance.now() - lastScreenSwap > SCREEN_SETTLE_MS; }
 
 function openGame(gameId) {
     const module2 = GAMES.find(function (game) { return game.id === gameId; });
     if (!module2) return;
-    if (ACTIVE.module && ACTIVE.module.id !== gameId) ACTIVE.module.stop();
+    if (ACTIVE.module && ACTIVE.module.id === gameId) return;   // idempotent
+    if (ACTIVE.module) { releaseAllDirs(ACTIVE.module); ACTIVE.module.stop(); }
     ACTIVE.module = module2;
+    ACTIVE.paused = false;
+    ACTIVE.errorReported = false;
+    pauseOverlayEl.hidden = true;
     shelfScreenEl.hidden = true;
     gameScreenEl.hidden = false;
+    bodyEl.classList.add("playing");
     gameTitleEl.textContent = module2.name;
     gameTaglineEl.textContent = module2.tagline;
-    inputHintEl.textContent = module2.hint;
     dashBtnEl.textContent = module2.actionLabel;
     scoreEl.textContent = "0";
     bestEl.textContent = String(readBest(gameId));
     msgEl.textContent = "";
-    ACTIVE.errorReported = false;
+    updateHints();
+    fitStage();
     module2.start();
     /* INPUT HYGIENE: a direction held while the previous screen closed can
        otherwise stay "on" inside the newly opened module. Clearing it through
        the contract keeps every module's private input object honest. */
     releaseAllDirs(module2);
-    fitStage();
+    scheduleFit();                    // after the first paint/layout settle
     setHash("game=" + gameId);
+    lastScreenSwap = performance.now();
 }
 
 function openShelf() {
     releaseAllDirs(ACTIVE.module);
     if (ACTIVE.module) ACTIVE.module.stop();
     ACTIVE.module = null;
+    ACTIVE.paused = false;
+    pauseOverlayEl.hidden = true;
     gameScreenEl.hidden = true;
     shelfScreenEl.hidden = false;
+    bodyEl.classList.remove("playing");
+    bodyEl.removeAttribute("data-layout");
     buildShelf();                     // fresh best-score lines on the cards
     setHash("");
+    lastScreenSwap = performance.now();
 }
 
 function setHash(value) {
@@ -899,19 +1213,57 @@ function routeFromHash() {
 
 window.addEventListener("hashchange", routeFromHash);
 
-/* whole-number scaling: the same rule every build has always followed */
-function fitStage() {
-    if (gameScreenEl.hidden) return;
-    const widthBudget = Math.min(window.innerWidth - 48, 660);
-    const heightBudget = window.innerHeight - (window.innerWidth >= 680 ? 170 : 360);
-    let scale = Math.floor(Math.min(widthBudget, heightBudget) / STAGE_SIZE);
-    scale = Math.max(2, Math.min(6, scale));
-    stageCanvas.style.width = (STAGE_SIZE * scale) + "px";
-    stageCanvas.style.height = (STAGE_SIZE * scale) + "px";
+/* Measure the real box the stage has left after header and controls are laid
+   out, in each of the two layouts, and choose the larger stage. Whole numbers
+   (2-6) keep pixels crisp; under 200 px the scale goes fractional (D3) so the
+   page still never scrolls during play. */
+function stageScaleFor(layout) {
+    bodyEl.dataset.layout = layout;
+    const style = window.getComputedStyle(bezelEl);
+    const chromeX = parseFloat(style.paddingLeft) + parseFloat(style.paddingRight) +
+                    parseFloat(style.borderLeftWidth) + parseFloat(style.borderRightWidth);
+    const chromeY = parseFloat(style.paddingTop) + parseFloat(style.paddingBottom) +
+                    parseFloat(style.borderTopWidth) + parseFloat(style.borderBottomWidth);
+    const messageH = msgEl.offsetHeight ? msgEl.offsetHeight + 6 : 0;
+    const availW = stageBlockEl.clientWidth - chromeX;
+    const availH = stageBlockEl.clientHeight - chromeY - messageH;
+    if (availW < 40 || availH < 40) return 0;
+    const fit = Math.min(availW, availH) / STAGE_SIZE;
+    const whole = Math.min(STAGE_MAX_SCALE, Math.floor(fit));
+    return whole >= STAGE_MIN_WHOLE ? whole : Math.max(0.4, fit);
 }
 
-window.addEventListener("resize", fitStage);
-window.addEventListener("orientationchange", fitStage);
+function fitStage() {
+    if (gameScreenEl.hidden) return;
+    const portraitScale = stageScaleFor("port");
+    const landscapeScale = stageScaleFor("land");
+    /* Near-square screens (foldable inner displays) pick whichever layout
+       yields the larger stage; exact ties follow the available aspect. */
+    let layout;
+    if (landscapeScale > portraitScale) layout = "land";
+    else if (portraitScale > landscapeScale) layout = "port";
+    else layout = window.innerWidth >= window.innerHeight ? "land" : "port";
+    bodyEl.dataset.layout = layout;
+    const scale = Math.max(0.4, layout === "land" ? landscapeScale : portraitScale);
+    const pixels = Math.round(STAGE_SIZE * scale);
+    stageCanvas.style.width = pixels + "px";
+    stageCanvas.style.height = pixels + "px";
+}
+
+let fitScheduled = false;
+function scheduleFit() {
+    if (fitScheduled) return;
+    fitScheduled = true;
+    window.requestAnimationFrame(function () {
+        fitScheduled = false;
+        fitStage();
+    });
+}
+
+window.addEventListener("resize", scheduleFit);
+window.addEventListener("orientationchange", scheduleFit);
+if (window.visualViewport) window.visualViewport.addEventListener("resize", scheduleFit);
+if (window.ResizeObserver) new ResizeObserver(scheduleFit).observe(stageBlockEl);
 
 /* ---------- the one loop: only the open game ticks and paints ---------- */
 
@@ -921,7 +1273,7 @@ function frame(now) {
     let dt = (now - FRAME.lastTime) / 1000;
     FRAME.lastTime = now;
     if (dt > 0.25) dt = 0.25;
-    if (ACTIVE.module) {
+    if (ACTIVE.module && !ACTIVE.paused) {
         try {
             ACTIVE.module.update(dt);
             stageCtx.clearRect(0, 0, stageCanvas.width, stageCanvas.height);
@@ -938,6 +1290,31 @@ function frame(now) {
     }
     window.requestAnimationFrame(frame);
 }
+
+/* ---------- pause: hidden tab, pagehide, lost focus ---------- */
+
+/* Stop ticking and painting (the last frame stays on the canvas) and show
+   the HTML overlay. The input that resumes is swallowed so it cannot also
+   dash or poke. */
+function pauseForLifecycle() {
+    if (!ACTIVE.module || ACTIVE.paused) return;
+    releaseAllDirs(ACTIVE.module);
+    ACTIVE.paused = true;
+    pauseOverlayEl.hidden = false;
+}
+
+function resumeFromUserInput() {
+    if (!ACTIVE.paused) return;
+    ACTIVE.paused = false;
+    pauseOverlayEl.hidden = true;
+    FRAME.lastTime = performance.now();   // the clamp would cover this too; be exact
+}
+
+document.addEventListener("visibilitychange", function () {
+    if (document.visibilityState === "hidden") pauseForLifecycle();
+});
+window.addEventListener("pagehide", pauseForLifecycle);
+window.addEventListener("blur", pauseForLifecycle);
 
 /* ---------- shared keyboard ---------- */
 
@@ -962,13 +1339,44 @@ function clearPadVisuals() {
 /* Release every direction inside the open module through the contract.
    This is the runtime's only legal way to touch a module's private input. */
 function releaseAllDirs(module3) {
-    if (!module3) return;
+    dirPointers.clear();
+    if (!module3) { clearPadVisuals(); return; }
     ["up", "down", "left", "right"].forEach(function (dir) { module3.onDir(dir, false); });
     clearPadVisuals();
 }
 
+/* Keys that are never "any key": modifiers, Tab, CapsLock and F1-F12. They
+   must not restart a finished run (or anything else). */
+function isNonAnyKey(code) {
+    if (code === "Tab" || code === "CapsLock") return true;
+    if (/^(Shift|Control|Alt|Meta)(Left|Right)$/.test(code)) return true;
+    if (/^F([1-9]|1[0-2])$/.test(code)) return true;
+    return false;
+}
+
+/* Never hijack keys while the user is typing in a field. None exist today;
+   this keeps the shell safe for any future settings UI. */
+function isEditableTarget(target) {
+    if (!target || !target.tagName) return false;
+    const tag = target.tagName;
+    return target.isContentEditable || tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT";
+}
+
 window.addEventListener("keydown", function (event) {
+    if (isEditableTarget(event.target)) return;
     if (!ACTIVE.module) return;
+
+    /* Browser/OS shortcuts pass through untouched: never preventDefault on a
+       modified key. (Ctrl+S, Cmd+D, Alt+Left and friends must reach the OS.) */
+    if (event.ctrlKey || event.metaKey || event.altKey) return;
+
+    if (ACTIVE.paused) {
+        if (event.code === "Escape") { openShelf(); return; }
+        if (event.code === "Space" || event.code.indexOf("Arrow") === 0) event.preventDefault();
+        resumeFromUserInput();     // swallowed: no dash/poke from the resume key
+        return;
+    }
+
     const code = event.code;
     if (code === "Space" || code.indexOf("Arrow") === 0) event.preventDefault();
     if (event.repeat) return;
@@ -977,6 +1385,7 @@ window.addEventListener("keydown", function (event) {
     if (code === "Space") { ACTIVE.module.onAction(); return; }
     if (code === "Escape") { openShelf(); return; }
     if (code === "KeyR") { ACTIVE.module.restart(); return; }
+    if (isNonAnyKey(code)) return;
     if (typeof ACTIVE.module.onAnyKey === "function") ACTIVE.module.onAnyKey();
 });
 
@@ -986,59 +1395,215 @@ window.addEventListener("keyup", function (event) {
     if (dir) { ACTIVE.module.onDir(dir, false); pressPadVisual(dir, false); }
 });
 
-/* Losing focus (tab switch, phone call, pad stolen) can swallow the keyup.
-   Release every direction so no character keeps swimming on its own. */
-window.addEventListener("blur", function () { releaseAllDirs(ACTIVE.module); });
+/* ---------- input mode + control preferences (D2) ---------- */
 
-/* ---------- shared pads (they serve whichever game is open) ---------- */
+/* The initial guess comes from media queries; after that only real input
+   switches the mode: a touch/pen pointer means touch, a key or the mouse
+   means keys. No user-agent sniffing. */
+const INITIAL_INPUT_MODE = ((window.matchMedia && window.matchMedia("(pointer: coarse)").matches) ||
+    (navigator.maxTouchPoints || 0) > 0) ? "touch" : "keys";
 
-function wirePad(id, onDown, onUp) {
-    const el = document.getElementById(id);
-    if (!el) return;
-    const down = function (event) {
-        event.preventDefault();
-        el.classList.add("press");
-        if (el.setPointerCapture && event.pointerId !== undefined) {
-            try { el.setPointerCapture(event.pointerId); } catch (error) { /* fine */ }
-        }
-        if (onDown) onDown();
-    };
-    const up = function () {
-        el.classList.remove("press");
-        if (onUp) onUp();
-    };
-    el.addEventListener("pointerdown", down);
-    el.addEventListener("pointerup", up);
-    el.addEventListener("pointercancel", up);
-    el.addEventListener("lostpointercapture", up);
-    el.addEventListener("contextmenu", function (event) { event.preventDefault(); });
-    return el;
+function readUiPref(name, allowed, fallback) {
+    try {
+        const value = window.localStorage.getItem(APP.savePrefix + "ui." + name);
+        return allowed.indexOf(value) >= 0 ? value : fallback;
+    } catch (error) {
+        return fallback;
+    }
 }
 
-const releaseDirs = null; /* pads handle their own releases */
+function saveUiPref(name, value) {
+    try {
+        window.localStorage.setItem(APP.savePrefix + "ui." + name, value);
+    } catch (error) {
+        /* saving quietly refused; the preference still applies this session */
+    }
+}
 
-["Up", "Down", "Left", "Right"].forEach(function (edge) {
-    const dir = edge.toLowerCase();
-    wirePad("p" + edge,
-        function () { if (ACTIVE.module) ACTIVE.module.onDir(dir, true); },
-        function () { if (ACTIVE.module) ACTIVE.module.onDir(dir, false); });
+const UI = {
+    mode: INITIAL_INPUT_MODE,
+    pads: readUiPref("pads", ["auto", "show", "hide"], "auto"),
+    hand: readUiPref("hand", ["left", "right"], "left")
+};
+
+function updateHints() {
+    const touch = UI.mode === "touch";
+    const module2 = ACTIVE.module;
+    restartBtnEl.textContent = touch ? "RESTART" : "RESTART · R";
+    if (!module2) { inputHintEl.textContent = ""; return; }
+    dashBtnEl.textContent = module2.actionLabel;
+    dashBtnEl.setAttribute("aria-label", module2.actionLabel + " (action)");
+    /* The frozen modules keep their "desktop: ..." hint strings; touch mode
+       builds its own line from the module's action label instead. */
+    inputHintEl.textContent = touch
+        ? "pad to move · " + module2.actionLabel + " or tap the stage · ⌂ to leave"
+        : String(module2.hint || "").replace(/^desktop:\s*/i, "");
+}
+
+function applyUi() {
+    const touch = UI.mode === "touch";
+    bodyEl.dataset.input = UI.mode;
+    bodyEl.dataset.pads = UI.pads;
+    bodyEl.dataset.hand = UI.hand;
+
+    chipMoveEl.innerHTML = touch ? "<i>👆</i> drag the pad to move" : "<i>⌨</i> WASD / arrows to move";
+    chipActEl.innerHTML = touch ? "<i>⬤</i> tap the action button" : "<i>⎵</i> SPACE for the action";
+    chipPadsEl.innerHTML = UI.pads === "show" ? "<i>📱</i> pads always shown"
+        : UI.pads === "hide" ? "<i>📱</i> pads always hidden"
+        : touch ? "<i>📱</i> pads follow your touch"
+        : "<i>🖥</i> pads hidden for keyboard";
+
+    padModeBtnEl.textContent = "PADS · " + UI.pads.toUpperCase();
+    padModeBtnEl.setAttribute("aria-label", "On-screen pads: " + UI.pads);
+    handModeBtnEl.textContent = "DIR PAD · " + UI.hand.toUpperCase();
+    handModeBtnEl.setAttribute("aria-label", "Direction pad side: " + UI.hand);
+
+    updateHints();
+    scheduleFit();      /* pads collapsing gives the stage more room */
+}
+
+function setInputMode(mode) {
+    if (UI.mode === mode) return;
+    UI.mode = mode;
+    applyUi();
+}
+
+window.addEventListener("pointerdown", function (event) {
+    if (event.pointerType === "mouse") setInputMode("keys");
+    else if (event.pointerType) setInputMode("touch");
+}, true);
+window.addEventListener("pointermove", function (event) {
+    if (event.pointerType === "mouse") setInputMode("keys");
+}, true);
+window.addEventListener("keydown", function () { setInputMode("keys"); }, true);
+
+padModeBtnEl.addEventListener("click", function () {
+    const order = ["auto", "show", "hide"];
+    UI.pads = order[(order.indexOf(UI.pads) + 1) % order.length];
+    saveUiPref("pads", UI.pads);
+    applyUi();
+});
+handModeBtnEl.addEventListener("click", function () {
+    UI.hand = UI.hand === "left" ? "right" : "left";
+    saveUiPref("hand", UI.hand);
+    applyUi();
 });
 
-wirePad("pDash", function () {
-    if (!ACTIVE.module) return;
-    ACTIVE.module.onAction();
+/* ---------- direction cluster: one sliding touch surface ---------- */
+
+/* Each finger is tracked by pointerId. Sliding from one button to the next
+   switches direction; lifting, pointercancel or lost capture releases it.
+   A second finger on the action button is unaffected. */
+const dirPointers = new Map();
+
+function dirAtPoint(x, y) {
+    const el = document.elementFromPoint(x, y);
+    const button = el && el.closest ? el.closest("[data-dir]") : null;
+    return button && dirClusterEl.contains(button) ? button.getAttribute("data-dir") : null;
+}
+
+function heldDirs() {
+    const held = new Set();
+    dirPointers.forEach(function (dir) { held.add(dir); });
+    return held;
+}
+
+function setPointerDir(pointerId, dir) {
+    const previous = dirPointers.get(pointerId) || null;
+    if (previous === dir) return;
+    if (previous) {
+        dirPointers.delete(pointerId);
+        if (!heldDirs().has(previous) && ACTIVE.module) ACTIVE.module.onDir(previous, false);
+    }
+    if (dir) {
+        const alreadyHeld = heldDirs().has(dir);
+        dirPointers.set(pointerId, dir);
+        if (!alreadyHeld && ACTIVE.module) ACTIVE.module.onDir(dir, true);
+    }
+    clearPadVisuals();
+    heldDirs().forEach(function (held) { pressPadVisual(held, true); });
+}
+
+dirClusterEl.addEventListener("pointerdown", function (event) {
+    event.preventDefault();
+    if (event.pointerType === "mouse" && event.button !== 0) return;
+    if (ACTIVE.paused) { resumeFromUserInput(); return; }
+    const dir = dirAtPoint(event.clientX, event.clientY);
+    if (!dir) return;
+    if (dirClusterEl.setPointerCapture) {
+        try { dirClusterEl.setPointerCapture(event.pointerId); } catch (error) { /* fine */ }
+    }
+    setPointerDir(event.pointerId, dir);
 });
-
-wirePad("btnRestart", function () {
-    if (ACTIVE.module) ACTIVE.module.restart();
+dirClusterEl.addEventListener("pointermove", function (event) {
+    if (!dirPointers.has(event.pointerId)) return;
+    const dir = dirAtPoint(event.clientX, event.clientY);
+    if (dir) setPointerDir(event.pointerId, dir);   // gaps keep the last direction
 });
+["pointerup", "pointercancel", "lostpointercapture"].forEach(function (type) {
+    dirClusterEl.addEventListener(type, function (event) { setPointerDir(event.pointerId, null); });
+});
+dirClusterEl.addEventListener("contextmenu", function (event) { event.preventDefault(); });
 
-wirePad("btnBack", function () { openShelf(); });
+/* ---------- action button ---------- */
 
-/* tapping the stage during play: the module decides what that means */
-wirePad("stage", function () {
+(function wireActionButton() {
+    const down = function (event) {
+        event.preventDefault();
+        if (event.pointerType === "mouse" && event.button !== 0) return;
+        dashBtnEl.classList.add("press");
+        if (dashBtnEl.setPointerCapture) {
+            try { dashBtnEl.setPointerCapture(event.pointerId); } catch (error) { /* fine */ }
+        }
+        if (ACTIVE.paused) { resumeFromUserInput(); return; }
+        if (ACTIVE.module) ACTIVE.module.onAction();
+    };
+    const up = function () { dashBtnEl.classList.remove("press"); };
+    dashBtnEl.addEventListener("pointerdown", down);
+    dashBtnEl.addEventListener("pointerup", up);
+    dashBtnEl.addEventListener("pointercancel", up);
+    dashBtnEl.addEventListener("lostpointercapture", up);
+    dashBtnEl.addEventListener("contextmenu", function (event) { event.preventDefault(); });
+})();
+
+/* ---------- stage tap: a tap acts, a drag does not ---------- */
+
+let stagePress = null;
+stageCanvas.addEventListener("pointerdown", function (event) {
+    event.preventDefault();
+    if (event.pointerType === "mouse" && event.button !== 0) return;
+    stagePress = { id: event.pointerId, x: event.clientX, y: event.clientY, at: performance.now() };
+    if (stageCanvas.setPointerCapture) {
+        try { stageCanvas.setPointerCapture(event.pointerId); } catch (error) { /* fine */ }
+    }
+});
+stageCanvas.addEventListener("pointerup", function (event) {
+    if (!stagePress || stagePress.id !== event.pointerId) return;
+    const moved = Math.hypot(event.clientX - stagePress.x, event.clientY - stagePress.y);
+    const quick = performance.now() - stagePress.at < 700;
+    stagePress = null;
+    if (moved > 12 || !quick) return;
+    if (ACTIVE.paused) { resumeFromUserInput(); return; }
     if (ACTIVE.module) ACTIVE.module.onStageTap();
 });
+["pointercancel", "lostpointercapture"].forEach(function (type) {
+    stageCanvas.addEventListener(type, function () { stagePress = null; });
+});
+
+/* ---------- chrome buttons (click: mouse, touch, keyboard, AT) ---------- */
+
+backBtnEl.addEventListener("click", function () { openShelf(); });
+restartBtnEl.addEventListener("click", function () {
+    if (ACTIVE.paused) resumeFromUserInput();
+    if (ACTIVE.module) ACTIVE.module.restart();
+});
+pauseOverlayEl.addEventListener("pointerdown", function (event) {
+    event.preventDefault();
+    event.stopPropagation();
+    resumeFromUserInput();
+});
+
+applyUi();
 
 /* ==================================================================
    PART 5 — GAME MODULES. One IIFE per game: it owns its own SETTINGS,

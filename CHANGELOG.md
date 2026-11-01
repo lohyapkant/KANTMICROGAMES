@@ -19,6 +19,116 @@
   this changelog, and never as a permanent ranking.
 - The same rules are repeated beside `APP.fileVersion` in `deploy/index.html`.
 
+## 009-20261101 — 2026-11-01 (responsive shell)
+
+Built from prompt: P-09 (responsive shell — phones, tablets, foldables, desktops); the
+prompt was **authored by Claude.ai Sonnet 5.5 Extra** and is saved unaltered in
+`prompts/P-09_responsive-shell.txt`  
+Tool and model: **Qwen3.8-Flash (Qoder CLI)** — recorded per the owner's standing request in
+changelog, README, plan, MODELS.md and the prompt copy  
+Games in the one file: 4 (PANDASNACK module content 007-20261101 **frozen**, BOOPEEK module
+content 006-20261101 **frozen**, DUCKLINE module content 005-20261101 **frozen**, SPROUTUP
+module content 007-20261101; file build **009-20261101** — **no game code changes**; the
+four IIFEs are byte-identical to build 008 by SHA-256)
+
+### Note — build number deviation
+
+The prompt title says **build 008**, but build 008 had already been used by the
+documentation cleanup (P-08). Build numbers are never reused, so this build is
+**009-20261101** in `APP.fileVersion`, the footer and every record. The prompt text itself
+was not altered; the deviation is documented in the prompt copy, README and MODELS.md.
+
+### Changed — shelf (F1, F2, F3)
+
+- The shelf is capped at a 760 px column and its grid uses
+  `minmax(min(228px, 100%), 1fr)`: one card column on the narrowest phones, two around
+  600–932 px, three above. No horizontal overflow from 280 px to 3440 px.
+- Cards are real buttons opened on `click`, so mouse, tap, `ENTER`/`SPACE` and assistive
+  tech all work; a drag that scrolls the shelf no longer launches a game.
+- Ghost-click guard: the tap that leaves a game cannot open a card that appears under the
+  finger; `openGame` is idempotent.
+- Visible `:focus-visible` rings; hover lift only under `(hover: hover)`.
+- Two persisted preferences under the how-to chips: `PADS · AUTO/SHOW/HIDE` and
+  `DIR PAD · LEFT/RIGHT` (`KANTMICROGAME.ui.pads`, `KANTMICROGAME.ui.hand`).
+
+### Changed — game screen layout (F4, F5, F9, F10, F11, D1, D3)
+
+- The game screen is a no-scroll app shell: `100dvh` with a `100vh` fallback,
+  `overscroll-behavior: none`, `touch-action: none` on stage and pads, footer hidden while
+  playing.
+- `fitStage()` now measures the real stage box after the header and controls are laid out,
+  in both the portrait and landscape layouts, and picks the larger stage. Whole-number
+  2×–6× while it fits; fractional only below 200 px (280×653 → 155 px, 568×320 → 187 px).
+- Portrait: stage on top, one controls row below. Landscape: direction cluster and action
+  column beside the stage, arena capped at 960 px so the pads stay near a 600 px stage on
+  large screens; `DIR PAD · RIGHT` mirrors both layouts.
+- Header compacted to one row (⌂ SHELF, title, SCORE, BEST); tagline hidden on short
+  screens. Every visible control is at least 48 × 48 px and 8 px from its neighbours.
+- Safe-area variables `--sai-t/-r/-b/-l` are used for page and top-bar padding, with
+  extra clearance near edges. Page zoom is allowed; double-tap zoom is suppressed with
+  `touch-action` on the chrome.
+
+### Changed — input, keyboard, lifecycle, pads (F6, F7, F8, F12)
+
+- Input mode comes from real use (`pointerType`, keydown), never from a user-agent check:
+  touch/pen shows the pads, keyboard/mouse hides them, and hints, shelf chips, the action
+  label and `RESTART · R` switch live. Frozen `hint` strings are displayed, not edited.
+- Ctrl/Cmd/Alt shortcuts pass through untouched; Tab, CapsLock, modifiers and F1–F12 never
+  count as "any key"; keys are ignored while a form field has focus.
+- `visibilitychange` (hidden), `pagehide` and `blur` release every direction and pause with
+  a `PAUSED` overlay; the first input only resumes (swallowed) and the frame clock resets.
+- The direction cluster is one sliding touch surface with per-`pointerId` tracking, a dead
+  centre, release on up/cancel/lost capture, and working multi-touch with the action pad.
+
+### Changed — accessibility polish (F13)
+
+- Focus-visible styles, `#msg` as `role="status" aria-live="polite"`, rem chrome text,
+  reduced-motion press/pulse handling, `100vh` fallbacks before `100dvh`.
+
+### Added — documentation and evidence
+
+- `CONTROLS.md` — one controls table for all four games, keyboard/mouse/touch/assistive
+  notes, preferences and persistence, pause, layout rules, and why the pads use
+  `tabindex="-1"`.
+- `tests/responsive-shell-report.md` — environment, 24-viewport matrix, pass/fail per
+  assertion, screenshot reference, frozen-module proof, what could not be verified,
+  browser caveats and a change list by file section.
+- `tests/real-device-checklist.md` — the hands-on checklist for the owner.
+- `tests/screenshots/` — three contact sheets covering 120 screenshots (24 viewports ×
+  shelf + 4 games) and eight full-size samples.
+- `tests/results/` — final verification JSON and the frozen-module SHA-256 proof.
+- `prompts/P-09_responsive-shell.txt` — the prompt copy, with the owner's prompt verbatim.
+
+### Documentation review/edit attempts (standing rule)
+
+- One documentation pass by **Qwen3.8-Flash (Qoder CLI)** on 2026-11-01: README,
+  CHANGELOG, MODELS.md, plan, `CONTROLS.md`, the test report, the real-device checklist and
+  this prompt copy. No content was deleted; edits were append-only or in place following
+  each file's template. No failed documentation attempt in this round.
+
+### Verification and limits
+
+- 1,409 automated assertions, **0 failures**, 0 console errors and 0 page errors, across
+  24 viewports × 4 games plus 41 interaction checks (drag/tap, ghost click, tab order,
+  shortcuts, slide, multi-touch, pointercancel, pagehide, pause/resume, mode switching,
+  preference persistence, mid-run resize/rotate, simulated portrait and landscape notches,
+  stage swipe, per-game key map).
+- 120 screenshots inspected on contact sheets; two layout problems were found by eye and
+  fixed (small stage from a content-sized measurement box; pads at the screen edges in
+  landscape).
+- Frozen modules proved unchanged with SHA-256 of the whole PART 5 region and of each of
+  the four modules.
+- **Not verified:** physical iOS/Android devices, Safari/Firefox/Edge, real notches and
+  home indicators, real pinch zoom, screen readers, foldable postures, more than two
+  pointers, 120 Hz and low-end performance. The report lists these gaps explicitly.
+
+### Build record (owner request: duration + tokens)
+
+- Duration taken to build this round: **~30 min wall-clock** (2026-11-01, 16:14 → about
+  16:45 WIB, from prompt paste to finished records; no idle gaps observed).
+- Tokens used in this round: **unknown - owner to fill in** — the tool surfaced no token
+  telemetry, and no number is invented.
+
 ## 008-20261101 — 2026-11-01 (documentation cleanup)
 
 Built from prompt: P-08 (documentation cleanup — links, `deploy/` move, MIT license, model links, GPT-OSS attempt recorded)  

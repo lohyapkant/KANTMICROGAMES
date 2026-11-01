@@ -1,0 +1,220 @@
+Prompt ID: P-09
+Build: 009-20261101 (responsive shell — phones, tablets, foldables, desktops)
+Date first saved: 2026-11-01
+Prompt author: Claude.ai Sonnet 5.5 Extra (owner-provided prompt; saved unaltered in PART 5)
+Tool and model that executed and saved this copy: Qwen3.8-Flash (Qoder CLI)
+------------------------------------------------------------
+PROMPT ID: P-09 BUILD: 009-20261101 NAME: responsive-shell
+
+PART 1. BUILD RECORD (owner's standing request)
+
+* Prompt author: Claude.ai Sonnet 5.5 Extra. The owner pasted the prompt at
+  2026-11-01 16:14 WIB (09:14 UTC) and asked that its authorship be recorded in the
+  README, CHANGELOG, MODELS.md and this prompt copy.
+* Executing model and tool: Qwen3.8-Flash (Qoder CLI). The owner selected it for this
+  build, as with the P-08 recovery pass.
+* Effort: the full seven steps of the prompt (shelf, game-screen layout, input-mode
+  awareness, keyboard hygiene, lifecycle pause, sliding direction cluster, polish),
+  the 24-viewport verification matrix, screenshot inspection, the frozen-module hash
+  proof, and all records and deliverables.
+* Duration: about 30 minutes wall-clock from the prompt paste to the finished
+  records (2026-11-01, 16:14 to about 16:45 WIB). No idle gaps were observed in the
+  session; this is wall-clock, not a stopwatch on active editing.
+* Tokens: unknown - owner to fill in. The tool does not surface session token
+  telemetry, so no number is claimed here.
+* Build number: 009-20261101, not the 008 written in the prompt title. Build 008 had
+  already been used by the documentation-cleanup build (P-08); build numbers are never
+  reused. See PART 4, deviation 1. The prompt text itself is not altered.
+
+PART 2. WHAT WAS BUILT (condensed)
+
+* The shared shell only: <style>, the HTML chrome, PART 3 (shelf), PART 4 (runtime)
+  and PART 6 (boot). Zero edits inside the four game IIFEs — PANDASNACK, BOOPEEK and
+  DUCKLINE stay frozen and SPROUTUP was not touched either. STAGE_SIZE stays 100 and
+  the module contract is unchanged.
+* D1: page zoom allowed (viewport meta without maximum-scale/user-scalable); double
+  tap zoom suppressed with touch-action instead.
+* D2: pads follow the last real input (touch/pen shows them, keyboard/mouse hides
+  them), with persisted PADS · AUTO/SHOW/HIDE and DIR PAD · LEFT/RIGHT overrides in
+  localStorage under KANTMICROGAME.ui.*.
+* D3: stage measured from the real box in both layouts, whole-number 2x-6x while it
+  fits, fractional only below 200 px, so the page never scrolls during play.
+* F1-F3: shelf width fixed from 280 px to 3440 px; cards open on click, not
+  pointerdown; ghost-click guard after leaving a game; focus rings; short tab order.
+* F4/F9-F11: no-scroll game shell (100dvh + 100vh fallback, overscroll-behavior,
+  touch-action), compact header, portrait and landscape layouts, 48 px targets,
+  four safe-area variables, simulated-notch-safe layout.
+* F6: hints, shelf chips and pad visibility switch live with the input mode; no
+  user-agent sniffing; frozen hint strings are displayed, not edited.
+* F7: Ctrl/Meta/Alt shortcuts pass through; Tab, CapsLock, modifiers and F1-F12 are
+  never "any key"; keys are not hijacked in form fields.
+* F8: visibilitychange, blur and pagehide release every direction and pause with an
+  overlay; the resuming input is swallowed; FRAME.lastTime resets on resume.
+* F12: the direction cluster is one sliding touch surface with per-pointerId
+  tracking; multi-touch with the action pad still works.
+* F13: focus-visible everywhere, #msg as a polite live region, rem chrome text,
+  reduced-motion press/pulse handling, 100vh fallbacks.
+
+PART 3. FILES TOUCHED
+
+* deploy/index.html - the shell rewrite, build stamps 009-20261101.
+* CONTROLS.md - new: one controls table for all four games, input modes, pads and
+  preferences, pause, layout rules, accessibility and the tabindex=-1 rationale.
+* tests/responsive-shell-report.md - new: environment, 24-viewport matrix,
+  pass/fail per assertion, screenshot sheets, frozen-module proof, what was not
+  verified, browser caveats, and a change list by file section.
+* tests/real-device-checklist.md - new: the hands-on checklist for the owner.
+* tests/results/ - machine-readable evidence (final verification JSON, frozen-module
+  hashes).
+* tests/screenshots/ - three contact sheets (120 screenshots) and eight full-size
+  samples.
+* README.md, CHANGELOG.md, MODELS.md, plans/micro-games-v2.md - records for build 009.
+
+PART 4. DEVIATIONS AND DECISIONS (all documented in the files)
+
+1. Build number 008 -> 009-20261101, because 008 was already spent on the
+   documentation cleanup. APP.fileVersion, the footer, README, CHANGELOG,
+   MODELS.md and the plan all say 009.
+2. The DIR PAD · RIGHT preference mirrors the controls in portrait as well as in
+   landscape (CSS row-reverse). The prompt asked for a left/right mirror option; the
+   owner's intent reads as both layouts, and a setting that did nothing in portrait
+   would be a trap.
+3. The landscape arena is capped at 960 px and centred, so on tablets and desktops
+   the pads stay beside the 600 px stage instead of sitting at the screen edges.
+   This came out of looking at the screenshots, not the DOM metrics.
+4. On the shortest screens (280x653, 568x320) the stage is fractional (155 px,
+   187 px) per D3, because 200 px would force the page to scroll.
+5. The frozen modules keep their own hint strings. The shell strips the "desktop: "
+   prefix in keys mode and writes the touch line from module.actionLabel; no game
+   code was edited. The per-game keyboard check confirmed Space, R, WASD, arrows and
+   Esc reach every module through the contract.
+6. No test harness (.js) is shipped in the project folder, to respect the
+   "documentation only beside index.html" rule; the report describes the harness and
+   the raw results are saved under tests/results/.
+
+PART 5. THE PROMPT, VERBATIM (unaltered owner paste)
+
+Integrity: 18,903 characters (18,971 bytes), SHA-256
+fb1a9c779e4d412878be7528262c5210cc7c1bb2da92864f11e238026d91279f.
+The title still says "build 008" because that is how the prompt was authored; the
+deviation is recorded in PART 1 and PART 4, not by editing the text.
+
+----- BEGIN VERBATIM PROMPT -----
+# TASK — KANT MICRO build 008: make the shared shell responsive, input-aware and safe on phones, tablets, foldables and desktops
+
+## 0. WHAT YOU ARE EDITING, AND THE BOUNDARIES
+`index.html` is a single-file, fully offline, MIT-licensed HTML5 project (~3,950 lines, vanilla JS + Canvas, no dependencies): a shelf screen plus four pixel-art micro games — PANDASNACK, BOOPEEK, DUCKLINE, SPROUTUP. Each game is a sealed IIFE that registers itself in `GAMES` and talks to the app only through the module contract: start / stop / restart / update(dt) / paint(ctx) / onDir(dir, pressed) / onAction() / onStageTap() / onAnyKey(), plus name, tagline, concept, actionLabel, hint, versionNumber, previewPaint.
+
+That contract already IS the project's input-action layer. The games never touch the keyboard, pointer, DOM, audio or timers (verified by search: no listeners, timers, audio or window/document use inside the four IIFEs). So do NOT build a new input system and do NOT rewrite any game. All work happens in the shared shell: the <style> block, the HTML body, PART 3 (shelf), PART 4 (runtime), PART 6 (boot), and docs.
+
+Rules (from the file's own READ ME FIRST block and the owner's standing requests):
+1. PANDASNACK, BOOPEEK and DUCKLINE are FROZEN: make zero edits inside their IIFEs. Leave SPROUTUP alone too; it needs no change. If you believe something can only be fixed inside a game module, STOP: report the line numbers and the reason, and do not edit.
+2. Keep the module contract exactly as is. Do not add required members; any optional runtime feature must be guarded with typeof checks.
+3. Do not change gameplay, balance, art, or text drawn inside the canvases. Do not change STAGE_SIZE or the stage canvas backing size (100x100): the games paint in that coordinate space. All scaling happens in CSS.
+4. Stay one offline file: no network calls, no web fonts, no libraries, no build step. Keep the MIT header and the shelf footer's license text and both links.
+5. Keep saved data intact: best scores live at `KANTMICROGAME.<GAMEID>.best`. New settings use the same prefix with a non-colliding name (e.g. `KANTMICROGAME.ui.controls`) and the same try/catch pattern as readBest/saveBest.
+6. Keep hash routing (`#game=ID`): it makes the Android back gesture and browser Back return to the shelf.
+7. Keep whole-number pixel scaling of the stage (`image-rendering: pixelated`), except where decision D3 allows otherwise.
+8. Work in small reviewable steps and keep the file runnable after each. Match the file's style: plain, friendly comments that explain why.
+
+## 1. OWNER DECISIONS (these defaults apply unless the owner edited them before pasting)
+D1 Zoom — ALLOW page zoom. Remove `maximum-scale=1.0, user-scalable=no` from the viewport meta (it blocks zoom on Android and desktop browsers, iOS ignores it anyway, and it fails WCAG 1.4.4). Prevent accidental double-tap zoom with `touch-action: manipulation` on chrome and `touch-action: none` on the stage and pads instead. (If the owner changes this to KEEP LOCKED, leave the meta alone.)
+D2 Pads on keyboard/mouse devices — AUTO. Show the on-screen pads while touch is the active input; collapse them when the active input is keyboard/mouse on a device with no touch support; follow the most recent input on hybrid devices. Add a tiny manual override (Auto / Always show / Always hide) and a "pads on left / right" mirror option for left-handed play, both persisted.
+D3 Scale fallback — keep whole-number stage scaling (2x or more) whenever header, stage and controls fit without page scroll. Only below that threshold may you use a non-integer CSS scale (still pixelated) so the page never has to scroll during play. Document the threshold in a comment.
+
+## 2. BASELINE FINDINGS (build 007-20261101, headless Chromium with touch emulation)
+[measured] = reproduced in a browser; [code] = from reading the code. RE-VERIFY each finding before fixing it; if one does not reproduce, say so.
+
+BLOCKERS
+F1 [measured] The shelf is broken on every viewport narrower than ~720 px (tested 280-680). `#page` is a column flexbox with `align-items:center`, so `#shelfScreen` shrink-wraps to a 716 px, 3-column grid and is centered, spilling ~160 px off BOTH sides at 390 px wide. `body{overflow-x:hidden}` hides the spill, so the title reads "T MICRO", the Panda Snack card sits at x = -163, and nothing can be scrolled into view. Verified: `#shelfScreen{width:100%}` fixes the shelf (1 column on phones, 2 around 600-720, 3 from 768), but the same rule on `#gameScreen` left-aligns the game screen, so the game screen needs explicit centering. Once F1 is fixed, the phone shelf becomes a long single column that must scroll, which makes F2 worse.
+F2 [measured] `buildCard` opens the game on `pointerdown`. A touch scroll that starts on a card launches the game (390x844: dragging up from a card opened BOOPEEK). [code] Right and middle mouse buttons open games too.
+F3 [measured] Cards, ⌂ SHELF, RESTART and the pads listen to pointer events only; there is no click path. Tab then Enter, and Tab then Space, on a card do nothing, so keyboard-only and assistive-tech users cannot start a game.
+F4 [measured] The game screen is taller than the viewport on most phones, so the page scrolls during play. Extra scroll needed, portrait: 280x653 +231 px; 320x568 +302 (D-pad below the fold); 375x667 +290 (D-pad below the fold); 390x844 +100; 412x915 +30; 430x932 +15. Landscape: 568x320 +521; 667x375 +452; 844x390 +169 (the stage itself runs below the fold at all three); 932x430 +129; 1024x768 +72. Foldable inner 720x720: +120 plus a 16 px horizontal overflow (stage left edge at x = -3). Desktop 1280x720 +120; 1366x768 +72. Fine at 768x1024 and above, and at 1920x1080 and above. Causes: `fitStage()` budgets with magic numbers (`innerWidth-48`, `innerHeight-360`, or -170 from 680 px wide) and a hard 2x minimum; the header is ~170 px tall; the row layout only starts at `min-width:680px`, so 568x320 and 667x375 stay in the column layout; the shelf footer `#meta` also sits under the game.
+
+DEGRADES PLAY
+F5 [code] The viewport meta locks zoom (see D1).
+F6 [code] No input-mode awareness. The in-game hint always reads "desktop: WASD ... SPACE or tap stage ..." (the string stored in each module's `hint`), even on phones; the shelf chips are static; pads are always shown on desktops.
+F7 [measured] Keyboard hygiene: Ctrl+S reaches the game (onAnyKey, then onDir down) while the browser opens Save; Meta+D triggers onDir right; Tab, Enter, Shift and Control each count as "any key" (which restarts a finished game). Esc leaves the run instantly — documented behavior, keep it.
+F8 [measured] Only `blur` releases held inputs. There is no `visibilitychange` or `pagehide` handling (a held key stayed "on" after a simulated visibilitychange) and no pause, so a window that loses focus but stays visible (split-screen, second monitor) keeps playing unattended. The dt clamp (0.25 s) is good; keep it.
+F9 [measured] `#stage` has `touch-action:auto` and the page has no `overscroll-behavior`, so swipes on the stage can scroll the page or pull-to-refresh on Android. [code] `onStageTap` fires on pointerdown even if the gesture turns into a scroll.
+F10 [measured] ⌂ SHELF is 35 px tall and RESTART is 39 px tall (below the 44-48 px target guidance). The pad buttons are 58 px with 9 px gaps (fine).
+F11 [code] Safe areas: only top and bottom insets are used; left/right padding is a fixed 14 px, so landscape notches and cutouts can cover content.
+F12 [measured] The D-pad has no slide-through: press ← then drift onto ↑ and ← stays held while ↑ is never pressed. Multi-touch itself works (hold ← + tap DASH fires both).
+F13 [code] No visible focus styles; the `.card:hover` lift sticks on touch; chrome text is in px so it ignores the user's font-size setting; `#msg` is not a live region; the 100dvh rules have no 100vh fallback.
+
+ALREADY CORRECT — PRESERVE: contract-only game I/O; `event.code` (WASD + arrows work on any keyboard layout); event.repeat ignored; Space/arrows preventDefault'd in game; blur releases inputs; Pointer Events with setPointerCapture and pointercancel/lostpointercapture on pads; multi-touch; hash routing; dt clamp; try/catch'd localStorage; reduced-motion handling for the mascot and shelf; env() safe-area top/bottom; 100dvh; no horizontal overflow on the game screen at the phone widths tested (280-430).
+
+## 3. REQUIRED WORK (in this order; one reviewable step each)
+STEP 1 — Shelf (F1, F2, F3, part of F13)
+- Fix the shelf width so there is never horizontal overflow from 280 px to 3440 px; let the banner and chips wrap; explicitly center the game screen.
+- Open games from a `click` handler on the card, so mouse, tap, keyboard Enter/Space and screen readers all work and a scroll gesture can never activate it. Make `openGame` idempotent. Give cards `touch-action: manipulation` and visible `:focus-visible` rings, and wrap `.card:hover` in `@media (hover:hover)`.
+- GHOST-CLICK HAZARD: once cards react to click, the tap that closes a game must not leak a click onto a card that appears under the finger. Move ⌂ SHELF and RESTART to `click` too (keep pointer events only for hold-type controls: the pads and the stage). Test it by tapping ⌂ SHELF at a spot where a card will appear underneath.
+- Tab order: ⌂ SHELF then RESTART. The pads are pointer-driven duplicates of WASD, so set tabindex="-1" on them and note this in CONTROLS.md.
+
+STEP 2 — Game screen layout (F4, F5, F9, F10, F11)
+- Make the game screen a no-scroll app shell: height from `100vh` with a `100dvh` override, `overscroll-behavior: none`, no page scroll while a game is open, `touch-action: none` on the stage and pads. The footer stays on the shelf only.
+- Replace `fitStage()`'s magic numbers by measuring the real box left for the stage after header and controls are laid out (ResizeObserver on the arena, plus window resize, orientationchange and `visualViewport` resize, coalesced with rAF). Choose the largest whole-number scale (2-6) that fits; apply D3 below the threshold.
+- Pick portrait vs landscape layout from the available aspect ratio (width >= height), not from `min-width:680px`. For near-square screens (foldable inner displays), choose whichever gives the larger stage.
+- Compact header: ⌂ SHELF, title, SCORE and BEST in one slim row; hide the tagline on short screens.
+- Landscape touch: direction cluster in the lower-left thumb zone, action button in the lower-right, stage in the middle (mirrored by the D2 option). Portrait: one controls row under the stage. You may split the plus-shaped pad into a direction cluster plus a separate action button if reach improves. Keep the existing look (colors, shadows, labels, press animation).
+- Targets: every tappable control >= 48x48 CSS px (pads may be 58, shrinking to 48 on short screens), >= 8 px between targets, ⌂ SHELF and RESTART raised to >= 48 px. Controls never overlap the stage or each other.
+- Safe areas: define `--sai-t/-r/-b/-l` as the four env(safe-area-inset-*, 0px) values and use only those variables everywhere, with 16-24 px extra clearance for controls near screen edges (OS edge gestures). This also lets tests simulate a notch by overriding the variables.
+- Rotation, fold/unfold, split-screen and window resize are live resizes: re-fit WITHOUT calling start/restart on the module, without losing run state, and without leaving a pad pressed or mispositioned.
+
+STEP 3 — Input-mode awareness (F6, D2)
+- Detect the ACTIVE input from actual use, never from user-agent or "is mobile" checks: a touch or pen pointerdown means "touch"; a keydown or a mouse pointerdown/move (use event.pointerType) means "keys/mouse". `matchMedia('(pointer: coarse)')`, `(hover: none)` and `navigator.maxTouchPoints` are only the initial guess. Expose the mode as `data-input="touch|keys"` on <body> and switch live.
+- Do not edit the frozen `hint` strings. In keys mode show `module.hint` (strip the leading "desktop: " for display only); in touch mode show a runtime-built hint from `module.actionLabel`, e.g. "pad to move · {ACTIONLABEL} or tap the stage · ⌂ to leave". The shelf chips switch the same way. Never show keyboard hints in touch mode or the reverse.
+- Pad visibility follows D2; when the pads collapse, the stage may grow.
+
+STEP 4 — Keyboard hygiene (F7)
+- Ignore any key event with Ctrl, Meta or Alt held, so browser and OS shortcuts (Ctrl+R, Ctrl+S, Cmd+D, Alt+Left) pass through untouched and never reach the game. Do not preventDefault on them.
+- Modifier keys alone, Tab, CapsLock and F1-F12 must not count as "any key". Keep Esc = shelf, R = restart, Space = action, WASD/arrows = move; Enter and other printable keys keep working as onAnyKey.
+- Never hijack keys while an input, textarea, select or contenteditable has focus (none exist today; keep it future-proof).
+
+STEP 5 — Lifecycle (F8)
+- On `visibilitychange` (hidden), `pagehide` and `blur`: release every direction, clear pad visuals, and auto-pause. Pause is a runtime state: stop calling update/paint (the last frame stays on the canvas), show a small HTML overlay "PAUSED - tap or press a key" over the stage, and reset FRAME.lastTime on resume. The input that resumes must be swallowed so it does not also dash or poke. Esc still leaves to the shelf.
+- Opening a game, leaving it, or a pointercancel must never leave a direction held (keep and extend releaseAllDirs).
+
+STEP 6 — Pads (F12)
+- Make the direction cluster one touch surface: a finger sliding from one direction to another switches direction; lifting or pointercancel releases it. Track every finger by pointerId so a second finger on the action button is unaffected. Hold + tap multi-touch must keep working.
+
+STEP 7 — Polish (rest of F13)
+- Visible focus styles everywhere; `#msg` as role="status" aria-live="polite"; chrome font sizes in rem; press and pulse animations respect prefers-reduced-motion; add a `100vh` fallback before each `100dvh`.
+
+## 4. METHOD
+Phase 1: reproduce the findings and report what reproduces (no edits). Skim the four IIFEs only to confirm they use the contract alone.
+Phase 2: short plan, then proceed. If you can ask the owner, pause here; otherwise log your assumptions and continue.
+Phase 3: implement the steps in order.
+Phase 4: verify (section 5).
+Phase 5: report (section 6). Never claim real-device testing you did not do.
+
+## 5. VERIFICATION
+Use Playwright or Puppeteer with Chromium if available (CDP touch events for real multi-touch). If you cannot run a browser, say so and do not claim the checks passed.
+Viewports (CSS px), portrait AND landscape where sensible: 280x653 (fold cover), 320x568, 360x640, 375x667, 390x844, 412x915, 430x932; foldable inner / near-square 600x700, 720x720, 884x1104; tablets 768x1024, 820x1180, 1024x1366; desktop 1280x600 (short browser window), 1280x720, 1366x768, 1920x1080, 2560x1440, 3440x1440. Also test with simulated notch insets by overriding the --sai variables (47/0/34/0 portrait; 0/47/21/47 landscape).
+Assertions, for the shelf and each of the four games:
+1. documentElement.scrollWidth <= innerWidth at every size.
+2. In a game: documentElement.scrollHeight <= innerHeight (no page scroll while playing); the whole stage and every control sit inside the viewport and the safe area.
+3. Every tappable control >= 48x48 CSS px and >= 8 px apart; no overlap with the stage or each other.
+4. Touch: a drag starting on a card scrolls and does not open a game; a tap opens it; tapping ⌂ SHELF over a spot where a card will appear does not open a game; hold ← + tap action works; sliding ← to ↑ switches direction; pointercancel, blur, visibilitychange and pagehide all release inputs; a swipe on the stage does not scroll the page.
+5. Keyboard: Tab then Enter/Space opens a card; WASD, arrows, Space, R and Esc work in each game; Ctrl+S, Cmd+D, Alt+Left and bare Shift/Tab/Ctrl do not reach the game.
+6. Mode switching in ONE session: touch -> keyboard -> touch updates hint, shelf chips and pad visibility each time; the manual override beats auto and persists across reload.
+7. Resize or rotate mid-run (portrait -> landscape -> narrow -> wide): the game is not restarted (spy on the module's start/restart), the score chip is unchanged, controls still work.
+8. Pause: hiding the page pauses; the resuming input is swallowed.
+Screenshots: capture every game at every viewport and LOOK at them; DOM metrics alone are not proof of a good layout. Keep a contact sheet.
+Real-device checklist (cannot be tested headless; write it for the owner): iOS Safari address-bar collapse and home-indicator swipe; Android Chrome back gesture and pull-to-refresh; notch/cutout in landscape; a real foldable (fold, unfold, hinge); split-screen, Stage Manager and freeform windows; tablet with hardware keyboard; touchscreen laptop (hybrid input); 120 Hz display; low-end phone.
+
+## 6. RECORDS AND DELIVERABLES
+Follow the build-numbering and record-keeping rules in the file header:
+- Bump to build 008-<the date you finish, YYYYMMDD>: `APP.fileVersion`, the hard-coded build text in the footer, and the header comments. Game versionNumbers do NOT change (no game content changed).
+- Update README.md and CHANGELOG.md if they are in the repo; otherwise give the text blocks for the owner to paste. Record the full model name and tool, effort/round summary, duration and token count — only what you can actually observe; write "unknown - owner to fill in" for the rest. Keep it exact and honest.
+- Do not alter this prompt; the owner stores it as the build's prompt copy.
+Deliver: (1) the updated index.html; (2) CONTROLS.md — one table covering all four games (they share the same controls; only the action label differs: DASH, POKE, GO, REACH) with keyboard, mouse, touch and accessibility notes, plus which owner decisions were applied; (3) a test report with screenshots, pass/fail per assertion, and what you could not verify; (4) the real-device checklist; (5) known limitations and browser caveats; (6) a list of everything you changed, by section of the file.
+
+## 7. DEFINITION OF DONE
+- Shelf and all four games usable at every size in the matrix, portrait and landscape, with no horizontal overflow anywhere and no page scroll during play (within D3).
+- Every game playable by touch alone (multi-touch, slide-through, thumb-zone controls) AND by keyboard/mouse alone (including opening cards, pausing and leaving).
+- Hints, chips and pads match the active input and switch live; the manual override works.
+- Browser shortcuts are never swallowed; no stuck keys or touches under blur, hide, pagehide, pointercancel or screen swaps.
+- Frozen modules unchanged: compare the text of each frozen IIFE (from `(function () {` to its closing `})();`) before and after and show it is identical. Contract unchanged, saved bests intact, file still single and offline.
+- Records updated; every claim in the report is accurate, including the limits of what was tested.
+----- END VERBATIM PROMPT -----

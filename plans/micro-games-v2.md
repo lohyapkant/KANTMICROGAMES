@@ -1,14 +1,16 @@
 # Plan: KANTMICROGAME — HTML5 Micro Games (v2 — the one-file pivot)
 
-Today: 2026-11-01. Status: build **008-20261101** done — the shelf and all four games
-(PANDASNACK, BOOPEEK, DUCKLINE, SPROUTUP) live together in ONE file. Build 008 is a
-**documentation cleanup** build: GitHub/public-site links, `deploy/` move documented,
-MIT license in index.html, model links added. Round 5 (a fifth module) is next.
+Today: 2026-11-01. Status: build **009-20261101** done — the shelf and all four games
+(PANDASNACK, BOOPEEK, DUCKLINE, SPROUTUP) live together in ONE file. Build 009 is the
+**responsive shell** build: the shell now fits phones, tablets, foldables and desktops
+with no page scroll during play, input-aware pads and hints, and safe-area padding; no
+game content changed. Build 008 was the documentation cleanup (links, `deploy/` move,
+MIT license). Round 5 (a fifth module) is next.
 
 Build IDs are `NNN-YYYYMMDD` (build number first, finish date second). A game's module
 content number is the build in which its content last changed. PANDASNACK is **frozen** at
 007-20261101, BOOPEEK is **frozen** at 006-20261101, DUCKLINE is **frozen** at 005-20261101,
-and SPROUTUP is live at 007-20261101.
+and SPROUTUP is live at 007-20261101. Builds 008 and 009 changed no module content.
 
 Supersedes micro-games.md (v1), kept as history: v1 described one file per game in
 separate folders; the owner changed their mind after round 1 — see prompt P-02.
@@ -50,11 +52,14 @@ KANTMICROGAME/
   deploy/index.html         <- EVERYTHING: shelf screen + game screen + all game modules
   wrangler.jsonc            <- Cloudflare Workers config (assets.directory: "./deploy")
   README.md                 <- project guide + a short manual per game
+  CONTROLS.md               <- controls and device behaviour (keyboard/mouse/touch/pads)
   CHANGELOG.md              <- one entry per finished build (builds, not rounds)
   MODELS.md                 <- dated owner observations on model strengths (append-only)
   LICENSE                   <- MIT licence (© Loh Yap Kant)
   plans/micro-games.md      <- v1 plan, kept for history
   plans/micro-games-v2.md   <- this plan (later pivots add v3, v4 …)
+  tests/                    <- build evidence: reports, real-device checklist,
+                               contact sheets, verification JSON (docs only)
   prompts/P-XX_*.txt        <- one prompt copy per build, per KANTPLANEINVASION convention
 ```
 
@@ -93,18 +98,25 @@ games, feeds events, ticks and paints only the open module, and keeps instant re
 
 ## Stage and controls spec (unchanged in spirit from v1)
 
-- Exactly `100 x 100` design pixels; whole-number integer scaling only;
-  `image-rendering: pixelated`; refit on resize and rotation.
+- Exactly `100 x 100` design pixels; scaled by whole numbers `2x`–`6x` while it fits, with
+  a fractional scale only below 200 px so the page never scrolls during play; measured from
+  the real stage box in both the portrait and landscape layouts; `image-rendering:
+  pixelated`; refit on resize, rotation, fold and `visualViewport` changes.
 - Fixed-step update (60 steps/second) with capped catch-up, inside each module.
 - All stage colors referenced BY NAME from the game's own `palette`.
 - Difficulty if present is one table of bands unlocked by score/time (BOOPEEK has none —
   the cozy poke game keeps it simple by design).
 - `W A S D` + arrows move; `Space`/action pad is the action (dash in PANDASNACK, poke in
-  BOOPEEK, quack boost in DUCKLINE); `R` restarts instantly; stage tap = the module's
-  action; `ESC` or ⌂ SHELF exits home.
-- Input hygiene: opening a game, leaving to the shelf and window `blur` release every held
-  direction through the module contract, so input never leaks between games. The shared
-  loop catches a failing module instead of dying.
+  BOOPEEK, quack boost in DUCKLINE, reach in SPROUTUP); `R` restarts instantly; stage tap =
+  the module's action; `ESC` or ⌂ SHELF exits home.
+- Input hygiene: opening a game, leaving to the shelf, `blur`, `visibilitychange`,
+  `pagehide` and `pointercancel` release every held direction through the module contract,
+  so input never leaks between games. The shared loop catches a failing module instead of
+  dying. Hiding the page pauses with a `PAUSED` plate; the resuming input is swallowed.
+- Input awareness (`-009`): pads follow the last real input (touch/pen shows them,
+  keyboard/mouse hides them), with persisted `PADS · AUTO/SHOW/HIDE` and
+  `DIR PAD · LEFT/RIGHT` preferences; hints and shelf chips switch live. Stage and pads use
+  `touch-action: none`; page zoom stays allowed.
 
 ## Definition of done (per build)
 
@@ -127,6 +139,7 @@ games, feeds events, ticks and paints only the open module, and keeps instant re
 | 006-20261101 | 2026-11-01 | Final special review: new `NNN-YYYYMMDD` build numbering (retro-renamed, 004/005 corrected to their finish date); model record corrected for 000/001; DUCKLINE frozen; BOOPEEK rebuilt as a five-spot peek-a-boo chase; `MODELS.md` added for dated owner observations; numbering guidance added to code, README and CHANGELOG. DONE. |
 | 007-20261101 | 2026-11-01 | Round 4: SPROUTUP shipped as fourth module (summer rain, Sproutlet, dewdrops, sunbeams, victory bloom); BOOPEEK frozen; PANDASNACK in-stage live HUD score tracking added & refrozen; shelf card with custom preview added. DONE. |
 | 008-20261101 | 2026-11-01 | Documentation cleanup: GitHub/public-site/model links added to all docs and index footer; `deploy/` move documented; MIT license header added to `index.html`; GPT-OSS 120B (Medium) attempt recorded. Opus halted mid-round; a Qwen3.8-Flash recovery pass verified every requirement and closed the remaining gaps. DONE. |
+| 009-20261101 | 2026-11-01 | Responsive shell (prompt authored by Claude.ai Sonnet 5.5 Extra): shelf and game screen fit 280–3440 px with no horizontal overflow and no page scroll during play; measured whole-number stage fit; safe areas; input-aware pads/hints and persisted PADS/DIR PAD preferences; keyboard shortcut hygiene; pause on hide/blur/pagehide; sliding direction cluster; focus/live-region/reduced-motion polish. `CONTROLS.md` and `tests/` added; frozen modules proved byte-identical. DONE. |
 
 ## Tool and model log (owner request, 2026-10-31)
 
@@ -144,6 +157,7 @@ the build's prompt copy.
 | 006 | 2026-11-01 | DeepSeek V4.1 Flash Free (OpenCode) / Gemini 3.8 Flash (Antigravity) — ~30 min, ~1.5 M tokens (handoff at session limit) |
 | 007 | 2026-11-01 | Gemini 3.8 Flash (Antigravity) — ~25 min, ~48,000 tokens processed |
 | 008 | 2026-11-01 | Claude Opus 4.6 Thinking (Antigravity) — ~20 min, ~60,000 tokens (GPT-OSS 120B Medium attempted first, failed) / Qwen3.8-Flash (Qoder CLI) — recovery pass ~15 min, ~30,000 tokens est. (closed remaining link gaps) |
+| 009 | 2026-11-01 | Qwen3.8-Flash (Qoder CLI) — ~30 min wall-clock, tokens unknown - owner to fill in. Prompt authored by Claude.ai Sonnet 5.5 Extra (saved verbatim; its title says build 008 but 008 was taken, so this build is 009). 1,409 assertions, 0 failures; 24 viewports; frozen modules byte-identical. |
 
 Rule: every future build truthfully records its model in all four homes.
 
