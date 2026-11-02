@@ -4,6 +4,9 @@ A dated, **append-only** place for the owner's subjective notes on how each mode
 performed on this project. It is not a ranking and not a permanent verdict: models change,
 versions change, and a note here describes one moment on one set of builds.
 
+From build 013 this file also holds the Usage ledger: a record of what each model used on
+each build. It is a record, not an opinion.
+
 **Rules for future models / LLMs**
 
 1. Do **not** rewrite or delete an existing observation. Add a new dated entry instead.
@@ -15,6 +18,8 @@ versions change, and a note here describes one moment on one set of builds.
    kept as written.
 6. When one model delivers several builds, write one entry per build and name the build in
    the heading.
+7. The Usage ledger is a record, not an observation. Add one row per model per build, every
+   build, copied from the CHANGELOG Build record. Observation entries stay owner-only.
 
 **Project links (kept current for every model reading this file)**
 
@@ -28,6 +33,56 @@ versions change, and a note here describes one moment on one set of builds.
   Conventions.
 - License: MIT (see `LICENSE` and the header comment in `deploy/index.html`). Legal name of
   the original creator: **Loh Yap Kant**, with help from the models observed below.
+
+## Usage ledger
+
+What each model used on each build. This is a record, not an opinion, and not a ranking.
+
+- One row per model per build. Failed, halted and prompt-only contributions get a row too.
+- Numbers are copied from the build's Build record in CHANGELOG.md. If a figure was corrected later, the final one is used.
+- **Tokens and credits are different units.** Credits are a tool's billing unit (here Qoder CLI), not tokens and not money. Token figures were counted in different ways (see "How counted"), so they are never added together.
+- "—" means not recorded. "~" means approximate.
+
+<!-- ADD NEW LEDGER ROWS DIRECTLY AFTER THE LAST ROW OF THE TABLE BELOW (no blank lines inside the table), then recompute the totals under it. -->
+| Build | Model · tool | Role | Time | Usage | How counted |
+|---|---|---|---|---|---|
+| 000 | DeepSeek V4.1 Flash Free · OpenCode | built | — | — | not recorded |
+| 001 | DeepSeek V4.1 Flash Free · OpenCode | built | — | — | not recorded |
+| 002 | GLM-5.3 Flash Free · OpenCode | built | — | — | not recorded |
+| 003 | GLM-5.3 Flash Free · OpenCode | built | ~45 min | ~27,000 tokens | approximate; method not stated |
+| 004 | Flint 40B Free · OpenCode | built | ~25 min | ~20,000 tokens | approximate; method not stated |
+| 005 | DeepSeek V4.1 Flash Free · OpenCode | built | ~115 min active | ~2.37 M tokens | measured: input + output + reasoning; ≈28.4 M cached reads not counted |
+| 006 | DeepSeek V4.1 Flash Free · OpenCode, then Gemini 3.8 Flash · Antigravity | started, then completed | ~30 min | ~1.5 M tokens | "processed"; one shared figure, cannot be split |
+| 007 | Gemini 3.8 Flash · Antigravity | built | ~25 min | ~48,000 tokens | approximate; method not stated |
+| 008 | GPT-OSS 120B Medium · Antigravity | attempted, abandoned | — | — | not recorded |
+| 008 | Claude Opus 4.6 Thinking · Antigravity | built, halted mid-round | ~20 min | ~60,000 tokens | approximate; method not stated |
+| 008 | Qwen3.8-Flash · Qoder CLI | recovery pass | ~15 min | ~30,000 tokens | estimate |
+| 009 | Claude.ai Sonnet 5.5 Extra · Claude.ai chat | wrote the prompt | — | — | not recorded |
+| 009 | Qwen3.8-Flash · Qoder CLI | built | ~30 min | 19.7809 credits | measured: Qoder per-request credits, 157 requests |
+| 010 | Qwen3.8-Flash · Qoder CLI | built | ~30 min | 9.0583 credits | measured: 186 requests |
+| 011 | Qwen3.8-Flash · Qoder CLI | built | ~30 min | 8.2768 credits | measured: 115 requests |
+| 012 | Claude.ai Sonnet 5.5 Extra · Claude.ai chat | wrote the prompt | — | — | not recorded |
+| 012 | Qwen3.8-Flash · Qoder CLI | built | ~20 min | 5.9094 credits | measured: 112 requests (4.4968 at build end; final total from the CHANGELOG addendum) |
+| 013 | Claude.ai Sonnet 5.5 Extra · Claude.ai chat | wrote the prompt | — | — | not recorded |
+| 013 | Qwen3.8-Flash · Qoder CLI | built | ~22 min | 4.5351 credits | measured: 104 requests |
+
+### Totals that can honestly be added
+- **Credits, Qoder CLI, measured (builds 009-013):** 47.5605 credits over 674 billable requests.
+- **Token totals: none.** The token figures count different things (for example ~2.37 M "processed" in build 005 against ~48,000 in build 007), so adding them would mean nothing.
+- **Time by model, approximate.** Builds 000-002 and the GPT-OSS attempt have no time recorded, so DeepSeek and GLM are undercounted. One block = 10 minutes, rounded half up.
+
+| Model | Minutes | At a glance |
+|---|---|---|
+| Qwen3.8-Flash | ~147 | ▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇ |
+| DeepSeek V4.1 Flash Free | ~115 | ▇▇▇▇▇▇▇▇▇▇▇▇ |
+| GLM-5.3 Flash Free | ~45 | ▇▇▇▇▇ |
+| Flint 40B Free | ~25 | ▇▇▇ |
+| Gemini 3.8 Flash | ~25 | ▇▇▇ |
+| Claude Opus 4.6 Thinking | ~20 | ▇▇ |
+| Shared session (build 006: DeepSeek + Gemini) | ~30 | ▇▇▇ |
+
+Total recorded: about 407 minutes (about 6 h 47 min) over 11 of 14 builds.
+(Totals were recomputed after the build-013 rows were added; the CHANGELOG Build records remain the source of truth.)
 
 ---
 

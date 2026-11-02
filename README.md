@@ -4,7 +4,7 @@ Six tiny pixel-art games in one HTML file. Open it, pick a game, play a minute.
 
 Play online: <https://kantmicrogames.lohyapkant.workers.dev/>
 
-**Current build:** `012-20261101` — six games, one file.
+**Current build:** `013-20261102` — six games, one file.
 
 ## About this project
 
@@ -27,12 +27,12 @@ The full record of every build is in CHANGELOG.md.
 
 ## How to play
 
-- Open `deploy/index.html` from the play link above, or double-click it on your computer.
+- Use the play link above, or download `deploy/index.html` and double-click it.
 - `W A S D` or the arrow keys move. `SPACE`, the action pad or a tap on the stage acts.
 - `R` restarts at any time. `ESC` or the shelf button takes you back.
 - On a phone or tablet the touch pads appear by themselves, and the PADS and DIR PAD choices are remembered.
 - Switching tabs or apps pauses the run. Page zoom is allowed.
-- Tip: open `deploy/index.html#game=PANDASNACK` or `#game=SNAILRACE` to jump straight into a game.
+- Tip: add `#game=PANDASNACK` (or any game name) to the play link to jump straight into a game.
 
 Keyboard, touch and device details are in CONTROLS.md.
 
@@ -44,7 +44,7 @@ Keyboard, touch and device details are in CONTROLS.md.
 | OpenCode | open-source coding agent for terminal, desktop and IDE | https://opencode.ai/ |
 | Google Antigravity | agent-first development platform | https://antigravity.google/ |
 | Qoder CLI | terminal coding agent | https://qoder.com/ |
-| Claude.ai | chat assistant (used to write one prompt) | https://claude.ai/ |
+| Claude.ai | chat assistant (used to write some of the prompts) | https://claude.ai/ |
 <!-- END:tools-table -->
 
 <!-- BEGIN:models-table  (add or edit rows only) -->
@@ -56,11 +56,11 @@ Keyboard, touch and device details are in CONTROLS.md.
 | Gemini 3.8 Flash | [Google](https://gemini.google.com/) | Antigravity | 006, 007 | Picked up cleanly after a session limit; delivered SPROUTUP. |
 | GPT-OSS 120B Medium | [OpenAI](https://openai.com/index/introducing-gpt-oss/) | Antigravity | 008 (attempt) | Abandoned: it deleted sections of the docs instead of editing them. |
 | Claude Opus 4.6 Thinking | [Anthropic](https://www.anthropic.com/) | Antigravity | 008 | Did most of the docs work, then halted mid-round. |
-| Qwen3.8-Flash | [Alibaba Qwen](https://qwen.ai/) | Qoder CLI | 008 (finish), 009, 010, 011, 012 | Delivered the responsive shell and two new games; older games stayed unchanged. |
-| Claude.ai Sonnet 5.5 Extra | [Anthropic](https://claude.ai/) | Claude.ai chat | 009, 012 (prompt only) | Wrote the responsive-shell prompt that Qwen executed. |
+| Qwen3.8-Flash | [Alibaba Qwen](https://qwen.ai/) | Qoder CLI | 008 (finish), 009, 010, 011, 012, 013 | Delivered the responsive shell and two new games; older games stayed unchanged. |
+| Claude.ai Sonnet 5.5 Extra | [Anthropic](https://claude.ai/) | Claude.ai chat | 009, 012, 013 (prompt only) | Wrote the responsive-shell prompt that Qwen executed. |
 <!-- END:models-table -->
 
-One person's dated snapshots from a handful of builds. Not a ranking. Details in MODELS.md and CHANGELOG.md.
+One person's dated snapshots from a handful of builds. Not a ranking. Time and usage for every build are tabulated in MODELS.md; the full record is in CHANGELOG.md.
 
 ## The rules every game follows
 
@@ -77,6 +77,7 @@ One person's dated snapshots from a handful of builds. Not a ranking. Details in
 - `deploy/index.html` — the whole game collection in one file.
 - `README.md`, `CHANGELOG.md`, `MODELS.md`, `CONTROLS.md` — this page, the build history, notes on the models, and the controls.
 - `LICENSE`, `wrangler.jsonc` — the MIT licence and the Cloudflare Workers settings.
+
 Design notes, prompts and test evidence are kept in the author's private archive.
 
 ## Links

@@ -2,6 +2,8 @@
 
 ## Conventions (read before adding an entry)
 
+Appendices A1-A9 (material moved out of the README in build 012) start under '## Appendices (build 012)' at the bottom of this file.
+
 - **Newest entry first.** Each entry starts with its build ID and the real finish date.
 - **Build IDs are `NNN-YYYYMMDD`**: a zero-padded project build number, then the finish
   date (2026-11-01 → `20261101`). The number is the identity; the date is a hint. Never
@@ -19,6 +21,7 @@
 - **Record homes (from build 012).** The full build record lives here: CHANGELOG = full
   record; README = summary rows in its two experiment tables; plan = ledger row + tool-log
   row; prompt copy = the prompt (private); index.html header = current build only.
+  MODELS.md also holds the Usage ledger (one row per model per build, copied from the Build record).
 - **Naming.** The project name is KANTMICROGAMES (one word). Older singular spellings stay
   in historical entries, appendices, the local folder name and archived prompt copies, on
   purpose. The old README "About the name" text is archived in Appendix A1.
@@ -50,6 +53,92 @@
 ### Per-build checklist
 
      1. Number: the next unused build number. Date: the day you finish.
+     2. CHANGELOG.md: paste a new entry under the marker using the Entry template. Never edit older entries. Record final figures; if one is corrected later, add a dated addendum instead of editing the original lines.
+     3. README.md: only (a) the games table if a game was added, (b) one row per model or tool in the two experiment tables, between their markers, (c) the "Current build" line. Nothing else.
+     4. CONTROLS.md: only if controls changed. Its "Applies to" line names the last build whose controls it describes; do not bump it on other builds.
+     5. MODELS.md: (a) every build: add one Usage ledger row per model that worked on the build, including failed, halted and prompt-only contributions, with numbers copied from the CHANGELOG Build record (the final figure), then recompute the totals under the table; (b) only when the owner supplies an observation: add a dated entry above the marker with a Source line. Never edit old entries.
+     6. plans/micro-games-v2.md (private): add one ledger row and one tool-log row.
+     7. Prompt copy: save the owner's request verbatim as prompts/P-NN_<slug>.txt (private).
+     8. deploy/index.html: update APP.fileVersion and the header "Current" line only. The footer reads the build from APP.fileVersion; never hard-code it.
+     9. Frozen games: prove they are byte-identical (SHA-256 of each IIFE) and put the numbers in the entry.
+    10. Consistency: the same build ID in APP.fileVersion, the index header, the rendered footer, README "Current build", the top CHANGELOG entry and the plan ledger row (CONTROLS excepted, see 4); the same six-game list in README, CONTROLS and the entry; the same copyright line in LICENSE and the index.html header.
+    11. Honest usage: record time and usage in the unit the tool reports, say how it was counted, write "not recorded" if unknown, and never add across units.
+    Never delete, shorten or restructure any documentation file or section. If something looks wrong, say so in the entry instead of fixing it silently.
+
+<!-- NEW BUILD ENTRIES: paste the newest entry on the line below this comment, above the previous newest. Never edit older entries. -->
+
+## 013-20261102 — 2026-11-02 (usage ledger, copyright and README fixes)
+
+Built from prompt: P-13 (the owner's usage-ledger and consistency request, written by
+Claude.ai Sonnet 5.5 Extra and pasted verbatim; private archive file
+`prompts/P-13_usage-ledger-and-fixes.txt`)  
+Tool and model: **Qwen3.8-Flash (Qoder CLI)**  
+Games in the one file: 6 (PANDASNACK 007-20261101 **frozen**, BOOPEEK 006-20261101
+**frozen**, DUCKLINE 005-20261101 **frozen**, SPROUTUP 007-20261101 **frozen**,
+SLIMEHOP 010-20261101 **frozen**, SNAILRACE 011-20261101; file build
+**013-20261102**)
+
+### Added — Usage ledger in MODELS.md
+
+- MODELS.md opens with a sentence that the file also holds the Usage ledger from build
+  013, and carries rule 7: the ledger is a record, not an observation; one row per model
+  per build, copied from the Build record; observation entries stay owner-only.
+- New "Usage ledger" section between Project links and the first dated entry: rows for
+  builds 000-012 (failed, halted and prompt-only contributions included), the units rule
+  (credits are not tokens), time-by-model bars and only honestly addable totals.
+- The 13 dated observation entries, the entry marker and both templates are byte-identical.
+
+### Changed — copyright, SPDX and footer (deploy/index.html and LICENSE)
+
+- D1 PLAIN: LICENSE line 3 is exactly `Copyright (c) 2026 Loh Yap Kant`, identical to the
+  index.html header line.
+- D2: `SPDX-License-Identifier: MIT` sits directly above `MIT License` in the index header.
+- D3: the footer's "MIT License" links to
+  https://github.com/lohyapkant/KANTMICROGAMES/blob/HEAD/LICENSE with
+  `style="color:inherit"`; " © 2026 Loh Yap Kant" stays after it.
+- `APP.fileVersion`, the header "Current" and "Build log" lines are `013-20261102`.
+
+### Changed — README (R1-R6)
+
+- R1 tools table: Claude.ai is "chat assistant (used to write some of the prompts)".
+- R2: a blank line separates the last bullet of "What's in this repo" from the
+  private-archive line, so it no longer renders inside the bullet.
+- R3: the play instructions use the play link (or a downloaded copy), and the tip adds
+  `#game=NAME` to the play link instead of pointing at a local file.
+- R4: the models-table caption points at the MODELS usage ledger.
+- R5: "Current build" is `013-20261102`.
+- R6: Qwen3.8-Flash's Builds cell gains 013; Claude.ai Sonnet 5.5 Extra reads
+  `009, 012, 013 (prompt only)`.
+
+### Changed — Conventions and checklist
+
+- One line at the top of Conventions points at the appendices at the bottom of this file.
+- The Record homes bullet now says MODELS.md also holds the Usage ledger.
+- The Per-build checklist is the build-013 text: CONTROLS "Applies to" names the last
+  build whose controls it describes; MODELS gains a ledger row every build; the
+  consistency item lists the exact places (plan row included, CONTROLS excepted) and the
+  copyright line; new item 11 covers honest usage.
+- The old checklist is quoted under "Edits to existing text" below.
+
+### Edits to existing text
+
+README.md:
+- Tools table, Claude.ai row: `| Claude.ai | chat assistant (used to write one prompt) | https://claude.ai/ |` → `| Claude.ai | chat assistant (used to write some of the prompts) | https://claude.ai/ |`
+- "What's in this repo", R2: `- \`LICENSE\`, \`wrangler.jsonc\` — the MIT licence and the Cloudflare Workers settings.` immediately followed by `Design notes, prompts and test evidence are kept in the author's private archive.` → the same two lines separated by a blank line.
+- "How to play", first bullet: `- Open \`deploy/index.html\` from the play link above, or double-click it on your computer.` → `- Use the play link above, or download \`deploy/index.html\` and double-click it.`
+- "How to play", tip: `- Tip: open \`deploy/index.html#game=PANDASNACK\` or \`#game=SNAILRACE\` to jump straight into a game.` → `- Tip: add \`#game=PANDASNACK\` (or any game name) to the play link to jump straight into a game.`
+- Models caption: `One person's dated snapshots from a handful of builds. Not a ranking. Details in MODELS.md and CHANGELOG.md.` → `One person's dated snapshots from a handful of builds. Not a ranking. Time and usage for every build are tabulated in MODELS.md; the full record is in CHANGELOG.md.`
+- "Current build": `**Current build:** \`012-20261101\` — six games, one file.` → `**Current build:** \`013-20261102\` — six games, one file.`
+- Models table, Qwen3.8-Flash Builds cell: `008 (finish), 009, 010, 011, 012` → `008 (finish), 009, 010, 011, 012, 013`
+- Models table, Claude.ai Sonnet 5.5 Extra Builds cell: `009, 012 (prompt only)` → `009, 012, 013 (prompt only)`
+
+CHANGELOG.md:
+- Conventions, Record homes bullet: `... index.html header = current build only.` → `... index.html header = current build only. MODELS.md also holds the Usage ledger (one row per model per build, copied from the Build record).`
+- Conventions, top: new line after the heading: `Appendices A1-A9 (material moved out of the README in build 012) start under '## Appendices (build 012)' at the bottom of this file.`
+- Per-build checklist, old block:
+
+```
+     1. Number: the next unused build number. Date: the day you finish.
      2. CHANGELOG.md: paste a new entry under the marker using the Entry template. Never edit older entries.
      3. README.md: only (a) the games table if a game was added, (b) one row per model or tool in the two experiment tables, between their markers, (c) the "Current build" line. Nothing else.
      4. CONTROLS.md: only if controls changed. Update the "Applies to" line.
@@ -60,8 +149,77 @@
      9. Frozen games: prove they are byte-identical (SHA-256 of each IIFE) and put the numbers in the entry.
     10. Consistency: the same build ID everywhere above, and the same game list in README, CONTROLS and the entry.
     Never delete, shorten or restructure any documentation file or section. If something looks wrong, say so in the entry instead of fixing it silently.
+```
 
-<!-- NEW BUILD ENTRIES: paste the newest entry on the line below this comment, above the previous newest. Never edit older entries. -->
+  → the new block under "Per-build checklist" above (items 1-11; items 4, 5 and 10
+  changed and item 11 added).
+
+LICENSE:
+- Line 3: `Copyright (c) 2026 Loh Yap Kant (GitHub: lohyapkant)` → `Copyright (c) 2026 Loh Yap Kant`
+
+deploy/index.html:
+- `    fileVersion: "012-20261101",       // build number of THIS one-file app` → `    fileVersion: "013-20261102",       // build number of THIS one-file app`
+- Header "Current": `  Current    : build 012-20261101 — documentation restructure; six games` → `  Current    : build 013-20261102 — usage ledger, copyright and README fixes; six games`
+- Header "Build log": `  Build log  : build 012-20261101, Qwen3.8-Flash (Qoder CLI) — the full` → `  Build log  : build 013-20261102, Qwen3.8-Flash (Qoder CLI) — the full`
+- Header: new line `  SPDX-License-Identifier: MIT` directly above `  MIT License`.
+- Footer: `        MIT License © 2026 Loh Yap Kant` → `        <a href="https://github.com/lohyapkant/KANTMICROGAMES/blob/HEAD/LICENSE" style="color:inherit">MIT License</a> © 2026 Loh Yap Kant`
+
+MODELS.md and plans/micro-games-v2.md: additions only; no existing text was edited.
+CONTROLS.md: byte-identical.
+
+### Verification and limits
+
+- **Lossless:** snapshot in `plans/archive/pre-013/`. CHANGELOG entries 000-012 and the
+  thirteen MODELS observation entries are byte-identical; CONTROLS.md is byte-identical
+  (SHA-256 `a3e438f5…`); the README diff is R1-R6 only; LICENSE changed line 3 only; the
+  index.html diff is the four listed edits; the plan gained two rows.
+- **Games:** six game IIFEs SHA-256 equal to build 012 (PANDASNACK `f6dd1614…`, BOOPEEK
+  `f3212979…`, DUCKLINE `6a62f23a…`, SPROUTUP `adff7441…`, SLIMEHOP `a92efde4…`,
+  SNAILRACE `457fa4b4…`); `node --check` on the inline script clean.
+- **Render:** headless Chrome 156 shows the footer `KANTMICROGAMES — build 013-20261102`
+  with exactly one build ID, six game cards plus the COMING SOON slot, zero console
+  messages and zero exceptions; the MIT License link carries the D3 href and style.
+- **Consistency:** `013-20261102` in `APP.fileVersion`, the index header (`Current` and
+  `Build log`), the rendered footer, README "Current build", this entry and the plan
+  ledger row. CONTROLS "Applies to" stays `012-20261101`. The six-game list matches
+  `gameName` in the file.
+- **Ledger:** every figure recomputed by script from the table rows and checked against
+  the Build records: 47.2971 credits over 670 requests (builds 009-013), 406 recorded
+  minutes over 11 of 14 builds. Build 012 uses the addendum's final 5.9094 credits / 112
+  requests. The working is in `tests/build-013-docs-ledger.md`.
+- **Public tree:** every relative link resolves inside deploy/ + the four docs + LICENSE +
+  wrangler.jsonc; no link points to `plans/`, `tests/` or `prompts/`.
+- **Tables and caps:** constant column counts in every table of the four docs; README 92
+  lines and 5,426 bytes, none of the banned words.
+- **Links:** 13 of 15 URLs loaded. claude.ai and the openai.com GPT-OSS page returned a
+  403 bot challenge; both are kept.
+- **Limits:** render and interaction were checked in headless Chrome only; no physical
+  phone or tablet was used. The live Cloudflare site serves build 012 until the owner
+  deploys.
+
+### Build record (owner request: duration + tokens/credits)
+
+- Duration: **~21 min** wall-clock (2026-11-02, 17:45 → about 18:07 WIB, from the prompt
+  paste to the finished records).
+- Tokens: **not exposed by the tool.** Qoder reports a `credits` value per request, so the
+  build records **4.2717 credits used** across 100 billable requests (17:46-18:07 WIB),
+  summed from the per-request credits telemetry in the session transcript. Credits are not
+  tokens, and no token number is invented.
+
+### Documentation review/edit attempts (standing rule)
+
+- 2026-11-02 — Qwen3.8-Flash (Qoder CLI), P-13 documentation pass: completed. All nine
+  step-6 checks passed on the work copies before the one-step swap, and checks 1, 2, 3
+  and 7 passed again on the live files. No section was deleted; every edit to existing
+  text is quoted above. Results in `tests/build-013-docs-ledger.md`.
+
+### Addendum — 2026-11-02 (final figures after the records were saved)
+
+The lines above were written at 18:07 WIB with the telemetry then available. The session's
+final figures, taken after the records were saved, are **4.5351 credits across 104 billable
+requests** (2026-11-02, 17:46-18:08 WIB), for a final duration of **about 22 minutes**.
+The Usage ledger in `MODELS.md` uses these final figures; the original lines above are kept
+as recorded. Credits are not tokens.
 
 ## 012-20261101 — 2026-11-01 (documentation restructure)
 
