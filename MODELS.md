@@ -67,15 +67,16 @@ What each model used on each build. This is a record, not an opinion, and not a 
 | 013 | Qwen3.8-Flash · Qoder CLI | built | ~22 min | 4.5351 credits | measured: 104 requests |
 | 014 | Qwen3.8-Flash · Qoder CLI | built | ~24 min | 8.9189 credits | measured: 124 requests (final figures from the CHANGELOG addendum) |
 | 015 | Qwen3.8-Flash · Qoder CLI | built | ~17 min | 7.8667 credits | measured: 147 requests (final figures from the CHANGELOG addendum) |
+| 016 | Qwen3.8-Flash · Qoder CLI | built | ~18 min | 10.2413 credits | measured: 198 requests (final figures from the CHANGELOG addendum) |
 
 ### Totals that can honestly be added
-- **Credits, Qoder CLI, measured (builds 009-015):** 64.3461 credits over 945 billable requests.
+- **Credits, Qoder CLI, measured (builds 009-016):** 74.5874 credits over 1,143 billable requests.
 - **Token totals: none.** The token figures count different things (for example ~2.37 M "processed" in build 005 against ~48,000 in build 007), so adding them would mean nothing.
 - **Time by model, approximate.** Builds 000-002 and the GPT-OSS attempt have no time recorded, so DeepSeek and GLM are undercounted. One block = 10 minutes, rounded half up.
 
 | Model | Minutes | At a glance |
 |---|---|---|
-| Qwen3.8-Flash | ~188 | ▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇ |
+| Qwen3.8-Flash | ~206 | ▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇ |
 | DeepSeek V4.1 Flash Free | ~115 | ▇▇▇▇▇▇▇▇▇▇▇▇ |
 | GLM-5.3 Flash Free | ~45 | ▇▇▇▇▇ |
 | Flint 40B Free | ~25 | ▇▇▇ |
@@ -83,8 +84,8 @@ What each model used on each build. This is a record, not an opinion, and not a 
 | Claude Opus 4.6 Thinking | ~20 | ▇▇ |
 | Shared session (build 006: DeepSeek + Gemini) | ~30 | ▇▇▇ |
 
-Total recorded: about 448 minutes (about 7 h 28 min) over 13 of 16 builds.
-(Totals were recomputed after the build-015 row was added; the CHANGELOG Build records remain the source of truth.)
+Total recorded: about 466 minutes (about 7 h 46 min) over 14 of 17 builds.
+(Totals were recomputed after the build-016 row was added; the CHANGELOG Build records remain the source of truth.)
 
 ---
 

@@ -1,10 +1,10 @@
-<!-- Applies to: build 015-20261102 · seven games · changes to controls are recorded in CHANGELOG.md -->
+<!-- Applies to: build 016-20261102 · eight games · changes to controls are recorded in CHANGELOG.md -->
 # KANTMICROGAMES — Controls
 
 Which controls exist, how they behave on each kind of device, and why.
-This guide applies to all seven games, on every kind of device.
+This guide applies to all eight games, on every kind of device.
 
-## One table for all seven games
+## One table for all eight games
 
 | Game | Move | Action (`SPACE`, action pad, stage tap) | Goal |
 |---|---|---|---|
@@ -15,8 +15,9 @@ This guide applies to all seven games, on every kind of device.
 | SLIMEHOP | hop one pad per press with `W A S D` / arrows / the direction pad | **STOMP** — bloom the pad underfoot, 1.2 s cooldown, stuns a nearby snail | bloom all nine pads in 30 s before the snail eats them |
 | SNAILRACE | steer with `W A S D` / arrows / the direction pad | **ZOOM** — 1.55× burst for 0.7 s, 2.6 s cooldown | reach the strawberry first in 20 s; lettuce boosts, salt locks |
 | HUGPARADE | step cell to cell along the hedge rails with `W A S D` / arrows / the direction pad | **PEEK** — see the next hedges for 2 s, 6 s cooldown | gather up to three hearts, then hug Bibi: a hug scores 1 plus 1 per heart held; the maze redraws every 10 s |
+| CATNAPCATCH | slide the pillow left and right with `A` / `D`, ← → or the direction pad | **POUF** — widen the paper pillow for 1.4 s, 4.5 s cooldown | catch falling noisemakers for 45 s; three clangs wake Mochi |
 
-The action button carries the game's own label (DASH / POKE / GO / REACH / STOMP / ZOOM / PEEK),
+The action button carries the game's own label (DASH / POKE / GO / REACH / STOMP / ZOOM / PEEK / POUF),
 so one pad serves every game. SLIMEHOP is the one game where a direction press is a single
 **discrete hop** rather than a continuous walk: holding a direction does not repeat, and
 each new press hops one pad (or bonks harmlessly at the pond edge). SNAILRACE steers
@@ -25,6 +26,8 @@ speed, so a lane change does not cost forward ground. HUGPARADE moves on cell ra
 instead: every press carries Momo a whole cell, a release mid-step still finishes that
 step at the next centre, a perpendicular press waits for the next junction, and only a
 hedge blocks a step. It never moves diagonally, so Momo cannot wedge between two hedges.
+CATNAPCATCH uses the horizontal axis only: left and right slide the paper pillow, and up
+and down do nothing.
 
 ## Input devices
 

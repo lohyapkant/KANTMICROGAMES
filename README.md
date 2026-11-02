@@ -1,10 +1,10 @@
 # KANTMICROGAMES
 
-Seven tiny pixel-art games in one HTML file. Open it, pick a game, play a minute.
+Eight tiny pixel-art games in one HTML file. Open it, pick a game, play a minute.
 
 Play online: <https://kantmicrogames.lohyapkant.workers.dev/>
 
-**Current build:** `015-20261102` — seven games, one file.
+**Current build:** `016-20261102` — eight games, one file.
 
 ## About this project
 
@@ -25,6 +25,7 @@ The full record of every build is in CHANGELOG.md.
 | SLIMEHOP | Slimey hops a 3×3 lily-pad pond, blooming every pad before a sleepy snail undoes the work. |
 | SNAILRACE | Nibbles races two garden snails to a picnic strawberry; lettuce zooms, salt stings. |
 | HUGPARADE | Momo steps along hedge rails, gathers hearts, and hugs Bibi before the maze reshapes; each heart makes the hug worth more. |
+| CATNAPCATCH | Slide a paper pillow under a sleeping kitten and catch the falling noisemakers; three clangs wake the nap. |
 
 ## How to play
 
@@ -57,7 +58,7 @@ Keyboard, touch and device details are in CONTROLS.md.
 | Gemini 3.8 Flash | [Google](https://gemini.google.com/) | Antigravity | 006, 007 | Picked up cleanly after a session limit; delivered SPROUTUP. |
 | GPT-OSS 120B Medium | [OpenAI](https://openai.com/index/introducing-gpt-oss/) | Antigravity | 008 (attempt) | Abandoned: it deleted sections of the docs instead of editing them. |
 | Claude Opus 4.6 Thinking | [Anthropic](https://www.anthropic.com/) | Antigravity | 008 | Did most of the docs work, then halted mid-round. |
-| Qwen3.8-Flash | [Alibaba Qwen](https://qwen.ai/) | Qoder CLI | 008 (finish), 009, 010, 011, 012, 013, 014, 015 | Delivered the responsive shell and three new games, then corrected HUGPARADE's movement and scoring in 015; older games stayed unchanged. |
+| Qwen3.8-Flash | [Alibaba Qwen](https://qwen.ai/) | Qoder CLI | 008 (finish), 009, 010, 011, 012, 013, 014, 015, 016 | Delivered the responsive shell and four new games, corrected HUGPARADE's movement and scoring in 015, then delivered CATNAPCATCH in 016; older games stayed unchanged. |
 | Claude.ai Sonnet 5.5 Extra | [Anthropic](https://claude.ai/) | Claude.ai chat | 009, 012, 013 (prompt only) | Wrote the responsive-shell prompt that Qwen executed. |
 <!-- END:models-table -->
 

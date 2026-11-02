@@ -67,6 +67,154 @@ Appendices A1-A9 (material moved out of the README in build 012) start under '##
 
 <!-- NEW BUILD ENTRIES: paste the newest entry on the line below this comment, above the previous newest. Never edit older entries. -->
 
+## 016-20261102 — 2026-11-02 (Round 8: CATNAPCATCH)
+
+Built from prompt: P-16 (the owner's Round 8 request for CATNAPCATCH, pasted verbatim,
+typos included; private archive file `prompts/P-16_catnapcatch.txt`)  
+Tool and model: **Qwen3.8-Flash (Qoder CLI)**  
+Games in the one file: 8 (PANDASNACK 007-20261101 **frozen**, BOOPEEK 006-20261101
+**frozen**, DUCKLINE 005-20261101 **frozen**, SPROUTUP 007-20261101 **frozen**,
+SLIMEHOP 010-20261101 **frozen**, SNAILRACE 011-20261101 **frozen**, HUGPARADE
+015-20261102 (unchanged this build), CATNAPCATCH 016-20261102; file build
+**016-20261102**)
+
+### Added — CATNAPCATCH, the eighth game (deploy/index.html, PART 5-H)
+
+- A new sealed IIFE before PART 6, registered in `GAMES` as `CATNAPCATCH`, content
+  `016-20261102`: Mochi, a butter-ginger kitten, sleeps on a floor cushion in a night
+  nursery while a paper pillow slides under the shelf to catch falling noisemakers.
+- Play: the pillow moves only left and right, at 62 px/s within x 16–84. Four
+  noisemakers (alarm clock, jingle bell, tin pot, toy block) drop from y 29 at a speed
+  that ramps from 28 to 40 px/s; the spawn gap tightens from 1.55 s to 0.82 s over the
+  round. A catch at y 60 scores **+1** (the tracked quantity is catches). A miss at
+  y 82 costs one of three clang slots; the third clang ends the run. The round lasts
+  **45 s**. The one action is **POUF**: it widens the pillow from half-width 10 to 16
+  for 1.4 s on a 4.5 s cooldown, so a catch window of ±13 px becomes ±19 px.
+- Art: a 100×100 night nursery — striped violet wall with 16 deterministic stars, a
+  round window with a crescent moon and four panes, a fish picture, a wooden shelf
+  with books, a jar and a block, warm floorboards, a lavender rug, a mint cushion, and
+  Mochi in a ginger coat with cream muzzle and paws, closed happy eyes, blush and a
+  curled tail. The paper pillow has a centre crease, seam stitches and fluff corners
+  when puffed. Items fall with a one-pixel streak; catches make a spark burst, a ring
+  and a rising `+1`; clangs shake the cat, show a `!` bubble and spray sparks on the
+  floor. Zzz drift above the sleeper.
+- HUD: a plate at the top shows `TIME n` and `CATCH n`, three bell pips for the quiet
+  slots remaining, `POUF` and five cooldown pips. The title plate states the rules
+  (`CATCH THE CLATTER`, `EACH CATCH +1`, `3 CLANGS END THE NAP`, `POUF MAKES IT
+  BIGGER`), and the game-over plate reads `CLATTER TOO LOUD` or `THE NAP HELD`, the
+  catch count, and `BEST n`.
+- Shelf preview: a private 200×96 `paintCatnapCatchPreview` with the night wall, moon
+  window, loaded shelf, three falling items with streaks, the rug, cushion, Mochi and
+  the pillow, plus drifting Zzz.
+- Best catches are stored under `KANTMICROGAMES.CATNAPCATCH.best`. This is a new key,
+  so no migration is needed. Desktop hint: `A` and `D` slide the pillow, `SPACE` or a
+  stage tap puffs it wider, `R` restarts, `ESC` returns to the shelf.
+
+### Changed — build identity and index notes (deploy/index.html)
+
+- `APP.fileVersion` is `016-20261102`; the header "Current" line names Round 8,
+  CATNAPCATCH and eight games, and "Build log" names this build. The footer follows
+  `APP.fileVersion` and reads `KANTMICROGAMES — build 016-20261102`.
+- READ ME FIRST now introduces eight modules and adds the
+  `CATNAPCATCH -> cat / CAT_*` prefix rule. Its frozen list records that build 016 left
+  all six frozen modules byte-identical and left HUGPARADE unchanged at content
+  `015-20261102`; the numbering note records CATNAPCATCH as new at 016. The PART 5
+  boundary note marks CATNAPCATCH live at content 016-20261102.
+
+### Note — legibility and HUD choices found in review
+
+- The shared 3×5 pixel font's `W` is hard to read at scale 1 (it reads as an `M`), so
+  CATNAPCATCH's on-canvas strings avoid `W`: the title says `3 CLANGS END THE NAP` and
+  `POUF MAKES IT BIGGER`, and the clang ending says `CLATTER TOO LOUD`. The shared font
+  was **not** changed, because that would alter frozen games' text (SPROUTUP uses it).
+- The three bell pips show **quiet slots remaining** (three gold at the start, one
+  dimmed per clang), not a tally of clangs. The first draft lit them as clangs arrived,
+  which read as empty lives on the title-to-play swap; the remaining-slots reading is
+  the one that matches "3 CLANGS END THE NAP".
+- A rising `+1` was added after the first play captures showed that the spark burst alone
+  was easy to miss; the coin-sized pop makes each catch legible without adding sound.
+
+### Changed — public and private records
+
+- README: "Eight tiny…", current build `016-20261102` — eight games, CATNAPCATCH added
+  to the games table, Qwen3.8-Flash's builds cell gains 016 and now says four new
+  games. Nothing else changed.
+- CONTROLS: "Applies to" is build `016-20261102 · eight games`; the guide and the table
+  now say eight; the table gains the CATNAPCATCH row (**POUF**, 1.4 s on a 4.5 s
+  cooldown, catches in 45 s with three clang slots); the action-label list adds POUF;
+  one sentence records that CATNAPCATCH uses the horizontal axis only (up and down do
+  nothing).
+- MODELS: one new Usage ledger row for 016, with the totals and bars recomputed from
+  the final Build record. No observation entry was added because the owner supplied no
+  new observation this round.
+- plans/micro-games-v2.md: one ledger row, one tool-log row, and the CATNAPCATCH
+  backlog row moved from `backlog` to "in the file (round 8)" with the shipped rules.
+- prompts/P-16_catnapcatch.txt saved with the owner's request verbatim; verification
+  in `tests/build-016-catnapcatch.md`, with eleven screenshots under
+  `tests/screenshots/build-016/`; pre-edit snapshot and hashes in
+  `plans/archive/pre-016/`.
+
+### Verification and limits
+
+- **Frozen modules:** each IIFE hashed as the exact `(function () {` … `})();` block
+  with no trailing newline. PANDASNACK `f6dd1614…`, BOOPEEK `f3212979…`, DUCKLINE
+  `6a62f23a…`, SPROUTUP `adff7441…`, SLIMEHOP `a92efde4…`, SNAILRACE `457fa4b4…` —
+  all equal to build 015. HUGPARADE is unchanged at `151deb6e…ddd12c65` (37,311
+  characters). CATNAPCATCH's new IIFE is `26f6be1a…4a8ee78` (34,524 characters). Full
+  hashes and character counts are in the test report.
+- **Code:** `node --check` on the extracted inline script clean; eight module IIFEs and
+  eight `GAMES` registrations found; all five CATNAPCATCH sprite maps are 7×7; no
+  `console.log` remains inside the page.
+- **Render:** headless Chrome 156 at 1280×800 shows eight game cards plus COMING SOON,
+  every preview at ratio 2.083, stage 600×600, no page scroll and zero console errors.
+  At 390×844 DPR 2 with touch, the Catnap Catch card preview is 324.0×155.5
+  (ratio 2.083), the stage is 300×300, the pads are 58 px, and the page does not scroll
+  sideways.
+- **Gameplay (23 assertions, 0 failures):** on an instrumented copy built from the
+  final module, `SPACE` started from the title; real `D` and `A` moved the pillow and
+  clamped at x 84 and x 16; a catch at the centre scored 1; a miss away from the
+  pillow cost one clang and read "clang! 2 more and mochi wakes"; POUF caught an
+  offset-15 item that a normal pillow would miss, ran 1.4 s, refused a second POUF
+  during its 4.5 s cooldown, became ready again after it, and lasted 1.35 s on the
+  second use; the third clang ended the run with `endReason` `clang`; real `R`
+  restarted at score 0; the 45 s clock ended the run with `endReason` `time`; best 1
+  was saved and survived a reload; `ESC` returned to the shelf.
+- **Mobile touch:** real CDP touch opened the Catnap Catch card, a stage tap started
+  the run, holding the left pad moved the pillow from 50 to about 18, and a stage tap
+  started POUF (`poufT` 1.2 s, `readyT` 4.3 s). The pads and stage stayed inside
+  390×844.
+- **Limits:** headless Chrome only; no physical phone, Safari, Firefox or iOS/Android
+  run. The Cloudflare site serves build 015 until the owner deploys build 016. No audio
+  exists in the project, so none was tested.
+
+### Build record (owner request: duration + tokens/credits)
+
+- Duration: **about 15 min** wall-clock at the time this entry was written
+  (2026-11-02, 21:37 → about 21:52 WIB, from the prompt paste to the records). The
+  final figure is in the addendum below.
+- Tokens: **not exposed by the tool.** Qoder reports a `credits` value per request, so
+  the build records **8.4440 credits used across 162 billable requests**
+  (21:37-21:52 WIB), summed from the per-request credits in the session transcript,
+  deduplicated by `request_id`. Credits are not tokens, and no token number is
+  invented.
+
+### Documentation review/edit attempts (standing rule)
+
+- 2026-11-02 — Qwen3.8-Flash (Qoder CLI), P-16 build: completed. README and CONTROLS
+  edits are limited to the lines listed above; CHANGELOG received this new entry only;
+  MODELS gained one ledger row and recomputed totals; the plan gained two rows and one
+  updated backlog row; LICENSE is byte-identical; no section was deleted, shortened or
+  restructured. The six frozen IIFEs and HUGPARADE were hashed, and CATNAPCATCH was
+  hashed, after the code edits. Results in `tests/build-016-catnapcatch.md`.
+
+### Addendum — 2026-11-02 (final figures after the records were saved)
+
+The lines above were written at 21:52 WIB with the telemetry then available. The session's
+final figures, taken at 21:55 WIB just before this addendum was written, are **10.2413
+credits across 198 billable requests** (2026-11-02, 21:37-21:55 WIB), for a final duration
+of **about 18 minutes**. The Usage ledger in `MODELS.md` uses these figures. Credits are
+not tokens.
+
 ## 015-20261102 — 2026-11-02 (Round 7 fixes: HUGPARADE rails and hug scoring)
 
 Built from prompt: P-15 (the owner's request to correct HUGPARADE before starting

@@ -6,12 +6,13 @@
   Repository : https://github.com/lohyapkant/KANTMICROGAMES
   Play online: https://kantmicrogames.lohyapkant.workers.dev/
   Hosting    : Cloudflare Workers (https://workers.cloudflare.com/)
-  Current    : build 015-20261102 — Round 7 fixes: HUGPARADE rail
-               movement and hug scoring; seven games
-               (PANDASNACK, BOOPEEK, DUCKLINE, SPROUTUP, SLIMEHOP, SNAILRACE, HUGPARADE)
+  Current    : build 016-20261102 — Round 8: CATNAPCATCH, the night-nursery
+               catch game; eight games
+               (PANDASNACK, BOOPEEK, DUCKLINE, SPROUTUP, SLIMEHOP, SNAILRACE,
+               HUGPARADE, CATNAPCATCH)
   Names      : project and on-screen brand KANTMICROGAMES ·
                save keys and the console tag use the KANTMICROGAMES prefix
-  Build log  : build 015-20261102, Qwen3.8-Flash (Qoder CLI) — the full
+  Build log  : build 016-20261102, Qwen3.8-Flash (Qoder CLI) — the full
                record of every build is in CHANGELOG.md
   ================================================================
 
@@ -726,8 +727,8 @@
 
 /* ==================================================================
    READ ME FIRST — BOUNDARIES BETWEEN THE SHELF, THE RUNTIME AND THE
-   SEVEN GAME MODULES (PANDASNACK, BOOPEEK, DUCKLINE, SPROUTUP, SLIMEHOP,
-   SNAILRACE, HUGPARADE).
+   EIGHT GAME MODULES (PANDASNACK, BOOPEEK, DUCKLINE, SPROUTUP, SLIMEHOP,
+   SNAILRACE, HUGPARADE, CATNAPCATCH).
 
    The shelf and the runtime are SHARED. The games are NOT shared.
    Each game is its own IIFE with its own SETTINGS, palette, sprite
@@ -745,7 +746,7 @@
       PANDASNACK -> panda / PAL / PANDA_*, BOOPEEK -> peek / boo / pip /
       BOO_ / PIP_*, DUCKLINE -> duck / mama / DUCK_*, SPROUTUP -> sprout /
       SPROUT_*, SLIMEHOP -> slime / SLIME_*, SNAILRACE -> race / RACE_*,
-      HUGPARADE -> hug / HUG_*.
+      HUGPARADE -> hug / HUG_*, CATNAPCATCH -> cat / CAT_*.
    4. Paint with the ctx passed into paint(ctx). Do not assume the
       shared stageCtx; that assumption is a PANDASNACK legacy only.
    5. Do not copy one game's character art into another game. Panda,
@@ -757,8 +758,9 @@
       are FROZEN by owner request: do not restyle, rebalance or refactor
       them unless the owner asks. (Build 010 changed only their unused
       `saveKey` label string when the storage prefix was renamed; art,
-      tuning and behaviour are untouched. Build 014 left all six
-      byte-identical.)
+      tuning and behaviour are untouched. Build 016 left all six
+      byte-identical, and left HUGPARADE unchanged at content
+      015-20261102.)
    7. Add a new game as a NEW IIFE registered in GAMES; never graft a
       new game into an existing module.
    ================================================================== */
@@ -783,7 +785,8 @@
    005-20261101; BOOPEEK is frozen at 006-20261101; PANDASNACK content
    was updated in 007-20261101 for in-stage score HUD and refrozen;
    SLIMEHOP is new at 010-20261101; SNAILRACE is new at 011-20261101;
-   HUGPARADE is new at 014-20261102 and corrected at 015-20261102).
+   HUGPARADE is new at 014-20261102 and corrected at 015-20261102;
+   CATNAPCATCH is new at 016-20261102).
 
    Every finished build's full record — model and tool, effort,
    duration, and tokens or credits — lives in CHANGELOG.md, under
@@ -800,7 +803,7 @@
 
 const APP = {
     name: "KANTMICROGAMES",
-    fileVersion: "015-20261102",       // build number of THIS one-file app
+    fileVersion: "016-20261102",       // build number of THIS one-file app
     savePrefix: "KANTMICROGAMES."      // best scores live at prefix + GAMEID + ".best"
 };
 
@@ -1659,10 +1662,12 @@ applyUi();
    * SNAILRACE is FROZEN at content 011-20261101 — Nibbles races two garden
      rivals across a picnic blanket to the strawberry; frozen when the
      HUGPARADE round shipped.
-   * HUGPARADE is live (content 015-20261102): Momo hunts for Bibi in a
-     hedge maze that redraws itself; PEEK shows the next hedges. Build
-     015 moved Momo onto the cell rails and made each hug worth 1 plus
-     one more per heart held.
+   * HUGPARADE is unchanged at content 015-20261102 (build 016 did not
+     touch it): Momo hunts for Bibi in a hedge maze that redraws itself;
+     PEEK shows the next hedges; each hug is worth 1 plus one per heart.
+   * CATNAPCATCH is live (content 016-20261102): Mochi the kitten sleeps
+     on a cushion while a paper pillow catches falling noisemakers. Three
+     clangs end the nap; POUF widens the pillow.
    ================================================================== */
 
 (function () {
@@ -7283,6 +7288,1038 @@ applyUi();
         actionLabel: "PEEK",
         hint: "desktop: WASD step along the hedge rails · SPACE or tap stage to peek at the next hedges · R restart · ESC shelf",
         previewPaint: paintHugParadePreview,
+        start, stop, restart,
+        update, paint, onDir, onAction, onStageTap, onAnyKey
+    });
+})();
+
+
+/* ==================================================================
+   PART 5-H — CATNAPCATCH module (content 016-20261102)
+   ------------------------------------------------------------------
+   MODULE BOUNDARY — READ BEFORE EDITING
+   * Everything inside this IIFE is PRIVATE to CATNAPCATCH: SETTINGS,
+     palette, sprite maps, room state, timers and draw helpers.
+   * Do NOT read or write other modules' names from here, and do NOT
+     let other modules read these names. The only shared things a
+     module may touch are: the module contract (start / stop / restart /
+     update / paint / onDir / onAction / onStageTap / onAnyKey), the
+     pixel helpers in PART 1, readBest / saveBest, and the shared chrome
+     handles scoreEl / bestEl / msgEl.
+   * Every name here is sealed inside this IIFE. Keep the CAT_ / cat
+     prefixes so nothing can collide with another module.
+   * Paint with the ctx passed into paint(ctx); never assume stageCtx.
+   * Art direction: a sleepy nursery at night. Mochi, a butter-ginger
+     kitten, snoozes on a floor cushion while a paper pillow floats
+     between the shelf and the nap, catching the clattering noisemakers.
+     Round window, soft stripes, stars, a fish picture, warm floorboards.
+   ================================================================== */
+
+(function () {
+    "use strict";
+
+    /* ---------- CATNAPCATCH settings (private) ---------- */
+
+    const SETTINGS = {
+        gameName: "CATNAPCATCH",
+        versionNumber: "016-20261102",
+        stageSize: 100,
+        saveKey: "KANTMICROGAMES.CATNAPCATCH.best",
+
+        playerSettings: {
+            pillowSpeed: 62,
+            pillowHalf: 10,
+            puffedHalf: 16,
+            poufSeconds: 1.4,
+            poufCooldownSeconds: 4.5
+        },
+
+        worldSettings: {
+            catchY: 60,
+            floorY: 82,
+            pillowMinX: 16,
+            pillowMaxX: 84,
+            spawnXMin: 14,
+            spawnXMax: 86,
+            firstSpawnSeconds: 1.2,
+            spawnSecondsStart: 1.55,
+            spawnSecondsMin: 0.82,
+            fallSpeedStart: 28,
+            fallSpeedEnd: 40,
+            maxClangs: 3
+        },
+
+        roundTimeLimitSeconds: 45,
+
+        palette: {
+            wall: "#312C57", wallLight: "#3D3768", wallDark: "#262144",
+            star: "#6E679C", starBright: "#EFE6C8",
+            windowFrame: "#8A6A4C", windowFrameLight: "#B08A63",
+            night: "#1E2347", moon: "#FFE9A8",
+            floor: "#C98B5E", floorLight: "#DBA274", floorDark: "#A96B44",
+            rug: "#8A6FAE", rugLight: "#A88BC9", rugDark: "#6E558E",
+            shelf: "#96694A", shelfLight: "#B98A63", shelfDark: "#6E4A33",
+            cushion: "#7FB0A6", cushionLight: "#A5D2C6", cushionDark: "#5E8A83",
+            fur: "#F2A65A", furLight: "#FFD1A1", stripe: "#D9823F",
+            cream: "#FFF3E2", ear: "#F08A96", eye: "#46352E",
+            nose: "#C96B78", blush: "#F79BAC",
+            pillow: "#FFF8EC", pillowShade: "#E4D6C0", pillowLine: "#C8B49A",
+            clock: "#E4572E", clockFace: "#FFF6E6",
+            metal: "#9AA7B1", metalLight: "#CBD5DB",
+            gold: "#F2C14E", goldLight: "#FFE08A",
+            wood: "#C77C46", woodLight: "#E3A46E",
+            zzz: "#CFC6F0", plate: "#221F3D", text: "#FFF8E6",
+            textGold: "#FFE58A", textPink: "#FFB9C7"
+        }
+    };
+
+    const PAL = SETTINGS.palette;
+    const WORLD = SETTINGS.worldSettings;
+    const PLAYER = SETTINGS.playerSettings;
+    const STAGE = SETTINGS.stageSize;
+
+    /* ---------- CATNAPCATCH private state ---------- */
+
+    const STATE = { TITLE: "title", PLAY: "play", OVER: "over" };
+    const STEP_SECONDS = 1 / 60;
+
+    let catState = STATE.TITLE;
+    let catStateT = 0;
+    let catClock = 0;
+    let catRoundT = 0;
+    let catScore = 0;
+    let catBest = 0;
+    let catClangs = 0;
+    let catEndReason = "time";
+    let catPoufT = 0;
+    let catPoufReadyT = 0;
+    let catSpawnT = 0;
+    let catTwitchT = 0;
+    let catSquishT = 0;
+    let catAccumulator = 0;
+
+    const pillow = { x: 50 };
+    const held = { up: false, down: false, left: false, right: false };
+
+    let catItems = [];
+    let catEffects = [];
+    let catZzz = [];
+    let catNextZ = 0.8;
+
+    const CAT_WALL_STARS = [];
+    for (let i = 0; i < 16; i++) {
+        CAT_WALL_STARS.push([6 + (i * 37) % 88, 30 + (i * 29) % 50]);
+    }
+
+    /* ---------- CATNAPCATCH sprite maps (all prefixed, all local) ---------- */
+
+    /* the noisemakers: an alarm clock, a jingle bell, a tin pot, a toy block */
+    const CAT_CLOCK_MAP = [
+        ".B...B.",
+        "BBBBBBB",
+        "KCCCCCK",
+        "KCWWWCK",
+        "KCWKKCK",
+        "KCCCCCK",
+        ".K...K."
+    ];
+    const CAT_CLOCK_COLORS = { B: PAL.metalLight, K: PAL.eye, C: PAL.clock, W: PAL.clockFace };
+
+    const CAT_BELL_MAP = [
+        "...Y...",
+        "..YYY..",
+        ".YYYYY.",
+        ".YYDYY.",
+        "YYYYYYY",
+        ".YYY...",
+        "...K..."
+    ];
+    const CAT_BELL_COLORS = { Y: PAL.gold, D: PAL.goldLight, K: PAL.eye };
+
+    const CAT_POT_MAP = [
+        "..KKK..",
+        "..K.K..",
+        ".KKKKK.",
+        "KKKKKKK",
+        "KMMMMMK",
+        "KMMMMMK",
+        ".KKKKK."
+    ];
+    const CAT_POT_COLORS = { K: PAL.metal, M: PAL.metalLight };
+
+    const CAT_BLOCK_MAP = [
+        "KKKKKKK",
+        "KWWWWWK",
+        "KWWKWWK",
+        "KWWWWWK",
+        "KWKWWWK",
+        "KWWWWWK",
+        "KKKKKKK"
+    ];
+    const CAT_BLOCK_COLORS = { K: PAL.wood, W: PAL.woodLight };
+
+    const CAT_ITEM_TYPES = [
+        { map: CAT_CLOCK_MAP, colors: CAT_CLOCK_COLORS },
+        { map: CAT_BELL_MAP, colors: CAT_BELL_COLORS },
+        { map: CAT_POT_MAP, colors: CAT_POT_COLORS },
+        { map: CAT_BLOCK_MAP, colors: CAT_BLOCK_COLORS }
+    ];
+
+    const CAT_BANG_MAP = [
+        ".WWWWW.",
+        ".WKKKW.",
+        ".WKKKW.",
+        ".WKKKW.",
+        ".WWWWW.",
+        ".WKKKW.",
+        ".WWWWW."
+    ];
+    const CAT_BANG_COLORS = { W: PAL.cream, K: PAL.clock };
+
+    /* ---------- CATNAPCATCH run setup (private) ---------- */
+
+    function clearHeld() {
+        held.up = false;
+        held.down = false;
+        held.left = false;
+        held.right = false;
+    }
+
+    function startRun() {
+        catScore = 0;
+        catClangs = 0;
+        catRoundT = 0;
+        catStateT = 0;
+        catPoufT = 0;
+        catPoufReadyT = 0;
+        catSpawnT = WORLD.firstSpawnSeconds;
+        catTwitchT = 0;
+        catSquishT = 0;
+        catEndReason = "time";
+        catItems = [];
+        catEffects = [];
+        catZzz = [];
+        catNextZ = 0.9;
+        pillow.x = 50;
+        catState = STATE.PLAY;
+        syncChrome(true);
+    }
+
+    function finishRun(reason) {
+        catEndReason = reason;
+        if (catScore > catBest) {
+            catBest = catScore;
+            saveBest(SETTINGS.gameName, catScore);
+        }
+        catState = STATE.OVER;
+        catStateT = 0;
+        catPoufT = 0;
+        catTwitchT = 0;
+        catItems = [];
+        syncChrome(true);
+    }
+
+    function tryPouf() {
+        if (catState !== STATE.PLAY) return false;
+        if (catPoufReadyT > 0) return false;
+        catPoufT = PLAYER.poufSeconds;
+        catPoufReadyT = PLAYER.poufCooldownSeconds;
+        catSquishT = 0.2;
+        burst(pillow.x, 57, PAL.cream, 7, 10);
+        ring(pillow.x, 57, 13);
+        syncChrome(true);
+        return true;
+    }
+
+    /* ---------- CATNAPCATCH world step (private) ---------- */
+
+    function spawnItem() {
+        const progress = Math.min(1, catRoundT / SETTINGS.roundTimeLimitSeconds);
+        let x = WORLD.spawnXMin + Math.random() * (WORLD.spawnXMax - WORLD.spawnXMin);
+        for (let tries = 0; tries < 6; tries++) {
+            let clear = true;
+            for (const item of catItems) {
+                if (Math.abs(item.x - x) < 13) { clear = false; break; }
+            }
+            if (clear) break;
+            x = WORLD.spawnXMin + Math.random() * (WORLD.spawnXMax - WORLD.spawnXMin);
+        }
+        catItems.push({
+            x: Math.round(x),
+            y: 29,
+            vy: WORLD.fallSpeedStart + (WORLD.fallSpeedEnd - WORLD.fallSpeedStart) * progress +
+                Math.random() * 3,
+            type: CAT_ITEM_TYPES[Math.floor(Math.random() * CAT_ITEM_TYPES.length)]
+        });
+        puff(x, 27, PAL.star);
+    }
+
+    function movePillow(dt) {
+        let dir = 0;
+        if (held.left && !held.right) dir = -1;
+        else if (held.right && !held.left) dir = 1;
+        if (!dir) return;
+        pillow.x += dir * PLAYER.pillowSpeed * dt;
+        if (pillow.x < WORLD.pillowMinX) pillow.x = WORLD.pillowMinX;
+        if (pillow.x > WORLD.pillowMaxX) pillow.x = WORLD.pillowMaxX;
+    }
+
+    function catchItem(index) {
+        const item = catItems[index];
+        catItems.splice(index, 1);
+        catScore += 1;
+        catSquishT = 0.18;
+        burst(item.x, WORLD.catchY, PAL.starBright, 8, 16);
+        burst(item.x, WORLD.catchY, PAL.pillow, 4, 10);
+        ring(item.x, WORLD.catchY, 11);
+        catEffects.push({ kind: "text", x: item.x, y: WORLD.catchY - 7, t: 0, life: 0.55 });
+        syncChrome(true);
+    }
+
+    function clangItem(index) {
+        const item = catItems[index];
+        catItems.splice(index, 1);
+        catClangs += 1;
+        catTwitchT = 0.7;
+        bustClang(item.x);
+        if (catClangs >= WORLD.maxClangs) {
+            finishRun("clang");
+            return;
+        }
+        syncChrome(true);
+    }
+
+    function stepWorld(dt) {
+        catClock += dt;
+        catStateT += dt;
+        updateEffects(dt);
+        updateZzz(dt);
+        catTwitchT = Math.max(0, catTwitchT - dt);
+        catSquishT = Math.max(0, catSquishT - dt);
+
+        if (catState !== STATE.PLAY) return;
+
+        catRoundT += dt;
+        catPoufT = Math.max(0, catPoufT - dt);
+        catPoufReadyT = Math.max(0, catPoufReadyT - dt);
+        movePillow(dt);
+
+        catSpawnT -= dt;
+        if (catSpawnT <= 0) {
+            spawnItem();
+            const progress = Math.min(1, catRoundT / SETTINGS.roundTimeLimitSeconds);
+            catSpawnT = WORLD.spawnSecondsStart -
+                (WORLD.spawnSecondsStart - WORLD.spawnSecondsMin) * progress;
+        }
+
+        const half = catPoufT > 0 ? PLAYER.puffedHalf : PLAYER.pillowHalf;
+        for (let i = catItems.length - 1; i >= 0; i--) {
+            const item = catItems[i];
+            const prevY = item.y;
+            item.y += item.vy * dt;
+            if (item.y >= WORLD.catchY && prevY < WORLD.catchY &&
+                Math.abs(item.x - pillow.x) <= half + 3) {
+                catchItem(i);
+                continue;
+            }
+            if (item.y >= WORLD.floorY) clangItem(i);
+        }
+
+        if (catState === STATE.PLAY && catRoundT >= SETTINGS.roundTimeLimitSeconds) {
+            finishRun("time");
+        }
+    }
+
+    function update(rawDt) {
+        let dt = rawDt > 0.25 ? 0.25 : rawDt;
+        catAccumulator += dt;
+        let steps = 0;
+        while (catAccumulator >= STEP_SECONDS && steps < 4) {
+            stepWorld(STEP_SECONDS);
+            catAccumulator -= STEP_SECONDS;
+            steps++;
+        }
+        if (steps === 4) catAccumulator = 0;
+        syncChrome(false);
+    }
+
+    /* ---------- CATNAPCATCH effects (private, drawn as pixels) ---------- */
+
+    function burst(x, y, color, count, speed) {
+        for (let i = 0; i < count; i++) {
+            const angle = (Math.PI * 2 * i) / count + Math.random() * 0.7;
+            const v = speed * (0.5 + Math.random() * 0.7);
+            catEffects.push({
+                kind: "spark", x: x, y: y,
+                vx: Math.cos(angle) * v, vy: Math.sin(angle) * v - 5,
+                t: 0, life: 0.45 + Math.random() * 0.2, color: color
+            });
+        }
+    }
+
+    function puff(x, y, color) {
+        catEffects.push({
+            kind: "spark", x: x, y: y, vx: 0, vy: -4,
+            t: 0, life: 0.3, color: color
+        });
+    }
+
+    function ring(x, y, maxR) {
+        catEffects.push({ kind: "ring", x: x, y: y, maxR: maxR, t: 0, life: 0.4 });
+    }
+
+    function bustClang(x) {
+        burst(x, WORLD.floorY - 2, PAL.textPink, 7, 13);
+        burst(x, WORLD.floorY - 2, PAL.goldLight, 5, 9);
+        ring(x, WORLD.floorY - 2, 14);
+    }
+
+    function updateEffects(dt) {
+        for (let i = catEffects.length - 1; i >= 0; i--) {
+            const e = catEffects[i];
+            e.t += dt;
+            if (e.kind === "spark") {
+                e.x += e.vx * dt;
+                e.y += e.vy * dt;
+                e.vy += 70 * dt;
+            } else if (e.kind === "text") {
+                e.y -= 16 * dt;
+            }
+            if (e.t >= e.life) catEffects.splice(i, 1);
+        }
+    }
+
+    function updateZzz(dt) {
+        if (catState !== STATE.OVER) {
+            catNextZ -= dt;
+            if (catNextZ <= 0) {
+                catNextZ = 1.6;
+                catZzz.push({ x: 58 + Math.random() * 2, y: 70, t: 0, life: 2.4 });
+            }
+        }
+        for (let i = catZzz.length - 1; i >= 0; i--) {
+            const z = catZzz[i];
+            z.t += dt;
+            z.x += dt * 4;
+            z.y -= dt * 5.5;
+            if (z.t >= z.life) catZzz.splice(i, 1);
+        }
+    }
+
+    /* ---------- CATNAPCATCH painting (private) ---------- */
+
+    function drawRoom(ctx) {
+        ctx.fillStyle = PAL.wall;
+        ctx.fillRect(0, 0, STAGE, 86);
+        ctx.fillStyle = PAL.wallLight;
+        for (let x = 0; x < STAGE; x += 10) ctx.fillRect(x, 20, 4, 66);
+        ctx.fillStyle = PAL.wallDark;
+        for (let x = 6; x < STAGE; x += 10) ctx.fillRect(x, 20, 1, 66);
+
+        ctx.fillStyle = PAL.star;
+        for (const star of CAT_WALL_STARS) ctx.fillRect(star[0], star[1], 1, 1);
+
+        ctx.fillStyle = PAL.floor;
+        ctx.fillRect(0, 86, STAGE, STAGE - 86);
+        ctx.fillStyle = PAL.floorLight;
+        for (let x = 0; x < STAGE; x += 12) ctx.fillRect(x, 86, 6, 1);
+        ctx.fillStyle = PAL.floorDark;
+        for (let y = 90; y < STAGE; y += 5) {
+            for (let x = 0; x < STAGE; x += 12) {
+                ctx.fillRect(x + (((y / 5) | 0) % 2) * 6, y, 1, 4);
+            }
+        }
+        ctx.fillRect(0, 86, STAGE, 1);
+    }
+
+    function drawWindow(ctx) {
+        ctx.fillStyle = PAL.windowFrame;
+        ctx.fillRect(5, 26, 25, 24);
+        ctx.fillStyle = PAL.windowFrameLight;
+        ctx.fillRect(5, 26, 25, 1);
+        ctx.fillStyle = PAL.night;
+        ctx.fillRect(7, 28, 21, 20);
+        paintRoundBlob(ctx, 13, 31, 9, 9, PAL.moon);
+        ctx.fillStyle = PAL.night;
+        ctx.fillRect(19, 30, 5, 5);
+        ctx.fillStyle = PAL.starBright;
+        ctx.fillRect(10, 44, 1, 1);
+        ctx.fillRect(24, 33, 1, 1);
+        ctx.fillRect(23, 44, 1, 1);
+        ctx.fillStyle = PAL.windowFrame;
+        ctx.fillRect(17, 28, 1, 20);
+        ctx.fillRect(7, 38, 21, 1);
+        ctx.fillStyle = PAL.windowFrameLight;
+        ctx.fillRect(4, 49, 27, 2);
+        ctx.fillStyle = PAL.windowFrame;
+        ctx.fillRect(4, 51, 27, 1);
+    }
+
+    function drawPicture(ctx) {
+        ctx.fillStyle = PAL.windowFrame;
+        ctx.fillRect(70, 27, 23, 18);
+        ctx.fillStyle = PAL.windowFrameLight;
+        ctx.fillRect(70, 27, 23, 1);
+        ctx.fillStyle = PAL.cream;
+        ctx.fillRect(72, 29, 19, 14);
+        ctx.fillStyle = PAL.cushion;
+        paintRoundBlob(ctx, 77, 34, 8, 4, PAL.cushion);
+        ctx.fillStyle = PAL.cushionDark;
+        ctx.fillRect(75, 35, 2, 2);
+        ctx.fillRect(84, 34, 2, 1);
+        ctx.fillRect(84, 36, 2, 1);
+        ctx.fillStyle = PAL.night;
+        ctx.fillRect(80, 35, 1, 1);
+        ctx.fillStyle = PAL.goldLight;
+        ctx.fillRect(88, 31, 1, 1);
+        ctx.fillRect(90, 33, 1, 1);
+    }
+
+    function drawShelf(ctx) {
+        ctx.fillStyle = PAL.shelfDark;
+        ctx.fillRect(4, 26, 92, 2);
+        ctx.fillStyle = PAL.shelf;
+        ctx.fillRect(4, 24, 92, 2);
+        ctx.fillStyle = PAL.shelfLight;
+        ctx.fillRect(4, 24, 92, 1);
+        ctx.fillStyle = PAL.shelfDark;
+        ctx.fillRect(10, 26, 2, 3);
+        ctx.fillRect(88, 26, 2, 3);
+
+        /* toys and books resting on the shelf, just under the HUD */
+        ctx.fillStyle = PAL.clock;
+        ctx.fillRect(8, 20, 2, 4);
+        ctx.fillStyle = PAL.gold;
+        ctx.fillRect(10, 19, 2, 5);
+        ctx.fillStyle = PAL.cushion;
+        ctx.fillRect(12, 21, 2, 3);
+        ctx.fillStyle = PAL.metalLight;
+        ctx.fillRect(76, 20, 5, 4);
+        ctx.fillStyle = PAL.goldLight;
+        ctx.fillRect(77, 21, 1, 1);
+        ctx.fillRect(79, 22, 1, 1);
+        ctx.fillStyle = PAL.wood;
+        ctx.fillRect(86, 21, 3, 3);
+        ctx.fillStyle = PAL.woodLight;
+        ctx.fillRect(86, 21, 3, 1);
+    }
+
+    function drawRug(ctx) {
+        paintRoundBlob(ctx, 24, 84, 52, 11, PAL.rugDark);
+        paintRoundBlob(ctx, 26, 84, 48, 10, PAL.rug);
+        ctx.fillStyle = PAL.rugLight;
+        ctx.fillRect(34, 86, 32, 1);
+        ctx.fillRect(38, 90, 24, 1);
+    }
+
+    function drawCushion(ctx) {
+        paintRoundBlob(ctx, 30, 86, 42, 7, PAL.cushionDark);
+        paintRoundBlob(ctx, 32, 85, 38, 6, PAL.cushion);
+        ctx.fillStyle = PAL.cushionLight;
+        ctx.fillRect(36, 85, 15, 1);
+        ctx.fillStyle = PAL.cushionDark;
+        ctx.fillRect(32, 90, 2, 1);
+        ctx.fillRect(66, 90, 2, 1);
+    }
+
+    function drawCatEar(ctx, x, y, lean) {
+        ctx.fillStyle = PAL.fur;
+        ctx.fillRect(x + lean, y + 1, 4, 3);
+        ctx.fillRect(x + 1 + lean, y, 2, 1);
+        ctx.fillStyle = PAL.ear;
+        ctx.fillRect(x + 1 + lean, y + 1, 2, 1);
+    }
+
+    function drawCat(ctx) {
+        const awake = catState === STATE.OVER;
+        const breathe = (!awake && Math.sin(catClock * 1.7) > 0.15) ? 1 : 0;
+        const twitch = catTwitchT > 0 && Math.floor(catClock * 16) % 2 === 0 ? 1 : 0;
+
+        /* tail curled around the cushion */
+        paintRoundBlob(ctx, 58, 82, 10, 4, PAL.stripe);
+        ctx.fillStyle = PAL.furLight;
+        ctx.fillRect(66, 83, 2, 1);
+
+        /* body */
+        paintRoundBlob(ctx, 34, 75 - breathe, 32, 13, PAL.fur);
+        paintRoundBlob(ctx, 39, 81, 22, 6, PAL.furLight);
+        ctx.fillStyle = PAL.stripe;
+        ctx.fillRect(37, 78 - breathe, 1, 3);
+        ctx.fillRect(40, 78 - breathe, 1, 3);
+        ctx.fillRect(43, 78 - breathe, 1, 3);
+
+        /* head */
+        const hy = 68 - breathe;
+        paintRoundBlob(ctx, 38, hy, 24, 16, PAL.fur);
+        drawCatEar(ctx, 39, hy - 2, twitch);
+        drawCatEar(ctx, 57, hy - 2, -twitch);
+        ctx.fillStyle = PAL.stripe;
+        ctx.fillRect(47, hy + 1, 1, 2);
+        ctx.fillRect(50, hy + 1, 1, 2);
+        ctx.fillRect(53, hy + 1, 1, 2);
+
+        /* muzzle, nose, blush, whiskers */
+        paintRoundBlob(ctx, 45, hy + 8, 10, 6, PAL.cream);
+        ctx.fillStyle = PAL.nose;
+        ctx.fillRect(49, hy + 9, 2, 1);
+        ctx.fillStyle = PAL.eye;
+        ctx.fillRect(50, hy + 10, 1, 1);
+        ctx.fillStyle = PAL.blush;
+        ctx.fillRect(40, hy + 9, 1, 1);
+        ctx.fillRect(59, hy + 9, 1, 1);
+        ctx.fillStyle = PAL.cream;
+        ctx.fillRect(36, hy + 9, 2, 1);
+        ctx.fillRect(62, hy + 9, 2, 1);
+
+        /* eyes: sleepy curves, or wide open when the nap ends */
+        ctx.fillStyle = PAL.eye;
+        if (!awake) {
+            ctx.fillRect(42, hy + 6, 3, 1);
+            ctx.fillRect(43, hy + 7, 1, 1);
+            ctx.fillRect(55, hy + 6, 3, 1);
+            ctx.fillRect(55, hy + 7, 1, 1);
+        } else {
+            ctx.fillRect(42, hy + 5, 3, 2);
+            ctx.fillRect(55, hy + 5, 3, 2);
+            ctx.fillStyle = PAL.cream;
+            ctx.fillRect(43, hy + 5, 1, 1);
+            ctx.fillRect(56, hy + 5, 1, 1);
+            ctx.fillStyle = PAL.eye;
+            ctx.fillRect(49, hy + 11, 2, 2);
+        }
+    }
+
+    function drawPillow(ctx) {
+        const puffed = catPoufT > 0;
+        const half = puffed ? PLAYER.puffedHalf : PLAYER.pillowHalf;
+        const x = Math.round(pillow.x - half);
+        const w = half * 2;
+        const y = 58 + (catSquishT > 0 ? 1 : 0);
+        const cx = Math.round(pillow.x);
+
+        ctx.fillStyle = "rgba(20,16,40,0.30)";
+        ctx.fillRect(x + 3, y + 7, w - 6, 1);
+
+        paintRoundBlob(ctx, x, y, w, 7, PAL.pillowShade);
+        paintRoundBlob(ctx, x + 1, y, w - 2, 6, PAL.pillow);
+        ctx.fillStyle = PAL.pillowShade;
+        ctx.fillRect(x + 3, y + 6, w - 6, 1);
+
+        /* the paper crease: a soft fold down the middle, seam and stitches */
+        ctx.fillStyle = PAL.pillowLine;
+        ctx.fillRect(cx - 1, y + 1, 1, 2);
+        ctx.fillRect(cx - 2, y + 3, 1, 1);
+        ctx.fillRect(cx + 1, y + 3, 1, 1);
+        ctx.fillRect(x + 4, y + 3, w - 8, 1);
+        for (let i = 0; i < w - 6; i += 4) {
+            ctx.fillRect(x + 3 + i, y + 5, 1, 1);
+        }
+
+        if (puffed) {
+            ctx.fillStyle = PAL.pillow;
+            ctx.fillRect(x - 1, y + 1, 2, 3);
+            ctx.fillRect(x + w - 1, y + 1, 2, 3);
+            ctx.fillRect(cx, y - 1, 1, 1);
+            ctx.fillStyle = PAL.pillowLine;
+            ctx.fillRect(x - 1, y + 4, 1, 1);
+            ctx.fillRect(x + w, y + 4, 1, 1);
+        }
+    }
+
+    function drawItems(ctx) {
+        for (const item of catItems) {
+            ctx.fillStyle = "rgba(255,248,230,0.16)";
+            ctx.fillRect(item.x, Math.round(item.y) - 8, 1, 3);
+            paintPixels(ctx, item.type.map, item.type.colors,
+                Math.round(item.x) - 3, Math.round(item.y) - 3, false, 1);
+        }
+    }
+
+    function drawZzz(ctx) {
+        for (const z of catZzz) {
+            const frac = z.t / z.life;
+            ctx.save();
+            ctx.globalAlpha = Math.max(0, 1 - frac);
+            paintPixelText(ctx, "Z", Math.round(z.x), Math.round(z.y), PAL.zzz, null, 1);
+            ctx.restore();
+        }
+    }
+
+    function drawEffects(ctx) {
+        for (const e of catEffects) {
+            const frac = e.t / e.life;
+            if (e.kind === "spark") {
+                ctx.fillStyle = e.color;
+                ctx.fillRect(Math.round(e.x), Math.round(e.y), 1, 1);
+            } else if (e.kind === "text") {
+                ctx.save();
+                ctx.globalAlpha = Math.max(0, 1 - frac);
+                paintPixelText(ctx, "+1", Math.round(e.x), Math.round(e.y), PAL.starBright, PAL.plate, 1);
+                ctx.restore();
+            } else {
+                const radius = Math.round(2 + (e.maxR - 2) * frac);
+                ctx.fillStyle = "rgba(255,248,230," + (0.55 * (1 - frac)).toFixed(2) + ")";
+                ctx.fillRect(Math.round(e.x - radius), Math.round(e.y), radius * 2, 1);
+            }
+        }
+        if (catTwitchT > 0) {
+            const bob = Math.floor(catClock * 8) % 2;
+            paintPixels(ctx, CAT_BANG_MAP, CAT_BANG_COLORS, 63, 63 - bob, false, 1);
+        }
+    }
+
+    function drawHudPlate(ctx, y, h, alpha) {
+        paintRoundBlob(ctx, 2, y, 96, h, "rgba(34,31,61," + (alpha || 0.84) + ")");
+    }
+
+    function drawBellPip(ctx, x, y, filled) {
+        ctx.fillStyle = filled ? PAL.gold : "rgba(255,248,230,0.20)";
+        ctx.fillRect(x + 2, y, 1, 1);
+        ctx.fillRect(x + 1, y + 1, 3, 1);
+        ctx.fillRect(x + 1, y + 2, 3, 1);
+        ctx.fillRect(x, y + 3, 5, 1);
+        ctx.fillRect(x + 2, y + 4, 1, 1);
+    }
+
+    function paintHud(ctx) {
+        drawHudPlate(ctx, 2, 17);
+
+        paintPixelText(ctx, "TIME " + Math.max(0, Math.ceil(SETTINGS.roundTimeLimitSeconds - catRoundT)),
+            26, 5, PAL.text, null, 1);
+        paintPixelText(ctx, "CATCH " + catScore, 77, 5, PAL.textGold, null, 1);
+
+        for (let i = 0; i < WORLD.maxClangs; i++) {
+            drawBellPip(ctx, 6 + i * 7, 11, i < WORLD.maxClangs - catClangs);
+        }
+
+        paintPixelText(ctx, "POUF", 47, 12, catPoufT > 0 ? PAL.textGold : PAL.text, null, 1);
+        const ready = catPoufReadyT <= 0 ? 1 : 1 - catPoufReadyT / PLAYER.poufCooldownSeconds;
+        for (let i = 0; i < 5; i++) {
+            const filled = (i + 0.5) / 5 <= ready;
+            ctx.fillStyle = catPoufT > 0 ? PAL.textGold
+                : (filled ? PAL.gold : "rgba(255,248,230,0.20)");
+            ctx.fillRect(58 + i * 5, 13, 3, 3);
+        }
+    }
+
+    function paintTitle(ctx) {
+        paintRoundBlob(ctx, 5, 16, 90, 52, "rgba(34,31,61,0.92)");
+        paintPixelText(ctx, "CATNAPCATCH", 50, 25, PAL.textGold, PAL.plate, 2);
+        paintPixelText(ctx, "CATCH THE CLATTER", 50, 41, PAL.text, null, 1);
+        paintPixelText(ctx, "EACH CATCH +1", 50, 48, PAL.textPink, null, 1);
+        paintPixelText(ctx, "3 CLANGS END THE NAP", 50, 55, PAL.text, null, 1);
+        paintPixelText(ctx, "POUF MAKES IT BIGGER", 50, 62, PAL.textPink, null, 1);
+
+        if (Math.floor(catClock / 0.55) % 2 === 0) {
+            drawHudPlate(ctx, 2, 12, 0.88);
+            paintPixelText(ctx, "PRESS ANY KEY OR TAP", 50, 5, PAL.text, PAL.plate, 1);
+        }
+    }
+
+    function paintOver(ctx) {
+        paintRoundBlob(ctx, 5, 16, 90, 54, "rgba(34,31,61,0.93)");
+        paintPixelText(ctx, catEndReason === "clang" ? "CLATTER TOO LOUD" : "THE NAP HELD",
+            50, 26, PAL.textGold, PAL.plate, 1);
+        paintPixelText(ctx, String(catScore), 50, 34, PAL.textGold, PAL.plate, 3);
+        paintPixelText(ctx, "CATCHES", 50, 52, PAL.text, null, 1);
+        paintPixelText(ctx, "BEST " + catBest, 50, 61, PAL.text, null, 1);
+
+        if (Math.floor(catClock / 0.55) % 2 === 0) {
+            drawHudPlate(ctx, 2, 12, 0.88);
+            paintPixelText(ctx, "PRESS ANY KEY OR TAP", 50, 5, PAL.text, PAL.plate, 1);
+        }
+    }
+
+    function paint(ctx) {
+        drawRoom(ctx);
+        drawWindow(ctx);
+        drawPicture(ctx);
+        drawShelf(ctx);
+        drawRug(ctx);
+        drawCushion(ctx);
+        drawCat(ctx);
+        drawPillow(ctx);
+        drawItems(ctx);
+        drawZzz(ctx);
+        drawEffects(ctx);
+
+        if (catState === STATE.TITLE) paintTitle(ctx);
+        else if (catState === STATE.PLAY) paintHud(ctx);
+        else paintOver(ctx);
+    }
+
+    /* ---------- CATNAPCATCH shelf card preview (private) ---------- */
+
+    function paintCatnapCatchPreview(ctx) {
+        /* night wall with soft stripes and stars */
+        ctx.fillStyle = PAL.wall;
+        ctx.fillRect(0, 0, 200, 96);
+        ctx.fillStyle = PAL.wallLight;
+        for (let x = 0; x < 200; x += 20) ctx.fillRect(x, 0, 8, 86);
+        ctx.fillStyle = PAL.wallDark;
+        for (let x = 12; x < 200; x += 20) ctx.fillRect(x, 0, 2, 86);
+        ctx.fillStyle = PAL.star;
+        for (let i = 0; i < 14; i++) {
+            ctx.fillRect(6 + (i * 47) % 188, 8 + (i * 31) % 62, 2, 2);
+        }
+
+        /* warm floorboards */
+        ctx.fillStyle = PAL.floor;
+        ctx.fillRect(0, 84, 200, 12);
+        ctx.fillStyle = PAL.floorLight;
+        for (let x = 0; x < 200; x += 24) ctx.fillRect(x, 84, 12, 2);
+        ctx.fillStyle = PAL.floorDark;
+        ctx.fillRect(0, 84, 200, 2);
+        for (let y = 90; y < 96; y += 5) {
+            for (let x = 0; x < 200; x += 24) {
+                ctx.fillRect(x + (((y / 5) | 0) % 2) * 12, y, 2, 3);
+            }
+        }
+
+        /* round window and moon */
+        ctx.fillStyle = PAL.windowFrame;
+        ctx.fillRect(8, 10, 50, 44);
+        ctx.fillStyle = PAL.windowFrameLight;
+        ctx.fillRect(8, 10, 50, 2);
+        ctx.fillStyle = PAL.night;
+        ctx.fillRect(12, 14, 42, 36);
+        paintRoundBlob(ctx, 24, 20, 18, 18, PAL.moon);
+        ctx.fillStyle = PAL.night;
+        ctx.fillRect(36, 19, 9, 9);
+        ctx.fillStyle = PAL.starBright;
+        ctx.fillRect(17, 42, 2, 2);
+        ctx.fillRect(46, 24, 2, 2);
+        ctx.fillRect(44, 44, 2, 2);
+        ctx.fillStyle = PAL.windowFrame;
+        ctx.fillRect(32, 14, 2, 36);
+        ctx.fillRect(12, 31, 42, 2);
+        ctx.fillStyle = PAL.windowFrameLight;
+        ctx.fillRect(6, 54, 54, 3);
+        ctx.fillStyle = PAL.windowFrame;
+        ctx.fillRect(6, 57, 54, 2);
+
+        /* shelf with a few tiny props */
+        ctx.fillStyle = PAL.shelfDark;
+        ctx.fillRect(58, 27, 138, 4);
+        ctx.fillStyle = PAL.shelf;
+        ctx.fillRect(58, 24, 138, 3);
+        ctx.fillStyle = PAL.shelfLight;
+        ctx.fillRect(58, 24, 138, 1);
+        ctx.fillStyle = PAL.clock;
+        ctx.fillRect(120, 15, 4, 9);
+        ctx.fillStyle = PAL.gold;
+        ctx.fillRect(124, 13, 4, 11);
+        ctx.fillStyle = PAL.cushion;
+        ctx.fillRect(128, 18, 4, 6);
+        ctx.fillStyle = PAL.metalLight;
+        ctx.fillRect(168, 14, 8, 10);
+        ctx.fillStyle = PAL.goldLight;
+        ctx.fillRect(170, 17, 2, 2);
+        ctx.fillRect(173, 20, 2, 2);
+        ctx.fillStyle = PAL.wood;
+        ctx.fillRect(186, 18, 5, 6);
+        ctx.fillStyle = PAL.woodLight;
+        ctx.fillRect(186, 18, 5, 2);
+
+        /* falling noisemakers, each with a little motion streak */
+        ctx.fillStyle = "rgba(255,248,230,0.22)";
+        ctx.fillRect(63, 26, 2, 6);
+        ctx.fillRect(143, 26, 2, 6);
+        ctx.fillRect(187, 30, 2, 6);
+        paintPixels(ctx, CAT_CLOCK_MAP, CAT_CLOCK_COLORS, 56, 34, false, 2);
+        paintPixels(ctx, CAT_BELL_MAP, CAT_BELL_COLORS, 136, 34, false, 2);
+        paintPixels(ctx, CAT_POT_MAP, CAT_POT_COLORS, 180, 38, false, 2);
+
+        /* rug, cushion and the sleeping cat */
+        paintRoundBlob(ctx, 74, 86, 100, 10, PAL.rugDark);
+        paintRoundBlob(ctx, 77, 85, 94, 9, PAL.rug);
+        ctx.fillStyle = PAL.rugLight;
+        ctx.fillRect(92, 88, 60, 2);
+        ctx.fillRect(104, 92, 36, 1);
+
+        paintRoundBlob(ctx, 82, 84, 82, 9, PAL.cushionDark);
+        paintRoundBlob(ctx, 85, 83, 76, 8, PAL.cushion);
+        ctx.fillStyle = PAL.cushionLight;
+        ctx.fillRect(94, 83, 30, 2);
+
+        /* body, head, ears */
+        paintRoundBlob(ctx, 88, 68, 68, 20, PAL.fur);
+        paintRoundBlob(ctx, 98, 80, 46, 10, PAL.furLight);
+        ctx.fillStyle = PAL.stripe;
+        ctx.fillRect(94, 71, 2, 5);
+        ctx.fillRect(100, 71, 2, 5);
+        ctx.fillRect(106, 71, 2, 5);
+
+        ctx.fillStyle = PAL.fur;
+        ctx.fillRect(108, 50, 8, 8);
+        ctx.fillRect(132, 50, 8, 8);
+        ctx.fillStyle = PAL.ear;
+        ctx.fillRect(110, 52, 4, 4);
+        ctx.fillRect(134, 52, 4, 4);
+        paintRoundBlob(ctx, 106, 54, 36, 26, PAL.fur);
+        ctx.fillStyle = PAL.stripe;
+        ctx.fillRect(120, 57, 2, 5);
+        ctx.fillRect(124, 57, 2, 5);
+        ctx.fillRect(128, 57, 2, 5);
+
+        /* sleepy face */
+        paintRoundBlob(ctx, 117, 67, 14, 9, PAL.cream);
+        ctx.fillStyle = PAL.eye;
+        ctx.fillRect(113, 63, 6, 2);
+        ctx.fillRect(114, 65, 2, 2);
+        ctx.fillRect(128, 63, 6, 2);
+        ctx.fillRect(128, 65, 2, 2);
+        ctx.fillStyle = PAL.nose;
+        ctx.fillRect(122, 68, 4, 2);
+        ctx.fillStyle = PAL.eye;
+        ctx.fillRect(123, 70, 2, 2);
+        ctx.fillStyle = PAL.blush;
+        ctx.fillRect(110, 67, 3, 2);
+        ctx.fillRect(135, 67, 3, 2);
+        ctx.fillStyle = PAL.cream;
+        ctx.fillRect(102, 68, 5, 2);
+        ctx.fillRect(141, 68, 5, 2);
+
+        /* the paper pillow, held between the clatter and the nap */
+        ctx.fillStyle = "rgba(20,16,40,0.30)";
+        ctx.fillRect(80, 54, 40, 2);
+        paintRoundBlob(ctx, 76, 42, 48, 10, PAL.pillowShade);
+        paintRoundBlob(ctx, 78, 42, 44, 8, PAL.pillow);
+        ctx.fillStyle = PAL.pillowShade;
+        ctx.fillRect(82, 50, 36, 1);
+        ctx.fillStyle = PAL.pillowLine;
+        ctx.fillRect(99, 43, 2, 3);
+        ctx.fillRect(82, 46, 36, 1);
+        for (let i = 0; i < 40; i += 8) ctx.fillRect(80 + i, 48, 2, 1);
+        ctx.fillStyle = PAL.pillow;
+        ctx.fillRect(74, 45, 3, 3);
+        ctx.fillRect(123, 45, 3, 3);
+
+        /* Zzz drifting up from the head */
+        ctx.fillStyle = PAL.zzz;
+        ctx.fillRect(150, 42, 4, 2);
+        ctx.fillRect(152, 45, 2, 2);
+        ctx.fillRect(150, 47, 4, 2);
+        ctx.fillRect(157, 34, 3, 2);
+        ctx.fillRect(158, 37, 2, 2);
+        ctx.fillRect(157, 39, 3, 2);
+
+        /* sparkles and a tiny caught glimmer */
+        ctx.fillStyle = PAL.starBright;
+        ctx.fillRect(70, 36, 2, 2);
+        ctx.fillRect(128, 38, 2, 2);
+        ctx.fillRect(90, 40, 1, 1);
+        ctx.fillRect(112, 38, 1, 1);
+        ctx.fillStyle = PAL.goldLight;
+        ctx.fillRect(66, 82, 2, 2);
+        ctx.fillRect(160, 84, 2, 2);
+    }
+
+    /* ---------- CATNAPCATCH chrome sync ---------- */
+
+    let catShownScore = null;
+    let catShownBest = null;
+    let catShownMsg = null;
+
+    function syncChrome(force) {
+        const shownBest = Math.max(catBest, catScore);
+        if (force || catShownScore !== catScore) {
+            catShownScore = catScore;
+            scoreEl.textContent = String(catScore);
+        }
+        if (force || catShownBest !== shownBest) {
+            catShownBest = shownBest;
+            bestEl.textContent = String(shownBest);
+        }
+
+        let msg;
+        if (catState === STATE.TITLE) {
+            msg = "slide the paper pillow with A and D — catch every clatter for 45 quiet seconds; POUF widens it";
+        } else if (catState === STATE.OVER) {
+            const noun = catScore === 1 ? "catch" : "catches";
+            msg = catEndReason === "clang"
+                ? "mochi woke up — " + catScore + " " + noun + "! press R to try again"
+                : "the nap held — " + catScore + " " + noun + "! press R to go again";
+        } else if (catPoufT > 0) {
+            msg = "pouf! the pillow is extra wide for a moment";
+        } else if (catTwitchT > 0) {
+            msg = "clang! " + (WORLD.maxClangs - catClangs) + " more and mochi wakes";
+        } else if (catPoufReadyT > 0) {
+            msg = "keep the night quiet — catch the clatter!";
+        } else {
+            msg = "keep the night quiet — SPACE puffs the pillow wider";
+        }
+        if (force || catShownMsg !== msg) {
+            catShownMsg = msg;
+            msgEl.textContent = msg;
+        }
+    }
+
+    /* ---------- CATNAPCATCH module contract ---------- */
+
+    function start() {
+        catBest = readBest(SETTINGS.gameName);
+        catScore = 0;
+        catClangs = 0;
+        catRoundT = 0;
+        catStateT = 0;
+        catClock = 0;
+        catPoufT = 0;
+        catPoufReadyT = 0;
+        catSpawnT = WORLD.firstSpawnSeconds;
+        catTwitchT = 0;
+        catSquishT = 0;
+        catEndReason = "time";
+        catItems = [];
+        catEffects = [];
+        catZzz = [];
+        catNextZ = 0.8;
+        pillow.x = 50;
+        catState = STATE.TITLE;
+        clearHeld();
+        syncChrome(true);
+    }
+
+    function stop() { clearHeld(); }
+
+    function restart() {
+        clearHeld();
+        startRun();
+    }
+
+    function onDir(dir, pressed) {
+        if (!(dir in held)) return;
+        held[dir] = pressed;
+        if (pressed && (catState === STATE.TITLE || catState === STATE.OVER) &&
+            catStateT > 0.35) {
+            startRun();
+        }
+    }
+
+    function onAction() {
+        if (catState === STATE.PLAY) tryPouf();
+        else if ((catState === STATE.TITLE || catState === STATE.OVER) && catStateT > 0.35) {
+            startRun();
+        }
+    }
+
+    function onStageTap() { onAction(); }
+
+    function onAnyKey() {
+        if ((catState === STATE.TITLE || catState === STATE.OVER) && catStateT > 0.35) {
+            startRun();
+        }
+    }
+
+    GAMES.push({
+        id: SETTINGS.gameName,
+        versionNumber: SETTINGS.versionNumber,
+        name: "Catnap Catch",
+        tagline: "keep the night quiet for mochi",
+        concept: "Mochi the kitten is asleep on a floor cushion. Slide the paper pillow to catch the clattering noisemakers before they land — three clangs wake the nap. POUF widens the pillow for a moment.",
+        actionLabel: "POUF",
+        hint: "desktop: A and D slide the pillow · SPACE or tap stage to POUF wider · R restart · ESC shelf",
+        previewPaint: paintCatnapCatchPreview,
         start, stop, restart,
         update, paint, onDir, onAction, onStageTap, onAnyKey
     });
