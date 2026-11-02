@@ -67,6 +67,130 @@ Appendices A1-A9 (material moved out of the README in build 012) start under '##
 
 <!-- NEW BUILD ENTRIES: paste the newest entry on the line below this comment, above the previous newest. Never edit older entries. -->
 
+## 015-20261102 — 2026-11-02 (Round 7 fixes: HUGPARADE rails and hug scoring)
+
+Built from prompt: P-15 (the owner's request to correct HUGPARADE before starting
+CATNAPCATCH, pasted verbatim, typos included; private archive file
+`prompts/P-15_hugparade-fixes.txt`)  
+Tool and model: **Qwen3.8-Flash (Qoder CLI)**  
+Games in the one file: 7 (PANDASNACK 007-20261101 **frozen**, BOOPEEK 006-20261101
+**frozen**, DUCKLINE 005-20261101 **frozen**, SPROUTUP 007-20261101 **frozen**,
+SLIMEHOP 010-20261101 **frozen**, SNAILRACE 011-20261101 **frozen**, HUGPARADE
+015-20261102; file build **015-20261102**)
+
+### Changed — HUGPARADE movement now runs on cell rails (deploy/index.html, PART 5-G)
+
+- The owner reported that Momo could stick between maze walls and that movement was hard
+  to steer. The cause was the continuous walk checked against wall rectangles with the
+  player's circle: near a junction the sprite could be stopped by a wall it was not
+  actually entering, and it never snapped to a corridor centre.
+- Movement is now cell centre to cell centre. One press always completes one whole cell,
+  even if the key is released early; a perpendicular press made mid-step waits and turns
+  at the next centre; a new press during a step is remembered, not dropped. A step is
+  blocked only when the hedge between the two cells is closed. There is no diagonal
+  travel and no wedging, and the old circle-versus-wall test is removed.
+- A maze redraw that comes due while Momo is between centres waits until the step lands,
+  so a shift can never move the player mid-step or outside the hedges (the build-014
+  post-redraw wall clearing is kept as a second guard).
+
+### Changed — HUGPARADE objective and scoring (the tracked quantity is hug points)
+
+- The score is now **hug points**: each hug scores **1 + one point for every heart held**,
+  so 1 with no hearts, 2 with one, 3 with two and 4 with all three (the HUD shows this as
+  `X1`–`X4` beside the time). Hearts no longer add points when collected; they are
+  multipliers for the next hug, and they reset when the fresh layout appears after a hug.
+  The 45 s round, the three hearts per layout, PEEK (2 s on a 6 s cooldown) and the 10 s
+  maze shift are unchanged.
+- The title plate now states the objective before play: `HUG BIBI +1`,
+  `EACH HEART +1X`, `MAZE SHIFTS 10S`, `PEEK SEES AHEAD`, under the HUGPARADE name on
+  the 100×100 canvas. The shell line under the canvas repeats the rule on the title and
+  reports the bonus when a hug lands.
+- The game-over plate now reads `HUG POINTS`, and the shell message reports "N hug
+  points" instead of "N hugs", so the unit on screen matches what is counted.
+- Best scores from build 014 used a 100+ scale and cannot be compared with the 1–4 scale.
+  The first 015 launch writes `KANTMICROGAMES.HUGPARADE.best.epoch` = `015` and clears
+  the old best once; later launches keep the 015 best. The save key itself is unchanged.
+- The `hugCount` variable left over from build 014 is removed.
+
+### Note — owner observation (recorded in MODELS.md as a dated entry)
+
+- The owner's note: the first HUGPARADE build is amazing work for Qwen and Qoder, but it
+  shipped logic problems (movement and unclear scoring) and needed correction. The full
+  note, with the owner's words verbatim, is in `MODELS.md` above its entry marker.
+
+### Changed — build identity and records
+
+- `APP.fileVersion` is `015-20261102`; the header "Current" line names the Round 7 fixes
+  and seven games, "Build log" names this build, and the numbering note records
+  HUGPARADE as new at 014 and corrected at 015. The footer follows `APP.fileVersion`.
+- README: "Current build" is `015-20261102`, the HUGPARADE pitch is rewritten for rails
+  and the heart multiplier, and Qwen3.8-Flash's builds cell gains 015 with a note that
+  015 corrected HUGPARADE's movement and scoring. Nothing else changed.
+- CONTROLS: "Applies to" is build `015-20261102 · seven games`; the HUGPARADE row and
+  the movement paragraph describe whole-cell rail steps, queued turns, hedge-only
+  blocking and the 1-plus-hearts hug, replacing the continuous-walk sentence.
+- MODELS: one new dated owner-observation entry above the marker, and one new Usage
+  ledger row for 015 with the totals and bars recomputed from the final Build record.
+- plans/micro-games-v2.md: one ledger row, one tool-log row, and the HUGPARADE backlog
+  row now records rails, hug points and the title plate. CATNAPCATCH stays `backlog` for
+  the next round.
+- prompts/P-15_hugparade-fixes.txt saved with the owner's request verbatim; verification
+  in `tests/build-015-hugparade-fixes.md`, with ten screenshots under
+  `tests/screenshots/build-015/`; pre-edit snapshot and hashes in
+  `plans/archive/pre-015/`.
+
+### Verification and limits
+
+- **Frozen six:** each IIFE hashed as the exact `(function () {` … `})();` block with no
+  trailing newline. PANDASNACK `f6dd1614…`, BOOPEEK `f3212979…`, DUCKLINE `6a62f23a…`,
+  SPROUTUP `adff7441…`, SLIMEHOP `a92efde4…`, SNAILRACE `457fa4b4…` — all equal to
+  build 014, with unchanged character counts. HUGPARADE 015 is `151deb6e…ddd12c65`
+  (37,311 characters, up from 34,568 in build 014). Full hashes in the test report.
+- **Code:** `node --check` on the extracted inline script clean; seven module IIFEs
+  found; no stale movement or scoring identifiers remain.
+- **Movement:** one press moved exactly one cell (0,6) → (0,5) and ended at a centre; a
+  press into a hedge changed nothing; a release mid-step still finished the step; a
+  perpendicular press during a step turned at the next junction (up then right reached
+  (1,5)); a redraw forced mid-step left the walls unchanged until the step landed.
+- **Scoring:** a hug with no hearts scored 1; with one heart 2; with three hearts 4
+  (1 → 5 in one run); hearts reset after the hug; a heart pickup alone left the score
+  unchanged; the round ended with the score and the message "2 hug points"; the best was
+  saved as 2, the epoch key written as `015`, and a build-014 best of 132 was migrated
+  to 0 exactly once.
+- **Render:** headless Chrome 156 at 1280×800 shows seven cards plus COMING SOON, every
+  preview at ratio 2.083, stage 600×600, no page scroll and zero app errors. At 390×844
+  DPR 2 with touch, previews are 324.0×155.5 (ratio 2.083), the stage is 300×300, real
+  touch opened the card, started the run, moved Momo one cell and used PEEK.
+- **Limits:** headless Chrome only; no physical phone, Safari, Firefox or iOS/Android
+  run. The Cloudflare site serves build 014 until the owner deploys build 015.
+
+### Build record (owner request: duration + tokens/credits)
+
+- Duration: **about 15 min** wall-clock at the time this entry was written
+  (2026-11-02, 21:00 → 21:15 WIB, from the prompt paste to the records). The final
+  figure is in the addendum below.
+- Tokens: **not exposed by the tool.** Qoder reports a `credits` value per request, so
+  the build records **6.9288 credits used across 121 billable requests** (21:00-21:15
+  WIB), summed from the per-request credits in the session transcript, deduplicated by
+  `request_id`. Credits are not tokens, and no token number is invented.
+
+### Documentation review/edit attempts (standing rule)
+
+- 2026-11-02 — Qwen3.8-Flash (Qoder CLI), P-15 build: completed. README and CONTROLS
+  edits are limited to the lines listed above; CHANGELOG received this new entry only;
+  MODELS gained one observation entry, one ledger row and recomputed totals; the plan
+  gained two rows and one updated backlog row; LICENSE is byte-identical; no section was
+  deleted, shortened or restructured. The six frozen IIFEs and HUGPARADE were hashed
+  after the code edits. Results in `tests/build-015-hugparade-fixes.md`.
+
+### Addendum — 2026-11-02 (final figures after the records were saved)
+
+The lines above were written at 21:15 WIB with the telemetry then available. The session's
+final figures, taken at 21:16 WIB just before this addendum was written, are **7.8667
+credits across 147 billable requests** (2026-11-02, 21:00-21:16 WIB), for a final duration
+of **about 17 minutes**. The Usage ledger in `MODELS.md` uses these figures. Credits are
+not tokens.
+
 ## 014-20261102 — 2026-11-02 (Round 7: HUGPARADE)
 
 Built from prompt: P-14 (the owner's Round 7 request for HUGPARADE, pasted verbatim,

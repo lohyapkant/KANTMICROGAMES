@@ -6,11 +6,12 @@
   Repository : https://github.com/lohyapkant/KANTMICROGAMES
   Play online: https://kantmicrogames.lohyapkant.workers.dev/
   Hosting    : Cloudflare Workers (https://workers.cloudflare.com/)
-  Current    : build 014-20261102 — Round 7: HUGPARADE; seven games
+  Current    : build 015-20261102 — Round 7 fixes: HUGPARADE rail
+               movement and hug scoring; seven games
                (PANDASNACK, BOOPEEK, DUCKLINE, SPROUTUP, SLIMEHOP, SNAILRACE, HUGPARADE)
   Names      : project and on-screen brand KANTMICROGAMES ·
                save keys and the console tag use the KANTMICROGAMES prefix
-  Build log  : build 014-20261102, Qwen3.8-Flash (Qoder CLI) — the full
+  Build log  : build 015-20261102, Qwen3.8-Flash (Qoder CLI) — the full
                record of every build is in CHANGELOG.md
   ================================================================
 
@@ -782,7 +783,7 @@
    005-20261101; BOOPEEK is frozen at 006-20261101; PANDASNACK content
    was updated in 007-20261101 for in-stage score HUD and refrozen;
    SLIMEHOP is new at 010-20261101; SNAILRACE is new at 011-20261101;
-   HUGPARADE is new at 014-20261102).
+   HUGPARADE is new at 014-20261102 and corrected at 015-20261102).
 
    Every finished build's full record — model and tool, effort,
    duration, and tokens or credits — lives in CHANGELOG.md, under
@@ -799,7 +800,7 @@
 
 const APP = {
     name: "KANTMICROGAMES",
-    fileVersion: "014-20261102",       // build number of THIS one-file app
+    fileVersion: "015-20261102",       // build number of THIS one-file app
     savePrefix: "KANTMICROGAMES."      // best scores live at prefix + GAMEID + ".best"
 };
 
@@ -1658,8 +1659,10 @@ applyUi();
    * SNAILRACE is FROZEN at content 011-20261101 — Nibbles races two garden
      rivals across a picnic blanket to the strawberry; frozen when the
      HUGPARADE round shipped.
-   * HUGPARADE is live (content 014-20261102): Momo hunts for Bibi in a
-     hedge maze that redraws itself; PEEK shows the next hedges.
+   * HUGPARADE is live (content 015-20261102): Momo hunts for Bibi in a
+     hedge maze that redraws itself; PEEK shows the next hedges. Build
+     015 moved Momo onto the cell rails and made each hug worth 1 plus
+     one more per heart held.
    ================================================================== */
 
 (function () {
@@ -6208,7 +6211,7 @@ applyUi();
 
 
 /* ==================================================================
-   PART 5-G — HUGPARADE module (content 014-20261102)
+   PART 5-G — HUGPARADE module (content 015-20261102)
    ------------------------------------------------------------------
    MODULE BOUNDARY — READ BEFORE EDITING
    * Everything inside this IIFE is PRIVATE to HUGPARADE: SETTINGS,
@@ -6235,16 +6238,14 @@ applyUi();
 
     const SETTINGS = {
         gameName: "HUGPARADE",
-        versionNumber: "014-20261102",
+        versionNumber: "015-20261102",
         stageSize: 100,
         saveKey: "KANTMICROGAMES.HUGPARADE.best",
+        scoreEpoch: "015",
 
         playerSettings: {
             moveSpeed: 30,
-            radius: 2.6,
-            heartPoints: 10,
-            hugPoints: 100,
-            timeBonusPerSecond: 2,
+            hugBasePoints: 1,
             peekSeconds: 2.0,
             peekCooldownSeconds: 6.0,
             hugSeconds: 1.5
@@ -6298,7 +6299,6 @@ applyUi();
     let hugRoundT = 0;
     let hugScore = 0;
     let hugBest = 0;
-    let hugCount = 0;
     let hugRedrawT = WORLD.redrawSeconds;
     let hugPeekT = 0;
     let hugPeekReadyT = 0;
@@ -6306,7 +6306,11 @@ applyUi();
     let hugLastBonus = 0;
     let hugAccumulator = 0;
 
-    const momo = { x: 0, y: 0, moving: false, walk: 0, blinkTimer: 2.2, blinkLeft: 0 };
+    const momo = {
+        x: 0, y: 0, moving: false, walk: 0, blinkTimer: 2.2, blinkLeft: 0,
+        cellC: 0, cellR: WORLD.rows - 1, targetC: null, targetR: null,
+        wantDir: null, lastDir: null
+    };
     const bibi = { x: 0, y: 0, cellC: 0, cellR: 0, blinkTimer: 3.1, blinkLeft: 0 };
 
     let hugLayout = null;        // the hedges on screen now
@@ -6390,19 +6394,26 @@ applyUi();
         };
     }
 
-    function circleHitsRect(x, y, radius, rect) {
-        const nx = clamp(x, rect.x, rect.x + rect.w);
-        const ny = clamp(y, rect.y, rect.y + rect.h);
-        const dx = x - nx;
-        const dy = y - ny;
-        return dx * dx + dy * dy < radius * radius;
-    }
-
-    function hitsWalls(x, y, radius) {
+    function wallCovers(x, y) {
         for (const wall of hugLayout.walls) {
-            if (circleHitsRect(x, y, radius, wall)) return true;
+            if (x >= wall.x && x < wall.x + wall.w && y >= wall.y && y < wall.y + wall.h) return true;
         }
         return false;
+    }
+
+    /* Rail rule: a step is legal only through an open cell boundary, so
+       Momo always travels centre-to-centre and can never clip a hedge. */
+    function canStep(c, r, dir) {
+        const dc = dir === "right" ? 1 : (dir === "left" ? -1 : 0);
+        const dr = dir === "down" ? 1 : (dir === "up" ? -1 : 0);
+        const nc = c + dc;
+        const nr = r + dr;
+        if (nc < 0 || nr < 0 || nc >= WORLD.cols || nr >= WORLD.rows) return false;
+        const edgeX = WORLD.originX + (dc > 0 ? c + 1 : c) * WORLD.cell;
+        const edgeY = WORLD.originY + (dr > 0 ? r + 1 : r) * WORLD.cell;
+        const px = dc === 0 ? cellCenterX(c) : edgeX;
+        const py = dr === 0 ? cellCenterY(r) : edgeY;
+        return !wallCovers(px, py);
     }
 
     /* ---------- HUGPARADE maze generation (private) ---------- */
@@ -6523,32 +6534,21 @@ applyUi();
         });
     }
 
-    /* A layout is the maze plus its friend spot and hearts. The player's
-       circle is protected: any interior wall that would spring up on top
-       of Momo is left open, so a redraw can never trap her in a hedge. */
+    /* A layout is the maze plus its friend spot and hearts. Momo sits at a
+       cell centre on the rail, so a redraw cannot put a hedge through her,
+       and a perfect maze always leaves the current cell at least one exit. */
     function makeLayout(px, py) {
         const grid = generateHedgeGrid();
-        let walls = hedgeWallsFromGrid(grid);
+        const walls = hedgeWallsFromGrid(grid);
         const playerCell = cellOf(px, py);
         const friendCell = pickFriendCell(playerCell);
         const hearts = pickHeartCells(friendCell, playerCell);
-        walls = walls.filter(function (wall) {
-            if (wall.outer) return true;
-            return !circleHitsRect(px, py, PLAYER.radius + 0.8, wall);
-        });
         return {
             walls: walls,
             friendC: friendCell[0],
             friendR: friendCell[1],
             hearts: hearts
         };
-    }
-
-    function openWallsAround(layout, x, y) {
-        layout.walls = layout.walls.filter(function (wall) {
-            if (wall.outer) return true;
-            return !circleHitsRect(x, y, PLAYER.radius + 0.8, wall);
-        });
     }
 
     /* ---------- HUGPARADE effects (private) ---------- */
@@ -6631,10 +6631,16 @@ applyUi();
     }
 
     function resetBuns() {
-        momo.x = cellCenterX(0);
-        momo.y = cellCenterY(WORLD.rows - 1);
+        momo.cellC = 0;
+        momo.cellR = WORLD.rows - 1;
+        momo.x = cellCenterX(momo.cellC);
+        momo.y = cellCenterY(momo.cellR);
         momo.moving = false;
         momo.walk = 0;
+        momo.targetC = null;
+        momo.targetR = null;
+        momo.wantDir = null;
+        momo.lastDir = null;
         momo.blinkTimer = 2.2;
         momo.blinkLeft = 0;
         bibi.blinkTimer = 3.1;
@@ -6643,7 +6649,6 @@ applyUi();
 
     function startRun() {
         hugScore = 0;
-        hugCount = 0;
         hugRoundT = 0;
         hugStateT = 0;
         hugPeekT = 0;
@@ -6664,7 +6669,6 @@ applyUi();
 
     function shiftHedges() {
         hugLayout = hugNextLayout;
-        openWallsAround(hugLayout, momo.x, momo.y);
         placeBibi(hugLayout);
         hugNextLayout = makeLayout(momo.x, momo.y);
         hugRedrawT = WORLD.redrawSeconds;
@@ -6675,10 +6679,12 @@ applyUi();
     }
 
     function beginHug() {
-        const remaining = Math.max(0, SETTINGS.roundTimeLimitSeconds - hugRoundT);
-        hugLastBonus = PLAYER.hugPoints + PLAYER.timeBonusPerSecond * Math.ceil(remaining);
+        let heartsHeld = 0;
+        for (const heart of hugLayout.hearts) {
+            if (heart.got) heartsHeld++;
+        }
+        hugLastBonus = PLAYER.hugBasePoints + heartsHeld;
         hugScore += hugLastBonus;
-        hugCount++;
         hugState = STATE.HUG;
         hugStateT = 0;
         hugHugT = PLAYER.hugSeconds;
@@ -6725,31 +6731,70 @@ applyUi();
 
     /* ---------- HUGPARADE movement and pickups (private) ---------- */
 
-    function moveMomo(dt) {
-        let dx = (held.right ? 1 : 0) - (held.left ? 1 : 0);
-        let dy = (held.down ? 1 : 0) - (held.up ? 1 : 0);
-        momo.moving = !!(dx || dy);
-        if (!momo.moving) return;
-
-        if (dx && dy) {
-            dx *= 0.7071;
-            dy *= 0.7071;
+    function chooseRailDir() {
+        if (momo.wantDir) {
+            const wanted = momo.wantDir;
+            momo.wantDir = null;
+            if (canStep(momo.cellC, momo.cellR, wanted)) return wanted;
         }
-        const radius = PLAYER.radius;
-        const step = PLAYER.moveSpeed * dt;
+        const order = [momo.lastDir, "up", "down", "left", "right"];
+        for (const dir of order) {
+            if (!dir || !held[dir]) continue;
+            if (canStep(momo.cellC, momo.cellR, dir)) return dir;
+        }
+        return null;
+    }
 
-        const nextX = momo.x + dx * step;
-        if (!hitsWalls(nextX, momo.y, radius)) momo.x = nextX;
-        const nextY = momo.y + dy * step;
-        if (!hitsWalls(momo.x, nextY, radius)) momo.y = nextY;
+    function startRailStep(dir) {
+        const dc = dir === "right" ? 1 : (dir === "left" ? -1 : 0);
+        const dr = dir === "down" ? 1 : (dir === "up" ? -1 : 0);
+        momo.targetC = momo.cellC + dc;
+        momo.targetR = momo.cellR + dr;
+    }
 
-        const minX = WORLD.originX + WORLD.wallThickness + radius;
-        const maxX = WORLD.originX + WORLD.cols * WORLD.cell - WORLD.wallThickness - radius;
-        const minY = WORLD.originY + WORLD.wallThickness + radius;
-        const maxY = WORLD.originY + WORLD.rows * WORLD.cell - WORLD.wallThickness - radius;
-        momo.x = clamp(momo.x, minX, maxX);
-        momo.y = clamp(momo.y, minY, maxY);
+    /* One press = at least one cell. A started step always finishes at the
+       next centre, even if the key is released mid-corridor, so Momo can never
+       be left wedged between two hedges. Perpendicular presses are queued for
+       the next junction. */
+    function moveMomo(dt) {
+        let remaining = PLAYER.moveSpeed * dt;
+        momo.moving = false;
+        let guard = 0;
 
+        while (remaining > 0.0001 && guard++ < 8) {
+            if (momo.targetC === null) {
+                const dir = chooseRailDir();
+                if (!dir) break;
+                startRailStep(dir);
+            }
+            const tx = cellCenterX(momo.targetC);
+            const ty = cellCenterY(momo.targetR);
+            const dx = tx - momo.x;
+            const dy = ty - momo.y;
+            const dist = Math.abs(dx) + Math.abs(dy);
+            if (dist <= remaining) {
+                momo.x = tx;
+                momo.y = ty;
+                momo.cellC = momo.targetC;
+                momo.cellR = momo.targetR;
+                momo.targetC = null;
+                momo.targetR = null;
+                remaining -= dist;
+                momo.moving = true;
+            } else {
+                const f = remaining / dist;
+                momo.x += dx * f;
+                momo.y += dy * f;
+                remaining = 0;
+                momo.moving = true;
+            }
+        }
+
+        if (!momo.moving) {
+            momo.x = cellCenterX(momo.cellC);
+            momo.y = cellCenterY(momo.cellR);
+            return;
+        }
         momo.walk += dt;
         if (momo.walk > 100) momo.walk -= 100;
     }
@@ -6761,7 +6806,6 @@ applyUi();
             const hy = cellCenterY(heart.r);
             if (Math.hypot(momo.x - hx, momo.y - hy) > 4.6) continue;
             heart.got = true;
-            hugScore += PLAYER.heartPoints;
             heartBurst(hx, hy - 2, 5);
             ring(hx, hy - 1, 9);
             syncChrome(true);
@@ -6769,6 +6813,7 @@ applyUi();
     }
 
     function checkHug() {
+        if (momo.targetC !== null) return;
         if (Math.hypot(momo.x - bibi.x, momo.y - bibi.y) > WORLD.hugRadius) return;
         beginHug();
     }
@@ -6806,13 +6851,14 @@ applyUi();
         hugPeekT = Math.max(0, hugPeekT - dt);
         hugPeekReadyT = Math.max(0, hugPeekReadyT - dt);
 
+        hugRedrawT -= dt;
+        if (hugRedrawT <= 0 && momo.targetC === null) shiftHedges();
+
         moveMomo(dt);
         collectHearts();
         checkHug();
         if (hugState !== STATE.PLAY) return;
 
-        hugRedrawT -= dt;
-        if (hugRedrawT <= 0) shiftHedges();
         if (hugRoundT >= SETTINGS.roundTimeLimitSeconds) finishRun();
     }
 
@@ -6985,15 +7031,18 @@ applyUi();
     function paintHud(ctx) {
         drawHudPlate(ctx, 2, 20);
 
+        let heartsHeld = 0;
         for (let i = 0; i < hugLayout.hearts.length; i++) {
             const heart = hugLayout.hearts[i];
+            if (heart.got) heartsHeld++;
             paintPixels(ctx, HUG_HEART_MAP, heart.got ? HUG_HEART_COLORS : HUG_HEART_DIM,
                 5 + i * 9, 4, false, 1);
         }
 
         paintPixelText(ctx, "TIME " + Math.max(0, Math.ceil(SETTINGS.roundTimeLimitSeconds - hugRoundT)),
             51, 5, PAL.text, null, 1);
-        paintPixelText(ctx, String(hugScore), 84, 5, PAL.textGold, null, 1);
+        paintPixelText(ctx, "X" + (1 + heartsHeld), 73, 5, PAL.textPink, null, 1);
+        paintPixelText(ctx, String(hugScore), 88, 5, PAL.textGold, null, 1);
 
         const warning = hugRedrawT <= WORLD.redrawWarnSeconds;
         const nextColor = warning && Math.floor(hugClock / 0.25) % 2 === 0 ? PAL.textPink : PAL.text;
@@ -7010,10 +7059,12 @@ applyUi();
     }
 
     function paintTitle(ctx) {
-        paintRoundBlob(ctx, 5, 27, 90, 40, "rgba(48,66,38,0.90)");
-        paintPixelText(ctx, "HUGPARADE", 50, 34, PAL.textGold, PAL.plate, 2);
-        paintPixelText(ctx, "MOMO FINDS BIBI", 50, 52, PAL.text, null, 1);
-        paintPixelText(ctx, "FOR A TINY HUG", 50, 60, PAL.textPink, null, 1);
+        paintRoundBlob(ctx, 5, 22, 90, 58, "rgba(48,66,38,0.90)");
+        paintPixelText(ctx, "HUGPARADE", 50, 28, PAL.textGold, PAL.plate, 2);
+        paintPixelText(ctx, "HUG BIBI +1", 50, 46, PAL.text, null, 1);
+        paintPixelText(ctx, "EACH HEART +1X", 50, 54, PAL.textPink, null, 1);
+        paintPixelText(ctx, "MAZE SHIFTS 10S", 50, 62, PAL.text, null, 1);
+        paintPixelText(ctx, "PEEK SEES AHEAD", 50, 70, PAL.textPink, null, 1);
 
         if (Math.floor(hugClock / 0.55) % 2 === 0) {
             drawHudPlate(ctx, 2, 12, 0.85);
@@ -7022,11 +7073,11 @@ applyUi();
     }
 
     function paintOver(ctx) {
-        paintRoundBlob(ctx, 5, 27, 90, 53, "rgba(48,66,38,0.92)");
-        paintPixelText(ctx, "TIME FOR A NAP", 50, 33, PAL.textGold, PAL.plate, 1);
-        paintPixelText(ctx, String(hugScore), 50, 45, PAL.textGold, PAL.plate, 3);
-        paintPixelText(ctx, "BEST " + hugBest, 50, 64, PAL.text, null, 1);
-        paintPixelText(ctx, hugCount === 1 ? "1 TINY HUG" : hugCount + " TINY HUGS", 50, 73, PAL.textPink, null, 1);
+        paintRoundBlob(ctx, 5, 27, 90, 55, "rgba(48,66,38,0.92)");
+        paintPixelText(ctx, "TIME FOR A NAP", 50, 32, PAL.textGold, PAL.plate, 1);
+        paintPixelText(ctx, String(hugScore), 50, 40, PAL.textGold, PAL.plate, 3);
+        paintPixelText(ctx, "HUG POINTS", 50, 57, PAL.text, null, 1);
+        paintPixelText(ctx, "BEST " + hugBest, 50, 68, PAL.text, null, 1);
 
         if (Math.floor(hugClock / 0.55) % 2 === 0) {
             drawHudPlate(ctx, 2, 12, 0.85);
@@ -7129,19 +7180,20 @@ applyUi();
 
         let msg;
         if (hugState === STATE.TITLE) {
-            msg = "press any key or tap to start";
+            msg = "hug Bibi: each hug = +1, each heart adds +1x — the maze shifts every 10 s";
         } else if (hugState === STATE.HUG) {
-            msg = "a tiny hug! +" + hugLastBonus + " — the hedges are giggling!";
+            msg = "a tiny hug! +" + hugLastBonus +
+                (hugLastBonus > 1 ? " — hearts made it bigger!" : " — the hedges are giggling!");
         } else if (hugState === STATE.OVER) {
-            msg = hugCount > 0
-                ? "time for a nap — " + hugCount + (hugCount === 1 ? " tiny hug!" : " tiny hugs!") + " press R to go again"
-                : "time for a nap — no hugs this time. press R to try again";
+            msg = hugScore > 0
+                ? "time for a nap — " + hugScore + (hugScore === 1 ? " hug point!" : " hug points!") + " press R to go again"
+                : "time for a nap — no hug points this time. press R to try again";
         } else if (hugPeekT > 0) {
             msg = "peeking! pale hedges are the NEXT ones — plan a path!";
         } else if (hugRedrawT <= WORLD.redrawWarnSeconds) {
-            msg = "the hedges are about to shift — find Bibi or a heart!";
+            msg = "the hedges are about to shift — hurry to Bibi!";
         } else {
-            msg = "find Bibi in the hedge maze — PEEK shows the next hedges";
+            msg = "find Bibi — each heart adds +1x to the hug";
         }
         if (force || hugShownMsg !== msg) {
             hugShownMsg = msg;
@@ -7151,10 +7203,26 @@ applyUi();
 
     /* ---------- HUGPARADE module contract ---------- */
 
+    /* 014 scored 100+ per hug; 015 scores 1..4, so the first 015 launch
+       retires the old best once and starts the new scale at zero */
+    function loadBestWithEpoch() {
+        let best = readBest(SETTINGS.gameName);
+        try {
+            const epochKey = APP.savePrefix + SETTINGS.gameName + ".best.epoch";
+            if (window.localStorage.getItem(epochKey) !== SETTINGS.scoreEpoch) {
+                window.localStorage.setItem(epochKey, SETTINGS.scoreEpoch);
+                saveBest(SETTINGS.gameName, 0);
+                best = 0;
+            }
+        } catch (error) {
+            /* storage refused: keep the value readBest already returned */
+        }
+        return best;
+    }
+
     function start() {
-        hugBest = readBest(SETTINGS.gameName);
+        hugBest = loadBestWithEpoch();
         hugScore = 0;
-        hugCount = 0;
         hugRoundT = 0;
         hugStateT = 0;
         hugClock = 0;
@@ -7187,7 +7255,11 @@ applyUi();
             if (dir in held) held[dir] = false;
             return;
         }
-        if (dir in held) held[dir] = true;
+        if (dir in held) {
+            held[dir] = true;
+            momo.wantDir = dir;
+            momo.lastDir = dir;
+        }
         if ((hugState === STATE.TITLE || hugState === STATE.OVER) && hugStateT > 0.35) startRun();
     }
 
@@ -7207,9 +7279,9 @@ applyUi();
         versionNumber: SETTINGS.versionNumber,
         name: "Hug Parade",
         tagline: "a tiny hedge-maze reunion",
-        concept: "Momo the long-eared bun hunts for Bibi, a sprout-topped butter bun, in a hedge maze that grows a new tangle every ten seconds. Gather hearts on the way to each tiny hug.",
+        concept: "Momo the long-eared bun hugs Bibi, a sprout-topped butter bun, in a hedge maze that grows a new tangle every ten seconds. Each hug scores 1; every heart held adds +1x, so all three hearts make the next hug worth 4. Gather hearts, hug, repeat.",
         actionLabel: "PEEK",
-        hint: "desktop: WASD walk · SPACE or tap stage to peek at the next hedges · R restart · ESC shelf",
+        hint: "desktop: WASD step along the hedge rails · SPACE or tap stage to peek at the next hedges · R restart · ESC shelf",
         previewPaint: paintHugParadePreview,
         start, stop, restart,
         update, paint, onDir, onAction, onStageTap, onAnyKey

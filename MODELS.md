@@ -66,15 +66,16 @@ What each model used on each build. This is a record, not an opinion, and not a 
 | 013 | Claude.ai Sonnet 5.5 Extra · Claude.ai chat | wrote the prompt | — | — | not recorded |
 | 013 | Qwen3.8-Flash · Qoder CLI | built | ~22 min | 4.5351 credits | measured: 104 requests |
 | 014 | Qwen3.8-Flash · Qoder CLI | built | ~24 min | 8.9189 credits | measured: 124 requests (final figures from the CHANGELOG addendum) |
+| 015 | Qwen3.8-Flash · Qoder CLI | built | ~17 min | 7.8667 credits | measured: 147 requests (final figures from the CHANGELOG addendum) |
 
 ### Totals that can honestly be added
-- **Credits, Qoder CLI, measured (builds 009-014):** 56.4794 credits over 798 billable requests.
+- **Credits, Qoder CLI, measured (builds 009-015):** 64.3461 credits over 945 billable requests.
 - **Token totals: none.** The token figures count different things (for example ~2.37 M "processed" in build 005 against ~48,000 in build 007), so adding them would mean nothing.
 - **Time by model, approximate.** Builds 000-002 and the GPT-OSS attempt have no time recorded, so DeepSeek and GLM are undercounted. One block = 10 minutes, rounded half up.
 
 | Model | Minutes | At a glance |
 |---|---|---|
-| Qwen3.8-Flash | ~171 | ▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇ |
+| Qwen3.8-Flash | ~188 | ▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇ |
 | DeepSeek V4.1 Flash Free | ~115 | ▇▇▇▇▇▇▇▇▇▇▇▇ |
 | GLM-5.3 Flash Free | ~45 | ▇▇▇▇▇ |
 | Flint 40B Free | ~25 | ▇▇▇ |
@@ -82,8 +83,8 @@ What each model used on each build. This is a record, not an opinion, and not a 
 | Claude Opus 4.6 Thinking | ~20 | ▇▇ |
 | Shared session (build 006: DeepSeek + Gemini) | ~30 | ▇▇▇ |
 
-Total recorded: about 431 minutes (about 7 h 11 min) over 12 of 15 builds.
-(Totals were recomputed after the build-014 row was added; the CHANGELOG Build records remain the source of truth.)
+Total recorded: about 448 minutes (about 7 h 28 min) over 13 of 16 builds.
+(Totals were recomputed after the build-015 row was added; the CHANGELOG Build records remain the source of truth.)
 
 ---
 
@@ -267,6 +268,36 @@ in the changelog: no physical devices, no other browsers, and Qoder exposes cred
 tokens. This is a snapshot of one build on one date.
 
 ---
+
+## 2026-11-02 — Owner observation — HUGPARADE (builds 014 and 015), Qwen3.8-Flash (Qoder CLI)
+
+Source: Owner's words (verbatim, from prompt P-15)
+
+Builds observed: `014-20261102`, `015-20261102`.
+
+The owner's notes: the first HUGPARADE build is impressive work for Qwen and Qoder, but
+it shipped with logic problems and needed correction before the next game. The owner's
+words:
+
+> "Finally, please record my observation that the first round HUGPARADE creation is
+> amazing for the Qoder Qwen model, but has logic problems for the initial build, and
+> needs correction."
+
+The owner also described the problems in the same message (abridged, wording kept):
+
+> "The path for the controlled character of the player is hard to maneuver in the game.
+> Sometimes, it get stuck moving between the maze."
+
+> "It is not made clear on what is the scoring about or what is the objective of the
+> game."
+
+> "I am not sure what is the one being kept track of - is it the hugs? Or the collection
+> of the hearts? Or is the score?"
+
+Build `014-20261102` created the game (maze, art, PEEK, shelf preview) and build
+`015-20261102` corrected it: movement now runs on cell rails and cannot wedge, and the
+score is hug points (1 plus one per heart held, maximum 4) stated on the title plate.
+This is a dated owner note, not a model-written summary, and not a permanent verdict.
 
 <!-- NEW ENTRIES ABOVE THIS LINE. Never edit existing entries. -->
 
