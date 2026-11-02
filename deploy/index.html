@@ -6,11 +6,11 @@
   Repository : https://github.com/lohyapkant/KANTMICROGAMES
   Play online: https://kantmicrogames.lohyapkant.workers.dev/
   Hosting    : Cloudflare Workers (https://workers.cloudflare.com/)
-  Current    : build 013-20261102 — usage ledger, copyright and README fixes; six games
-               (PANDASNACK, BOOPEEK, DUCKLINE, SPROUTUP, SLIMEHOP, SNAILRACE)
+  Current    : build 014-20261102 — Round 7: HUGPARADE; seven games
+               (PANDASNACK, BOOPEEK, DUCKLINE, SPROUTUP, SLIMEHOP, SNAILRACE, HUGPARADE)
   Names      : project and on-screen brand KANTMICROGAMES ·
                save keys and the console tag use the KANTMICROGAMES prefix
-  Build log  : build 013-20261102, Qwen3.8-Flash (Qoder CLI) — the full
+  Build log  : build 014-20261102, Qwen3.8-Flash (Qoder CLI) — the full
                record of every build is in CHANGELOG.md
   ================================================================
 
@@ -290,7 +290,10 @@
         .card .preview {
             display: block;
             width: 100%;
-            height: 96px;
+            height: auto;
+            /* keep the 200 x 96 stage-card art in proportion on every card
+               width; a fixed 96 px height used to squash it vertically */
+            aspect-ratio: 200 / 96;
             border-radius: 14px;
             image-rendering: pixelated;
             image-rendering: crisp-edges;
@@ -722,7 +725,8 @@
 
 /* ==================================================================
    READ ME FIRST — BOUNDARIES BETWEEN THE SHELF, THE RUNTIME AND THE
-   FIVE GAME MODULES (PANDASNACK, BOOPEEK, DUCKLINE, SPROUTUP, SLIMEHOP).
+   SEVEN GAME MODULES (PANDASNACK, BOOPEEK, DUCKLINE, SPROUTUP, SLIMEHOP,
+   SNAILRACE, HUGPARADE).
 
    The shelf and the runtime are SHARED. The games are NOT shared.
    Each game is its own IIFE with its own SETTINGS, palette, sprite
@@ -739,19 +743,21 @@
    3. Prefix every private name with the game's own prefix:
       PANDASNACK -> panda / PAL / PANDA_*, BOOPEEK -> peek / boo / pip /
       BOO_ / PIP_*, DUCKLINE -> duck / mama / DUCK_*, SPROUTUP -> sprout /
-      SPROUT_*, SLIMEHOP -> slime / SLIME_*, SNAILRACE -> race / RACE_*.
+      SPROUT_*, SLIMEHOP -> slime / SLIME_*, SNAILRACE -> race / RACE_*,
+      HUGPARADE -> hug / HUG_*.
    4. Paint with the ctx passed into paint(ctx). Do not assume the
       shared stageCtx; that assumption is a PANDASNACK legacy only.
    5. Do not copy one game's character art into another game. Panda,
       mouse, mallard, seedling and slime shapes must stay visually
       distinct.
    6. PANDASNACK (content 007-20261101), BOOPEEK (content 006-20261101),
-      DUCKLINE (content 005-20261101), SPROUTUP (content 007-20261101)
-      and SLIMEHOP (content 010-20261101) are FROZEN by owner request:
-      do not restyle, rebalance or refactor them unless the owner asks.
-      (Build 010 changed only their unused `saveKey` label string when
-      the storage prefix was renamed; art, tuning and behaviour are
-      untouched. Build 011 left all five byte-identical.)
+      DUCKLINE (content 005-20261101), SPROUTUP (content 007-20261101),
+      SLIMEHOP (content 010-20261101) and SNAILRACE (content 011-20261101)
+      are FROZEN by owner request: do not restyle, rebalance or refactor
+      them unless the owner asks. (Build 010 changed only their unused
+      `saveKey` label string when the storage prefix was renamed; art,
+      tuning and behaviour are untouched. Build 014 left all six
+      byte-identical.)
    7. Add a new game as a NEW IIFE registered in GAMES; never graft a
       new game into an existing module.
    ================================================================== */
@@ -775,7 +781,8 @@
    identical does NOT change that game's number (DUCKLINE is frozen at
    005-20261101; BOOPEEK is frozen at 006-20261101; PANDASNACK content
    was updated in 007-20261101 for in-stage score HUD and refrozen;
-   SLIMEHOP is new at 010-20261101).
+   SLIMEHOP is new at 010-20261101; SNAILRACE is new at 011-20261101;
+   HUGPARADE is new at 014-20261102).
 
    Every finished build's full record — model and tool, effort,
    duration, and tokens or credits — lives in CHANGELOG.md, under
@@ -792,7 +799,7 @@
 
 const APP = {
     name: "KANTMICROGAMES",
-    fileVersion: "013-20261102",       // build number of THIS one-file app
+    fileVersion: "014-20261102",       // build number of THIS one-file app
     savePrefix: "KANTMICROGAMES."      // best scores live at prefix + GAMEID + ".best"
 };
 
@@ -1301,7 +1308,7 @@ function frame(now) {
             ACTIVE.module.paint(stageCtx);
         } catch (error) {
             /* A broken game must never kill the shared loop, the shelf or the
-               other two games. Report once per open, keep the app alive. */
+               other games. Report once per open, keep the app alive. */
             if (!ACTIVE.errorReported) {
                 ACTIVE.errorReported = true;
                 console.error("KANTMICROGAMES module error:", error);
@@ -1648,8 +1655,11 @@ applyUi();
      is approved as-is (frozen by the owner after SLIMEHOP shipped).
    * SLIMEHOP is FROZEN at content 010-20261101 — the lily-pad bloom
      chase is approved as-is.
-   * SNAILRACE is the live one (content 011-20261101): Nibbles races
-     two garden rivals across a picnic blanket to the strawberry.
+   * SNAILRACE is FROZEN at content 011-20261101 — Nibbles races two garden
+     rivals across a picnic blanket to the strawberry; frozen when the
+     HUGPARADE round shipped.
+   * HUGPARADE is live (content 014-20261102): Momo hunts for Bibi in a
+     hedge maze that redraws itself; PEEK shows the next hedges.
    ================================================================== */
 
 (function () {
@@ -6191,6 +6201,1016 @@ applyUi();
         actionLabel: "ZOOM",
         hint: "desktop: WASD steer · SPACE or tap stage to zoom · R restart · ESC shelf",
         previewPaint: paintSnailRacePreview,
+        start, stop, restart,
+        update, paint, onDir, onAction, onStageTap, onAnyKey
+    });
+})();
+
+
+/* ==================================================================
+   PART 5-G — HUGPARADE module (content 014-20261102)
+   ------------------------------------------------------------------
+   MODULE BOUNDARY — READ BEFORE EDITING
+   * Everything inside this IIFE is PRIVATE to HUGPARADE: SETTINGS,
+     palette, hedge maps, maze state, timers and draw helpers.
+   * Do NOT read or write other modules' names from here, and do NOT
+     let other modules read these names. The only shared things a
+     module may touch are: the module contract (start / stop / restart /
+     update / paint / onDir / onAction / onStageTap / onAnyKey), the
+     pixel helpers in PART 1, readBest / saveBest, and the shared chrome
+     handles scoreEl / bestEl / msgEl.
+   * Every name here is sealed inside this IIFE. Keep the HUG_ / hug
+     prefixes so nothing can collide with another module.
+   * Paint with the ctx passed into paint(ctx); never assume stageCtx.
+   * Art direction: a sunny pocket hedge maze on a lawn, Momo the
+     long-eared peach bun searching for Bibi the sprout-topped butter
+     bun. Everything round, soft and a little silly; every hug is a
+     tiny parade of hearts.
+   ================================================================== */
+
+(function () {
+    "use strict";
+
+    /* ---------- HUGPARADE settings (private) ---------- */
+
+    const SETTINGS = {
+        gameName: "HUGPARADE",
+        versionNumber: "014-20261102",
+        stageSize: 100,
+        saveKey: "KANTMICROGAMES.HUGPARADE.best",
+
+        playerSettings: {
+            moveSpeed: 30,
+            radius: 2.6,
+            heartPoints: 10,
+            hugPoints: 100,
+            timeBonusPerSecond: 2,
+            peekSeconds: 2.0,
+            peekCooldownSeconds: 6.0,
+            hugSeconds: 1.5
+        },
+
+        worldSettings: {
+            cols: 7,
+            rows: 7,
+            cell: 10,
+            originX: 15,
+            originY: 28,
+            wallThickness: 2,
+            redrawSeconds: 10,
+            redrawWarnSeconds: 2,
+            heartsPerLayout: 3,
+            hugRadius: 5.2,
+            friendMinDistance: 4
+        },
+
+        roundTimeLimitSeconds: 45,
+
+        palette: {
+            lawn: "#DDF0C4", lawnLight: "#ECF9DC", lawnDark: "#B9DC9E",
+            path: "#F8EAD2", pathLight: "#FFF6E6", pathShade: "#EBD7B7",
+            hedge: "#5F9E52", hedgeLight: "#8BC46F", hedgeDark: "#3E7540", hedgeShadow: "#2F5A33",
+            ghostHedge: "#EAFFD4",
+            momo: "#FFC9A8", momoLight: "#FFE4D0", momoEar: "#F59AA6",
+            bibi: "#FFE1A3", bibiLight: "#FFF1CE",
+            sprout: "#5FAF4A", sproutLight: "#9BD46B",
+            eye: "#46352E", shine: "#FFFFFF", blush: "#F79BAC", nose: "#C96B78",
+            heart: "#F26B76", heartLight: "#FFC2CB",
+            rug: "#F7A8B8", rugLight: "#FFD6DF", rugShade: "#E3869C",
+            daisy: "#FFF9EE", daisyCenter: "#F2C14E",
+            plate: "#3C4A2C", text: "#FFF8E6", textGold: "#FFE58A", textPink: "#FFB9C7"
+        }
+    };
+
+    const PAL = SETTINGS.palette;
+    const WORLD = SETTINGS.worldSettings;
+    const PLAYER = SETTINGS.playerSettings;
+    const STAGE = SETTINGS.stageSize;
+
+    /* ---------- HUGPARADE private state ---------- */
+
+    const STATE = { TITLE: "title", PLAY: "play", HUG: "hug", OVER: "over" };
+    const STEP_SECONDS = 1 / 60;
+
+    let hugState = STATE.TITLE;
+    let hugStateT = 0;
+    let hugClock = 0;
+    let hugRoundT = 0;
+    let hugScore = 0;
+    let hugBest = 0;
+    let hugCount = 0;
+    let hugRedrawT = WORLD.redrawSeconds;
+    let hugPeekT = 0;
+    let hugPeekReadyT = 0;
+    let hugHugT = 0;
+    let hugLastBonus = 0;
+    let hugAccumulator = 0;
+
+    const momo = { x: 0, y: 0, moving: false, walk: 0, blinkTimer: 2.2, blinkLeft: 0 };
+    const bibi = { x: 0, y: 0, cellC: 0, cellR: 0, blinkTimer: 3.1, blinkLeft: 0 };
+
+    let hugLayout = null;        // the hedges on screen now
+    let hugNextLayout = null;    // what PEEK shows: the next hedges
+    let hugSparkles = [];
+    let hugRings = [];
+
+    const held = { up: false, down: false, left: false, right: false };
+
+    /* ---------- HUGPARADE sprite maps (all prefixed, all local) ---------- */
+
+    /* Momo: a round peach bun with two upright lop ears. 11 x 11. */
+    const HUG_MOMO_MAP = [
+        "...M...M...",
+        "..MMM.MMM..",
+        "..MEM.MEM..",
+        "..MEM.MEM..",
+        ".MMMMMMMMM.",
+        "MMMMMMMMMMM",
+        "MMKKMMMKKMM",
+        "MMWKMMMWKMM",
+        "MMPMMNMMPMM",
+        "MMMMMMMMMMM",
+        ".MMMMMMMMM."
+    ];
+
+    /* Bibi: a butter bun with a jaunty little sprout. 11 x 11. */
+    const HUG_BIBI_MAP = [
+        "....G.G....",
+        "...GGGG....",
+        ".....g.....",
+        "...YYYYY...",
+        "..YYYYYYY..",
+        ".YYYYYYYYY.",
+        "YYYYYYYYYYY",
+        "YYKKYYYKKYY",
+        "YYWKYYYWKYY",
+        "YYPYYNYYPYY",
+        ".YYYYYYYYY."
+    ];
+
+    const HUG_MOMO_COLORS = {
+        M: PAL.momo, E: PAL.momoEar, K: PAL.eye, W: PAL.shine,
+        P: PAL.blush, N: PAL.nose
+    };
+
+    const HUG_BIBI_COLORS = {
+        Y: PAL.bibi, G: PAL.sprout, g: PAL.sproutLight, K: PAL.eye,
+        W: PAL.shine, P: PAL.blush, N: PAL.nose
+    };
+
+    const HUG_HEART_MAP = [
+        ".RR.RR.",
+        "RLRRRRR",
+        "RRRRRRR",
+        ".RRRRR.",
+        "..RRR..",
+        "...R..."
+    ];
+
+    const HUG_HEART_COLORS = { R: PAL.heart, L: PAL.heartLight };
+    const HUG_HEART_DIM = { R: "rgba(255,255,255,0.20)", L: "rgba(255,255,255,0.32)" };
+
+    /* small fixed decorations in the lawn margins (kept out of the maze) */
+    const HUG_FLOWERS = [[7, 26], [12, 25], [87, 25], [94, 40], [5, 58], [95, 72], [8, 96], [91, 97]];
+    const HUG_GRASS = [[4, 34], [10, 50], [90, 30], [97, 52], [3, 78], [96, 90]];
+
+    /* ---------- HUGPARADE helpers ---------- */
+
+    function clamp(value, low, high) {
+        return value < low ? low : (value > high ? high : value);
+    }
+
+    function cellCenterX(c) { return WORLD.originX + c * WORLD.cell + WORLD.cell / 2; }
+    function cellCenterY(r) { return WORLD.originY + r * WORLD.cell + WORLD.cell / 2; }
+
+    function cellOf(x, y) {
+        return {
+            c: clamp(Math.floor((x - WORLD.originX) / WORLD.cell), 0, WORLD.cols - 1),
+            r: clamp(Math.floor((y - WORLD.originY) / WORLD.cell), 0, WORLD.rows - 1)
+        };
+    }
+
+    function circleHitsRect(x, y, radius, rect) {
+        const nx = clamp(x, rect.x, rect.x + rect.w);
+        const ny = clamp(y, rect.y, rect.y + rect.h);
+        const dx = x - nx;
+        const dy = y - ny;
+        return dx * dx + dy * dy < radius * radius;
+    }
+
+    function hitsWalls(x, y, radius) {
+        for (const wall of hugLayout.walls) {
+            if (circleHitsRect(x, y, radius, wall)) return true;
+        }
+        return false;
+    }
+
+    /* ---------- HUGPARADE maze generation (private) ---------- */
+
+    function generateHedgeGrid() {
+        const cols = WORLD.cols;
+        const rows = WORLD.rows;
+        const h = [];
+        const v = [];
+        const visited = [];
+        for (let r = 0; r <= rows; r++) {
+            h[r] = [];
+            for (let c = 0; c < cols; c++) h[r][c] = true;
+        }
+        for (let r = 0; r < rows; r++) {
+            v[r] = [];
+            visited[r] = [];
+            for (let c = 0; c <= cols; c++) v[r][c] = true;
+            for (let c = 0; c < cols; c++) visited[r][c] = false;
+        }
+
+        const stack = [[0, 0]];
+        visited[0][0] = true;
+        let remaining = rows * cols - 1;
+        const dirs = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+
+        while (remaining > 0 && stack.length > 0) {
+            const top = stack[stack.length - 1];
+            const r = top[0];
+            const c = top[1];
+            const options = [];
+            for (const dir of dirs) {
+                const nr = r + dir[0];
+                const nc = c + dir[1];
+                if (nr < 0 || nr >= rows || nc < 0 || nc >= cols) continue;
+                if (visited[nr][nc]) continue;
+                options.push([nr, nc, dir[0], dir[1]]);
+            }
+            if (options.length === 0) { stack.pop(); continue; }
+            const pick = options[Math.floor(Math.random() * options.length)];
+            const nr = pick[0];
+            const nc = pick[1];
+            const dr = pick[2];
+            const dc = pick[3];
+            if (dr === -1) h[r][c] = false;
+            else if (dr === 1) h[r + 1][c] = false;
+            else if (dc === -1) v[r][c] = false;
+            else v[r][c + 1] = false;
+            visited[nr][nc] = true;
+            stack.push([nr, nc]);
+            remaining--;
+        }
+        return { h: h, v: v };
+    }
+
+    function hedgeWallsFromGrid(grid) {
+        const walls = [];
+        const t = WORLD.wallThickness;
+        const ox = WORLD.originX;
+        const oy = WORLD.originY;
+        const cell = WORLD.cell;
+        for (let r = 0; r <= WORLD.rows; r++) {
+            for (let c = 0; c < WORLD.cols; c++) {
+                if (!grid.h[r][c]) continue;
+                walls.push({
+                    x: ox + c * cell, y: oy + r * cell - t / 2,
+                    w: cell, h: t, outer: (r === 0 || r === WORLD.rows)
+                });
+            }
+        }
+        for (let r = 0; r < WORLD.rows; r++) {
+            for (let c = 0; c <= WORLD.cols; c++) {
+                if (!grid.v[r][c]) continue;
+                walls.push({
+                    x: ox + c * cell - t / 2, y: oy + r * cell,
+                    w: t, h: cell, outer: (c === 0 || c === WORLD.cols)
+                });
+            }
+        }
+        return walls;
+    }
+
+    function pickFriendCell(playerCell) {
+        const options = [];
+        for (let r = 0; r < WORLD.rows; r++) {
+            for (let c = 0; c < WORLD.cols; c++) {
+                const dist = Math.abs(c - playerCell.c) + Math.abs(r - playerCell.r);
+                if (dist >= WORLD.friendMinDistance) options.push([c, r]);
+            }
+        }
+        if (options.length === 0) {
+            for (let r = 0; r < WORLD.rows; r++) {
+                for (let c = 0; c < WORLD.cols; c++) {
+                    if (c !== playerCell.c || r !== playerCell.r) options.push([c, r]);
+                }
+            }
+        }
+        return options[Math.floor(Math.random() * options.length)];
+    }
+
+    function pickHeartCells(friendCell, playerCell) {
+        const pool = [];
+        for (let r = 0; r < WORLD.rows; r++) {
+            for (let c = 0; c < WORLD.cols; c++) {
+                if (c === friendCell[0] && r === friendCell[1]) continue;
+                if (c === playerCell.c && r === playerCell.r) continue;
+                pool.push([c, r]);
+            }
+        }
+        for (let i = pool.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            const swap = pool[i];
+            pool[i] = pool[j];
+            pool[j] = swap;
+        }
+        return pool.slice(0, WORLD.heartsPerLayout).map(function (cell) {
+            return { c: cell[0], r: cell[1], got: false };
+        });
+    }
+
+    /* A layout is the maze plus its friend spot and hearts. The player's
+       circle is protected: any interior wall that would spring up on top
+       of Momo is left open, so a redraw can never trap her in a hedge. */
+    function makeLayout(px, py) {
+        const grid = generateHedgeGrid();
+        let walls = hedgeWallsFromGrid(grid);
+        const playerCell = cellOf(px, py);
+        const friendCell = pickFriendCell(playerCell);
+        const hearts = pickHeartCells(friendCell, playerCell);
+        walls = walls.filter(function (wall) {
+            if (wall.outer) return true;
+            return !circleHitsRect(px, py, PLAYER.radius + 0.8, wall);
+        });
+        return {
+            walls: walls,
+            friendC: friendCell[0],
+            friendR: friendCell[1],
+            hearts: hearts
+        };
+    }
+
+    function openWallsAround(layout, x, y) {
+        layout.walls = layout.walls.filter(function (wall) {
+            if (wall.outer) return true;
+            return !circleHitsRect(x, y, PLAYER.radius + 0.8, wall);
+        });
+    }
+
+    /* ---------- HUGPARADE effects (private) ---------- */
+
+    function burst(x, y, color, count, spread) {
+        for (let i = 0; i < count; i++) {
+            const angle = Math.random() * Math.PI * 2;
+            const speed = 6 + Math.random() * (spread || 14);
+            hugSparkles.push({
+                x: x, y: y,
+                vx: Math.cos(angle) * speed,
+                vy: Math.sin(angle) * speed - 6,
+                t: 0,
+                life: 0.45 + Math.random() * 0.5,
+                color: color
+            });
+        }
+    }
+
+    function heartBurst(x, y, count) {
+        for (let i = 0; i < count; i++) {
+            const angle = Math.random() * Math.PI * 2;
+            const speed = 7 + Math.random() * 13;
+            hugSparkles.push({
+                x: x, y: y,
+                vx: Math.cos(angle) * speed,
+                vy: Math.sin(angle) * speed - 8,
+                t: 0,
+                life: 0.6 + Math.random() * 0.5,
+                color: (i % 2 === 0) ? PAL.heart : PAL.heartLight
+            });
+        }
+    }
+
+    function ring(x, y, maxR) {
+        hugRings.push({ x: x, y: y, r: 2, maxR: maxR, t: 0, life: 0.5 });
+    }
+
+    function updateEffects(dt) {
+        for (let i = hugSparkles.length - 1; i >= 0; i--) {
+            const sp = hugSparkles[i];
+            sp.t += dt;
+            sp.x += sp.vx * dt;
+            sp.y += sp.vy * dt;
+            sp.vy += 30 * dt;
+            if (sp.t >= sp.life) hugSparkles.splice(i, 1);
+        }
+        for (let i = hugRings.length - 1; i >= 0; i--) {
+            hugRings[i].t += dt;
+            if (hugRings[i].t >= hugRings[i].life) hugRings.splice(i, 1);
+        }
+    }
+
+    function updateBlink(bun, dt) {
+        if (bun.blinkLeft > 0) {
+            bun.blinkLeft -= dt;
+            return;
+        }
+        bun.blinkTimer -= dt;
+        if (bun.blinkTimer <= 0) {
+            bun.blinkLeft = 0.12;
+            bun.blinkTimer = 2.4 + Math.random() * 1.8;
+        }
+    }
+
+    /* ---------- HUGPARADE run flow (private) ---------- */
+
+    function clearHeld() {
+        held.up = false;
+        held.down = false;
+        held.left = false;
+        held.right = false;
+    }
+
+    function placeBibi(layout) {
+        bibi.cellC = layout.friendC;
+        bibi.cellR = layout.friendR;
+        bibi.x = cellCenterX(bibi.cellC);
+        bibi.y = cellCenterY(bibi.cellR);
+    }
+
+    function resetBuns() {
+        momo.x = cellCenterX(0);
+        momo.y = cellCenterY(WORLD.rows - 1);
+        momo.moving = false;
+        momo.walk = 0;
+        momo.blinkTimer = 2.2;
+        momo.blinkLeft = 0;
+        bibi.blinkTimer = 3.1;
+        bibi.blinkLeft = 0;
+    }
+
+    function startRun() {
+        hugScore = 0;
+        hugCount = 0;
+        hugRoundT = 0;
+        hugStateT = 0;
+        hugPeekT = 0;
+        hugPeekReadyT = 0;
+        hugHugT = 0;
+        hugLastBonus = 0;
+        resetBuns();
+        hugLayout = makeLayout(momo.x, momo.y);
+        placeBibi(hugLayout);
+        hugNextLayout = makeLayout(momo.x, momo.y);
+        hugRedrawT = WORLD.redrawSeconds;
+        hugSparkles = [];
+        hugRings = [];
+        hugAccumulator = 0;
+        hugState = STATE.PLAY;
+        syncChrome(true);
+    }
+
+    function shiftHedges() {
+        hugLayout = hugNextLayout;
+        openWallsAround(hugLayout, momo.x, momo.y);
+        placeBibi(hugLayout);
+        hugNextLayout = makeLayout(momo.x, momo.y);
+        hugRedrawT = WORLD.redrawSeconds;
+        burst(momo.x, momo.y - 4, PAL.hedgeLight, 9, 12);
+        burst(momo.x, momo.y - 4, PAL.sproutLight, 5, 9);
+        ring(momo.x, momo.y - 3, 20);
+        syncChrome(true);
+    }
+
+    function beginHug() {
+        const remaining = Math.max(0, SETTINGS.roundTimeLimitSeconds - hugRoundT);
+        hugLastBonus = PLAYER.hugPoints + PLAYER.timeBonusPerSecond * Math.ceil(remaining);
+        hugScore += hugLastBonus;
+        hugCount++;
+        hugState = STATE.HUG;
+        hugStateT = 0;
+        hugHugT = PLAYER.hugSeconds;
+        heartBurst(momo.x, momo.y - 6, 12);
+        ring(momo.x, momo.y - 5, 26);
+        syncChrome(true);
+    }
+
+    function finishHug() {
+        hugLayout = makeLayout(momo.x, momo.y);
+        placeBibi(hugLayout);
+        hugNextLayout = makeLayout(momo.x, momo.y);
+        hugRedrawT = WORLD.redrawSeconds;
+        hugPeekT = 0;
+        hugHugT = 0;
+        burst(momo.x, momo.y - 6, PAL.rugLight, 8, 11);
+        ring(momo.x, momo.y - 5, 18);
+        hugState = STATE.PLAY;
+        hugStateT = 0;
+        syncChrome(true);
+    }
+
+    function finishRun() {
+        if (hugScore > hugBest) {
+            hugBest = hugScore;
+            saveBest(SETTINGS.gameName, hugScore);
+        }
+        hugState = STATE.OVER;
+        hugStateT = 0;
+        hugPeekT = 0;
+        syncChrome(true);
+    }
+
+    function tryPeek() {
+        if (hugState !== STATE.PLAY) return false;
+        if (hugPeekReadyT > 0) return false;
+        hugPeekT = PLAYER.peekSeconds;
+        hugPeekReadyT = PLAYER.peekCooldownSeconds;
+        ring(momo.x, momo.y - 4, 16);
+        burst(momo.x, momo.y - 4, PAL.ghostHedge, 6, 8);
+        syncChrome(true);
+        return true;
+    }
+
+    /* ---------- HUGPARADE movement and pickups (private) ---------- */
+
+    function moveMomo(dt) {
+        let dx = (held.right ? 1 : 0) - (held.left ? 1 : 0);
+        let dy = (held.down ? 1 : 0) - (held.up ? 1 : 0);
+        momo.moving = !!(dx || dy);
+        if (!momo.moving) return;
+
+        if (dx && dy) {
+            dx *= 0.7071;
+            dy *= 0.7071;
+        }
+        const radius = PLAYER.radius;
+        const step = PLAYER.moveSpeed * dt;
+
+        const nextX = momo.x + dx * step;
+        if (!hitsWalls(nextX, momo.y, radius)) momo.x = nextX;
+        const nextY = momo.y + dy * step;
+        if (!hitsWalls(momo.x, nextY, radius)) momo.y = nextY;
+
+        const minX = WORLD.originX + WORLD.wallThickness + radius;
+        const maxX = WORLD.originX + WORLD.cols * WORLD.cell - WORLD.wallThickness - radius;
+        const minY = WORLD.originY + WORLD.wallThickness + radius;
+        const maxY = WORLD.originY + WORLD.rows * WORLD.cell - WORLD.wallThickness - radius;
+        momo.x = clamp(momo.x, minX, maxX);
+        momo.y = clamp(momo.y, minY, maxY);
+
+        momo.walk += dt;
+        if (momo.walk > 100) momo.walk -= 100;
+    }
+
+    function collectHearts() {
+        for (const heart of hugLayout.hearts) {
+            if (heart.got) continue;
+            const hx = cellCenterX(heart.c);
+            const hy = cellCenterY(heart.r);
+            if (Math.hypot(momo.x - hx, momo.y - hy) > 4.6) continue;
+            heart.got = true;
+            hugScore += PLAYER.heartPoints;
+            heartBurst(hx, hy - 2, 5);
+            ring(hx, hy - 1, 9);
+            syncChrome(true);
+        }
+    }
+
+    function checkHug() {
+        if (Math.hypot(momo.x - bibi.x, momo.y - bibi.y) > WORLD.hugRadius) return;
+        beginHug();
+    }
+
+    /* ---------- HUGPARADE fixed-step update ---------- */
+
+    function update(rawDt) {
+        let dt = rawDt > 0.25 ? 0.25 : rawDt;
+        hugAccumulator += dt;
+        let steps = 0;
+        while (hugAccumulator >= STEP_SECONDS && steps < 4) {
+            stepWorld(STEP_SECONDS);
+            hugAccumulator -= STEP_SECONDS;
+            steps++;
+        }
+        if (steps === 4) hugAccumulator = 0;
+        syncChrome(false);
+    }
+
+    function stepWorld(dt) {
+        hugClock += dt;
+        hugStateT += dt;
+        updateEffects(dt);
+        updateBlink(momo, dt);
+        updateBlink(bibi, dt);
+
+        if (hugState === STATE.HUG) {
+            hugHugT -= dt;
+            if (hugHugT <= 0) finishHug();
+            return;
+        }
+        if (hugState !== STATE.PLAY) return;
+
+        hugRoundT += dt;
+        hugPeekT = Math.max(0, hugPeekT - dt);
+        hugPeekReadyT = Math.max(0, hugPeekReadyT - dt);
+
+        moveMomo(dt);
+        collectHearts();
+        checkHug();
+        if (hugState !== STATE.PLAY) return;
+
+        hugRedrawT -= dt;
+        if (hugRedrawT <= 0) shiftHedges();
+        if (hugRoundT >= SETTINGS.roundTimeLimitSeconds) finishRun();
+    }
+
+    /* ---------- HUGPARADE painting (private) ---------- */
+
+    function paintHedgeRect(ctx, x, y, w, h, seed) {
+        const X = Math.round(x);
+        const Y = Math.round(y);
+        const W = Math.round(w);
+        const H = Math.round(h);
+        ctx.fillStyle = PAL.hedgeDark;
+        ctx.fillRect(X, Y, W, H);
+        ctx.fillStyle = PAL.hedge;
+        ctx.fillRect(X, Y, W, 1);
+        ctx.fillRect(X, Y, 1, H);
+        ctx.fillStyle = PAL.hedgeLight;
+        const leafCount = Math.max(1, Math.round((W + H) / 5));
+        for (let i = 0; i < leafCount; i++) {
+            const lx = X + ((seed * 7 + i * 13) % Math.max(1, W));
+            const ly = Y + ((seed * 5 + i * 11) % Math.max(1, H));
+            ctx.fillRect(lx, ly, 1, 1);
+        }
+        ctx.fillStyle = PAL.hedgeShadow;
+        ctx.fillRect(X, Y + H - 1, W, 1);
+    }
+
+    function paintDaisy(ctx, x, y) {
+        ctx.fillStyle = PAL.daisy;
+        ctx.fillRect(x, y - 1, 1, 1);
+        ctx.fillRect(x, y + 1, 1, 1);
+        ctx.fillRect(x - 1, y, 1, 1);
+        ctx.fillRect(x + 1, y, 1, 1);
+        ctx.fillStyle = PAL.daisyCenter;
+        ctx.fillRect(x, y, 1, 1);
+    }
+
+    function drawLawn(ctx) {
+        ctx.fillStyle = PAL.lawn;
+        ctx.fillRect(0, 0, STAGE, STAGE);
+        ctx.fillStyle = PAL.lawnLight;
+        for (let y = 0; y < STAGE; y += 18) ctx.fillRect(0, y, STAGE, 8);
+
+        for (const flower of HUG_FLOWERS) paintDaisy(ctx, flower[0], flower[1]);
+        ctx.fillStyle = PAL.lawnDark;
+        for (const tuft of HUG_GRASS) {
+            ctx.fillRect(tuft[0], tuft[1], 1, 2);
+            ctx.fillRect(tuft[0] + 1, tuft[1] + 1, 1, 1);
+        }
+
+        ctx.fillStyle = PAL.path;
+        ctx.fillRect(WORLD.originX, WORLD.originY, WORLD.cols * WORLD.cell, WORLD.rows * WORLD.cell);
+        ctx.fillStyle = PAL.pathLight;
+        for (let i = 0; i < 11; i++) {
+            ctx.fillRect(WORLD.originX + ((i * 17) % (WORLD.cols * WORLD.cell)),
+                WORLD.originY + ((i * 23) % (WORLD.rows * WORLD.cell)), 1, 1);
+        }
+        ctx.fillStyle = PAL.pathShade;
+        ctx.fillRect(WORLD.originX, WORLD.originY, WORLD.cols * WORLD.cell, 1);
+    }
+
+    function drawHedges(ctx) {
+        for (const wall of hugLayout.walls) {
+            paintHedgeRect(ctx, wall.x, wall.y, wall.w, wall.h, Math.round(wall.x + wall.y * 3));
+        }
+        if (hugState === STATE.PLAY && hugRedrawT <= WORLD.redrawWarnSeconds) {
+            const pulse = 0.35 + 0.35 * Math.sin(hugClock * 10);
+            ctx.fillStyle = "rgba(255,229,138," + pulse.toFixed(2) + ")";
+            for (const wall of hugLayout.walls) {
+                if (!wall.outer) continue;
+                ctx.fillRect(Math.round(wall.x) + 1, Math.round(wall.y) + 1, 1, 1);
+                ctx.fillRect(Math.round(wall.x + wall.w) - 2, Math.round(wall.y + wall.h) - 1, 1, 1);
+            }
+        }
+    }
+
+    function drawGhostLayout(ctx) {
+        if (hugState !== STATE.PLAY || hugPeekT <= 0 || !hugNextLayout) return;
+        const pulse = 0.38 + 0.10 * Math.sin(hugClock * 8);
+        ctx.save();
+        ctx.globalAlpha = pulse;
+        ctx.fillStyle = PAL.ghostHedge;
+        for (const wall of hugNextLayout.walls) {
+            ctx.fillRect(Math.round(wall.x), Math.round(wall.y), Math.round(wall.w), Math.round(wall.h));
+        }
+        const gx = cellCenterX(hugNextLayout.friendC);
+        const gy = cellCenterY(hugNextLayout.friendR);
+        paintBunAt(ctx, "bibi", gx, gy, 0);
+        ctx.globalAlpha = pulse + 0.18;
+        for (const heart of hugNextLayout.hearts) {
+            paintPixels(ctx, HUG_HEART_MAP, HUG_HEART_COLORS,
+                cellCenterX(heart.c) - 3, cellCenterY(heart.r) - 3, false, 1);
+        }
+        ctx.restore();
+    }
+
+    function drawRug(ctx) {
+        const x = Math.round(bibi.x);
+        const y = Math.round(bibi.y);
+        paintRoundBlob(ctx, x - 4, y + 3, 9, 3, PAL.rugShade);
+        paintRoundBlob(ctx, x - 3, y + 2, 7, 2, PAL.rug);
+        ctx.fillStyle = PAL.rugLight;
+        ctx.fillRect(x - 2, y + 2, 4, 1);
+    }
+
+    function drawHearts(ctx) {
+        for (const heart of hugLayout.hearts) {
+            if (heart.got) continue;
+            const bob = Math.round(Math.sin(hugClock * 3.1 + heart.c * 1.7 + heart.r * 0.9));
+            const x = cellCenterX(heart.c) - 3;
+            const y = cellCenterY(heart.r) - 4 + bob;
+            paintPixels(ctx, HUG_HEART_MAP, HUG_HEART_COLORS, x, y, false, 1);
+            ctx.fillStyle = PAL.shine;
+            ctx.fillRect(x + 6, y - 2, 1, 1);
+        }
+    }
+
+    function paintBunAt(ctx, kind, x, y, bob) {
+        const map = kind === "momo" ? HUG_MOMO_MAP : HUG_BIBI_MAP;
+        const colors = kind === "momo" ? HUG_MOMO_COLORS : HUG_BIBI_COLORS;
+        paintPixels(ctx, map, colors, Math.round(x) - 5, Math.round(y) - 7 - bob, false, 1);
+    }
+
+    function drawBun(ctx, kind, bun, excited) {
+        const x = Math.round(bun.x);
+        const y = Math.round(bun.y);
+        const moving = excited || (kind === "momo" && momo.moving);
+        const bob = moving ? (Math.floor(hugClock * 9 + (kind === "momo" ? 0 : 1.5)) % 2) : 0;
+
+        paintRoundBlob(ctx, x - 4, y + 2, 9, 3, "rgba(47,90,51,0.22)");
+        paintBunAt(ctx, kind, bun.x, bun.y, bob);
+
+        if (bun.blinkLeft > 0) {
+            const colors = kind === "momo" ? HUG_MOMO_COLORS : HUG_BIBI_COLORS;
+            const top = y - 1 - bob;
+            ctx.fillStyle = colors.M || colors.Y;
+            ctx.fillRect(x - 3, top, 2, 2);
+            ctx.fillRect(x + 2, top, 2, 2);
+            ctx.fillStyle = PAL.eye;
+            ctx.fillRect(x - 3, top + 1, 2, 1);
+            ctx.fillRect(x + 2, top + 1, 2, 1);
+        }
+    }
+
+    function drawHugMoment(ctx) {
+        if (hugState !== STATE.HUG) return;
+        const midX = Math.round((momo.x + bibi.x) / 2);
+        const midY = Math.round((momo.y + bibi.y) / 2);
+        const bob = Math.round(Math.sin(hugClock * 7));
+        paintRoundBlob(ctx, midX - 13, midY - 13, 26, 26, "rgba(255,196,208,0.20)");
+        paintPixels(ctx, HUG_HEART_MAP, HUG_HEART_COLORS, midX - 7, Math.max(25, midY - 21) + bob, false, 2);
+    }
+
+    function drawEffects(ctx) {
+        for (const r of hugRings) {
+            const frac = r.t / r.life;
+            const radius = Math.round(r.r + (r.maxR - r.r) * frac);
+            ctx.fillStyle = "rgba(255,231,190," + (0.7 * (1 - frac)).toFixed(2) + ")";
+            ctx.fillRect(Math.round(r.x - radius), Math.round(r.y), radius * 2, 1);
+        }
+        for (const sp of hugSparkles) {
+            ctx.fillStyle = sp.color;
+            ctx.fillRect(Math.round(sp.x), Math.round(sp.y), 1, 1);
+        }
+    }
+
+    function drawHudPlate(ctx, y, h, alpha) {
+        paintRoundBlob(ctx, 2, y, 96, h, "rgba(48,66,38," + (alpha || 0.80) + ")");
+    }
+
+    function paintHud(ctx) {
+        drawHudPlate(ctx, 2, 20);
+
+        for (let i = 0; i < hugLayout.hearts.length; i++) {
+            const heart = hugLayout.hearts[i];
+            paintPixels(ctx, HUG_HEART_MAP, heart.got ? HUG_HEART_COLORS : HUG_HEART_DIM,
+                5 + i * 9, 4, false, 1);
+        }
+
+        paintPixelText(ctx, "TIME " + Math.max(0, Math.ceil(SETTINGS.roundTimeLimitSeconds - hugRoundT)),
+            51, 5, PAL.text, null, 1);
+        paintPixelText(ctx, String(hugScore), 84, 5, PAL.textGold, null, 1);
+
+        const warning = hugRedrawT <= WORLD.redrawWarnSeconds;
+        const nextColor = warning && Math.floor(hugClock / 0.25) % 2 === 0 ? PAL.textPink : PAL.text;
+        paintPixelText(ctx, "NEXT " + Math.max(0, Math.ceil(hugRedrawT)), 21, 13, nextColor, null, 1);
+        paintPixelText(ctx, "PEEK", 53, 13, hugPeekT > 0 ? PAL.textGold : PAL.text, null, 1);
+
+        const ready = hugPeekReadyT <= 0 ? 1 : 1 - hugPeekReadyT / PLAYER.peekCooldownSeconds;
+        for (let i = 0; i < 5; i++) {
+            const filled = (i + 0.5) / 5 <= ready;
+            ctx.fillStyle = hugPeekT > 0 ? PAL.textGold
+                : (filled ? PAL.sproutLight : "rgba(255,248,230,0.22)");
+            ctx.fillRect(66 + i * 5, 14, 3, 3);
+        }
+    }
+
+    function paintTitle(ctx) {
+        paintRoundBlob(ctx, 5, 27, 90, 40, "rgba(48,66,38,0.90)");
+        paintPixelText(ctx, "HUGPARADE", 50, 34, PAL.textGold, PAL.plate, 2);
+        paintPixelText(ctx, "MOMO FINDS BIBI", 50, 52, PAL.text, null, 1);
+        paintPixelText(ctx, "FOR A TINY HUG", 50, 60, PAL.textPink, null, 1);
+
+        if (Math.floor(hugClock / 0.55) % 2 === 0) {
+            drawHudPlate(ctx, 2, 12, 0.85);
+            paintPixelText(ctx, "PRESS ANY KEY OR TAP", 50, 5, PAL.text, PAL.plate, 1);
+        }
+    }
+
+    function paintOver(ctx) {
+        paintRoundBlob(ctx, 5, 27, 90, 53, "rgba(48,66,38,0.92)");
+        paintPixelText(ctx, "TIME FOR A NAP", 50, 33, PAL.textGold, PAL.plate, 1);
+        paintPixelText(ctx, String(hugScore), 50, 45, PAL.textGold, PAL.plate, 3);
+        paintPixelText(ctx, "BEST " + hugBest, 50, 64, PAL.text, null, 1);
+        paintPixelText(ctx, hugCount === 1 ? "1 TINY HUG" : hugCount + " TINY HUGS", 50, 73, PAL.textPink, null, 1);
+
+        if (Math.floor(hugClock / 0.55) % 2 === 0) {
+            drawHudPlate(ctx, 2, 12, 0.85);
+            paintPixelText(ctx, "PRESS ANY KEY OR TAP", 50, 5, PAL.text, PAL.plate, 1);
+        }
+    }
+
+    function paint(ctx) {
+        drawLawn(ctx);
+        drawGhostLayout(ctx);
+        drawHedges(ctx);
+        drawRug(ctx);
+        drawHearts(ctx);
+
+        const near = Math.hypot(momo.x - bibi.x, momo.y - bibi.y) < 22;
+        drawBun(ctx, "bibi", bibi, near && hugState === STATE.PLAY);
+        drawBun(ctx, "momo", momo, false);
+        drawHugMoment(ctx);
+        drawEffects(ctx);
+
+        if (hugState === STATE.TITLE) paintTitle(ctx);
+        else if (hugState === STATE.PLAY || hugState === STATE.HUG) paintHud(ctx);
+        else paintOver(ctx);
+    }
+
+    /* ---------- HUGPARADE shelf card preview (private) ---------- */
+
+    function paintHugParadePreview(ctx) {
+        ctx.fillStyle = PAL.lawn;
+        ctx.fillRect(0, 0, 200, 96);
+        ctx.fillStyle = PAL.lawnLight;
+        for (let y = 0; y < 96; y += 16) ctx.fillRect(0, y, 200, 7);
+
+        paintDaisy(ctx, 6, 8);
+        paintDaisy(ctx, 194, 10);
+        paintDaisy(ctx, 5, 88);
+        paintDaisy(ctx, 193, 86);
+        ctx.fillStyle = PAL.lawnDark;
+        ctx.fillRect(12, 14, 1, 2);
+        ctx.fillRect(188, 74, 1, 2);
+        ctx.fillRect(18, 82, 1, 2);
+
+        paintRoundBlob(ctx, 8, 12, 184, 78, PAL.path);
+        paintRoundBlob(ctx, 11, 15, 178, 72, PAL.pathLight);
+
+        /* the hedge border and a playful tangle of rows */
+        paintHedgeRect(ctx, 8, 8, 184, 6, 3);
+        paintHedgeRect(ctx, 8, 88, 184, 6, 5);
+        paintHedgeRect(ctx, 8, 14, 6, 74, 7);
+        paintHedgeRect(ctx, 186, 14, 6, 74, 11);
+        paintHedgeRect(ctx, 58, 14, 6, 36, 13);
+        paintHedgeRect(ctx, 14, 50, 44, 6, 17);
+        paintHedgeRect(ctx, 64, 30, 56, 6, 19);
+        paintHedgeRect(ctx, 126, 36, 6, 52, 23);
+        paintHedgeRect(ctx, 132, 62, 54, 6, 29);
+
+        drawSmallHeart(ctx, 86, 26, 1);
+        drawSmallHeart(ctx, 100, 16, 2);
+        drawSmallHeart(ctx, 116, 28, 1);
+
+        /* Bibi waits on her rug in the upper right */
+        paintRoundBlob(ctx, 151, 56, 18, 5, PAL.rugShade);
+        paintRoundBlob(ctx, 153, 55, 14, 4, PAL.rug);
+        ctx.fillStyle = PAL.rugLight;
+        ctx.fillRect(157, 55, 6, 1);
+        paintPixels(ctx, HUG_BIBI_MAP, HUG_BIBI_COLORS, 149, 24, false, 3);
+
+        /* Momo trots in from the lower left */
+        paintRoundBlob(ctx, 20, 88, 18, 5, "rgba(47,90,51,0.18)");
+        paintPixels(ctx, HUG_MOMO_MAP, HUG_MOMO_COLORS, 19, 56, false, 3);
+
+        ctx.fillStyle = PAL.hedgeLight;
+        ctx.fillRect(70, 20, 2, 2);
+        ctx.fillRect(168, 76, 2, 2);
+        ctx.fillStyle = PAL.heartLight;
+        ctx.fillRect(84, 22, 1, 1);
+        ctx.fillRect(110, 20, 1, 1);
+    }
+
+    function drawSmallHeart(ctx, x, y, scale) {
+        paintPixels(ctx, HUG_HEART_MAP, HUG_HEART_COLORS, x, y, false, scale);
+    }
+
+    /* ---------- HUGPARADE chrome sync ---------- */
+
+    let hugShownScore = null;
+    let hugShownBest = null;
+    let hugShownMsg = null;
+
+    function syncChrome(force) {
+        const shownBest = Math.max(hugBest, hugScore);
+        if (force || hugShownScore !== hugScore) {
+            hugShownScore = hugScore;
+            scoreEl.textContent = String(hugScore);
+        }
+        if (force || hugShownBest !== shownBest) {
+            hugShownBest = shownBest;
+            bestEl.textContent = String(shownBest);
+        }
+
+        let msg;
+        if (hugState === STATE.TITLE) {
+            msg = "press any key or tap to start";
+        } else if (hugState === STATE.HUG) {
+            msg = "a tiny hug! +" + hugLastBonus + " — the hedges are giggling!";
+        } else if (hugState === STATE.OVER) {
+            msg = hugCount > 0
+                ? "time for a nap — " + hugCount + (hugCount === 1 ? " tiny hug!" : " tiny hugs!") + " press R to go again"
+                : "time for a nap — no hugs this time. press R to try again";
+        } else if (hugPeekT > 0) {
+            msg = "peeking! pale hedges are the NEXT ones — plan a path!";
+        } else if (hugRedrawT <= WORLD.redrawWarnSeconds) {
+            msg = "the hedges are about to shift — find Bibi or a heart!";
+        } else {
+            msg = "find Bibi in the hedge maze — PEEK shows the next hedges";
+        }
+        if (force || hugShownMsg !== msg) {
+            hugShownMsg = msg;
+            msgEl.textContent = msg;
+        }
+    }
+
+    /* ---------- HUGPARADE module contract ---------- */
+
+    function start() {
+        hugBest = readBest(SETTINGS.gameName);
+        hugScore = 0;
+        hugCount = 0;
+        hugRoundT = 0;
+        hugStateT = 0;
+        hugClock = 0;
+        hugPeekT = 0;
+        hugPeekReadyT = 0;
+        hugHugT = 0;
+        hugLastBonus = 0;
+        resetBuns();
+        hugLayout = makeLayout(momo.x, momo.y);
+        placeBibi(hugLayout);
+        hugNextLayout = makeLayout(momo.x, momo.y);
+        hugRedrawT = WORLD.redrawSeconds;
+        hugSparkles = [];
+        hugRings = [];
+        hugAccumulator = 0;
+        hugState = STATE.TITLE;
+        clearHeld();
+        syncChrome(true);
+    }
+
+    function stop() { clearHeld(); }
+
+    function restart() {
+        clearHeld();
+        startRun();
+    }
+
+    function onDir(dir, pressed) {
+        if (!pressed) {
+            if (dir in held) held[dir] = false;
+            return;
+        }
+        if (dir in held) held[dir] = true;
+        if ((hugState === STATE.TITLE || hugState === STATE.OVER) && hugStateT > 0.35) startRun();
+    }
+
+    function onAction() {
+        if (hugState === STATE.PLAY) tryPeek();
+        else if ((hugState === STATE.TITLE || hugState === STATE.OVER) && hugStateT > 0.35) startRun();
+    }
+
+    function onStageTap() { onAction(); }
+
+    function onAnyKey() {
+        if ((hugState === STATE.TITLE || hugState === STATE.OVER) && hugStateT > 0.35) startRun();
+    }
+
+    GAMES.push({
+        id: SETTINGS.gameName,
+        versionNumber: SETTINGS.versionNumber,
+        name: "Hug Parade",
+        tagline: "a tiny hedge-maze reunion",
+        concept: "Momo the long-eared bun hunts for Bibi, a sprout-topped butter bun, in a hedge maze that grows a new tangle every ten seconds. Gather hearts on the way to each tiny hug.",
+        actionLabel: "PEEK",
+        hint: "desktop: WASD walk · SPACE or tap stage to peek at the next hedges · R restart · ESC shelf",
+        previewPaint: paintHugParadePreview,
         start, stop, restart,
         update, paint, onDir, onAction, onStageTap, onAnyKey
     });

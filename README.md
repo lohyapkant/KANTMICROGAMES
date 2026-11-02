@@ -1,10 +1,10 @@
 # KANTMICROGAMES
 
-Six tiny pixel-art games in one HTML file. Open it, pick a game, play a minute.
+Seven tiny pixel-art games in one HTML file. Open it, pick a game, play a minute.
 
 Play online: <https://kantmicrogames.lohyapkant.workers.dev/>
 
-**Current build:** `013-20261102` — six games, one file.
+**Current build:** `014-20261102` — seven games, one file.
 
 ## About this project
 
@@ -24,6 +24,7 @@ The full record of every build is in CHANGELOG.md.
 | SPROUTUP | Sproutlet the baby seedling gathers raindrops to bloom in the sun. |
 | SLIMEHOP | Slimey hops a 3×3 lily-pad pond, blooming every pad before a sleepy snail undoes the work. |
 | SNAILRACE | Nibbles races two garden snails to a picnic strawberry; lettuce zooms, salt stings. |
+| HUGPARADE | Momo the long-eared bun finds Bibi in a hedge maze that reshapes every 10 s. |
 
 ## How to play
 
@@ -56,7 +57,7 @@ Keyboard, touch and device details are in CONTROLS.md.
 | Gemini 3.8 Flash | [Google](https://gemini.google.com/) | Antigravity | 006, 007 | Picked up cleanly after a session limit; delivered SPROUTUP. |
 | GPT-OSS 120B Medium | [OpenAI](https://openai.com/index/introducing-gpt-oss/) | Antigravity | 008 (attempt) | Abandoned: it deleted sections of the docs instead of editing them. |
 | Claude Opus 4.6 Thinking | [Anthropic](https://www.anthropic.com/) | Antigravity | 008 | Did most of the docs work, then halted mid-round. |
-| Qwen3.8-Flash | [Alibaba Qwen](https://qwen.ai/) | Qoder CLI | 008 (finish), 009, 010, 011, 012, 013 | Delivered the responsive shell and two new games; older games stayed unchanged. |
+| Qwen3.8-Flash | [Alibaba Qwen](https://qwen.ai/) | Qoder CLI | 008 (finish), 009, 010, 011, 012, 013, 014 | Delivered the responsive shell and three new games; older games stayed unchanged. |
 | Claude.ai Sonnet 5.5 Extra | [Anthropic](https://claude.ai/) | Claude.ai chat | 009, 012, 013 (prompt only) | Wrote the responsive-shell prompt that Qwen executed. |
 <!-- END:models-table -->
 

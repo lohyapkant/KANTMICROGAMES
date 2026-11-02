@@ -1,10 +1,10 @@
-<!-- Applies to: build 012-20261101 · six games · changes to controls are recorded in CHANGELOG.md -->
+<!-- Applies to: build 014-20261102 · seven games · changes to controls are recorded in CHANGELOG.md -->
 # KANTMICROGAMES — Controls
 
 Which controls exist, how they behave on each kind of device, and why.
-This guide applies to all six games, on every kind of device.
+This guide applies to all seven games, on every kind of device.
 
-## One table for all six games
+## One table for all seven games
 
 | Game | Move | Action (`SPACE`, action pad, stage tap) | Goal |
 |---|---|---|---|
@@ -14,13 +14,15 @@ This guide applies to all six games, on every kind of device.
 | SPROUTUP | weave with `W A S D` / arrows / the direction pad | **REACH** — leap burst, 0.5 s at 1.85×, 2 s cooldown | gather 15 drops in 24 s to bloom |
 | SLIMEHOP | hop one pad per press with `W A S D` / arrows / the direction pad | **STOMP** — bloom the pad underfoot, 1.2 s cooldown, stuns a nearby snail | bloom all nine pads in 30 s before the snail eats them |
 | SNAILRACE | steer with `W A S D` / arrows / the direction pad | **ZOOM** — 1.55× burst for 0.7 s, 2.6 s cooldown | reach the strawberry first in 20 s; lettuce boosts, salt locks |
+| HUGPARADE | walk with `W A S D` / arrows / the direction pad | **PEEK** — see the next hedges for 2 s, 6 s cooldown | gather hearts and reach Bibi for a hug; the maze redraws every 10 s |
 
-The action button carries the game's own label (DASH / POKE / GO / REACH / STOMP / ZOOM),
+The action button carries the game's own label (DASH / POKE / GO / REACH / STOMP / ZOOM / PEEK),
 so one pad serves every game. SLIMEHOP is the one game where a direction press is a single
 **discrete hop** rather than a continuous walk: holding a direction does not repeat, and
 each new press hops one pad (or bonks harmlessly at the pond edge). SNAILRACE steers
 continuously on both axes; holding right and up moves diagonally with each axis at full
-speed, so a lane change does not cost forward ground.
+speed, so a lane change does not cost forward ground. HUGPARADE also walks continuously
+on both axes, so a corner in its hedge maze can be turned without stopping.
 
 ## Input devices
 

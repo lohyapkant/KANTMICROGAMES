@@ -65,15 +65,16 @@ What each model used on each build. This is a record, not an opinion, and not a 
 | 012 | Qwen3.8-Flash · Qoder CLI | built | ~20 min | 5.9094 credits | measured: 112 requests (4.4968 at build end; final total from the CHANGELOG addendum) |
 | 013 | Claude.ai Sonnet 5.5 Extra · Claude.ai chat | wrote the prompt | — | — | not recorded |
 | 013 | Qwen3.8-Flash · Qoder CLI | built | ~22 min | 4.5351 credits | measured: 104 requests |
+| 014 | Qwen3.8-Flash · Qoder CLI | built | ~24 min | 8.9189 credits | measured: 124 requests (final figures from the CHANGELOG addendum) |
 
 ### Totals that can honestly be added
-- **Credits, Qoder CLI, measured (builds 009-013):** 47.5605 credits over 674 billable requests.
+- **Credits, Qoder CLI, measured (builds 009-014):** 56.4794 credits over 798 billable requests.
 - **Token totals: none.** The token figures count different things (for example ~2.37 M "processed" in build 005 against ~48,000 in build 007), so adding them would mean nothing.
 - **Time by model, approximate.** Builds 000-002 and the GPT-OSS attempt have no time recorded, so DeepSeek and GLM are undercounted. One block = 10 minutes, rounded half up.
 
 | Model | Minutes | At a glance |
 |---|---|---|
-| Qwen3.8-Flash | ~147 | ▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇ |
+| Qwen3.8-Flash | ~171 | ▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇ |
 | DeepSeek V4.1 Flash Free | ~115 | ▇▇▇▇▇▇▇▇▇▇▇▇ |
 | GLM-5.3 Flash Free | ~45 | ▇▇▇▇▇ |
 | Flint 40B Free | ~25 | ▇▇▇ |
@@ -81,8 +82,8 @@ What each model used on each build. This is a record, not an opinion, and not a 
 | Claude Opus 4.6 Thinking | ~20 | ▇▇ |
 | Shared session (build 006: DeepSeek + Gemini) | ~30 | ▇▇▇ |
 
-Total recorded: about 407 minutes (about 6 h 47 min) over 11 of 14 builds.
-(Totals were recomputed after the build-013 rows were added; the CHANGELOG Build records remain the source of truth.)
+Total recorded: about 431 minutes (about 7 h 11 min) over 12 of 15 builds.
+(Totals were recomputed after the build-014 row was added; the CHANGELOG Build records remain the source of truth.)
 
 ---
 
