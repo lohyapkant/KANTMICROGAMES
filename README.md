@@ -4,7 +4,7 @@ Eight tiny pixel-art games in one HTML file. Open it, pick a game, play a minute
 
 Play online: <https://kantmicrogames.lohyapkant.workers.dev/>
 
-**Current build:** `016-20261102` — eight games, one file.
+**Current build:** `017-20261103` — eight games, one file.
 
 ## About this project
 
@@ -62,7 +62,11 @@ Keyboard, touch and device details are in CONTROLS.md.
 | Claude.ai Sonnet 5.5 Extra | [Anthropic](https://claude.ai/) | Claude.ai chat | 009, 012, 013 (prompt only) | Wrote the responsive-shell prompt that Qwen executed. |
 <!-- END:models-table -->
 
-One person's dated snapshots from a handful of builds. Not a ranking. Time and usage for every build are tabulated in MODELS.md; the full record is in CHANGELOG.md.
+One person's dated snapshots from a handful of builds. Not a ranking. Time and usage for every build are tabulated in MODELS.md; the full record is in CHANGELOG.md. Most builds run on free or trial plans; how that works is in MODELS.md.
+
+## How the builds are checked
+
+Since build 009, each shell change is checked against a viewport test matrix before it ships: a list of screen sizes from small phones to wide desktops, with automated layout checks and screenshots inspected by eye. The matrix began with the responsive-shell rebuild (prompt P-09, written by Claude.ai Sonnet 5.5 Extra and run by Qwen3.8-Flash): 24 viewports, 1,409 automated checks and 120 screenshots. Build 017 reused it as a 20-viewport check (1,184 checks) and found a real title-truncation defect at 390–430 px that the numbers alone had missed. The point is simple: measure every size, look at the pictures, and fix what the measurements do not show.
 
 ## The rules every game follows
 

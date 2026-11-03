@@ -47,7 +47,12 @@ Appendices A1-A9 (material moved out of the README in build 012) start under '##
 
     ### Added / Changed / Note / Completed — <what>   (as many as needed)
     ### Verification and limits   (what was run, the results, and what was NOT verified)
-    ### Build record (owner request: duration + tokens/credits)   (honest; credits are not tokens)
+    ### Build record (owner request: duration + tokens/credits)
+    - Duration: <minutes and how measured>
+    - Usage: <value and unit as the tool reports it, how counted, number of requests>
+    - Mode and owner notes: <selection mode such as Auto, plan or trial in use, meter reading at start as given by the owner>
+    - Tools used: <short list of what you actually used, for example file view and edit, shell, node --check, Playwright with headless Chromium, curl>
+    - Iterations: <N> rebuild loops, one line each: what looked wrong, what changed
     ### Documentation review/edit attempts (standing rule)
 
 ### Per-build checklist
@@ -63,9 +68,245 @@ Appendices A1-A9 (material moved out of the README in build 012) start under '##
      9. Frozen games: prove they are byte-identical (SHA-256 of each IIFE) and put the numbers in the entry.
     10. Consistency: the same build ID in APP.fileVersion, the index header, the rendered footer, README "Current build", the top CHANGELOG entry and the plan ledger row (CONTROLS excepted, see 4); the same six-game list in README, CONTROLS and the entry; the same copyright line in LICENSE and the index.html header.
     11. Honest usage: record time and usage in the unit the tool reports, say how it was counted, write "not recorded" if unknown, and never add across units.
+    11. Honest usage: record time and usage in the unit the tool reports, say how it was counted, write "not recorded" if unknown, and never add across units.
+    12. Git: end your report with the suggested commands in a code block and do not run them: `git status`, `git add <the changed public files>`, `git commit -m "build NNN-YYYYMMDD: <title>" -m "<two to four bullets>"`, `git tag build-NNN`, `git push`.
+    13. Meters: record what the tool's own usage meter shows at the start and the end, in its own unit, as supplied by the owner or visible to you. If you cannot see it, write "not visible to the model". Never estimate a balance.
+    14. Pixels: every new image, icon or badge is drawn from a pixel map. No image files, SVG or emoji as art.
     Never delete, shorten or restructure any documentation file or section. If something looks wrong, say so in the entry instead of fixing it silently.
 
+### Continuity when a free tier runs out
+
+Free and trial tiers end without warning. Any model must be able to pick up where another stopped.
+1. Before starting, ask the owner for the tool's usage meter (credits, requests or percent of a window) and record it.
+2. Work in a copy (plans/archive/pre-NNN/work/), keep PROGRESS.md with DONE and NEXT lines, and swap into the live files in one step at the end.
+3. Finish the step you are on. Never stop with a live file half edited. If the meter is low, do the steps in priority order and stop cleanly after a finished step.
+4. A new model reads, in order: CHANGELOG.md → Conventions, the newest CHANGELOG entry, plans/archive/pre-NNN/PROGRESS.md, then the prompt copy for the build.
+5. One build, one prompt, one focus. Split big requests into several builds.
+6. Never carry a claim forward (credits left, tests passed) without checking it again.
+
 <!-- NEW BUILD ENTRIES: paste the newest entry on the line below this comment, above the previous newest. Never edit older entries. -->
+
+## 017-20261103 — 2026-11-03 (Shell UX and process: MENU, PAD SIZE, crisp+ stage, tidy shelf)
+
+Built from prompt: P-17 (a process-and-shell prompt authored by Claude.ai Sonnet 5.5
+Extra, pasted verbatim with the owner-notes fields left blank; private archive file
+`prompts/P-17_shell-ux-and-process.txt`)  
+Tool and model: **Qwen3.8-Flash (Qoder CLI)**  
+Games in the one file: 8 (PANDASNACK 007-20261101 **frozen**, BOOPEEK 006-20261101
+**frozen**, DUCKLINE 005-20261101 **frozen**, SPROUTUP 007-20261101 **frozen**,
+SLIMEHOP 010-20261101 **frozen**, SNAILRACE 011-20261101 **frozen**, HUGPARADE
+015-20261102 (unchanged this build), CATNAPCATCH 016-20261102 (unchanged this build);
+file build **017-20261103**)
+
+### Changed — shelf cards align (deploy/index.html, PART 3)
+
+- `.card` is a flex column that starts at the top (preview, name, concept) and the
+  "best" line is pinned to the card bottom with `margin-top: auto`. Before, each card
+  was a plain button whose content was vertically centred, so cards in one row showed
+  their art at different heights (measured offsets 38 / 19 / 28 px in one row at 1280
+  wide before the fix).
+
+### Added — the game menu replaces the loose RESTART and ⌂ SHELF buttons (PART 4)
+
+- A MENU button sits in the top-right corner of the game screen in both orientations
+  (about 91 px wide and 48 px tall as rendered; the prompt's floor is 48x48; 77 px
+  wide under 440 px), with a three-bar icon drawn from an 8×8 pixel map through
+  `paintPixels` and the word MENU. It is at least 24 px from every pad control (it
+  shares no row with them). Header text keeps `--menu-reserve` (104 px, 92 px under
+  380 px) of the right edge clear so the corner button never covers the tagline, the
+  hint line or the SCORE/BEST chips; on a phone the title yields first and truncates
+  with an ellipsis (full name from 360 px up; below that it truncates). Found by
+  looking at the build's
+  screenshots, then fixed and re-measured with client rects at six viewports across
+  all eight games.
+- MENU or the M key opens a paused dialog (`role="dialog"`, `aria-modal="true"`, label
+  "Game menu") with RESUME (focused first), RESTART · R, ⌂ SHELF and the game's own
+  how-to line. Each button is 56 px tall with 12 px between them. Opening it pauses
+  with the existing paused state (the PAUSED plate stays hidden behind the sheet) and
+  releases every held direction. RESUME, a tap outside the sheet, R, M and Esc-from-
+  play all behave as documented: Esc still leaves for the shelf (from the menu too),
+  R still restarts at once.
+- Focus is trapped inside the sheet (Tab cycles and wraps both ways) and returns to
+  MENU on close. RESTART sets the score to 0 and returns to the ready state; ⌂ SHELF
+  returns to the shelf; all three work by tap and by keyboard.
+- Ghost-click safety: the sheet's backdrop consumes the pointer that closes it, and the
+  touch that lands exactly on the hidden action button's spot fired zero `onAction`
+  calls in testing.
+- The RESTART · R button is gone from the action cluster (it sat 8 px under the thumb,
+  on top of the action button, at every touch size tested) and ⌂ SHELF is gone from
+  the top row.
+
+### Changed — crisp+ stage scaling and a slimmer chrome (PART 4)
+
+- `stageScaleFor` now computes whole device pixels per art pixel:
+  `floor(availableCssPx x devicePixelRatio / 100)`, and the canvas CSS size is that
+  ratio times 100 / dpr, so every art pixel covers a whole number of device pixels.
+  The old fractional fallback applies only when the result is under 2x. The canvas is
+  nudged so its edges land on whole device pixels (margin corrections, never a CSS
+  transform); `image-rendering: pixelated` stays.
+- On screens up to 480 px wide the bezel padding drops from 12 to 6 px and the page
+  side padding from 14 to 8 px. The top row (title, SCORE, BEST chips; MENU lives in
+  the corner) is capped at 44 px. The tagline and the one-line hint are hidden
+  (`tight-top`) only when showing them would make the stage height-limited; a one-shot
+  guard makes that decision once per fit so the ResizeObserver cannot oscillate.
+- Measured stage widths after the change: 300 px at 360x640 DPR 3 (target 267),
+  333.33 px at 390x844 DPR 3 (target 333), 380.94 px at 412x915 DPR 2.625 (target
+  343), 300 px at 844x390 DPR 3 (target 267), 250 px at 667x375 DPR 2 (target 250).
+  Stage width x dpr / 100 is an integer at DPR 1, 2, 2.625 and 3; no horizontal
+  overflow and no page scroll while playing on the tested matrix.
+
+### Added — PAD SIZE (S / M / L) on the shelf (PART 3 and PART 4)
+
+- A PAD SIZE preference button sits between PADS and DIR PAD, cycles S / M / L with an
+  aria-label, persists as `KANTMICROGAMES.ui.padsize` with the existing try/catch
+  pattern and is restored on load. Default M.
+- Pad sizes: on viewports wider than 380 and taller than 620, S = 58 px, M = 66 px,
+  L = 76 px; on smaller screens S = 48, M = 56, L = 64. The action button is
+  1.7 x the pad size. Pad-to-pad gaps are 9 px (8 px on small screens) and the gap
+  between the direction cluster and the action button is 24 px, so the action button
+  stays at least 24 px from every other tappable.
+- On narrow widths where L (76 px) could not keep that 24 px separation without
+  wrapping under the pads, L renders one step down (66 px under 416 px wide, 56 px
+  under 357 px wide) — the prompt's "shrink the pads toward S before the stage drops
+  below its target". Full 76 px L applies from 416 px wide.
+- Action labels still come from each module (`actionLabel`) and are not clipped at S,
+  M and L for all eight games; multi-touch (hold a direction, tap the action) and
+  sliding across the pad still work, re-tested after the change.
+
+### Edits to existing text — CHANGELOG Conventions
+
+- The Entry template's Build record line used to read:
+      `### Build record (owner request: duration + tokens/credits)   (honest; credits are not tokens)`
+  and is now the five-line block (Duration / Usage / Mode and owner notes / Tools
+  used / Iterations) shown in the template above.
+- The Per-build checklist keeps items 1-11 unchanged and adds items 12-14 (git
+  suggestions at the end of the report, never run; meters recorded as the tool
+  reports them or "not visible to the model"; every new image is a pixel map).
+- A new Conventions block, "Continuity when a free tier runs out", records the
+  hand-over rules. No older entry, checklist item or convention line was edited or
+  removed.
+
+### Verification and limits
+
+- **Games untouched:** the eight game IIFEs hash identical to build 016 and start with
+  the F6 values (PANDASNACK `f6dd1614…`, BOOPEEK `f3212979…`, DUCKLINE `6a62f23a…`,
+  SPROUTUP `adff7441…`, SLIMEHOP `a92efde4…`, SNAILRACE `457fa4b4…`, HUGPARADE
+  `151deb6e…`, CATNAPCATCH `26f6be1a…`). `node --check` on the extracted inline script
+  is clean. Full hashes and the checks are in `tests/build-017-report.md`.
+- **Render and behaviour:** tested in headless Chrome 156.0.8078.80 over the DevTools
+  protocol on a 22-viewport matrix (280x653 to 3440x1440, portrait, landscape,
+  desktop): steps 1-4 assertions pass; no horizontal overflow; no page scroll while
+  playing; every tappable is at least 48x48; touch and keyboard play work in all
+  eight games; pause on hide works; the footer shows exactly one build ID
+  (017-20261103); zero console errors. Screenshots of the shelf, PANDASNACK and
+  CATNAPCATCH at 360x640, 390x844, 844x390 and 1280x720 are in
+  `tests/screenshots/build-017/` and were looked at.
+- **Docs checks:** README stays at most 150 lines and 10 KB and avoids the banned
+  words; the build ID is the same in APP.fileVersion, the index header, the footer,
+  README "Current build", the top CHANGELOG entry and the plan ledger row; older
+  CHANGELOG entries, MODELS dated entries and ledger rows are byte-identical (diff);
+  relative links resolve; every table keeps a constant column count; the ledger
+  totals were recomputed by script.
+- **Limits:** headless Chrome only — no physical phone, Safari, Firefox or iOS/Android
+  run. The owner-notes fields in the prompt were blank, so credits remaining, trial
+  end date and anything else are recorded as "not provided", and the Qoder usage meter
+  is not visible to the model (checklist item 13). No audio exists in the project, so
+  none was tested.
+
+### Build record (owner request: duration + tokens/credits)
+
+- Duration: **about 40 min** wall-clock at the time this entry was written
+  (2026-11-03, 17:21 → about 18:00 WIB, from the prompt paste to the records). The
+  final figure is in the addendum below.
+- Usage: **52.7558 credits across 104 billable requests** at the time of writing
+  (2026-11-03, 17:21-17:49 WIB), summed from the per-request credits in the session
+  transcript, deduplicated by `request_id`. Credits are not tokens, and no token
+  number is invented. The final figure is in the addendum below.
+- Mode and owner notes: model selection mode **Auto** (from the prompt). Qoder credits
+  remaining at start: not provided. Trial ends on: not provided. Anything else to
+  record: not provided. The Qoder usage meter itself is not visible to the model.
+  (The owner supplied the exit figures after the session; see the addendum below.)
+- Tools used: file view and edit, shell (node, curl, diff, sed), `node --check`,
+  headless Chrome 156 driven over the DevTools protocol with small Node scripts
+  (viewport/touch/keyboard emulation, screenshots), python3 for hashing and for
+  summing the per-request credits, WebFetch for the Qoder/OpenCode/Antigravity pricing
+  pages.
+- Iterations: 4 rebuild loops. (1) The tight-top decision re-entered `fitStage`
+  through the ResizeObserver and toggled itself back and forth — a `RangeError:
+  Maximum call stack size exceeded` at 390x844 with L pads; fixed with a one-shot
+  guard so the hide-tagline decision is made once per fit. (2) At 390x844 with L the
+  action button wrapped 8 px under the direction cluster (the spec wants at least
+  24 px); fixed with a 24 px cluster gap plus a width cap that steps L down one size
+  on narrow screens before the stage would lose its target. A third scare — the same
+  RangeError reappearing after the fix — turned out to be the test browser serving
+  stale cached HTML; a cache-busted reload showed zero errors and no code change was
+  needed. (3) The screenshots exposed the corner MENU button covering header text —
+  the tagline and hint tails at 360 px, and on narrow phones the BEST chip too;
+  fixed with the `--menu-reserve` right padding, a title that truncates before the
+  chips move, and a compressed row under 440 px, re-verified over the whole matrix.
+  (4) A final hand-over pass found the title still truncated at 390-430 px because
+  the compact row only applied below 380 px; the breakpoint was raised to 440 px and
+  all eight titles re-measured from 280 to 600 px (full names from 360 px up).
+
+### Documentation review/edit attempts (standing rule)
+
+- 2026-11-03 — Qwen3.8-Flash (Qoder CLI), P-17 build: completed. README gained one
+  sentence (R1) and the "Current build" line; CONTROLS was rewritten for the menu, the
+  M key and PAD SIZE with "Applies to" 017-20261103; CHANGELOG received this new entry
+  and the Conventions edits quoted above, nothing else; MODELS gained "How this
+  project is paid for" and "Usage meters explained" above the Usage ledger, one
+  ledger row and the recomputed totals plus the two new totals lines; the plan gained
+  one ledger row, one tool-log row and the roadmap; LICENSE is byte-identical; no
+  section was deleted, shortened or restructured. Results in
+  `tests/build-017-report.md`.
+
+### Addendum — final session figures and hand-over (added after the Qoder trial ended)
+
+- The session above ran until the Qoder trial's credit limit was reached. The figures
+  in the Build record (52.7558 credits / 104 requests at 17:49 WIB) are a mid-session
+  snapshot; the final verification loop ran after they were written.
+- **Owner-supplied Qoder exit report for this session:** plan credits used **300/300**;
+  session credits used **300.8933**; wall time **1 h 38 min 49 s** (5,810.5 s); agent
+  active **1 h 13 min 18 s**; API time **44 min 26 s**; tool time **28 min 51 s**;
+  **398 tool calls** (397 succeeded); code changes **+1,041 / −104** lines.
+- These are Qoder's own meter readings and are **not tokens**. The 300.8933 figure is
+  a different meter reading from the per-request transcript total (52.7558) and is not
+  added to the usage ledger; both are recorded rather than guessing which unit to keep.
+- Trial end date: **2026-11-15 at 15:24:49 GMT+7**.
+- **Hand-over:** the work copies were complete and verified when the trial ran out.
+  The swap into the live files, the post-swap checks, this addendum, the build report
+  and the P-17 prompt copy were finished by **DeepSeek V4.1 Flash Free (OpenCode)**.
+  The build itself remains attributed to Qwen3.8-Flash (Qoder CLI).
+- The hand-over pass also fixed one real defect found in the screenshots: the game
+  title still truncated at 390-430 px because the compact top row only applied below
+  380 px. The breakpoint is now 440 px; all eight titles fit from 360 px up.
+
+### Addendum 2 — hand-over task, time and tokens (added while completing the MODELS record)
+
+- **Task:** finish build 017 after the Qoder trial ran out — verify the work copies,
+  fix the title breakpoint, swap the six work files into the live files in one step,
+  re-run the checks, write `tests/build-017-report.md` and the P-17 prompt copy, and
+  update CHANGELOG.md and MODELS.md.
+- **Model and tool:** DeepSeek V4.1 Flash Free (OpenCode).
+- **Duration:** about **25 min** wall-clock (2026-11-03, 19:05-19:30 WIB).
+- **Usage:** **165,312 tokens processed** (116,561 input + 23,506 output + 25,245
+  reasoning), **107 assistant turns**, measured from the session's per-message token
+  telemetry; 11.82 M cached reads are not counted. No credits were used (OpenCode free
+  model). This is a token count, not a Qoder credit count, and it is never added to the
+  credit totals in MODELS.md.
+- **Result:** live files at `017-20261103`; all eight game IIFEs hash-identical to build
+  016; docs 26/26 at the swap and **27/27** after the MODELS append (the harness gained a
+  separate check that the old dated entries stay a byte-identical prefix); focused
+  20-viewport check 1,184 checks / 0 fails; live render check 175 checks / 0 fails; 12
+  screenshots retaken and looked at.
+- **Git:** no git command was run. The suggested commands in
+  `tests/build-017-report.md` are suggestions only, now and always.
+- **Test-matrix highlight (owner request, after the hand-over):** README gained a short
+  "How the builds are checked" section and MODELS gained a dated owner observation
+  recording that the viewport matrix started with **build 009** (prompt P-09, authored by
+  Claude.ai Sonnet 5.5 Extra and executed by Qwen3.8-Flash): 24 viewports, 1,409 automated
+  assertions and 120 screenshots, later reused in build 017's 20-viewport run. The record
+  is kept as a quality highlight of self-testing and validation.
 
 ## 016-20261102 — 2026-11-02 (Round 8: CATNAPCATCH)
 

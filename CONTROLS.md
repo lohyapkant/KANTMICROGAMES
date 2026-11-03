@@ -1,4 +1,4 @@
-<!-- Applies to: build 016-20261102 · eight games · changes to controls are recorded in CHANGELOG.md -->
+<!-- Applies to: build 017-20261103 · eight games · changes to controls are recorded in CHANGELOG.md -->
 # KANTMICROGAMES — Controls
 
 Which controls exist, how they behave on each kind of device, and why.
@@ -31,12 +31,24 @@ and down do nothing.
 
 ## Input devices
 
-| Device | Move | Act | Start / restart | Leave |
+| Device | Move | Act | Menu / start / restart | Leave |
 |---|---|---|---|---|
-| Keyboard | `W A S D` or arrow keys | `SPACE` | `SPACE` / `ENTER` / any unmodified key starts the title card; `R` restarts a run | `ESC` |
-| Mouse | drag the direction pad (optional) | click the action button or the stage | click the card on the shelf; click `RESTART` | click `⌂ SHELF` |
-| Touch / pen | thumb-drag the direction pad; slide from one arrow to the next without lifting | tap the action button or the stage | tap the card; tap `RESTART` | tap `⌂ SHELF` |
-| Assistive tech | the pads are direct-manipulation only (see below); keyboard mappings still work | `SPACE` | `ENTER` on a focused card | `ESC` or `⌂ SHELF` |
+| Keyboard | `W A S D` or arrow keys | `SPACE` | `SPACE` / `ENTER` / any unmodified key starts the title card; `M` opens or closes the game menu; `R` restarts a run (from play or from the menu) | `ESC` (from the menu too) |
+| Mouse | drag the direction pad (optional) | click the action button or the stage | click the card on the shelf; click `MENU`, then `RESTART` in the menu | click `MENU`, then `⌂ SHELF` in the menu |
+| Touch / pen | thumb-drag the direction pad; slide from one arrow to the next without lifting | tap the action button or the stage | tap the card; tap `MENU`, then `RESTART` in the menu | tap `MENU`, then `⌂ SHELF` in the menu |
+| Assistive tech | the pads are direct-manipulation only (see below); keyboard mappings still work | `SPACE` | `ENTER` on a focused card; `MENU` is a real button | `ESC` or `⌂ SHELF` in the menu |
+
+## The game menu
+
+The MENU button sits in the top-right corner of the game screen in both
+orientations, with a three-bar pixel icon and the word MENU. It (or the `M` key)
+opens a paused dialog with **RESUME**, **RESTART · R**, **⌂ SHELF** and the game's
+own how-to line. Opening it pauses the run and releases every held direction.
+RESUME, a tap outside the sheet, `M` (from the menu) close it and resume; focus is
+trapped inside the sheet and returns to MENU on close. There are no loose
+RESTART or shelf buttons in the play area any more — the corner MENU button and
+the menu are the only chrome. The tap that closes the menu by landing outside the
+sheet never reaches a pad, the stage or a card underneath.
 
 Rules that apply everywhere:
 
@@ -52,7 +64,7 @@ Rules that apply everywhere:
 
 ## On-screen pads
 
-The direction cluster and the action + restart column appear when the last real
+The direction cluster and the action button appear when the last real
 input was touch or pen. If the last input was a key or the mouse they hide, giving
 the stage the whole screen. The circle in the middle of the direction cluster is
 empty: sliding across it keeps the current direction instead of releasing it.
@@ -61,26 +73,29 @@ empty: sliding across it keeps the current direction instead of releasing it.
 |---|---|---|
 | `PADS` | **AUTO** (default) · **SHOW** · **HIDE** | AUTO follows the last input type; SHOW always shows the pads; HIDE hides them even in touch mode (the stage and the keyboard still work) |
 | `DIR PAD` | **LEFT** (default) · **RIGHT** | puts the direction cluster and the action column on opposite sides — in landscape beside the stage, in portrait within the controls row |
+| `PAD SIZE` | **M** (default) · **S** · **L** | sets the touch-pad size: S = 58 px, M = 66 px, L = 76 px; the action button is 1.7 x the pad size. On small screens (≤ 380 px wide or ≤ 620 px tall) the sizes are 48 / 56 / 64 px |
 
-Both preferences sit on the shelf under the how-to chips, are announced with an
+All three preferences sit on the shelf under the how-to chips, are announced with an
 `aria-label`, and persist across reloads in `localStorage` under
-`KANTMICROGAMES.ui.pads` and `KANTMICROGAMES.ui.hand`. To reset them, clear those
-keys (or all `KANTMICROGAMES.*` keys) in the browser's site data. Best scores use the
-same prefix: `KANTMICROGAMES.<GAME>.best`.
+`KANTMICROGAMES.ui.pads`, `KANTMICROGAMES.ui.hand` and `KANTMICROGAMES.ui.padsize`.
+To reset them, clear those keys (or all `KANTMICROGAMES.*` keys) in the browser's
+site data. Best scores use the same prefix: `KANTMICROGAMES.<GAME>.best`.
 
-Pads and buttons are at least **48 × 48 CSS px** at every viewport. On the
-smallest phones (≤ 380 px wide or ≤ 620 px tall) the pad shrinks to exactly 48 px;
-on larger screens it grows to 58 px.
+Pads and buttons are at least **48 × 48 CSS px** at every viewport. The direction
+pads keep a 9 px gap (8 px on small screens) and the action button sits 24 px from
+the direction cluster. On viewports narrower than 416 px the L size renders one
+step down (66 px, then 56 px below 357 px) so the pads never crowd the stage or
+each other.
 
 ### Why the pads are not Tab stops
 
 The four direction buttons and the action pad use `tabindex="-1"` on purpose.
-They are held controls, not buttons you press once: tabbing to them would add six
-stops in front of `RESTART` and would not let a keyboard user hold a direction.
+They are held controls, not buttons you press once: tabbing to them would add five
+stops in front of the menu button and would not let a keyboard user hold a direction.
 Every pad action has a keyboard equivalent (`W A S D` / arrows, `SPACE`), so the
 game is fully operable from the keyboard without them. The tab order is kept
-short and predictable: shelf cards and preferences on the shelf, then `⌂ SHELF` →
-`RESTART` in a game.
+short and predictable: shelf cards and preferences on the shelf, then the MENU
+button in a game (and the three menu buttons while the menu is open).
 
 ## Pause
 
@@ -90,13 +105,18 @@ first, so nothing runs into a wall while the phone rings. A `PAUSED` plate appea
 over the stage.
 
 The next tap or key press only resumes: it is swallowed, so you cannot dash or poke
-straight out of a pause. `ESC` still leaves to the shelf while paused.
+straight out of a pause. `M` opens the menu while paused (it also works from the
+menu). `ESC` still leaves to the shelf while paused. While the menu is open the
+sheet replaces the `PAUSED` plate; behind it the game stays paused.
 
 ## Layout and scaling
 
-- The stage keeps its 100 × 100 design pixels and is scaled by whole numbers
-  **2×–6×** (200–600 px) while that fits. Below 200 px — very short landscape
-  phones — the scale becomes fractional rather than clipping or scrolling.
+- The stage keeps its 100 × 100 design pixels and is scaled "crisp+": the shell
+  computes whole device pixels per art pixel from the room available and the
+  device pixel ratio (about 2×–10× on today's phones), and only falls back to a
+  fractional scale when the whole-number result would be under 2× — very short
+  landscape phones. Canvas edges land on whole device pixels; the canvas is never
+  stretched with a CSS transform.
 - The shell measures the room left by the header, the hint and the controls in
   both layouts, picks the layout that yields the bigger stage, and only then sizes
   the canvas. Portrait screens put the stage on top and one controls row below;
@@ -115,9 +135,11 @@ straight out of a pause. `ESC` still leaves to the shelf while paused.
 
 ## Accessibility
 
-- Visible focus ring (`:focus-visible`) on shelf cards, preference buttons and the
-  two chrome buttons.
+- Visible focus ring (`:focus-visible`) on shelf cards, preference buttons, the
+  MENU button and the menu buttons.
 - Cards are real buttons with an accessible name; `ENTER` and `SPACE` open them.
+- The game menu is a labelled dialog (`aria-modal`) whose buttons are real buttons;
+  focus is trapped inside while it is open and returns to MENU on close.
 - Stage messages (`#msg`) are a polite live region, so screen readers hear
   "PAUSED", "GAME OVER" and similar shell-level text.
 - Prefers-reduced-motion turns off the card lift, chip pulse and button press
@@ -130,5 +152,11 @@ straight out of a pause. `ESC` still leaves to the shelf while paused.
   line from the game's action label, so no game code had to change.
 - HIDE hides the action button as well as the direction pad. On a touch-only
   device the action is still available by tapping the stage.
+- PAD SIZE only resizes the touch pads; keyboard play is unchanged. On the
+  narrowest widths the L choice renders one step down (see the pad table above)
+  so the action button keeps its 24 px gap instead of wrapping.
+- Below 360 px wide the game title in the top row truncates with an ellipsis
+  so SCORE and BEST stay clear of the corner MENU button; from 360 px up the
+  full name fits. The full name is also on the shelf card and in the browser tab.
 - The mascot animation and the shelf's hover lift are decorative only; they are
   disabled under reduced motion and do not affect play.

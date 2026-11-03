@@ -6,13 +6,14 @@
   Repository : https://github.com/lohyapkant/KANTMICROGAMES
   Play online: https://kantmicrogames.lohyapkant.workers.dev/
   Hosting    : Cloudflare Workers (https://workers.cloudflare.com/)
-  Current    : build 016-20261102 — Round 8: CATNAPCATCH, the night-nursery
-               catch game; eight games
+  Current    : build 017-20261103 — shell UX and process: MENU replaces the
+               loose SHELF/RESTART buttons, PAD SIZE (S/M/L), crisp+ stage
+               scaling, aligned shelf cards; eight games unchanged
                (PANDASNACK, BOOPEEK, DUCKLINE, SPROUTUP, SLIMEHOP, SNAILRACE,
                HUGPARADE, CATNAPCATCH)
   Names      : project and on-screen brand KANTMICROGAMES ·
                save keys and the console tag use the KANTMICROGAMES prefix
-  Build log  : build 016-20261102, Qwen3.8-Flash (Qoder CLI) — the full
+  Build log  : build 017-20261103, Qwen3.8-Flash (Qoder CLI) — the full
                record of every build is in CHANGELOG.md
   ================================================================
 
@@ -79,11 +80,29 @@
             --sai-b: env(safe-area-inset-bottom, 0px);
             --sai-l: env(safe-area-inset-left, 0px);
 
-            /* Pad geometry: 58 px by default, 48 px (still a comfortable
-               target) on narrow or short screens. */
-            --pad: 58px;
+            /* Pad geometry: PAD SIZE M (66 px) by default. S and L are set
+               on <body data-padsize>; narrow or short screens drop one step
+               (S 48 / M 56 / L 64) so nothing crowds a small phone.
+               --pad-cap steps L (and only L) one more step down on narrow
+               widths, where 76 px pads plus the 1.7 x action button could
+               not keep 24 px between tappables without pushing the stage
+               below its target — pads shrink before the stage does. */
+            --pad: 66px;
             --pad-gap: 9px;
+            --pad-cap: 76px;
+
+            /* The corner MENU button (about 83 px wide plus its 8 px right
+               offset and a gap): header text keeps this much of the right
+               edge clear. */
+            --menu-reserve: 104px;
         }
+
+        body[data-padsize="s"] { --pad: 58px; }
+        body[data-padsize="m"] { --pad: 66px; }
+        body[data-padsize="l"] { --pad: min(76px, var(--pad-cap)); }
+
+        @media (max-width: 415px) { :root { --pad-cap: 66px; } }
+        @media (max-width: 356px) { :root { --pad-cap: 56px; } }
 
         * {
             box-sizing: border-box;
@@ -143,7 +162,7 @@
         }
 
         .card:focus-visible, .pill:focus-visible, .pbtn:focus-visible,
-        #btnRestart:focus-visible, .pref:focus-visible {
+        .menuBtn:focus-visible, #btnMenu:focus-visible, .pref:focus-visible {
             outline: 3px solid #E9A93D;
             outline-offset: 3px;
         }
@@ -268,7 +287,13 @@
 
         .card {
             position: relative;
-            display: block;
+            /* flex column from the top: the button's default vertical centring
+               used to float the preview art to different heights inside one
+               grid row; starting at the top lines every card up */
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            justify-content: flex-start;
             padding: 18px 18px 15px;
             border-radius: 22px;
             background: var(--panel);
@@ -306,7 +331,7 @@
 
         .card .name { font-size: 17px; font-weight: 800; }
         .card .concept { margin-top: 6px; font-size: 13px; font-weight: 600; line-height: 1.45; color: var(--ink-soft); }
-        .card .best { margin-top: 11px; font-size: 12px; font-weight: 800; }
+        .card .best { margin-top: auto; padding-top: 11px; font-size: 12px; font-weight: 800; }
         .card .best::before { content: "★ "; color: #E9A93D; }
 
         .card.soon { border: 2px dashed #D9C7B2; background: rgba(255, 253, 248, 0.65); box-shadow: none; cursor: default; }
@@ -324,6 +349,7 @@
            allows at least 200 px; below that threshold a fractional CSS scale
            (still pixelated, D3) keeps the page scroll-free instead. */
         #gameScreen {
+            position: relative;   /* the MENU button anchors to this corner */
             width: 100%;
             max-width: 1100px;
             flex: 1 1 auto;
@@ -342,13 +368,17 @@
             flex: none;
         }
 
+        /* The slim top strip: title, SCORE and BEST, centred; the MENU
+           button sits in the top-right corner above this row's right edge. */
         .topRow {
             display: flex;
             align-items: center;
+            justify-content: center;
             gap: 8px;
             width: 100%;
-            justify-content: center;
-            flex-wrap: wrap;
+            min-height: 30px;
+            max-height: 44px;
+            padding-right: var(--menu-reserve);   /* keep clear of the corner MENU button */
         }
 
         .pill {
@@ -374,9 +404,24 @@
             letter-spacing: 0.5px;
             text-shadow: 0 3px 0 rgba(74, 59, 50, 0.08);
             text-align: center;
+            /* the title yields first: on a narrow phone it truncates so the
+               SCORE and BEST chips stay clear of the corner MENU button */
+            flex: 0 1 auto;
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
-        #gameTagline { font-size: 0.81rem; font-weight: 700; color: var(--ink-soft); text-align: center; }
+        .topRow .chip { flex: none; }
+
+        #gameTagline {
+            font-size: 0.81rem;
+            font-weight: 700;
+            color: var(--ink-soft);
+            text-align: center;
+            padding-right: var(--menu-reserve);   /* clear of the corner MENU button */
+        }
 
         #inputHint {
             font-size: 0.72rem;
@@ -385,6 +430,7 @@
             text-align: center;
             line-height: 1.35;
             max-width: 60rem;
+            padding-right: var(--menu-reserve);   /* clear of the corner MENU button */
         }
 
         #arena {
@@ -411,10 +457,10 @@
         #controlsRow {
             grid-area: controls;
             display: flex;
-            flex-wrap: wrap;   /* 280 px phones: the action column wraps under the pad */
+            flex-wrap: wrap;   /* under ~300 px wide: the action column wraps under the pad; the 24 px row gap keeps the required distance */
             align-items: center;
             justify-content: center;
-            gap: 8px 16px;
+            gap: 24px;
             width: 100%;
         }
 
@@ -559,8 +605,8 @@
         #pDown  { grid-area: down;  background: #FFF2D6; --btn-shade: #DFC386; }
 
         #pDash {
-            width: calc(var(--pad) * 1.5);
-            height: calc(var(--pad) * 1.5);
+            width: calc(var(--pad) * 1.7);
+            height: calc(var(--pad) * 1.7);
             border-radius: 999px;
             background: #FFE5C5;
             --btn-shade: #DBB07E;
@@ -568,10 +614,19 @@
             letter-spacing: 0.5px;
         }
 
-        #btnRestart {
+        /* ---- corner MENU button and the game menu sheet ---- */
+
+        #btnMenu {
+            position: absolute;
+            top: calc(var(--sai-t) + 6px);
+            right: calc(var(--sai-r) + 8px);
+            z-index: 30;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            min-width: 56px;
             min-height: 48px;
-            min-width: 48px;
-            padding: 10px 18px;
+            padding: 6px 13px;
             border-radius: 999px;
             border: 1px solid var(--outline);
             background: var(--panel);
@@ -584,7 +639,68 @@
             touch-action: manipulation;
         }
 
-        #btnRestart.press { transform: translateY(3px); box-shadow: 0 1px 0 rgba(74, 59, 50, 0.12); }
+        #btnMenu.press { transform: translateY(3px); box-shadow: 0 1px 0 rgba(74, 59, 50, 0.12); }
+
+        #menuIcon { width: 16px; height: 16px; image-rendering: pixelated; image-rendering: crisp-edges; flex: none; }
+
+        #menuOverlay {
+            position: fixed;
+            inset: 0;
+            z-index: 60;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 18px;
+            background: rgba(74, 59, 50, 0.38);
+        }
+
+        #menuSheet {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            width: min(92vw, 340px);
+            max-height: calc(100dvh - 36px);
+            overflow-y: auto;
+            padding: 18px 18px 16px;
+            border-radius: 22px;
+            background: var(--panel);
+            border: 1px solid var(--outline);
+            box-shadow: 0 14px 30px rgba(74, 59, 50, 0.25);
+        }
+
+        #menuSheet h3 {
+            font-size: 1.02rem;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            text-align: center;
+            margin-bottom: 2px;
+        }
+
+        .menuBtn {
+            min-height: 56px;
+            padding: 10px 18px;
+            border-radius: 16px;
+            border: 1px solid var(--outline);
+            background: var(--panel);
+            box-shadow: 0 4px 0 rgba(74, 59, 50, 0.12);
+            font-family: inherit;
+            font-weight: 800;
+            font-size: 0.95rem;
+            color: var(--ink);
+            cursor: pointer;
+            touch-action: manipulation;
+        }
+
+        .menuBtn.press { transform: translateY(3px); box-shadow: 0 1px 0 rgba(74, 59, 50, 0.12); }
+
+        #menuHint {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--ink-soft);
+            text-align: center;
+            line-height: 1.4;
+            padding: 2px 4px 0;
+        }
 
         /* Keyboard mode: the pointer pads are duplicates of WASD/SPACE, so
            they collapse (the manual override can force them back on). */
@@ -596,11 +712,48 @@
         }
 
         @media (max-width: 380px), (max-height: 620px) {
-            :root { --pad: 48px; --pad-gap: 8px; }
+            :root { --pad-gap: 8px; }
+            body[data-padsize="s"] { --pad: 48px; }
+            body[data-padsize="m"] { --pad: 56px; }
+            body[data-padsize="l"] { --pad: min(64px, var(--pad-cap)); }
         }
 
         @media (max-height: 700px) {
             #gameTagline { display: none; }
+        }
+
+        /* fitStage adds .tight-top when the stage is height-limited: showing
+           the tagline or the hint would shrink the stage, so the hint moves
+           into the game menu instead. */
+        body.tight-top #gameTagline,
+        body.tight-top #inputHint { display: none; }
+
+        /* Very small screens: a thin bezel and page padding give the stage
+           every whole device pixel available. */
+        @media (max-width: 480px) {
+            #page {
+                padding-left: calc(var(--sai-l) + 8px);
+                padding-right: calc(var(--sai-r) + 8px);
+            }
+            body.playing #page {
+                padding-left: calc(var(--sai-l) + 8px);
+                padding-right: calc(var(--sai-r) + 8px);
+            }
+            #bezel { padding: 6px; border-radius: 18px; }
+            #pauseOverlay { inset: 6px; }
+        }
+
+        /* Compress the slim top row before it would wrap on narrow phones.
+           Raised to 440px because 390-430px phones still truncated the game
+           name ("Panda...", "Catnap...") at the larger chip sizes. */
+        @media (max-width: 440px) {
+            :root { --menu-reserve: 92px; }   /* the button is smaller here */
+            .topRow { gap: 4px; padding-right: var(--menu-reserve); }
+            #gameTitle { font-size: 0.92rem; }
+            .topRow .chip { padding: 3px 4px; }
+            .topRow .chip i { font-size: 0.6rem; }
+            .topRow .chip b { font-size: 0.8rem; }
+            #btnMenu { min-width: 48px; padding: 6px 8px; font-size: 0.72rem; }
         }
 
         /* =============== footer =============== */
@@ -641,8 +794,8 @@
 
         @media (prefers-reduced-motion: reduce) {
             .card, .card:hover, .chip.pulse b { animation: none; transition: none; transform: none; }
-            .pbtn, .pill, #btnRestart { transition: none; }
-            .pbtn.press, .pill.press, #btnRestart.press { transform: none; }
+            .pbtn, .pill, .menuBtn, #btnMenu { transition: none; }
+            .pbtn.press, .pill.press, .menuBtn.press, #btnMenu.press { transform: none; }
         }
     </style>
 </head>
@@ -668,6 +821,7 @@
 
         <div id="prefs" role="group" aria-label="Control preferences">
             <button type="button" id="btnPadMode" class="pref" aria-label="On-screen pads: auto">PADS · AUTO</button>
+            <button type="button" id="btnPadSize" class="pref" aria-label="Pad size: medium">PAD SIZE · M</button>
             <button type="button" id="btnHandMode" class="pref" aria-label="Direction pad side: left">DIR PAD · LEFT</button>
         </div>
 
@@ -676,9 +830,11 @@
 
     <!-- =============== the game screen (one shared stage + pads) =============== -->
     <section id="gameScreen" hidden>
+        <button id="btnMenu" aria-label="Open the game menu" aria-expanded="false">
+            <canvas id="menuIcon" width="8" height="8" aria-hidden="true"></canvas>MENU
+        </button>
         <div class="gameTop">
             <div class="topRow">
-                <button id="btnBack" class="pill" aria-label="Back to the shelf">⌂ SHELF</button>
                 <h2 id="gameTitle"></h2>
                 <span class="chip"><i>SCORE</i><b id="scoreVal">0</b></span>
                 <span class="chip"><i>★ BEST</i><b id="bestVal">0</b></span>
@@ -707,10 +863,19 @@
 
                 <div id="actionCluster">
                     <button id="pDash" class="pbtn" tabindex="-1" aria-label="Action button (SPACE)">DASH</button>
-                    <button id="btnRestart">RESTART · R</button>
                 </div>
             </div>
         </main>
+
+        <div id="menuOverlay" hidden>
+            <div id="menuSheet" role="dialog" aria-modal="true" aria-label="Game menu">
+                <h3>PAUSED</h3>
+                <button id="menuResume" class="menuBtn">RESUME</button>
+                <button id="menuRestart" class="menuBtn">RESTART · R</button>
+                <button id="menuShelf" class="menuBtn">⌂ SHELF</button>
+                <p id="menuHint"></p>
+            </div>
+        </div>
     </section>
 
     <footer id="meta">
@@ -760,7 +925,8 @@
       `saveKey` label string when the storage prefix was renamed; art,
       tuning and behaviour are untouched. Build 016 left all six
       byte-identical, and left HUGPARADE unchanged at content
-      015-20261102.)
+      015-20261102. Build 017 changed the shared shell only: all eight
+      game modules are byte-identical to build 016.)
    7. Add a new game as a NEW IIFE registered in GAMES; never graft a
       new game into an existing module.
    ================================================================== */
@@ -786,7 +952,8 @@
    was updated in 007-20261101 for in-stage score HUD and refrozen;
    SLIMEHOP is new at 010-20261101; SNAILRACE is new at 011-20261101;
    HUGPARADE is new at 014-20261102 and corrected at 015-20261102;
-   CATNAPCATCH is new at 016-20261102).
+   CATNAPCATCH is new at 016-20261102; build 017 changed the shared
+   shell and no game).
 
    Every finished build's full record — model and tool, effort,
    duration, and tokens or credits — lives in CHANGELOG.md, under
@@ -803,7 +970,7 @@
 
 const APP = {
     name: "KANTMICROGAMES",
-    fileVersion: "016-20261102",       // build number of THIS one-file app
+    fileVersion: "017-20261103",       // build number of THIS one-file app
     savePrefix: "KANTMICROGAMES."      // best scores live at prefix + GAMEID + ".best"
 };
 
@@ -1021,6 +1188,20 @@ const MOON_MAP = [
 
 const MOON_COLORS = { W: "#F4C764" };
 
+/* The MENU button icon: three pixel bars, painted with the shared helper
+   (standing rule from build 017: every icon comes from a pixel map). */
+const MENU_ICON_MAP = [
+    "XXXXXXXX",
+    "XXXXXXXX",
+    "........",
+    "XXXXXXXX",
+    "XXXXXXXX",
+    "........",
+    "XXXXXXXX",
+    "XXXXXXXX"
+];
+const MENU_ICON_COLORS = { X: "#4A3B32" };
+
 /* PANDASNACK's card preview scene: the panda head, two bamboo shoots,
    and two wasps drifting around it.
    BOUNDARY NOTE: this preview and the shelf mascot intentionally share the
@@ -1163,8 +1344,15 @@ const gameTitleEl = document.getElementById("gameTitle");
 const gameTaglineEl = document.getElementById("gameTagline");
 const inputHintEl = document.getElementById("inputHint");
 const dashBtnEl = document.getElementById("pDash");
-const restartBtnEl = document.getElementById("btnRestart");
-const backBtnEl = document.getElementById("btnBack");
+const menuBtnEl = document.getElementById("btnMenu");
+const menuOverlayEl = document.getElementById("menuOverlay");
+const menuSheetEl = document.getElementById("menuSheet");
+const menuResumeEl = document.getElementById("menuResume");
+const menuRestartEl = document.getElementById("menuRestart");
+const menuShelfEl = document.getElementById("menuShelf");
+const menuHintEl = document.getElementById("menuHint");
+const menuIconEl = document.getElementById("menuIcon");
+const padSizeBtnEl = document.getElementById("btnPadSize");
 const verEl = document.getElementById("verBox");
 const chipMoveEl = document.getElementById("chipMove");
 const chipActEl = document.getElementById("chipAct");
@@ -1188,6 +1376,7 @@ function openGame(gameId) {
     if (!module2) return;
     if (ACTIVE.module && ACTIVE.module.id === gameId) return;   // idempotent
     if (ACTIVE.module) { releaseAllDirs(ACTIVE.module); ACTIVE.module.stop(); }
+    closeMenu(false);
     ACTIVE.module = module2;
     ACTIVE.paused = false;
     ACTIVE.errorReported = false;
@@ -1216,6 +1405,7 @@ function openGame(gameId) {
 function openShelf() {
     releaseAllDirs(ACTIVE.module);
     if (ACTIVE.module) ACTIVE.module.stop();
+    closeMenu(false);
     ACTIVE.module = null;
     ACTIVE.paused = false;
     pauseOverlayEl.hidden = true;
@@ -1246,9 +1436,16 @@ function routeFromHash() {
 window.addEventListener("hashchange", routeFromHash);
 
 /* Measure the real box the stage has left after header and controls are laid
-   out, in each of the two layouts, and choose the larger stage. Whole numbers
-   (2-6) keep pixels crisp; under 200 px the scale goes fractional (D3) so the
-   page still never scrolls during play. */
+   out, in each of the two layouts, and choose the larger stage.
+
+   D3 "crisp+" (build 017): the scale is chosen in DEVICE pixels, so every
+   art pixel covers a whole number of device pixels on any screen density:
+     devicePxPerArtPx = floor(availableCssPx x devicePixelRatio / 100)
+     canvasCssPx      = devicePxPerArtPx x 100 / devicePixelRatio
+   At DPR 1 this is the old whole-number scale. Under 2x the old fractional
+   fallback keeps the page scroll-free. The 6x cap (600 css px) is kept. */
+let stageLimit = "w";   // which axis limited the chosen stage (h = height)
+
 function stageScaleFor(layout) {
     bodyEl.dataset.layout = layout;
     const style = window.getComputedStyle(bezelEl);
@@ -1261,14 +1458,22 @@ function stageScaleFor(layout) {
     const availH = stageBlockEl.clientHeight - chromeY - messageH;
     if (availW < 40 || availH < 40) return 0;
     const fit = Math.min(availW, availH) / STAGE_SIZE;
-    const whole = Math.min(STAGE_MAX_SCALE, Math.floor(fit));
-    return whole >= STAGE_MIN_WHOLE ? whole : Math.max(0.4, fit);
+    stageLimit = availH < availW - 0.5 ? "h" : "w";
+    const dpr = window.devicePixelRatio || 1;
+    const devicePx = Math.floor(Math.min(availW, availH) * dpr / STAGE_SIZE);
+    const cssScale = devicePx / dpr;               // css px per art pixel
+    if (cssScale >= STAGE_MIN_WHOLE) return Math.min(STAGE_MAX_SCALE, cssScale);
+    return Math.max(0.4, fit);
 }
+
+let fitTightDone = false;   // the tight-header decision is made once per fit
 
 function fitStage() {
     if (gameScreenEl.hidden) return;
     const portraitScale = stageScaleFor("port");
+    const portraitLimit = stageLimit;
     const landscapeScale = stageScaleFor("land");
+    const landscapeLimit = stageLimit;
     /* Near-square screens (foldable inner displays) pick whichever layout
        yields the larger stage; exact ties follow the available aspect. */
     let layout;
@@ -1276,10 +1481,35 @@ function fitStage() {
     else if (portraitScale > landscapeScale) layout = "port";
     else layout = window.innerWidth >= window.innerHeight ? "land" : "port";
     bodyEl.dataset.layout = layout;
+    /* When the height is the limit, the tagline and hint would only take
+       room from the stage; hide them (the hint also lives in the menu) and
+       measure once more with the slimmer header. */
+    const heightLimited = (layout === "land" ? landscapeLimit : portraitLimit) === "h";
+    /* Decide the tight header from the BEFORE measurements, apply it, then
+       measure once more with the slimmer header. The guard stops the two
+       states from chasing each other (freeing height can make a taller
+       stage width-limited, which must not undo the decision). */
+    if (!fitTightDone && heightLimited !== bodyEl.classList.contains("tight-top")) {
+        fitTightDone = true;
+        bodyEl.classList.toggle("tight-top", heightLimited);
+        fitStage();
+        fitTightDone = false;
+        return;
+    }
     const scale = Math.max(0.4, layout === "land" ? landscapeScale : portraitScale);
-    const pixels = Math.round(STAGE_SIZE * scale);
-    stageCanvas.style.width = pixels + "px";
-    stageCanvas.style.height = pixels + "px";
+    const cssSize = STAGE_SIZE * scale;
+    stageCanvas.style.width = cssSize + "px";
+    stageCanvas.style.height = cssSize + "px";
+    /* Snap the canvas edges onto whole device pixels (never with a CSS
+       transform, which would blur crisp+). */
+    const dpr = window.devicePixelRatio || 1;
+    const rect = stageCanvas.getBoundingClientRect();
+    const offX = Math.round(rect.left * dpr) / dpr - rect.left;
+    const offY = Math.round(rect.top * dpr) / dpr - rect.top;
+    if (Math.abs(offX) > 0.001 || Math.abs(offY) > 0.001) {
+        stageCanvas.style.marginLeft = ((parseFloat(stageCanvas.style.marginLeft) || 0) + offX) + "px";
+        stageCanvas.style.marginTop = ((parseFloat(stageCanvas.style.marginTop) || 0) + offY) + "px";
+    }
 }
 
 let fitScheduled = false;
@@ -1332,7 +1562,7 @@ function pauseForLifecycle() {
     if (!ACTIVE.module || ACTIVE.paused) return;
     releaseAllDirs(ACTIVE.module);
     ACTIVE.paused = true;
-    pauseOverlayEl.hidden = false;
+    if (!MENU.open) pauseOverlayEl.hidden = false;   // the menu sheet, not the plate, shows while it is open
 }
 
 function resumeFromUserInput() {
@@ -1402,8 +1632,19 @@ window.addEventListener("keydown", function (event) {
        modified key. (Ctrl+S, Cmd+D, Alt+Left and friends must reach the OS.) */
     if (event.ctrlKey || event.metaKey || event.altKey) return;
 
+    /* The menu sheet is up: it owns the keyboard until it closes. */
+    if (MENU.open) {
+        if (event.code === "Tab") { trapMenuFocus(event); return; }
+        if (event.code === "Escape") { openShelf(); return; }   // D1: Esc still leaves for the shelf
+        if (event.code === "KeyM") { closeMenu(true); return; }
+        if (event.code === "KeyR") { closeMenu(true); ACTIVE.module.restart(); return; }
+        if (event.code === "Space" || event.code.indexOf("Arrow") === 0) event.preventDefault();
+        return;                // swallowed: nothing acts out of the menu
+    }
+
     if (ACTIVE.paused) {
         if (event.code === "Escape") { openShelf(); return; }
+        if (event.code === "KeyM") { resumeFromUserInput(); openMenu(); return; }
         if (event.code === "Space" || event.code.indexOf("Arrow") === 0) event.preventDefault();
         resumeFromUserInput();     // swallowed: no dash/poke from the resume key
         return;
@@ -1417,6 +1658,7 @@ window.addEventListener("keydown", function (event) {
     if (code === "Space") { ACTIVE.module.onAction(); return; }
     if (code === "Escape") { openShelf(); return; }
     if (code === "KeyR") { ACTIVE.module.restart(); return; }
+    if (code === "KeyM") { openMenu(); return; }
     if (isNonAnyKey(code)) return;
     if (typeof ACTIVE.module.onAnyKey === "function") ACTIVE.module.onAnyKey();
 });
@@ -1455,20 +1697,20 @@ function saveUiPref(name, value) {
 const UI = {
     mode: INITIAL_INPUT_MODE,
     pads: readUiPref("pads", ["auto", "show", "hide"], "auto"),
+    padsize: readUiPref("padsize", ["s", "m", "l"], "m"),
     hand: readUiPref("hand", ["left", "right"], "left")
 };
 
 function updateHints() {
     const touch = UI.mode === "touch";
     const module2 = ACTIVE.module;
-    restartBtnEl.textContent = touch ? "RESTART" : "RESTART · R";
     if (!module2) { inputHintEl.textContent = ""; return; }
     dashBtnEl.textContent = module2.actionLabel;
     dashBtnEl.setAttribute("aria-label", module2.actionLabel + " (action)");
     /* The frozen modules keep their "desktop: ..." hint strings; touch mode
        builds its own line from the module's action label instead. */
     inputHintEl.textContent = touch
-        ? "pad to move · " + module2.actionLabel + " or tap the stage · ⌂ to leave"
+        ? "pad to move · " + module2.actionLabel + " or tap the stage · MENU pauses"
         : String(module2.hint || "").replace(/^desktop:\s*/i, "");
 }
 
@@ -1476,6 +1718,7 @@ function applyUi() {
     const touch = UI.mode === "touch";
     bodyEl.dataset.input = UI.mode;
     bodyEl.dataset.pads = UI.pads;
+    bodyEl.dataset.padsize = UI.padsize;
     bodyEl.dataset.hand = UI.hand;
 
     chipMoveEl.innerHTML = touch ? "<i>👆</i> drag the pad to move" : "<i>⌨</i> WASD / arrows to move";
@@ -1489,6 +1732,9 @@ function applyUi() {
     padModeBtnEl.setAttribute("aria-label", "On-screen pads: " + UI.pads);
     handModeBtnEl.textContent = "DIR PAD · " + UI.hand.toUpperCase();
     handModeBtnEl.setAttribute("aria-label", "Direction pad side: " + UI.hand);
+    padSizeBtnEl.textContent = "PAD SIZE · " + UI.padsize.toUpperCase();
+    padSizeBtnEl.setAttribute("aria-label", "Pad size: " +
+        (UI.padsize === "s" ? "small" : UI.padsize === "l" ? "large" : "medium"));
 
     updateHints();
     scheduleFit();      /* pads collapsing gives the stage more room */
@@ -1518,6 +1764,12 @@ padModeBtnEl.addEventListener("click", function () {
 handModeBtnEl.addEventListener("click", function () {
     UI.hand = UI.hand === "left" ? "right" : "left";
     saveUiPref("hand", UI.hand);
+    applyUi();
+});
+padSizeBtnEl.addEventListener("click", function () {
+    const order = ["s", "m", "l"];
+    UI.padsize = order[(order.indexOf(UI.padsize) + 1) % order.length];
+    saveUiPref("padsize", UI.padsize);
     applyUi();
 });
 
@@ -1624,16 +1876,74 @@ stageCanvas.addEventListener("pointerup", function (event) {
 
 /* ---------- chrome buttons (click: mouse, touch, keyboard, AT) ---------- */
 
-backBtnEl.addEventListener("click", function () { openShelf(); });
-restartBtnEl.addEventListener("click", function () {
-    if (ACTIVE.paused) resumeFromUserInput();
-    if (ACTIVE.module) ACTIVE.module.restart();
-});
 pauseOverlayEl.addEventListener("pointerdown", function (event) {
     event.preventDefault();
     event.stopPropagation();
     resumeFromUserInput();
 });
+
+/* ---------- the game menu (build 017) ---------- */
+
+/* Opening pauses with the shell's own paused state and releases every held
+   direction; the sheet takes the PAUSED plate's place. Closing through
+   RESUME, a tap on the backdrop or M resumes; R restarts; Esc still leaves
+   (D1). The whole sheet is one click target per gesture, so a tap that
+   closes it can never reach a pad or the stage underneath. */
+const MENU = { open: false };
+
+function openMenu() {
+    if (!ACTIVE.module || MENU.open) return;
+    MENU.open = true;
+    releaseAllDirs(ACTIVE.module);
+    ACTIVE.paused = true;
+    pauseOverlayEl.hidden = true;
+    menuHintEl.textContent = inputHintEl.textContent;
+    menuOverlayEl.hidden = false;
+    menuBtnEl.setAttribute("aria-expanded", "true");
+    menuResumeEl.focus();
+}
+
+function closeMenu(resume) {
+    if (!MENU.open) { if (resume) menuBtnEl.focus(); return; }
+    MENU.open = false;
+    menuOverlayEl.hidden = true;
+    menuBtnEl.setAttribute("aria-expanded", "false");
+    if (resume) {
+        ACTIVE.paused = false;
+        FRAME.lastTime = performance.now();
+        menuBtnEl.focus();
+    }
+}
+
+function trapMenuFocus(event) {
+    const focusables = [menuResumeEl, menuRestartEl, menuShelfEl];
+    const index = focusables.indexOf(document.activeElement);
+    event.preventDefault();
+    let next;
+    if (index === -1) next = event.shiftKey ? focusables.length - 1 : 0;
+    else next = (index + (event.shiftKey ? -1 : 1) + focusables.length) % focusables.length;
+    focusables[next].focus();
+}
+
+menuBtnEl.addEventListener("click", function () {
+    if (MENU.open) closeMenu(true); else openMenu();
+});
+menuResumeEl.addEventListener("click", function () { closeMenu(true); });
+menuRestartEl.addEventListener("click", function () {
+    closeMenu(true);
+    if (ACTIVE.module) ACTIVE.module.restart();
+});
+menuShelfEl.addEventListener("click", function () { openShelf(); });
+menuOverlayEl.addEventListener("pointerdown", function (event) {
+    event.preventDefault();
+    event.stopPropagation();
+});
+menuOverlayEl.addEventListener("click", function (event) {
+    if (!menuSheetEl.contains(event.target)) closeMenu(true);   // a tap outside the sheet resumes
+});
+
+/* The MENU icon: three pixel bars from a pixel map (no image files, no SVG). */
+paintPixels(menuIconEl.getContext("2d"), MENU_ICON_MAP, MENU_ICON_COLORS, 0, 0);
 
 applyUi();
 

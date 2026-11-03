@@ -34,6 +34,27 @@ each build. It is a record, not an opinion.
 - License: MIT (see `LICENSE` and the header comment in `deploy/index.html`). Legal name of
   the original creator: **Loh Yap Kant**, with help from the models observed below.
 
+## How this project is paid for
+
+This project is built on free and trial plans on purpose, to see what a person with no budget can do.
+- **Qoder CLI** runs on Qoder's first-sign-in offer: a free 14-day Pro trial with 300 credits. Unused trial credits are cleared when the trial ends. Model selection is set to Auto; the ledger records the model name the tool reports.
+- **Claude.ai chat** (used to write some of the prompts) runs on a plan with a usage window that the owner describes as about 5 hours. Its usage is read by the owner from Claude's usage page, in percent of the window, not tokens.
+- Earlier builds used OpenCode's free models and Antigravity.
+When a quota runs out the work pauses and resumes with whatever is available (see CHANGELOG.md → Conventions → Continuity when a free tier runs out).
+
+## Usage meters explained
+
+What each tool's own meter shows, in plain words. Filled from each tool's documentation
+where a page could be opened (2026-11-03); anything that could not be confirmed from a
+page says "to confirm" or "not confirmed".
+
+| Tool | What the meter shows | Unit | Resets or expires | Where to look | Source |
+|---|---|---|---|---|---|
+| Qoder CLI | credits spent per request; heavier models and longer work spend more | credits | the 14-day Pro trial (300 credits from first sign-in) ends on its date and unused credits are cleared; list price is about US$0.01 per credit | Qoder usage page | https://docs.qoder.com/account/pricing |
+| Claude.ai chat | how much of the usage window is used | percent of the window, not tokens | the window resets (owner: about 5 hours); exact rules to confirm | Claude's usage page, read by the owner | to confirm |
+| OpenCode | the Console tracks usage with budget controls, credits can be added to a workspace, and open-source model access comes through Go subscriptions (US$10 / US$40 / US$20 per member per month) | credits; US$ per month | how added credits expire is not stated on the page read; subscriptions are monthly | the OpenCode Console, Usage and Billing pages | https://opencode.ai/v2/docs/console/ |
+| Antigravity | the free Individual plan (US$0/month) works on basic weekly rate limits; Google AI Pro and Ultra add higher rate limits and a flexible AI credit pool; organizations use Google Cloud with consumption-based API pricing | weekly rate limits; credits | rate limits reset weekly; credit-pool rules are on the plans docs | the Antigravity pricing page and its plans docs | https://antigravity.google/pricing |
+
 ## Usage ledger
 
 What each model used on each build. This is a record, not an opinion, and not a ranking.
@@ -68,24 +89,29 @@ What each model used on each build. This is a record, not an opinion, and not a 
 | 014 | Qwen3.8-Flash · Qoder CLI | built | ~24 min | 8.9189 credits | measured: 124 requests (final figures from the CHANGELOG addendum) |
 | 015 | Qwen3.8-Flash · Qoder CLI | built | ~17 min | 7.8667 credits | measured: 147 requests (final figures from the CHANGELOG addendum) |
 | 016 | Qwen3.8-Flash · Qoder CLI | built | ~18 min | 10.2413 credits | measured: 198 requests (final figures from the CHANGELOG addendum) |
+| 017 | Qwen3.8-Flash · Qoder CLI | built | ~99 min (1 h 38 min 49 s wall; 1 h 13 min 18 s active) | 52.7558 credits at 17:49; 300.8933 session credits at exit | measured: 104 billable requests at 17:49; Qoder exit report: plan 300/300, session 300.8933, 398 tool calls; the two meters are not added together |
+| 017 | DeepSeek V4.1 Flash Free · OpenCode | finished build 017 after the Qoder trial ended | ~25 min | 165,312 tokens processed | measured: 116,561 input + 23,506 output + 25,245 reasoning; 11.82 M cached reads not counted; 107 assistant turns |
 
 ### Totals that can honestly be added
-- **Credits, Qoder CLI, measured (builds 009-016):** 74.5874 credits over 1,143 billable requests.
+- **Credits, Qoder CLI, measured (builds 009-017):** 127.3432 credits over 1,247 billable requests.
+- **Approximate list-price value of the measured credits:** 127.3432 x US$0.01 = US$1.27. An estimate, not a bill: the trial is free. Based on Qoder's published plan prices (about US$20 for 2,000 credits); check https://docs.qoder.com/account/pricing before relying on it. Never converted for tokens and never added across tools.
+- **Owner's Qoder exit report for build 017:** plan **300/300 credits used**; session **300.8933 credits**; **398 tool calls**; wall time 1 h 38 min 49 s. This is Qoder's own meter reading, not the per-request transcript total above, and is not added to it (the two meters count differently).
+- **Iterations recorded (from build 017):** 4 over 1 build.
 - **Token totals: none.** The token figures count different things (for example ~2.37 M "processed" in build 005 against ~48,000 in build 007), so adding them would mean nothing.
 - **Time by model, approximate.** Builds 000-002 and the GPT-OSS attempt have no time recorded, so DeepSeek and GLM are undercounted. One block = 10 minutes, rounded half up.
 
 | Model | Minutes | At a glance |
 |---|---|---|
-| Qwen3.8-Flash | ~206 | ▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇ |
-| DeepSeek V4.1 Flash Free | ~115 | ▇▇▇▇▇▇▇▇▇▇▇▇ |
+| Qwen3.8-Flash | ~305 | ▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇ |
+| DeepSeek V4.1 Flash Free | ~140 | ▇▇▇▇▇▇▇▇▇▇▇▇▇▇ |
 | GLM-5.3 Flash Free | ~45 | ▇▇▇▇▇ |
 | Flint 40B Free | ~25 | ▇▇▇ |
 | Gemini 3.8 Flash | ~25 | ▇▇▇ |
 | Claude Opus 4.6 Thinking | ~20 | ▇▇ |
 | Shared session (build 006: DeepSeek + Gemini) | ~30 | ▇▇▇ |
 
-Total recorded: about 466 minutes (about 7 h 46 min) over 14 of 17 builds.
-(Totals were recomputed after the build-016 row was added; the CHANGELOG Build records remain the source of truth.)
+Total recorded: about 590 minutes (about 9 h 50 min) over 15 of 18 builds.
+(Totals were recomputed after the build-017 row was added; the CHANGELOG Build records remain the source of truth.)
 
 ---
 
@@ -299,6 +325,106 @@ Build `014-20261102` created the game (maze, art, PEEK, shelf preview) and build
 `015-20261102` corrected it: movement now runs on cell rails and cannot wedge, and the
 score is hug points (1 plus one per heart held, maximum 4) stated on the title plate.
 This is a dated owner note, not a model-written summary, and not a permanent verdict.
+
+## 2026-11-03 — Qwen3.8-Flash (Qoder CLI) — build 017: shell UX, then credit exhaustion
+
+Source: Recorded by DeepSeek V4.1 Flash Free from the owner's feedback, the CHANGELOG
+addendum and the Qoder exit report.
+
+Builds observed: `017-20261103` (steps 0–6; the swap into the live files was not reached).
+
+The owner's notes: this session did the shell work and then ran the Qoder trial out of
+credits while repeating the verification matrix. What it delivered: shelf cards aligned by
+a flex column with the best line pinned to the bottom; a corner MENU button and the M key
+with a paused dialog (RESUME / RESTART · R / ⌂ SHELF, focus trap, ghost-click safety);
+crisp+ stage scaling; PAD SIZE S/M/L; the CHANGELOG conventions, continuity block and
+checklist additions; the MODELS “How this project is paid for” and “Usage meters
+explained” sections; a 20-viewport matrix with screenshots; and the `017-20261103` entry.
+What it did not reach: the swap into the live files, `tests/build-017-report.md`, the P-17
+prompt copy and the final-session addendum. The live files were still build 016 when the
+trial ended. The work itself was substantially complete and verified; the failure was
+operational (the credits ran out), not a missing design.
+
+The owner describes the session as stuck in continuous testing, with the matrix repeated
+until the 300-credit trial was completely used up. The owner's wording is “tokens”; Qoder's
+meter reports **credits**, not tokens, and the record keeps that distinction. The Qoder
+exit report for the session: plan **300/300 credits used**, session **300.8933 credits**,
+**398 tool calls**, wall **1 h 38 min 49 s** (agent active 1 h 13 min 18 s), code changes
+**+1,041 / −104** lines. This is a dated snapshot of one session, not a permanent verdict
+on the model, and later Qwen versions may behave differently.
+
+## 2026-11-03 — Claude.ai Sonnet 5.5 Extra (Anthropic, chat) — P-17 prompt author
+
+Source: Recorded by DeepSeek V4.1 Flash Free from the owner's feedback and the saved
+prompt.
+
+Builds observed: `017-20261103` (authored the P-17 prompt; did not edit the repository).
+
+The owner's notes: the structured prompt again did the heavy lifting for the build. It set
+the boundaries (shell and docs only; all eight game IIFEs must stay hash-identical), listed
+the owner decisions, measured baseline findings F1–F6, and gave seven ordered steps with
+acceptance criteria. It supplied the exact text for the CHANGELOG conventions, the
+continuity block, the MODELS payment and meter sections, the README sentence and the
+roadmap, plus a 20-viewport verification matrix, a screenshot list, deliverables and a
+definition of done. It told the model to work in `plans/archive/pre-017/work/`, keep
+`PROGRESS.md` with DONE/NEXT lines, and swap into the live files in one step at the end —
+which is exactly what made the hand-over possible when the credits ran out. The prompt is
+saved verbatim in `prompts/P-17_shell-ux-and-process.txt` (private archive). This is a
+snapshot of one prompt on one date.
+
+## 2026-11-03 — DeepSeek V4.1 Flash Free (OpenCode) — build 017 hand-over
+
+Source: Owner's words (verbatim) and a record of the completion pass.
+
+Builds observed: `017-20261103` (completion pass after the Qoder trial ended).
+
+The owner's words, verbatim: “my observation that you have saved me from a horrible
+unfinished situation and that you have picked up and assisted me properly”.
+
+What this pass did: read the CHANGELOG conventions and checklist, the 017 entry and
+`plans/archive/pre-017/PROGRESS.md`; verified the work copies (all eight game IIFEs
+hash-identical to build 016, `node --check` clean, docs 26/26); found and fixed one real
+defect — the game title still truncated at 390–430 px because the compact top row only
+applied below 380 px, so the breakpoint is now 440 px; re-ran a focused 20-viewport check
+(1,184 checks, 0 fails) and retook the 12 screenshots; swapped the six work files into the
+live files in one step; ran the post-swap checks (hashes, syntax, docs 26/26, live render
+175 checks / 0 fails); wrote `tests/build-017-report.md` and
+`prompts/P-17_shell-ux-and-process.txt`; added the final-session addendum and this MODELS
+update. Qwen's part is the entry above: the shelf, MENU, crisp+ stage, PAD SIZE, the
+conventions and the 20-viewport matrix; the missing part was the swap, report and prompt
+copy.
+
+Time and usage: about **25 min** wall-clock (2026-11-03, 19:05–19:30 WIB); **165,312
+tokens processed** (116,561 input + 23,506 output + 25,245 reasoning); 11.82 M cached reads
+not counted; 107 assistant turns, measured from the session's per-message token telemetry.
+No credits were used (OpenCode free model). No git command was run; the suggested commands
+in the report are suggestions only, now and always.
+
+## 2026-11-03 — Owner observation — the viewport test matrix (from build 009)
+
+Source: Recorded by DeepSeek V4.1 Flash Free from the owner's request and the
+CHANGELOG/test reports.
+
+Builds observed: `009-20261101` (where the matrix started), `017-20261103` (latest full
+use).
+
+The owner's notes: the owner asked when the test matrix began and wants it kept as a
+highlight of self-testing and validation, because it measurably helped the quality of the
+implementation. It started with **build 009** (`009-20261101`, the responsive-shell
+rebuild), from **prompt P-09**, authored by **Claude.ai Sonnet 5.5 Extra** and executed by
+**Qwen3.8-Flash (Qoder CLI)**. That build checked **24 viewports from 280×653 to
+3440×1440**, portrait and landscape, with **1,409 automated assertions (0 failures, 0
+console errors)** and **120 screenshots inspected on contact sheets**. The matrix caught
+two real layout faults that DOM numbers alone had missed — a stage sized from a
+content-sized measurement box, and pads pushed to the screen edges in landscape — and both
+were fixed before the build shipped. Later builds reused the same approach at different
+depths (builds 010 and 011 checked four viewports; builds 014-016 checked desktop and
+mobile), and **build 017** brought the full matrix back: a **20-viewport focused run
+(1,184 checks, 0 failures)** plus a live post-swap check (175 checks) and 12 screenshots.
+That pass found the game title still truncating at 390-430 px, which led to the 440 px
+breakpoint fix. The owner's point is that this self-testing and validation is a quality
+highlight of the project, not just paperwork: measure every size, look at the screenshots,
+and fix what the numbers miss. This is a dated owner note, not a model-written summary.
 
 <!-- NEW ENTRIES ABOVE THIS LINE. Never edit existing entries. -->
 
