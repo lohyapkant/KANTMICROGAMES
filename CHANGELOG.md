@@ -2,7 +2,7 @@
 
 ## Conventions (read before adding an entry)
 
-Appendices A1-A9 (material moved out of the README in build 012) start under '## Appendices (build 012)' at the bottom of this file.
+Appendices A1-A9 and A11 (material moved out of the README in build 012 and out of CONTROLS.md in build 018) start under '## Appendices (build 012)' at the bottom of this file.
 
 - **Newest entry first.** Each entry starts with its build ID and the real finish date.
 - **Build IDs are `NNN-YYYYMMDD`**: a zero-padded project build number, then the finish
@@ -85,6 +85,150 @@ Free and trial tiers end without warning. Any model must be able to pick up wher
 6. Never carry a claim forward (credits left, tests passed) without checking it again.
 
 <!-- NEW BUILD ENTRIES: paste the newest entry on the line below this comment, above the previous newest. Never edit older entries. -->
+
+## 018-20261104 — 2026-11-04 (Controls and top bar: pinned SHELF/RESTART, fixed pixel labels, no menu)
+
+Built from prompt: P-18 (the owner's controls-and-top-bar prompt; its text said "build 019"
+and "currently build 018", but the repo was at build 017 with no 018 anywhere, so the owner
+confirmed this run is build 018; private archive file `prompts/P-18_controls-and-top-bar.txt`)  
+Tool and model: **DeepSeek V4.1 Flash Free** (OpenCode)  
+Games in the one file: 8 (PANDASNACK 007-20261101 **frozen**, BOOPEEK 006-20261101
+**frozen**, DUCKLINE 005-20261101 **frozen**, SPROUTUP 007-20261101 **frozen**,
+SLIMEHOP 010-20261101 **frozen**, SNAILRACE 011-20261101 **frozen**, HUGPARADE
+015-20261102 (unchanged this build), CATNAPCATCH 016-20261102 (unchanged this build);
+file build **018-20261104**)
+
+### Removed — MENU and the three pad options (deploy/index.html, PART 3 + PART 4)
+
+- The MENU button, its paused sheet (RESUME / RESTART · R / ⌂ SHELF), the M key,
+  the three-bar icon and all their CSS/JS/listeners are gone. `openGame`/`openShelf`
+  no longer call `closeMenu`, and the pause plate no longer checks `MENU.open`.
+- The PADS (AUTO / SHOW / HIDE), DIR PAD (LEFT / RIGHT) and PAD SIZE (S / M / L)
+  shelf buttons, the `#prefs` group, the `UI` object, `readUiPref` / `saveUiPref`,
+  `applyUi` / `setInputMode`, the `data-pads` / `data-padsize` / `data-hand` /
+  `data-input` attributes and the CSS that hid the pads in keyboard mode are gone.
+  Old stored values under `KANTMICROGAMES.ui.*` are left untouched and never read.
+- The shelf chip now reads "pads on every screen"; the other two chips describe the
+  pad and the keyboard without a device guess.
+
+### Added — pinned SHELF and RESTART (items 1 and 6)
+
+- A fixed `.cornerBar` at `top: calc(var(--sai-t) + 8px); left: calc(var(--sai-l) + 8px)`
+  holds two real buttons, SHELF and RESTART, with 12 px between them and the
+  per-class height from the size table (48 / 48 / 52 / 56 px). They are identical on
+  all eight games and do not move with the centred content column.
+- Both labels are pixel-text canvases (SHELF, RESTART) with full-word `aria-label`s.
+- Under 360 px wide the pair stacks vertically; that is the measured fix for the
+  280 px test screen, where the side-by-side pair plus the title, SCORE and BEST did
+  not fit (the title collapsed to 0 px and the row overflowed by 1 px). Stacked, the
+  pair is 60 px wide and the title keeps 52 px with no overflow.
+- The title, SCORE and BEST stay in the slim top row to the right of the pair; the
+  tagline and hint are hidden only when the stage is height-limited, as before.
+
+### Changed — directions left, action right, fixed sizes (items 3, 4, 5)
+
+- Portrait: stage on top, one controls row below, directions left and action right.
+- Landscape: three columns (directions, stage, action), centred with 24 px column
+  gaps and capped at 1100 px, so a 1920 px screen does not push the controls to the
+  edges. The stage column is centred between the controls; the group is centred.
+- The direction cluster is still the plus shape with an empty centre, an 8 px gap
+  between buttons, and at least 24 px from the action button in portrait.
+- Sizes are fixed by the shorter side of the viewport: XS 48 / 88, SM 60 / 112,
+  MD 72 / 132, LG 84 / 156; labels 2/3, 2/3, 3/4, 3/5; corner heights 48 / 48 /
+  52 / 56. No user option. Every tappable is at least 48 × 48.
+- The XS direction and action sizes are 48 and 88, not the prompt's 52 and 96:
+  52 × 3 + 8 × 2 + 24 + 96 = 292 px cannot fit a 280 px screen. At 280 the page
+  side padding also drops from 8 px to 4 px so the 272 px XS row fits exactly.
+
+### Added — crisp pixel-text labels (item 6)
+
+- `drawPixelLabel` / `refreshPixelLabels` draw every control label with the file's
+  own `PIXEL_FONT` and `paintPixelText`. `n = round(scale × devicePixelRatio)` is a
+  whole number of device pixels per font pixel; the canvas CSS size is `n / dpr`.
+- The action label is redrawn when a game opens (`setActionLabel`), and all labels
+  are redrawn on resize, orientation change, visual-viewport change and after the
+  first layout. No arrows, SVG, emoji or system-font words remain on game controls.
+
+### Verification and limits
+
+- Viewports (CSS px, DPR): 280×653 (3), 390×844 (3), 768×1024 (2), 844×390 (3),
+  1280×720 (1), 1920×1080 (1). Games: PANDASNACK and CATNAPCATCH for layout; all
+  eight action labels at 390×844.
+- A1 pass: no `#btnMenu`, `#menuOverlay`, `#menuSheet`, `#menuIcon`, `#prefs`,
+  `#btnPadMode`, `#btnPadSize`, `#btnHandMode`, no `KeyM` and no `PADS ·` /
+  `PAD SIZE` / `DIR PAD` text remains.
+- A2 pass: SHELF is at (8, 8) in both games at every viewport; RESTART sits
+  immediately to its right with a 12 px gap when side by side, and at (8, 68)
+  when the pair stacks at 280; heights 48 / 48 / 52 / 56; sizes per class.
+- A3 pass: directions left of the stage and action right in landscape at 844×390,
+  1280×720 and 1920×1080; both below the stage with directions left at 280×653,
+  390×844 and 768×1024; controls visible with touch emulation off at 1280/1920.
+- A4 pass: measured sizes match the class table; every tappable ≥ 48 × 48; 8 px
+  direction gaps; 24 px direction-to-action gap in portrait; all eight action
+  labels fit (widest REACH/STOMP 57 px in a 112 px button at 390).
+- A5 pass: every control label is a canvas with an `aria-label`; no arrows or
+  symbols; `canvas.width / pixelTextWidth(text, 1)` is an integer at DPR 1, 2 and 3.
+- A6 pass: a CDP touch on LEFT fired `onDir("left", true)` then `false`; the action
+  fired `onAction`; W/A/S/D, Space, R and Esc worked; a `blur` paused the run and
+  the next key only resumed.
+- A7 pass: five stage sizes are unchanged from build 017 and the sixth grew:
+  233.33, 333.33, 600, 300 (was 266.66 at 844×390), 600, 600 CSS px. No page
+  scroll and no horizontal overflow.
+- A8 pass: all eight game IIFE hashes are identical to build 017: PANDASNACK
+  f6dd1614db8ca9d6, BOOPEEK f321297984175b84, DUCKLINE 6a62f23a0d747a5a,
+  SPROUTUP adff7441c41aef44, SLIMEHOP a92efde40ca8618a, SNAILRACE
+  457fa4b4750da245, HUGPARADE 151deb6e718b23a6, CATNAPCATCH 26f6be1af791ee73.
+  `node --check` clean; one footer build ID; zero console errors.
+- A9 pass: README is 97 lines and 6.4 KB; old CHANGELOG/MODELS entries and ledger
+  rows are byte-identical; the same build ID is in `APP.fileVersion`, the index
+  header, the rendered footer, README, the top CHANGELOG entry and the plan row;
+  ledger totals recomputed.
+- Screenshots: four files captured (390×844 PANDASNACK, 844×390 PANDASNACK,
+  1280×720 CATNAPCATCH, 768×1024 CATNAPCATCH); the 844×390 file was refreshed
+  after the final fit, and all four were inspected (one more than the suggested
+  three).
+- Not verified: no real iOS/Android hardware, no screen reader, no 3440 px screen
+  (the build's limit was the six named viewports). The Run guard section was not
+  present in CHANGELOG; the owner confirmed step 5's six-viewport and one-repair
+  limits were the operative guard. No git command was run.
+
+### Edits to existing text
+
+- `deploy/index.html`: header "Current" and "Build log" lines; `APP.fileVersion`;
+  the size-variable block, focus rule, game-screen/corner-bar CSS, top-row reserve,
+  landscape grid, controls row, direction cluster, `.pbtn`, `#pDash`, small-screen
+  top row and reduced-motion rule; the shelf how-to chips; the game-screen markup
+  and the runtime element handles, keyboard handler, hints, menu/pad code and
+  listeners. The eight game IIFEs were not touched.
+- `CONTROLS.md`: rewritten for the pinned pair, always-on pads, fixed sizes, pixel
+  labels and no menu; every removed passage is archived verbatim in Appendix A11.
+- `README.md`: "Current build" 018; the one pad bullet replaced; 018 added to the
+  DeepSeek V4.1 Flash Free row. No other README text changed.
+- `MODELS.md`: one Usage ledger row for build 018 and recomputed totals. No dated
+  observation was added because the owner notes were blank.
+- `CHANGELOG.md`: this entry and Appendix A11 only; entries 000–017 are untouched.
+- `plans/micro-games-v2.md`: one ledger row and one tool-log row.
+
+### Build record (owner request: duration + tokens/credits)
+
+- Duration: ~35 min wall clock (from the first snapshot/tool call at about 19:25 to
+  the final swap at about 20:00 WIB; measured with the shell clock).
+- Usage: not visible to the model; the owner notes were blank and no meter reading
+  was supplied. No token or credit figure is claimed.
+- Mode and owner notes: owner supplied two decisions only — use 018-20261104, and
+  use step 5 as the guard. Model/tool and meter fields were blank.
+- Tools used: file view/edit, shell, Python exact-match patch scripts, Node.js
+  `--check`, headless Chrome over CDP (Node WebSocket helper), `curl`, screenshots.
+- Iterations: 1 repair cycle pair. First pass measured a 280 px clash (side-by-side
+  pair left 0 px for the title and overflowed the row by 1 px); the fix stacked the
+  pair under 360 px and dropped the 280 px page padding to 4 px. Re-measured green.
+
+### Documentation review/edit attempts (standing rule)
+
+- No separate documentation review model was used. The build's own documentation
+  edits were checked against the Conventions and the per-build checklist; the old
+  CONTROLS passages were copied verbatim into A11 before the rewrite.
+
 
 ## 017-20261103 — 2026-11-03 (Shell UX and process: MENU, PAD SIZE, crisp+ stage, tidy shelf)
 
@@ -2179,3 +2323,173 @@ SPROUTUP and SLIMEHOP; the five older modules were not touched.
 Moved from CONTROLS.md § Accessibility (last bullet) in build 012 — verbatim, not edited.
 
 - Colours and pixel art are untouched; this build only changed the shell.
+### A11 — CONTROLS.md passages removed in build 018
+
+Moved from CONTROLS.md in build 018 — verbatim, not edited. The whole build-017
+file is reproduced below so no removed passage is lost; the rewritten CONTROLS.md
+is the current guide.
+
+````markdown
+<!-- Applies to: build 017-20261103 · eight games · changes to controls are recorded in CHANGELOG.md -->
+# KANTMICROGAMES — Controls
+
+Which controls exist, how they behave on each kind of device, and why.
+This guide applies to all eight games, on every kind of device.
+
+## One table for all eight games
+
+| Game | Move | Action (`SPACE`, action pad, stage tap) | Goal |
+|---|---|---|---|
+| PANDASNACK | scurry with `W A S D` / arrows / the direction pad | **DASH** — 0.7 s at 1.75×, 2.2 s cooldown | munch bamboo, dodge wasps, keep three hearts |
+| BOOPEEK | tiptoe with `W A S D` / arrows / the direction pad | **POKE** — 20 px reach, 0.1 s cooldown | poke Boo while he peeks; 10 in 20 s, then beat your score |
+| DUCKLINE | swim with `W A S D` / arrows / the direction pad | **GO** — quack boost, 0.55 s at 1.7×, 2 s cooldown | gather three ducklings, reach the far bank in 22 s |
+| SPROUTUP | weave with `W A S D` / arrows / the direction pad | **REACH** — leap burst, 0.5 s at 1.85×, 2 s cooldown | gather 15 drops in 24 s to bloom |
+| SLIMEHOP | hop one pad per press with `W A S D` / arrows / the direction pad | **STOMP** — bloom the pad underfoot, 1.2 s cooldown, stuns a nearby snail | bloom all nine pads in 30 s before the snail eats them |
+| SNAILRACE | steer with `W A S D` / arrows / the direction pad | **ZOOM** — 1.55× burst for 0.7 s, 2.6 s cooldown | reach the strawberry first in 20 s; lettuce boosts, salt locks |
+| HUGPARADE | step cell to cell along the hedge rails with `W A S D` / arrows / the direction pad | **PEEK** — see the next hedges for 2 s, 6 s cooldown | gather up to three hearts, then hug Bibi: a hug scores 1 plus 1 per heart held; the maze redraws every 10 s |
+| CATNAPCATCH | slide the pillow left and right with `A` / `D`, ← → or the direction pad | **POUF** — widen the paper pillow for 1.4 s, 4.5 s cooldown | catch falling noisemakers for 45 s; three clangs wake Mochi |
+
+The action button carries the game's own label (DASH / POKE / GO / REACH / STOMP / ZOOM / PEEK / POUF),
+so one pad serves every game. SLIMEHOP is the one game where a direction press is a single
+**discrete hop** rather than a continuous walk: holding a direction does not repeat, and
+each new press hops one pad (or bonks harmlessly at the pond edge). SNAILRACE steers
+continuously on both axes; holding right and up moves diagonally with each axis at full
+speed, so a lane change does not cost forward ground. HUGPARADE moves on cell rails
+instead: every press carries Momo a whole cell, a release mid-step still finishes that
+step at the next centre, a perpendicular press waits for the next junction, and only a
+hedge blocks a step. It never moves diagonally, so Momo cannot wedge between two hedges.
+CATNAPCATCH uses the horizontal axis only: left and right slide the paper pillow, and up
+and down do nothing.
+
+## Input devices
+
+| Device | Move | Act | Menu / start / restart | Leave |
+|---|---|---|---|---|
+| Keyboard | `W A S D` or arrow keys | `SPACE` | `SPACE` / `ENTER` / any unmodified key starts the title card; `M` opens or closes the game menu; `R` restarts a run (from play or from the menu) | `ESC` (from the menu too) |
+| Mouse | drag the direction pad (optional) | click the action button or the stage | click the card on the shelf; click `MENU`, then `RESTART` in the menu | click `MENU`, then `⌂ SHELF` in the menu |
+| Touch / pen | thumb-drag the direction pad; slide from one arrow to the next without lifting | tap the action button or the stage | tap the card; tap `MENU`, then `RESTART` in the menu | tap `MENU`, then `⌂ SHELF` in the menu |
+| Assistive tech | the pads are direct-manipulation only (see below); keyboard mappings still work | `SPACE` | `ENTER` on a focused card; `MENU` is a real button | `ESC` or `⌂ SHELF` in the menu |
+
+## The game menu
+
+The MENU button sits in the top-right corner of the game screen in both
+orientations, with a three-bar pixel icon and the word MENU. It (or the `M` key)
+opens a paused dialog with **RESUME**, **RESTART · R**, **⌂ SHELF** and the game's
+own how-to line. Opening it pauses the run and releases every held direction.
+RESUME, a tap outside the sheet, `M` (from the menu) close it and resume; focus is
+trapped inside the sheet and returns to MENU on close. There are no loose
+RESTART or shelf buttons in the play area any more — the corner MENU button and
+the menu are the only chrome. The tap that closes the menu by landing outside the
+sheet never reaches a pad, the stage or a card underneath.
+
+Rules that apply everywhere:
+
+- **One tap = one action.** A tap on the stage acts once (`onStageTap`). A drag on
+  the stage does not act; a mouse drag that starts on a shelf card does not open it.
+- **Drag does not leak.** After `⌂ SHELF`, a tap that ends where a card now sits does
+  not open anything (a short ghost-click guard, and one tap must both start and end
+  on the card).
+- **Browser shortcuts pass through.** `Ctrl` / `Cmd` / `Alt` combinations are never
+  consumed: copy, paste, reload, tab switching and OS gestures reach the browser.
+  Tab, CapsLock, the modifier keys and F1–F12 are never treated as "any key".
+- **Arrows and Space do not scroll the page** while a game is open.
+
+## On-screen pads
+
+The direction cluster and the action button appear when the last real
+input was touch or pen. If the last input was a key or the mouse they hide, giving
+the stage the whole screen. The circle in the middle of the direction cluster is
+empty: sliding across it keeps the current direction instead of releasing it.
+
+| Preference | Values | Effect |
+|---|---|---|
+| `PADS` | **AUTO** (default) · **SHOW** · **HIDE** | AUTO follows the last input type; SHOW always shows the pads; HIDE hides them even in touch mode (the stage and the keyboard still work) |
+| `DIR PAD` | **LEFT** (default) · **RIGHT** | puts the direction cluster and the action column on opposite sides — in landscape beside the stage, in portrait within the controls row |
+| `PAD SIZE` | **M** (default) · **S** · **L** | sets the touch-pad size: S = 58 px, M = 66 px, L = 76 px; the action button is 1.7 x the pad size. On small screens (≤ 380 px wide or ≤ 620 px tall) the sizes are 48 / 56 / 64 px |
+
+All three preferences sit on the shelf under the how-to chips, are announced with an
+`aria-label`, and persist across reloads in `localStorage` under
+`KANTMICROGAMES.ui.pads`, `KANTMICROGAMES.ui.hand` and `KANTMICROGAMES.ui.padsize`.
+To reset them, clear those keys (or all `KANTMICROGAMES.*` keys) in the browser's
+site data. Best scores use the same prefix: `KANTMICROGAMES.<GAME>.best`.
+
+Pads and buttons are at least **48 × 48 CSS px** at every viewport. The direction
+pads keep a 9 px gap (8 px on small screens) and the action button sits 24 px from
+the direction cluster. On viewports narrower than 416 px the L size renders one
+step down (66 px, then 56 px below 357 px) so the pads never crowd the stage or
+each other.
+
+### Why the pads are not Tab stops
+
+The four direction buttons and the action pad use `tabindex="-1"` on purpose.
+They are held controls, not buttons you press once: tabbing to them would add five
+stops in front of the menu button and would not let a keyboard user hold a direction.
+Every pad action has a keyboard equivalent (`W A S D` / arrows, `SPACE`), so the
+game is fully operable from the keyboard without them. The tab order is kept
+short and predictable: shelf cards and preferences on the shelf, then the MENU
+button in a game (and the three menu buttons while the menu is open).
+
+## Pause
+
+A game pauses when the tab is hidden, the window loses focus, or the page is being
+put away (`visibilitychange`, `blur`, `pagehide`). Every held direction is released
+first, so nothing runs into a wall while the phone rings. A `PAUSED` plate appears
+over the stage.
+
+The next tap or key press only resumes: it is swallowed, so you cannot dash or poke
+straight out of a pause. `M` opens the menu while paused (it also works from the
+menu). `ESC` still leaves to the shelf while paused. While the menu is open the
+sheet replaces the `PAUSED` plate; behind it the game stays paused.
+
+## Layout and scaling
+
+- The stage keeps its 100 × 100 design pixels and is scaled "crisp+": the shell
+  computes whole device pixels per art pixel from the room available and the
+  device pixel ratio (about 2×–10× on today's phones), and only falls back to a
+  fractional scale when the whole-number result would be under 2× — very short
+  landscape phones. Canvas edges land on whole device pixels; the canvas is never
+  stretched with a CSS transform.
+- The shell measures the room left by the header, the hint and the controls in
+  both layouts, picks the layout that yields the bigger stage, and only then sizes
+  the canvas. Portrait screens put the stage on top and one controls row below;
+  landscape screens put the direction cluster and action column beside the stage.
+- During play the page never scrolls: the shell is exactly one viewport tall
+  (`100dvh` with a `100vh` fallback), uses `overscroll-behavior: none`, and gives
+  the stage and pads `touch-action: none` so a swipe cannot drag or pull-to-refresh
+  the page. The shelf still scrolls normally, and the page keeps
+  `touch-action: manipulation` so double-tap zoom is not triggered on chrome.
+- Safe areas (`env(safe-area-inset-*)`) are applied as padding on the page and the
+  top bar, so notches, rounded corners and the home-indicator strip never cover a
+  control.
+- **Page zoom is allowed** (the viewport meta has no `maximum-scale` and no
+  `user-scalable=no`), so a player who needs it can pinch-zoom the shelf and the
+  chrome.
+
+## Accessibility
+
+- Visible focus ring (`:focus-visible`) on shelf cards, preference buttons, the
+  MENU button and the menu buttons.
+- Cards are real buttons with an accessible name; `ENTER` and `SPACE` open them.
+- The game menu is a labelled dialog (`aria-modal`) whose buttons are real buttons;
+  focus is trapped inside while it is open and returns to MENU on close.
+- Stage messages (`#msg`) are a polite live region, so screen readers hear
+  "PAUSED", "GAME OVER" and similar shell-level text.
+- Prefers-reduced-motion turns off the card lift, chip pulse and button press
+  transforms.
+
+## Known control quirks
+
+- The frozen modules still carry their original desktop hint strings. The shell
+  strips the `desktop:` prefix for the keyboard hint and writes its own touch
+  line from the game's action label, so no game code had to change.
+- HIDE hides the action button as well as the direction pad. On a touch-only
+  device the action is still available by tapping the stage.
+- PAD SIZE only resizes the touch pads; keyboard play is unchanged. On the
+  narrowest widths the L choice renders one step down (see the pad table above)
+  so the action button keeps its 24 px gap instead of wrapping.
+- Below 360 px wide the game title in the top row truncates with an ellipsis
+  so SCORE and BEST stay clear of the corner MENU button; from 360 px up the
+  full name fits. The full name is also on the shelf card and in the browser tab.
+- The mascot animation and the shelf's hover lift are decorative only; they are
+  disabled under reduced motion and do not affect play.
+````

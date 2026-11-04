@@ -91,27 +91,29 @@ What each model used on each build. This is a record, not an opinion, and not a 
 | 016 | Qwen3.8-Flash · Qoder CLI | built | ~18 min | 10.2413 credits | measured: 198 requests (final figures from the CHANGELOG addendum) |
 | 017 | Qwen3.8-Flash · Qoder CLI | built | ~99 min (1 h 38 min 49 s wall; 1 h 13 min 18 s active) | 52.7558 credits at 17:49; 300.8933 session credits at exit | measured: 104 billable requests at 17:49; Qoder exit report: plan 300/300, session 300.8933, 398 tool calls; the two meters are not added together |
 | 017 | DeepSeek V4.1 Flash Free · OpenCode | finished build 017 after the Qoder trial ended | ~25 min | 165,312 tokens processed | measured: 116,561 input + 23,506 output + 25,245 reasoning; 11.82 M cached reads not counted; 107 assistant turns |
+| 018 | DeepSeek V4.1 Flash Free · OpenCode | built | ~35 min | — | not visible to the model; owner notes blank, no meter reading supplied |
 
 ### Totals that can honestly be added
 - **Credits, Qoder CLI, measured (builds 009-017):** 127.3432 credits over 1,247 billable requests.
 - **Approximate list-price value of the measured credits:** 127.3432 x US$0.01 = US$1.27. An estimate, not a bill: the trial is free. Based on Qoder's published plan prices (about US$20 for 2,000 credits); check https://docs.qoder.com/account/pricing before relying on it. Never converted for tokens and never added across tools.
 - **Owner's Qoder exit report for build 017:** plan **300/300 credits used**; session **300.8933 credits**; **398 tool calls**; wall time 1 h 38 min 49 s. This is Qoder's own meter reading, not the per-request transcript total above, and is not added to it (the two meters count differently).
 - **Iterations recorded (from build 017):** 4 over 1 build.
+- **Iterations recorded (build 018):** 1 repair cycle pair (a 280 px control clash, fixed by stacking the corner pair under 360 px and using 4 px page padding).
 - **Token totals: none.** The token figures count different things (for example ~2.37 M "processed" in build 005 against ~48,000 in build 007), so adding them would mean nothing.
 - **Time by model, approximate.** Builds 000-002 and the GPT-OSS attempt have no time recorded, so DeepSeek and GLM are undercounted. One block = 10 minutes, rounded half up.
 
 | Model | Minutes | At a glance |
 |---|---|---|
 | Qwen3.8-Flash | ~305 | ▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇ |
-| DeepSeek V4.1 Flash Free | ~140 | ▇▇▇▇▇▇▇▇▇▇▇▇▇▇ |
+| DeepSeek V4.1 Flash Free | ~175 | ▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇ |
 | GLM-5.3 Flash Free | ~45 | ▇▇▇▇▇ |
 | Flint 40B Free | ~25 | ▇▇▇ |
 | Gemini 3.8 Flash | ~25 | ▇▇▇ |
 | Claude Opus 4.6 Thinking | ~20 | ▇▇ |
 | Shared session (build 006: DeepSeek + Gemini) | ~30 | ▇▇▇ |
 
-Total recorded: about 590 minutes (about 9 h 50 min) over 15 of 18 builds.
-(Totals were recomputed after the build-017 row was added; the CHANGELOG Build records remain the source of truth.)
+Total recorded: about 625 minutes (about 10 h 25 min) over 16 of 19 builds.
+(Totals were recomputed after the build-018 row was added; the CHANGELOG Build records remain the source of truth.)
 
 ---
 
