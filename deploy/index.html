@@ -6,15 +6,16 @@
   Repository : https://github.com/lohyapkant/KANTMICROGAMES
   Play online: https://kantmicrogames.lohyapkant.workers.dev/
   Hosting    : Cloudflare Workers (https://workers.cloudflare.com/)
-  Current    : build 018-20261104 — controls and top bar: SHELF and RESTART
-               pinned to the viewport's upper-left, MENU and the PADS / DIR
-               PAD / PAD SIZE options removed, directions left and action
-               right on every screen, fixed sizes per screen class, pixel-text
-               labels; eight games unchanged (PANDASNACK, BOOPEEK, DUCKLINE,
-               SPROUTUP, SLIMEHOP, SNAILRACE, HUGPARADE, CATNAPCATCH)
+  Current    : build 019-20261106 — stage stability and crisp sizing: the
+               stage no longer changes size at idle, the tagline and hint are
+               not shown on the game screen, and the 600 px cap is applied in
+               whole device pixels at every display scale; controls unchanged
+               from build 018; eight games unchanged (PANDASNACK, BOOPEEK,
+               DUCKLINE, SPROUTUP, SLIMEHOP, SNAILRACE, HUGPARADE,
+               CATNAPCATCH)
   Names      : project and on-screen brand KANTMICROGAMES ·
                save keys and the console tag use the KANTMICROGAMES prefix
-  Build log  : build 018-20261104, DeepSeek V4.1 Flash Free (OpenCode) — the
+  Build log  : build 019-20261106, DeepSeek V4.1 Flash Free (OpenCode) — the
                full record of every build is in CHANGELOG.md
   ================================================================
 
@@ -228,8 +229,8 @@
             display: block;
             width: 96px;    /* 16 design-pixels wide, x6, crisp */
             height: 90px;   /* 15 design-pixels tall            */
-            image-rendering: pixelated;
             image-rendering: crisp-edges;
+            image-rendering: pixelated;
         }
 
         #bannerText { min-width: 0; }
@@ -332,8 +333,8 @@
                width; a fixed 96 px height used to squash it vertically */
             aspect-ratio: 200 / 96;
             border-radius: 14px;
-            image-rendering: pixelated;
             image-rendering: crisp-edges;
+            image-rendering: pixelated;
             background: #FFF6E4;
             border: 1px dashed var(--outline);
             margin-bottom: 13px;
@@ -349,7 +350,7 @@
         .card.soon .name { color: var(--ink-soft); }
 
         .soonRow { display: flex; align-items: center; gap: 14px; }
-        #soonMoon { flex: none; width: 56px; height: 56px; image-rendering: pixelated; image-rendering: crisp-edges; }
+        #soonMoon { flex: none; width: 56px; height: 56px; image-rendering: crisp-edges; image-rendering: pixelated; }
 
         /* =============== game screen =============== */
 
@@ -398,8 +399,8 @@
 
         .cornerBtn canvas {
             display: block;
-            image-rendering: pixelated;
             image-rendering: crisp-edges;
+            image-rendering: pixelated;
         }
 
         .gameTop {
@@ -554,8 +555,8 @@
 
         #stage {
             display: block;
-            image-rendering: pixelated;
             image-rendering: crisp-edges;
+            image-rendering: pixelated;
             border-radius: 10px;
             touch-action: none; /* a swipe on the stage never scrolls or refreshes */
         }
@@ -649,15 +650,12 @@
             --btn-shade: #DBB07E;
         }
 
-        @media (max-height: 700px) {
-            #gameTagline { display: none; }
-        }
-
-        /* fitStage adds .tight-top when the stage is height-limited: showing
-           the tagline or the hint would shrink the stage, so both step out
-           of the way and the stage keeps its pixels. */
-        body.tight-top #gameTagline,
-        body.tight-top #inputHint { display: none; }
+        /* D1 (build 019): the tagline and the one-line hint are never shown
+           on the game screen. The title, SCORE, BEST and the pinned pair
+           stay; nothing hides conditionally, so the header height cannot
+           depend on the stage size. */
+        #gameTagline,
+        #inputHint { display: none; }
 
         /* 280 px screens: 8 px page padding would leave 264 px, two pixels
            short of the 272 px the XS controls need (48 x 3 + 8 x 2 + 24 +
@@ -908,7 +906,7 @@
 
 const APP = {
     name: "KANTMICROGAMES",
-    fileVersion: "018-20261104",       // build number of THIS one-file app
+    fileVersion: "019-20261106",       // build number of THIS one-file app
     savePrefix: "KANTMICROGAMES."      // best scores live at prefix + GAMEID + ".best"
 };
 
@@ -1257,8 +1255,8 @@ const shelfScreenEl = document.getElementById("shelfScreen");
 const gameScreenEl = document.getElementById("gameScreen");
 const stageCanvas = document.getElementById("stage");
 const stageCtx = stageCanvas.getContext("2d");
-const stageBlockEl = document.getElementById("stageBlock");
 const bezelEl = document.getElementById("bezel");
+const gameTopEl = document.querySelector(".gameTop");
 const pauseOverlayEl = document.getElementById("pauseOverlay");
 const dirClusterEl = document.getElementById("dirCluster");
 const scoreEl = document.getElementById("scoreVal");
@@ -1274,7 +1272,10 @@ const verEl = document.getElementById("verBox");
 
 const STAGE_SIZE = 100;
 const STAGE_MIN_WHOLE = 2;      // D3: below 200 px the scale becomes fractional
-const STAGE_MAX_SCALE = 6;
+const STAGE_CAP_CSS = 600;      // device-pixel cap: floor(600 x dpr / 100)
+const PORT_ROW_GAP = 10;        // #arena row gap in portrait
+const LAND_COL_GAP = 24;        // #arena column gap in landscape
+const MESSAGE_LINE_H = 24;      // reserved line + gap when #msg has text
 const SCREEN_SETTLE_MS = 400;   // ghost-click gate after a screen swap
 
 let lastScreenSwap = 0;
@@ -1346,81 +1347,89 @@ function routeFromHash() {
 
 window.addEventListener("hashchange", routeFromHash);
 
-/* Measure the real box the stage has left after header and controls are laid
-   out, in each of the two layouts, and choose the larger stage.
+/* Compute the room the stage has left, in each of the two layouts, and pick
+   the larger stage. The room comes ONLY from boxes whose size follows the
+   viewport: #gameScreen (100dvh, the page padding and the safe areas), the
+   slim top row, the class-table control sizes, the bezel chrome and the
+   message line. Nothing here measures #stageBlock, the bezel or the canvas,
+   so resizing the canvas can never feed back into the next fit. Build 019
+   removed the build-018 .tight-top toggle and the ResizeObserver on
+   #stageBlock for exactly that reason: together they made the stage flip
+   between two sizes on every frame at some heights.
 
-   D3 "crisp+" (build 017): the scale is chosen in DEVICE pixels, so every
-   art pixel covers a whole number of device pixels on any screen density:
-     devicePxPerArtPx = floor(availableCssPx x devicePixelRatio / 100)
+   D3 "crisp+" (build 017, cap fixed in build 019): the scale is chosen in
+   DEVICE pixels, so every art pixel covers a whole number of device pixels
+   on any screen density:
+     devicePxPerArtPx = min(floor(roomCssPx x devicePixelRatio / 100),
+                            floor(600 x devicePixelRatio / 100))
      canvasCssPx      = devicePxPerArtPx x 100 / devicePixelRatio
-   At DPR 1 this is the old whole-number scale. Under 2x the old fractional
-   fallback keeps the page scroll-free. The 6x cap (600 css px) is kept. */
-let stageLimit = "w";   // which axis limited the chosen stage (h = height)
+   The 600 CSS px ceiling is applied in whole device pixels, so 125%, 175%
+   and 225% display scales stay whole too. At DPR 1 this is the old
+   whole-number scale. Under 2x the old fractional fallback keeps the page
+   scroll-free. */
 
-function stageScaleFor(layout) {
-    bodyEl.dataset.layout = layout;
-    const style = window.getComputedStyle(bezelEl);
-    const chromeX = parseFloat(style.paddingLeft) + parseFloat(style.paddingRight) +
-                    parseFloat(style.borderLeftWidth) + parseFloat(style.borderRightWidth);
-    const chromeY = parseFloat(style.paddingTop) + parseFloat(style.paddingBottom) +
-                    parseFloat(style.borderTopWidth) + parseFloat(style.borderBottomWidth);
-    const messageH = msgEl.offsetHeight ? msgEl.offsetHeight + 6 : 0;
-    const availW = stageBlockEl.clientWidth - chromeX;
-    const availH = stageBlockEl.clientHeight - chromeY - messageH;
-    if (availW < 40 || availH < 40) return 0;
-    const fit = Math.min(availW, availH) / STAGE_SIZE;
-    stageLimit = availH < availW - 0.5 ? "h" : "w";
+function stageScaleFromBox(boxW, boxH) {
+    if (boxW < 40 || boxH < 40) return 0;
     const dpr = window.devicePixelRatio || 1;
-    const devicePx = Math.floor(Math.min(availW, availH) * dpr / STAGE_SIZE);
+    const room = Math.min(boxW, boxH);
+    const devicePx = Math.min(
+        Math.floor(room * dpr / STAGE_SIZE),
+        Math.floor(STAGE_CAP_CSS * dpr / STAGE_SIZE)
+    );
     const cssScale = devicePx / dpr;               // css px per art pixel
-    if (cssScale >= STAGE_MIN_WHOLE) return Math.min(STAGE_MAX_SCALE, cssScale);
-    return Math.max(0.4, fit);
+    if (cssScale >= STAGE_MIN_WHOLE) return cssScale;
+    return Math.max(0.4, room / STAGE_SIZE);
 }
-
-let fitTightDone = false;   // the tight-header decision is made once per fit
 
 function fitStage() {
     if (gameScreenEl.hidden) return;
-    const portraitScale = stageScaleFor("port");
-    const portraitLimit = stageLimit;
-    const landscapeScale = stageScaleFor("land");
-    const landscapeLimit = stageLimit;
+    const viewW = gameScreenEl.clientWidth;
+    const viewH = gameScreenEl.clientHeight;
+    if (viewW < 40 || viewH < 40) return;
+
+    const topStyle = window.getComputedStyle(gameTopEl);
+    const topH = gameTopEl.offsetHeight + (parseFloat(topStyle.marginBottom) || 0);
+    const arenaH = Math.max(0, viewH - topH);
+
+    const bezelStyle = window.getComputedStyle(bezelEl);
+    const chromeX = parseFloat(bezelStyle.paddingLeft) + parseFloat(bezelStyle.paddingRight) +
+                    parseFloat(bezelStyle.borderLeftWidth) + parseFloat(bezelStyle.borderRightWidth);
+    const chromeY = parseFloat(bezelStyle.paddingTop) + parseFloat(bezelStyle.paddingBottom) +
+                    parseFloat(bezelStyle.borderTopWidth) + parseFloat(bezelStyle.borderBottomWidth);
+
+    const rootStyle = window.getComputedStyle(document.documentElement);
+    const dirSize = parseFloat(rootStyle.getPropertyValue("--dir-size")) || 0;
+    const dirGap = parseFloat(rootStyle.getPropertyValue("--dir-gap")) || 0;
+    const actionSize = parseFloat(rootStyle.getPropertyValue("--action-size")) || 0;
+    const dirCluster = 3 * dirSize + 2 * dirGap;
+    const controlsH = Math.max(dirCluster, actionSize);
+    const messageH = msgEl.textContent ? MESSAGE_LINE_H : 0;
+
+    const portraitScale = stageScaleFromBox(
+        viewW - chromeX,
+        arenaH - controlsH - PORT_ROW_GAP - chromeY - messageH
+    );
+    const landscapeScale = stageScaleFromBox(
+        viewW - dirCluster - actionSize - 2 * LAND_COL_GAP - chromeX,
+        arenaH - chromeY - messageH
+    );
+
     /* Near-square screens (foldable inner displays) pick whichever layout
        yields the larger stage; exact ties follow the available aspect. */
     let layout;
     if (landscapeScale > portraitScale) layout = "land";
     else if (portraitScale > landscapeScale) layout = "port";
     else layout = window.innerWidth >= window.innerHeight ? "land" : "port";
-    bodyEl.dataset.layout = layout;
-    /* When the height is the limit, the tagline and hint would only take
-       room from the stage; hide them and measure once more with the
-       slimmer header. */
-    const heightLimited = (layout === "land" ? landscapeLimit : portraitLimit) === "h";
-    /* Decide the tight header from the BEFORE measurements, apply it, then
-       measure once more with the slimmer header. The guard stops the two
-       states from chasing each other (freeing height can make a taller
-       stage width-limited, which must not undo the decision). */
-    if (!fitTightDone && heightLimited !== bodyEl.classList.contains("tight-top")) {
-        fitTightDone = true;
-        bodyEl.classList.toggle("tight-top", heightLimited);
-        fitStage();
-        fitTightDone = false;
-        return;
-    }
+    if (bodyEl.dataset.layout !== layout) bodyEl.dataset.layout = layout;
+
     const scale = Math.max(0.4, layout === "land" ? landscapeScale : portraitScale);
     const cssSize = STAGE_SIZE * scale;
-    stageCanvas.style.width = cssSize + "px";
-    stageCanvas.style.height = cssSize + "px";
-    /* Snap the canvas edges onto whole device pixels (never with a CSS
-       transform, which would blur crisp+). */
-    const dpr = window.devicePixelRatio || 1;
-    const rect = stageCanvas.getBoundingClientRect();
-    const offX = Math.round(rect.left * dpr) / dpr - rect.left;
-    const offY = Math.round(rect.top * dpr) / dpr - rect.top;
-    if (Math.abs(offX) > 0.001 || Math.abs(offY) > 0.001) {
-        stageCanvas.style.marginLeft = ((parseFloat(stageCanvas.style.marginLeft) || 0) + offX) + "px";
-        stageCanvas.style.marginTop = ((parseFloat(stageCanvas.style.marginTop) || 0) + offY) + "px";
-    }
+    /* Never write a size that is already current: a no-op style write still
+       dirties layout and can wake observers. */
+    const currentW = parseFloat(stageCanvas.style.width);
+    const currentH = parseFloat(stageCanvas.style.height);
+    if (!(Math.abs(currentW - cssSize) < 0.005)) stageCanvas.style.width = cssSize + "px";
+    if (!(Math.abs(currentH - cssSize) < 0.005)) stageCanvas.style.height = cssSize + "px";
 }
 
 let fitScheduled = false;
@@ -1437,7 +1446,6 @@ function scheduleFit() {
 window.addEventListener("resize", scheduleFit);
 window.addEventListener("orientationchange", scheduleFit);
 if (window.visualViewport) window.visualViewport.addEventListener("resize", scheduleFit);
-if (window.ResizeObserver) new ResizeObserver(scheduleFit).observe(stageBlockEl);
 
 /* ---------- the one loop: only the open game ticks and paints ---------- */
 
@@ -1558,7 +1566,7 @@ window.addEventListener("keydown", function (event) {
     if (dir) { ACTIVE.module.onDir(dir, true); pressPadVisual(dir, true); return; }
     if (code === "Space") { ACTIVE.module.onAction(); return; }
     if (code === "Escape") { openShelf(); return; }
-    if (code === "KeyR") { ACTIVE.module.restart(); return; }
+    if (code === "KeyR") { ACTIVE.module.restart(); scheduleFit(); return; }
     if (isNonAnyKey(code)) return;
     if (typeof ACTIVE.module.onAnyKey === "function") ACTIVE.module.onAnyKey();
 });
@@ -1740,6 +1748,7 @@ restartBtnEl.addEventListener("click", function () {
     if (!screenSettled() || !ACTIVE.module) return;
     resumeFromUserInput();
     ACTIVE.module.restart();
+    scheduleFit();
 });
 
 refreshPixelLabels();

@@ -1,4 +1,4 @@
-<!-- Applies to: build 018-20261104 · eight games · changes to controls are recorded in CHANGELOG.md -->
+<!-- Applies to: build 019-20261106 · eight games · changes to controls are recorded in CHANGELOG.md -->
 # KANTMICROGAMES — Controls
 
 Which controls exist, how they behave on each kind of device, and why.
@@ -34,8 +34,7 @@ and down do nothing.
 Two chrome buttons are pinned to the viewport's upper-left corner, inside the safe area,
 on every game and every device: **SHELF** and **RESTART**. They never move with the
 centred content column and never move between games. The title, SCORE and BEST sit to
-their right in one slim row; the tagline and hint step out of the way when they would
-crowd the stage.
+their right in one slim row. The tagline and hint are not shown on the game screen.
 
 - **SHELF** returns to the shelf. **RESTART** starts the current run again.
 - There is no menu and no `M` key. `R` restarts, `ESC` leaves, and both work from play
@@ -144,11 +143,13 @@ once the run is resumed.
   device pixel ratio (about 2×–10× on today's phones), and only falls back to a
   fractional scale when the whole-number result would be under 2× — very short
   landscape phones. Canvas edges land on whole device pixels; the canvas is never
-  stretched with a CSS transform.
-- The shell measures the room left by the header, the hint and the controls in
-  both layouts, picks the layout that yields the bigger stage, and only then sizes
-  the canvas. Portrait screens put the stage on top and one controls row below;
-  landscape screens put the direction cluster and action button beside the stage.
+  stretched with a CSS transform. The 600 px cap is applied in whole device pixels,
+  so the stage stays crisp at 125%, 175% and 225% display scales.
+- The shell measures the room left by the header and the controls in both layouts,
+  picks the layout that yields the bigger stage, and only then sizes the canvas.
+  Portrait screens put the stage on top and one controls row below; landscape
+  screens put the direction cluster and action button beside the stage. The
+  tagline and hint are not shown on the game screen.
 - During play the page never scrolls: the shell is exactly one viewport tall
   (`100dvh` with a `100vh` fallback), uses `overscroll-behavior: none`, and gives
   the stage and pads `touch-action: none` so a swipe cannot drag or pull-to-refresh

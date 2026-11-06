@@ -2,7 +2,7 @@
 
 ## Conventions (read before adding an entry)
 
-Appendices A1-A9 and A11 (material moved out of the README in build 012 and out of CONTROLS.md in build 018) start under '## Appendices (build 012)' at the bottom of this file.
+Appendices A1-A9, A11 and A12 (material moved out of the README in build 012 and out of CONTROLS.md in builds 018 and 019) start under '## Appendices (build 012)' at the bottom of this file.
 
 - **Newest entry first.** Each entry starts with its build ID and the real finish date.
 - **Build IDs are `NNN-YYYYMMDD`**: a zero-padded project build number, then the finish
@@ -72,6 +72,7 @@ Appendices A1-A9 and A11 (material moved out of the README in build 012 and out 
     12. Git: end your report with the suggested commands in a code block and do not run them: `git status`, `git add <the changed public files>`, `git commit -m "build NNN-YYYYMMDD: <title>" -m "<two to four bullets>"`, `git tag build-NNN`, `git push`.
     13. Meters: record what the tool's own usage meter shows at the start and the end, in its own unit, as supplied by the owner or visible to you. If you cannot see it, write "not visible to the model". Never estimate a balance.
     14. Pixels: every new image, icon or badge is drawn from a pixel map. No image files, SVG or emoji as art.
+    15. Stability: the stage must not change size at idle. After any change to `fitStage`, the top row or the controls, run the idle check (record the stage rectangle on every animation frame for 0.8 s at the named sizes; zero changes) before swapping files.
     Never delete, shorten or restructure any documentation file or section. If something looks wrong, say so in the entry instead of fixing it silently.
 
 ### Continuity when a free tier runs out
@@ -85,6 +86,130 @@ Free and trial tiers end without warning. Any model must be able to pick up wher
 6. Never carry a claim forward (credits left, tests passed) without checking it again.
 
 <!-- NEW BUILD ENTRIES: paste the newest entry on the line below this comment, above the previous newest. Never edit older entries. -->
+
+## 019-20261106 — 2026-11-06 (Stage stability and crisp sizing: no idle vibration, whole-device-pixel cap)
+
+Built from prompt: P-19 (the owner's stage-stability and crisp-sizing prompt; private archive file `prompts/P-19_stage-stability.txt`)  
+Tool and model: **DeepSeek V4.1 Flash Free** (OpenCode)  
+Games in the one file: 8 (PANDASNACK 007-20261101 **frozen**, BOOPEEK 006-20261101
+**frozen**, DUCKLINE 005-20261101 **frozen**, SPROUTUP 007-20261101 **frozen**,
+SLIMEHOP 010-20261101 **frozen**, SNAILRACE 011-20261101 **frozen**, HUGPARADE
+015-20261102 (unchanged this build), CATNAPCATCH 016-20261102 (unchanged this build);
+file build **019-20261106**)
+
+### Fixed — the stage no longer vibrates at idle (F1)
+
+- Removed the build-018 `.tight-top` mechanism: the conditional class toggle,
+  `fitTightDone`, the `heightLimited` / `stageLimit` decision and the CSS that hid
+  `#gameTagline` / `#inputHint` only when the height was the limit. Per D1 both are
+  now hidden permanently on the game screen.
+- `fitStage` now computes the room from `#gameScreen` (`100dvh`), the measured slim
+  top row, the class-table control sizes (`--dir-size`, `--dir-gap`,
+  `--action-size`), the bezel chrome, the safe areas and fixed constants. It no
+  longer measures `#stageBlock` or anything inside it, so resizing the canvas cannot
+  feed back into the next fit.
+- Removed the `ResizeObserver` on `#stageBlock`. Re-fit happens only on `resize`,
+  `orientationchange`, `visualViewport` resize, game open and restart, coalesced with
+  one `requestAnimationFrame`. A size that is already current is not written.
+- Baseline (build 018): IDLE SWEEP 7/33 fail — 47 stage changes and 96–225
+  style/class mutations per 800 ms at 440×704, 440×720, 440×736, 440×752, 430×700,
+  430×740 and 360×640. Build 019: 33/33 pass with 0 changes and 0 mutations.
+  RESIZE SETTLE: 69 changes before; 1 change each at heights 744 and 800 after.
+
+### Fixed — the 600 px cap is whole-pixel at every display scale (F2)
+
+- `STAGE_CAP_CSS = 600`; `devicePxPerArtPx = min(floor(roomCssPx × dpr / 100),
+  floor(600 × dpr / 100))`; stage CSS size = `devicePxPerArtPx × 100 / dpr`.
+- Baseline (build 018): 3/8 fail — DPR 1.25 gave 7.5, 1.75 gave 10.5 and 2.25 gave
+  13.5 device px per art px. Build 019: 8/8 pass — DPR 1.25 → 560, 1.75 → 571.42 and
+  2.25 → 577.77 CSS px (7, 10 and 13 device px per art px); DPR 1, 1.5, 2, 2.5 and 3
+  stay at 600 CSS px.
+- D2 respected: whole device pixels per art pixel; no fractional or "fill" scaling was
+  added. D3 respected: no new UI and no options.
+
+### Changed — tagline and hint (D1) and image-rendering order (F4)
+
+- `#gameTagline` and `#inputHint` are `display: none` on the game screen on every
+  device. The title, SCORE, BEST, SHELF and RESTART are unchanged from build 018.
+- `image-rendering: pixelated;` is now the last of the pair in every rule that had
+  both declarations (four rules plus `#soonMoon`), so a browser that accepts both no
+  longer lets `crisp-edges` win.
+
+### Verification and limits
+
+- Viewports (CSS px, DPR): 280×653 (3), 390×844 (3), 768×1024 (2), 844×390 (3),
+  1280×720 (1), 1920×1080 (1). Games: PANDASNACK and CATNAPCATCH for layout.
+- V1 IDLE SWEEP: 33/33 pass (0 changes, 0 mutations).
+- V2 RESIZE SETTLE: pass (1 change each at heights 744 and 800, then quiet).
+- V3 CAP SWEEP: 8/8 pass (see above).
+- V4 stage sizes: 233.33, 333.33, 600, 266.66, 600, 600 CSS px. At 844×390 the stage
+  is 266.66 with the title message present; build 018 is also 266.66 in that state.
+  With an empty message the 844×390 stage is 300 CSS px, which is the F6 baseline;
+  F6's 300 was measured in the empty-message state. SHELF and RESTART positions and
+  sizes are unchanged from build 018; directions are left and the action right; no
+  horizontal overflow and no page scroll.
+- V5 play check at 390×844: a CDP touch on LEFT fired `onDir("left", true)` then
+  `false`; a tap on the action button fired `onAction`; W, Space, R and Esc worked; a
+  `blur` paused the run and the next key only resumed.
+- V6: all eight IIFE hashes are identical to build 018 and start with the F5 values
+  (PANDASNACK f6dd1614db8ca9d6, BOOPEEK f321297984175b84, DUCKLINE 6a62f23a0d747a5a,
+  SPROUTUP adff7441c41aef44, SLIMEHOP a92efde40ca8618a, SNAILRACE 457fa4b4750da245,
+  HUGPARADE 151deb6e718b23a6, CATNAPCATCH 26f6be1af791ee73). `node --check` clean;
+  one footer build ID; zero console errors.
+- V7: README is 97 lines and 6.4 KB; older CHANGELOG entries and MODELS dated entries
+  and ledger rows are byte-identical (diff shows only the intended regions); the same
+  build ID is in `APP.fileVersion`, the index header, the rendered footer, README, the
+  top CHANGELOG entry and the plan row; table column counts are constant; relative
+  links resolve.
+- Stage at 440×745 @3 (PANDASNACK): 400×400 CSS px at (20, 77). Stage at 440×956 @3
+  (CATNAPCATCH): 400×400 CSS px at (20, 175).
+- Not verified: no real iPhone, no Safari and no real iOS hardware. The owner's phone
+  is an iPhone 16 Pro Max on Safari in portrait (440 CSS px wide at 3×); that device
+  and browser were **NOT** tested here. No screen reader. No git command was run.
+
+### Edits to existing text
+
+- `deploy/index.html`: header "Current" and "Build log" lines; `APP.fileVersion`; the
+  game-screen tagline/hint CSS; `fitStage` and `stageScaleFromBox` (replacing
+  `stageScaleFor`), the stage constants and element handles; the restart paths; the
+  `image-rendering` order. The eight game IIFEs were not touched.
+- `CONTROLS.md`: the "Applies to" line; the tagline/hint sentences in "Controls on
+  the game screen" and "Layout and scaling"; one sentence added to the crisp+ bullet.
+  Every removed sentence is archived verbatim in Appendix A12.
+- `README.md`: "Current build" 019; 019 added to the DeepSeek V4.1 Flash Free row.
+  No other README text changed.
+- `MODELS.md`: one Usage ledger row for build 019 and recomputed time totals/bars. No
+  dated observation was added because the owner notes were blank. No credit line was
+  touched.
+- `CHANGELOG.md`: this entry, checklist item 15 and Appendix A12 only; entries
+  000–018 are untouched.
+- `plans/micro-games-v2.md`: one ledger row and one tool-log row.
+- Build 018 was the controls and top bar build; the planned docs repair is still
+  pending and will take a later number.
+
+### Build record (owner request: duration + tokens/credits)
+
+- Duration: ~30 min wall clock (the STEP 0 snapshot was created at 09:20 and the
+  final swap at 09:33 WIB; the run began a few minutes before the snapshot and its
+  exact start was not timestamped).
+- Usage: not visible to the model; the owner notes were blank and no meter reading was
+  supplied. No token or credit figure is claimed.
+- Mode and owner notes: the owner supplied the test phone (iPhone 16 Pro Max, Safari,
+  portrait, 440 CSS px wide at 3×) and reported the stage vibrating and blurring on
+  every game in portrait. The model/tool and meter fields were blank.
+- Tools used: file view/edit, shell, Python exact-match patch scripts, Node.js
+  `--check`, headless Chrome over CDP (Node WebSocket helper), `curl`, screenshots.
+- Iterations: 1 implementation pass. The verification helper needed 2 repairs (a
+  touch-emulation parameter and a resize-recorder race) and Chrome was restarted once
+  to reset emulated DPR; no layout repair cycle was needed. The 844×390 V4 figure was
+  investigated rather than changed: build 018 and build 019 both measure 266.66 with
+  the title message and 300 with an empty message.
+
+### Documentation review/edit attempts (standing rule)
+
+- No separate documentation review model was used. The build's own documentation
+  edits were checked against the Conventions and the per-build checklist; the removed
+  CONTROLS sentences were copied verbatim into Appendix A12 before the edit.
 
 ## 018-20261104 — 2026-11-04 (Controls and top bar: pinned SHELF/RESTART, fixed pixel labels, no menu)
 
@@ -2493,3 +2618,15 @@ sheet replaces the `PAUSED` plate; behind it the game stays paused.
 - The mascot animation and the shelf's hover lift are decorative only; they are
   disabled under reduced motion and do not affect play.
 ````
+
+### A12 — CONTROLS.md sentences removed in build 019
+
+Moved from CONTROLS.md in build 019 — verbatim, not edited.
+
+From § Controls on the game screen:
+
+> The title, SCORE and BEST sit to their right in one slim row; the tagline and hint step out of the way when they would crowd the stage.
+
+From § Layout and scaling:
+
+> The shell measures the room left by the header, the hint and the controls in both layouts, picks the layout that yields the bigger stage, and only then sizes the canvas.

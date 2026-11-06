@@ -4,7 +4,7 @@ Eight tiny pixel-art games in one HTML file. Open it, pick a game, play a minute
 
 Play online: <https://kantmicrogames.lohyapkant.workers.dev/>
 
-**Current build:** `018-20261104` — eight games, one file.
+**Current build:** `019-20261106` — eight games, one file.
 
 ## About this project
 
@@ -52,7 +52,7 @@ Keyboard, touch and device details are in CONTROLS.md.
 <!-- BEGIN:models-table  (add or edit rows only) -->
 | Model | Developer | Used via | Builds | How it went (owner notes, 2026-11-01) |
 |---|---|---|---|---|
-| DeepSeek V4.1 Flash Free | [DeepSeek](https://www.deepseek.com/) | OpenCode | 000, 001, 005, 006, 018 | Clear pixel art and clean code (owner: "amazing"). |
+| DeepSeek V4.1 Flash Free | [DeepSeek](https://www.deepseek.com/) | OpenCode | 000, 001, 005, 006, 018, 019 | Clear pixel art and clean code (owner: "amazing"). |
 | GLM-5.3 Flash Free | [Z.ai (Zhipu AI)](https://z.ai/) | OpenCode | 002, 003 | Worked mechanically; one game needed a full rework. |
 | Flint 40B Free | [Recursive](https://recursive.com/) | OpenCode | 004 | A working module, but its art had to be rebuilt. |
 | Gemini 3.8 Flash | [Google](https://gemini.google.com/) | Antigravity | 006, 007 | Picked up cleanly after a session limit; delivered SPROUTUP. |
