@@ -4,7 +4,7 @@ Eight tiny pixel-art games in one HTML file. Open it, pick a game, play a minute
 
 Play online: <https://kantmicrogames.lohyapkant.workers.dev/>
 
-**Current build:** `019-20261106` — eight games, one file.
+**Current build:** `020-20261106` — eight games, one file.
 
 ## About this project
 
@@ -52,21 +52,17 @@ Keyboard, touch and device details are in CONTROLS.md.
 <!-- BEGIN:models-table  (add or edit rows only) -->
 | Model | Developer | Used via | Builds | How it went (owner notes, 2026-11-01) |
 |---|---|---|---|---|
-| DeepSeek V4.1 Flash Free | [DeepSeek](https://www.deepseek.com/) | OpenCode | 000, 001, 005, 006, 018, 019 | Clear pixel art and clean code (owner: "amazing"). |
+| DeepSeek V4.1 Flash Free | [DeepSeek](https://www.deepseek.com/) | OpenCode | 000, 001, 005, 006, 017, 018, 019, 020 | Clear pixel art and clean code (owner: "amazing"). |
 | GLM-5.3 Flash Free | [Z.ai (Zhipu AI)](https://z.ai/) | OpenCode | 002, 003 | Worked mechanically; one game needed a full rework. |
 | Flint 40B Free | [Recursive](https://recursive.com/) | OpenCode | 004 | A working module, but its art had to be rebuilt. |
 | Gemini 3.8 Flash | [Google](https://gemini.google.com/) | Antigravity | 006, 007 | Picked up cleanly after a session limit; delivered SPROUTUP. |
 | GPT-OSS 120B Medium | [OpenAI](https://openai.com/index/introducing-gpt-oss/) | Antigravity | 008 (attempt) | Abandoned: it deleted sections of the docs instead of editing them. |
 | Claude Opus 4.6 Thinking | [Anthropic](https://www.anthropic.com/) | Antigravity | 008 | Did most of the docs work, then halted mid-round. |
-| Qwen3.8-Flash | [Alibaba Qwen](https://qwen.ai/) | Qoder CLI | 008 (finish), 009, 010, 011, 012, 013, 014, 015, 016 | Delivered the responsive shell and four new games, corrected HUGPARADE's movement and scoring in 015, then delivered CATNAPCATCH in 016; older games stayed unchanged. |
+| Qwen3.8-Flash | [Alibaba Qwen](https://qwen.ai/) | Qoder CLI | 008 (finish), 009, 010, 011, 012, 013, 014, 015, 016, 017 | Delivered the responsive shell and four new games, corrected HUGPARADE's movement and scoring in 015, then delivered CATNAPCATCH in 016; older games stayed unchanged. |
 | Claude.ai Sonnet 5.5 Extra | [Anthropic](https://claude.ai/) | Claude.ai chat | 009, 012, 013 (prompt only) | Wrote the responsive-shell prompt that Qwen executed. |
 <!-- END:models-table -->
 
 One person's dated snapshots from a handful of builds. Not a ranking. Time and usage for every build are tabulated in MODELS.md; the full record is in CHANGELOG.md. Most builds run on free or trial plans; how that works is in MODELS.md.
-
-## How the builds are checked
-
-Since build 009, each shell change is checked against a viewport test matrix before it ships: a list of screen sizes from small phones to wide desktops, with automated layout checks and screenshots inspected by eye. The matrix began with the responsive-shell rebuild (prompt P-09, written by Claude.ai Sonnet 5.5 Extra and run by Qwen3.8-Flash): 24 viewports, 1,409 automated checks and 120 screenshots. Build 017 reused it as a 20-viewport check (1,184 checks) and found a real title-truncation defect at 390–430 px that the numbers alone had missed. The point is simple: measure every size, look at the pictures, and fix what the measurements do not show.
 
 ## The rules every game follows
 

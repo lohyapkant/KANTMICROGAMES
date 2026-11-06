@@ -40,6 +40,7 @@ This project is built on free and trial plans on purpose, to see what a person w
 - **Qoder CLI** runs on Qoder's first-sign-in offer: a free 14-day Pro trial with 300 credits. Unused trial credits are cleared when the trial ends. Model selection is set to Auto; the ledger records the model name the tool reports.
 - **Claude.ai chat** (used to write some of the prompts) runs on a plan with a usage window that the owner describes as about 5 hours. Its usage is read by the owner from Claude's usage page, in percent of the window, not tokens.
 - Earlier builds used OpenCode's free models and Antigravity.
+- **Update, 2026-11-03:** the Qoder trial credits are used up (plan meter 300/300; the trial itself ends 2026-11-15 at 15:24:49 GMT+7). Build 017 was finished on OpenCode with DeepSeek V4.1 Flash Free, and builds 018 onward run on OpenCode's free models unless noted.
 When a quota runs out the work pauses and resumes with whatever is available (see CHANGELOG.md → Conventions → Continuity when a free tier runs out).
 
 ## Usage meters explained
@@ -93,11 +94,13 @@ What each model used on each build. This is a record, not an opinion, and not a 
 | 017 | DeepSeek V4.1 Flash Free · OpenCode | finished build 017 after the Qoder trial ended | ~25 min | 165,312 tokens processed | measured: 116,561 input + 23,506 output + 25,245 reasoning; 11.82 M cached reads not counted; 107 assistant turns |
 | 018 | DeepSeek V4.1 Flash Free · OpenCode | built | ~35 min | — | not visible to the model; owner notes blank, no meter reading supplied |
 | 019 | DeepSeek V4.1 Flash Free · OpenCode | built | ~30 min | — | not visible to the model; owner notes blank, no meter reading supplied |
+| 020 | DeepSeek V4.1 Flash Free · OpenCode | built | ~15 min | — | not visible to the model; owner notes blank, no meter reading supplied |
 
 ### Totals that can honestly be added
-- **Credits, Qoder CLI, measured (builds 009-017):** 127.3432 credits over 1,247 billable requests.
-- **Approximate list-price value of the measured credits:** 127.3432 x US$0.01 = US$1.27. An estimate, not a bill: the trial is free. Based on Qoder's published plan prices (about US$20 for 2,000 credits); check https://docs.qoder.com/account/pricing before relying on it. Never converted for tokens and never added across tools.
-- **Owner's Qoder exit report for build 017:** plan **300/300 credits used**; session **300.8933 credits**; **398 tool calls**; wall time 1 h 38 min 49 s. This is Qoder's own meter reading, not the per-request transcript total above, and is not added to it (the two meters count differently).
+- **Credits, Qoder CLI, per-request transcript, builds 009-016:** 74.5874 credits over 1,143 billable requests.
+- **Build 017, two readings, never added:** the transcript snapshot taken at 17:49 shows 52.7558 credits over 104 requests (incomplete: the session ran on afterwards). Qoder's own exit report shows session 300.8933 credits, 398 tool calls and the plan at 300/300 credits.
+- **Unreconciled:** the transcript total for builds 009-016 plus the exit-report figure for build 017 is more than the 300-credit plan, and why is not known. Do not total these readings. The authoritative figure is Qoder's usage history, read by the owner.
+- **Approximate list-price value:** the plan meter reads 300 of 300 trial credits used, which is about US$3.00 at about US$0.01 per credit. An estimate, not a bill: the trial is free. Check https://docs.qoder.com/account/pricing before relying on it. Never converted for tokens and never added across tools.
 - **Iterations recorded (from build 017):** 4 over 1 build.
 - **Iterations recorded (build 018):** 1 repair cycle pair (a 280 px control clash, fixed by stacking the corner pair under 360 px and using 4 px page padding).
 - **Token totals: none.** The token figures count different things (for example ~2.37 M "processed" in build 005 against ~48,000 in build 007), so adding them would mean nothing.
@@ -106,15 +109,15 @@ What each model used on each build. This is a record, not an opinion, and not a 
 | Model | Minutes | At a glance |
 |---|---|---|
 | Qwen3.8-Flash | ~305 | ▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇ |
-| DeepSeek V4.1 Flash Free | ~205 | ▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇ |
+| DeepSeek V4.1 Flash Free | ~220 | ▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇ |
 | GLM-5.3 Flash Free | ~45 | ▇▇▇▇▇ |
 | Flint 40B Free | ~25 | ▇▇▇ |
 | Gemini 3.8 Flash | ~25 | ▇▇▇ |
 | Claude Opus 4.6 Thinking | ~20 | ▇▇ |
 | Shared session (build 006: DeepSeek + Gemini) | ~30 | ▇▇▇ |
 
-Total recorded: about 655 minutes (about 10 h 55 min) over 17 of 20 builds.
-(Totals were recomputed after the build-019 row was added; the CHANGELOG Build records remain the source of truth.)
+Total recorded: about 670 minutes (about 11 h 10 min) over 18 of 21 builds.
+(Totals were recomputed after the build-020 row was added; the CHANGELOG Build records remain the source of truth.)
 
 ---
 
@@ -428,6 +431,18 @@ That pass found the game title still truncating at 390-430 px, which led to the 
 breakpoint fix. The owner's point is that this self-testing and validation is a quality
 highlight of the project, not just paperwork: measure every size, look at the screenshots,
 and fix what the numbers miss. This is a dated owner note, not a model-written summary.
+
+## 2026-11-06 — DeepSeek V4.1 Flash Free (OpenCode) — builds 018 and 019
+
+Source: Owner's words (verbatim)
+
+Builds observed: `018-20261104`, `019-20261106`.
+
+The owner's notes: after build 019, on an iPhone 16 Pro Max in Safari (portrait), the owner played all eight games and reported, verbatim:
+
+> "Wow - it fixed it. I played all the games and there is no vibration in the image."
+
+Build 018 had put the controls and top bar to the owner's design; build 019 removed a layout loop that made the stage vibrate on phones. This is a dated owner note about one device on one day, not a model-written summary.
 
 <!-- NEW ENTRIES ABOVE THIS LINE. Never edit existing entries. -->
 

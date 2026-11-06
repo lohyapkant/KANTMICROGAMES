@@ -2,7 +2,7 @@
 
 ## Conventions (read before adding an entry)
 
-Appendices A1-A9, A11 and A12 (material moved out of the README in build 012 and out of CONTROLS.md in builds 018 and 019) start under '## Appendices (build 012)' at the bottom of this file.
+Appendices A1-A9, A11, A12 and A13 (material moved out of the README in builds 012 and 020 and out of CONTROLS.md in builds 018, 019 and 020) start under '## Appendices (build 012)' at the bottom of this file.
 
 - **Newest entry first.** Each entry starts with its build ID and the real finish date.
 - **Build IDs are `NNN-YYYYMMDD`**: a zero-padded project build number, then the finish
@@ -55,6 +55,17 @@ Appendices A1-A9, A11 and A12 (material moved out of the README in build 012 and
     - Iterations: <N> rebuild loops, one line each: what looked wrong, what changed
     ### Documentation review/edit attempts (standing rule)
 
+### Run guard (every prompt)
+
+1. One step at a time, in order. If you finish early, stop.
+2. Verification budget: one script per check, a timeout on every script, no screenshots, no browser matrix. One browser load at one viewport is enough for the footer check.
+3. Repair budget: after a failed check, fix it and re-run ONLY that check. At most 2 repair cycles per problem. If it still fails, write "not fixed" in the report and move on. Never loop.
+4. Checkpoint: after each step write "DONE step N / NEXT step N+1" in plans/archive/pre-020/PROGRESS.md. If a limit, error or quota message appears, finish the current edit, update PROGRESS.md and stop.
+5. Work in plans/archive/pre-020/work/ and copy to the live files in ONE step at the end (STEP 7). If interrupted before that, the live files are still build 019.
+6. Report what you skipped. A smaller true report beats a larger guessed one.
+
+A prompt names one step or one small group of steps. The owner reads the usage meter between runs.
+
 ### Per-build checklist
 
      1. Number: the next unused build number. Date: the day you finish.
@@ -70,7 +81,7 @@ Appendices A1-A9, A11 and A12 (material moved out of the README in build 012 and
     11. Honest usage: record time and usage in the unit the tool reports, say how it was counted, write "not recorded" if unknown, and never add across units.
     11. Honest usage: record time and usage in the unit the tool reports, say how it was counted, write "not recorded" if unknown, and never add across units.
     12. Git: end your report with the suggested commands in a code block and do not run them: `git status`, `git add <the changed public files>`, `git commit -m "build NNN-YYYYMMDD: <title>" -m "<two to four bullets>"`, `git tag build-NNN`, `git push`.
-    13. Meters: record what the tool's own usage meter shows at the start and the end, in its own unit, as supplied by the owner or visible to you. If you cannot see it, write "not visible to the model". Never estimate a balance.
+    13. Meters: record what the tool's own usage meter shows at the start and the end, in its own unit, as supplied by the owner or visible to you. If you cannot see it, write "not visible to the model". Never estimate a balance. If two readings of the same usage disagree, record both, never add them, and write 'unreconciled' with what is known.
     14. Pixels: every new image, icon or badge is drawn from a pixel map. No image files, SVG or emoji as art.
     15. Stability: the stage must not change size at idle. After any change to `fitStage`, the top row or the controls, run the idle check (record the stage rectangle on every animation frame for 0.8 s at the named sizes; zero changes) before swapping files.
     Never delete, shorten or restructure any documentation file or section. If something looks wrong, say so in the entry instead of fixing it silently.
@@ -84,8 +95,170 @@ Free and trial tiers end without warning. Any model must be able to pick up wher
 4. A new model reads, in order: CHANGELOG.md → Conventions, the newest CHANGELOG entry, plans/archive/pre-NNN/PROGRESS.md, then the prompt copy for the build.
 5. One build, one prompt, one focus. Split big requests into several builds.
 6. Never carry a claim forward (credits left, tests passed) without checking it again.
+7. Verification is a budget, not a goal: a small set of viewports, two repair cycles, then write 'not fixed' and move on. A test that cannot pass is a reason to stop and report, not to loop.
 
 <!-- NEW BUILD ENTRIES: paste the newest entry on the line below this comment, above the previous newest. Never edit older entries. -->
+
+## 020-20261106 — 2026-11-06 (Documentation repair: README, CHANGELOG, MODELS, CONTROLS, plan; no game change)
+
+Built from prompt: P-20 (the owner's documentation-repair prompt; private archive file `prompts/P-20_docs-repair.txt`)  
+Tool and model: **DeepSeek V4.1 Flash Free** (OpenCode)  
+Games in the one file: 8 (PANDASNACK 007-20261101 **frozen**, BOOPEEK 006-20261101
+**frozen**, DUCKLINE 005-20261101 **frozen**, SPROUTUP 007-20261101 **frozen**,
+SLIMEHOP 010-20261101 **frozen**, SNAILRACE 011-20261101 **frozen**, HUGPARADE
+015-20261102 (unchanged this build), CATNAPCATCH 016-20261102 (unchanged this build);
+file build **020-20261106**)
+
+### Changed — documentation only; no game, layout or behaviour changed
+
+- README.md: removed the unauthorised "## How the builds are checked" section (F1), archived
+  verbatim in Appendix A13; the Qwen3.8-Flash Builds cell now ends `017` and the DeepSeek
+  V4.1 Flash Free cell is `000, 001, 005, 006, 017, 018, 019, 020` (F2); "Current build" is
+  `020-20261106`.
+- MODELS.md: replaced the three F3 totals bullets with the four bullets supplied in the
+  prompt (74.5874 credits / 1,143 requests for builds 009–016; build 017's two readings
+  recorded and never added; an explicit "Unreconciled" bullet; the ~US$3.00 plan-meter
+  estimate). Appended the 2026-11-03 payment update (F5), added the 2026-11-06 dated entry
+  for builds 018 and 019 carrying the owner's iPhone report (F8), and added the build-020
+  Usage ledger row.
+- MODELS.md "Usage meters explained" (F4): the OpenCode and Antigravity pages cited in
+  those rows were opened again on 2026-11-06. OpenCode's Console page still shows usage
+  tracking, budget controls and Go / Go Plus / Go Teams at US$10 / US$40 / US$20 per member
+  per month; Antigravity's pricing page still shows a US$0 Individual plan, weekly rate
+  limits, a Pro/Ultra credit pool and Cloud consumption pricing. Both rows were left as
+  they stand; no price or limit was changed and none was re-guessed.
+- CHANGELOG.md: Conventions gained the "### Run guard (every prompt)" block and Continuity
+  item 7 (F6); checklist item 13 was amended; the appendix pointer now names A13; Appendix
+  A13 holds the removed README section and the removed CONTROLS sentence verbatim. Entry
+  019 gained one dated addendum and nothing else (F8). Entries 000–018 are byte-identical.
+- CONTROLS.md: the stale first bullet of "Known control quirks" now says the game screen
+  shows no hint line (F7); the old sentence is archived in A13. "Applies to" stays at 019
+  because the controls did not change.
+- plans/micro-games-v2.md: one ledger row, one tool-log row and the "Roadmap v3" block
+  appended; nothing above them was edited.
+- deploy/index.html: `APP.fileVersion` and the header "Current" line only.
+- F9: this is the documentation repair that entry 019 said "will take a later number".
+  Builds 018 and 019 were the controls/top-bar and stage-stability builds.
+
+### Verification and limits
+
+- Old records: entries 000–018 of CHANGELOG.md are byte-identical to the pre-020 snapshot;
+  entry 019 is byte-identical plus the one appended addendum; every MODELS.md dated entry
+  and existing ledger row is byte-identical (diff). The removed README section and CONTROLS
+  sentence are found verbatim in A13.
+- Build ID: `020-20261106` in `APP.fileVersion`, the index header, the rendered footer,
+  README "Current build", the top CHANGELOG entry and the plan ledger row. CONTROLS
+  "Applies to" stays `019-20261106` by design.
+- README: 93 lines and 5,872 bytes (caps 150 lines / 10 KB); zero whole-word,
+  case-insensitive matches for IIFE, frozen, contract, credit, token, hash. Table column
+  counts are constant in all five documents; every relative link resolves in the public
+  tree and none points at plans/, tests/ or prompts/.
+- Time totals recomputed by script from the ledger rows, with the working shown in the
+  build report. No credit line is summed across the two Qoder readings.
+- All eight game IIFE hashes are identical before and after (`node --check` clean): the
+  eight values are the build-019 values. One browser load at one viewport found one footer
+  build ID and zero console errors.
+- Not verified: no screenshot matrix and no multi-viewport browser run — the Run guard
+  limits this build to one load, and the layout did not change. No real iPhone or Safari
+  test was run in this build (the owner's report is quoted, not re-tested). No git command
+  was run.
+
+### Edits to existing text
+
+- `README.md` — removed, in full:
+  "## How the builds are checked" and its paragraph ("Since build 009, each shell change
+  is checked against a viewport test matrix … fix what the measurements do not show.").
+  New text: none in the README; the removed section is archived in A13.
+- `README.md` — Qwen3.8-Flash Builds cell: old `008 (finish), 009, 010, 011, 012, 013, 014,
+  015, 016` → new `008 (finish), 009, 010, 011, 012, 013, 014, 015, 016, 017`. No other
+  cell in that row changed.
+- `README.md` — DeepSeek V4.1 Flash Free Builds cell: old `000, 001, 005, 006, 018, 019` →
+  new `000, 001, 005, 006, 017, 018, 019, 020`. No other cell in that row changed.
+- `README.md` — "**Current build:** `019-20261106` — eight games, one file." → "**Current
+  build:** `020-20261106` — eight games, one file."
+- `MODELS.md` — old bullet "**Credits, Qoder CLI, measured (builds 009-017):** 127.3432
+  credits over 1,247 billable requests." replaced by "**Credits, Qoder CLI, per-request
+  transcript, builds 009-016:** 74.5874 credits over 1,143 billable requests."
+- `MODELS.md` — old bullet "**Approximate list-price value of the measured credits:**
+  127.3432 x US$0.01 = US$1.27. An estimate, not a bill: the trial is free. Based on
+  Qoder's published plan prices (about US$20 for 2,000 credits); check
+  https://docs.qoder.com/account/pricing before relying on it. Never converted for tokens
+  and never added across tools." replaced by "**Approximate list-price value:** the plan
+  meter reads 300 of 300 trial credits used, which is about US$3.00 at about US$0.01 per
+  credit. An estimate, not a bill: the trial is free. Check
+  https://docs.qoder.com/account/pricing before relying on it. Never converted for tokens
+  and never added across tools."
+- `MODELS.md` — old bullet "**Owner's Qoder exit report for build 017:** plan **300/300
+  credits used**; session **300.8933 credits**; **398 tool calls**; wall time 1 h 38 min
+  49 s. This is Qoder's own meter reading, not the per-request transcript total above, and
+  is not added to it (the two meters count differently)." replaced by two bullets:
+  "**Build 017, two readings, never added:** the transcript snapshot taken at 17:49 shows
+  52.7558 credits over 104 requests (incomplete: the session ran on afterwards). Qoder's
+  own exit report shows session 300.8933 credits, 398 tool calls and the plan at 300/300
+  credits." and "**Unreconciled:** the transcript total for builds 009-016 plus the
+  exit-report figure for build 017 is more than the 300-credit plan, and why is not known.
+  Do not total these readings. The authoritative figure is Qoder's usage history, read by
+  the owner."
+- `MODELS.md` — "How this project is paid for": appended "**Update, 2026-11-03:** the Qoder
+  trial credits are used up (plan meter 300/300; the trial itself ends 2026-11-15 at
+  15:24:49 GMT+7). Build 017 was finished on OpenCode with DeepSeek V4.1 Flash Free, and
+  builds 018 onward run on OpenCode's free models unless noted."
+- `MODELS.md` — Usage ledger: added the row `| 020 | DeepSeek V4.1 Flash Free · OpenCode |
+  built | ~15 min | — | not visible to the model; owner notes blank, no meter reading
+  supplied |`.
+- `MODELS.md` — time-by-model row: old `| DeepSeek V4.1 Flash Free | ~205 |` → new
+  `| DeepSeek V4.1 Flash Free | ~220 |` with 22 blocks instead of 21.
+- `MODELS.md` — total: old "Total recorded: about 655 minutes (about 10 h 55 min) over 17
+  of 20 builds." → new "Total recorded: about 670 minutes (about 11 h 10 min) over 18 of
+  21 builds."; the parenthetical now says "after the build-020 row was added".
+- `MODELS.md` — new dated entry "## 2026-11-06 — DeepSeek V4.1 Flash Free (OpenCode) —
+  builds 018 and 019" added above the marker with the owner's words verbatim; no existing
+  dated entry was edited.
+- `CONTROLS.md` — first bullet of "Known control quirks": old "The shell writes its own
+  hint line from the game's action label, so the frozen modules' original desktop hint
+  strings are not shown. No game code had to change." → new "The game screen shows no hint
+  line. The shelf cards and chips explain the controls, and the frozen modules' original
+  desktop hint strings are not shown. No game code had to change."
+- `CHANGELOG.md` — entry 019: appended "### Addendum — 2026-11-06 (owner report, recorded
+  in build 020)" with the owner's iPhone 16 Pro Max / Safari / portrait report. Nothing
+  above it in entry 019 changed.
+- `CHANGELOG.md` — Conventions: added "### Run guard (every prompt)" with the prompt's six
+  numbered rules verbatim and the closing line "A prompt names one step or one small group
+  of steps. The owner reads the usage meter between runs."
+- `CHANGELOG.md` — checklist item 13: old "… Never estimate a balance." → new "… Never
+  estimate a balance. If two readings of the same usage disagree, record both, never add
+  them, and write 'unreconciled' with what is known."
+- `CHANGELOG.md` — Continuity: added item 7, "Verification is a budget, not a goal: a small
+  set of viewports, two repair cycles, then write 'not fixed' and move on. A test that
+  cannot pass is a reason to stop and report, not to loop."
+- `CHANGELOG.md` — appendix pointer: old "Appendices A1-A9, A11 and A12 (material moved out
+  of the README in build 012 and out of CONTROLS.md in builds 018 and 019) …" → new
+  "Appendices A1-A9, A11, A12 and A13 (material moved out of the README in builds 012 and
+  020 and out of CONTROLS.md in builds 018, 019 and 020) …".
+- `deploy/index.html` — `APP.fileVersion`: old `"019-20261106"` → new `"020-20261106"`;
+  header "Current" line: old `019-20261106` → new `020-20261106`. No other line changed.
+- `plans/micro-games-v2.md` — one ledger row and one tool-log row appended; the
+  "## Roadmap v3" block appended after the old roadmap. Nothing above them was edited.
+
+### Build record (owner request: duration + tokens/credits)
+
+- Duration: ~15 min wall clock (the STEP 0 snapshot was created at 14:01 and the records were finished at about 14:12 WIB; the run began a few minutes before the snapshot and its exact start was not timestamped).
+- Usage: not visible to the model; the owner notes were blank and no meter reading was
+  supplied. No token or credit figure is claimed. A tokens-per-second × duration figure
+  was considered and rejected: it would be an estimate presented as a measurement.
+- Mode and owner notes: DeepSeek V4.1 Flash Free on OpenCode's free tier. The owner's
+  verbatim note after build 019 is quoted in MODELS.md and in the entry-019 addendum. The
+  model/tool and meter fields were blank.
+- Tools used: file view/edit, shell, `diff`/`shasum`, Python scripts for the checks,
+  Node.js `--check`, one headless-Chrome CDP load for the footer.
+- Iterations: 1 documentation pass. The F4 pages were re-opened once each; both confirmed
+  the existing row text, so no row was changed. No layout repair cycle was needed.
+
+### Documentation review/edit attempts (standing rule)
+
+- No separate documentation review model was used. Every edit was checked against the
+  Conventions and the per-build checklist; the removed README section and CONTROLS sentence
+  were copied verbatim into Appendix A13 before the edit.
 
 ## 019-20261106 — 2026-11-06 (Stage stability and crisp sizing: no idle vibration, whole-device-pixel cap)
 
@@ -210,6 +383,9 @@ file build **019-20261106**)
 - No separate documentation review model was used. The build's own documentation
   edits were checked against the Conventions and the per-build checklist; the removed
   CONTROLS sentences were copied verbatim into Appendix A12 before the edit.
+
+### Addendum — 2026-11-06 (owner report, recorded in build 020)
+- The owner played all eight games on an iPhone 16 Pro Max in Safari (portrait) after this build and reported that the vibration is gone. That is the real-device check this report lists as not done. It covers the vibration only, not every other Safari behaviour. Recorded by DeepSeek V4.1 Flash Free from the owner's message.
 
 ## 018-20261104 — 2026-11-04 (Controls and top bar: pinned SHELF/RESTART, fixed pixel labels, no menu)
 
@@ -2630,3 +2806,18 @@ From § Controls on the game screen:
 From § Layout and scaling:
 
 > The shell measures the room left by the header, the hint and the controls in both layouts, picks the layout that yields the bigger stage, and only then sizes the canvas.
+
+### A13 — README section and CONTROLS sentence removed in build 020
+
+Moved from README.md § How the builds are checked and from CONTROLS.md in build 020 — verbatim, not edited.
+
+From README.md § How the builds are checked:
+
+## How the builds are checked
+
+Since build 009, each shell change is checked against a viewport test matrix before it ships: a list of screen sizes from small phones to wide desktops, with automated layout checks and screenshots inspected by eye. The matrix began with the responsive-shell rebuild (prompt P-09, written by Claude.ai Sonnet 5.5 Extra and run by Qwen3.8-Flash): 24 viewports, 1,409 automated checks and 120 screenshots. Build 017 reused it as a 20-viewport check (1,184 checks) and found a real title-truncation defect at 390–430 px that the numbers alone had missed. The point is simple: measure every size, look at the pictures, and fix what the measurements do not show.
+
+From CONTROLS.md § Known control quirks (first bullet):
+
+- The shell writes its own hint line from the game's action label, so the frozen
+  modules' original desktop hint strings are not shown. No game code had to change.

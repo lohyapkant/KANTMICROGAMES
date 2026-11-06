@@ -176,8 +176,7 @@ once the run is resumed.
 
 ## Known control quirks
 
-- The shell writes its own hint line from the game's action label, so the frozen
-  modules' original desktop hint strings are not shown. No game code had to change.
+- The game screen shows no hint line. The shelf cards and chips explain the controls, and the frozen modules' original desktop hint strings are not shown. No game code had to change.
 - The title truncates with an ellipsis when the top row is tight, so SCORE and BEST
   stay clear of the pinned pair. The full name is on the shelf card and in the
   browser tab.
