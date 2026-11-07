@@ -1,4 +1,4 @@
-<!-- Applies to: build 019-20261106 · eight games · changes to controls are recorded in CHANGELOG.md -->
+<!-- Applies to: build 021-20261107 · eight games · changes to controls are recorded in CHANGELOG.md -->
 # KANTMICROGAMES — Controls
 
 Which controls exist, how they behave on each kind of device, and why.
@@ -28,6 +28,23 @@ step at the next centre, a perpendicular press waits for the next junction, and 
 hedge blocks a step. It never moves diagonally, so Momo cannot wedge between two hedges.
 CATNAPCATCH uses the horizontal axis only: left and right slide the paper pillow, and up
 and down do nothing.
+
+## Settings
+
+SETTINGS is on the shelf only; no game screen has it. It opens a dialog with one
+setting, **COLOUR**, the page background tone.
+
+- Six values: **RANDOM** (the default) and five fixed palettes: **PEACH**, **MINT**,
+  **SKY**, **LILAC**, **BUTTER**.
+- RANDOM picks one of the five at random on every page load. Choosing a fixed palette
+  saves it and uses it on every visit until RANDOM is chosen again.
+- The choice is saved under the storage key `KANTMICROGAMES.ui.colour`.
+- Choosing a value applies it at once. **CLOSE**, a tap outside the dialog or `ESC`
+  closes it and returns focus to SETTINGS; `ESC` does nothing else on the shelf. Focus
+  stays inside the dialog while it is open.
+- Text colours, the stage and every game's colours do not change; only the background
+  tone does.
+- No sound setting exists yet.
 
 ## Controls on the game screen
 

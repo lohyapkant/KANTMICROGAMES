@@ -95,6 +95,7 @@ What each model used on each build. This is a record, not an opinion, and not a 
 | 018 | DeepSeek V4.1 Flash Free · OpenCode | built | ~35 min | — | not visible to the model; owner notes blank, no meter reading supplied |
 | 019 | DeepSeek V4.1 Flash Free · OpenCode | built | ~30 min | — | not visible to the model; owner notes blank, no meter reading supplied |
 | 020 | DeepSeek V4.1 Flash Free · OpenCode | built | ~15 min | — | not visible to the model; owner notes blank, no meter reading supplied |
+| 021 | DeepSeek V4.1 Flash Free · OpenCode | built | ~10 min | 162,156 tokens processed | measured: 105,696 input + 28,262 output + 28,198 reasoning; 8.61 M cached reads not counted; OpenCode stats delta (see CHANGELOG build record) |
 
 ### Totals that can honestly be added
 - **Credits, Qoder CLI, per-request transcript, builds 009-016:** 74.5874 credits over 1,143 billable requests.
@@ -109,15 +110,15 @@ What each model used on each build. This is a record, not an opinion, and not a 
 | Model | Minutes | At a glance |
 |---|---|---|
 | Qwen3.8-Flash | ~305 | ▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇ |
-| DeepSeek V4.1 Flash Free | ~220 | ▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇ |
+| DeepSeek V4.1 Flash Free | ~230 | ▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇ |
 | GLM-5.3 Flash Free | ~45 | ▇▇▇▇▇ |
 | Flint 40B Free | ~25 | ▇▇▇ |
 | Gemini 3.8 Flash | ~25 | ▇▇▇ |
 | Claude Opus 4.6 Thinking | ~20 | ▇▇ |
 | Shared session (build 006: DeepSeek + Gemini) | ~30 | ▇▇▇ |
 
-Total recorded: about 670 minutes (about 11 h 10 min) over 18 of 21 builds.
-(Totals were recomputed after the build-020 row was added; the CHANGELOG Build records remain the source of truth.)
+Total recorded: about 680 minutes (about 11 h 20 min) over 19 of 22 builds.
+(Totals were recomputed after the build-021 row was added; the CHANGELOG Build records remain the source of truth.)
 
 ---
 

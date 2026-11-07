@@ -60,8 +60,8 @@ Appendices A1-A9, A11, A12 and A13 (material moved out of the README in builds 0
 1. One step at a time, in order. If you finish early, stop.
 2. Verification budget: one script per check, a timeout on every script, no screenshots, no browser matrix. One browser load at one viewport is enough for the footer check.
 3. Repair budget: after a failed check, fix it and re-run ONLY that check. At most 2 repair cycles per problem. If it still fails, write "not fixed" in the report and move on. Never loop.
-4. Checkpoint: after each step write "DONE step N / NEXT step N+1" in plans/archive/pre-020/PROGRESS.md. If a limit, error or quota message appears, finish the current edit, update PROGRESS.md and stop.
-5. Work in plans/archive/pre-020/work/ and copy to the live files in ONE step at the end (STEP 7). If interrupted before that, the live files are still build 019.
+4. Checkpoint: after each step write "DONE step N / NEXT step N+1" in plans/archive/pre-NNN/PROGRESS.md. If a limit, error or quota message appears, finish the current edit, update PROGRESS.md and stop.
+5. Work in plans/archive/pre-NNN/work/ and copy to the live files in ONE step at the end (STEP 7). If interrupted before that, the live files are still the previous build.
 6. Report what you skipped. A smaller true report beats a larger guessed one.
 
 A prompt names one step or one small group of steps. The owner reads the usage meter between runs.
@@ -98,6 +98,204 @@ Free and trial tiers end without warning. Any model must be able to pick up wher
 7. Verification is a budget, not a goal: a small set of viewports, two repair cycles, then write 'not fixed' and move on. A test that cannot pass is a reason to stop and report, not to loop.
 
 <!-- NEW BUILD ENTRIES: paste the newest entry on the line below this comment, above the previous newest. Never edit older entries. -->
+
+## 021-20261107 — 2026-11-07 (Settings and background colour: shelf-only dialog, six palettes; no game change)
+
+Built from prompt: P-21 (settings panel and background colour; shell only; private archive file `prompts/P-21_settings-and-colour.txt`)  
+Tool and model: **DeepSeek V4.1 Flash Free** (OpenCode)  
+Games in the one file: 8 (PANDASNACK 007-20261101 **frozen**, BOOPEEK 006-20261101
+**frozen**, DUCKLINE 005-20261101 **frozen**, SPROUTUP 007-20261101 **frozen**,
+SLIMEHOP 010-20261101 **frozen**, SNAILRACE 011-20261101 **frozen**, HUGPARADE
+015-20261102 (unchanged this build), CATNAPCATCH 016-20261102 (unchanged this build);
+file build **021-20261107**)
+
+### Added — background palettes (deploy/index.html, shell CSS only)
+
+- The two glow colours are now variables: `--glow-a` and `--glow-b`; the `body`
+  background uses them instead of the hard-coded `#FFEFD8` and `#FDE4EA`.
+- Five palette blocks, selected by `body[data-colour="…"]`: **PEACH**, **MINT**,
+  **SKY**, **LILAC**, **BUTTER**. Each sets `--cream`, `--cream-deep`, `--glow-a`,
+  `--glow-b` and `--outline`. PEACH is the build-020 palette byte for byte:
+  `#FFF3E2`, `#FFE8CC`, `#FFEFD8`, `#FDE4EA`, `#E8D8C2`.
+- `--ink`, `--ink-soft` and `--panel` are unchanged, and no stage or game colour was
+  touched; only the page background tone changes.
+- `<meta name="theme-color">` exists already and now carries the active `--cream`.
+  Nothing else in `<head>` changed.
+- Contrast measured by script with the WCAG formula (`--ink` #4A3B32, `--ink-soft`
+  #8A776A; PEACH `--ink-soft`/`--cream` baseline 3.890):
+
+  | Palette | `--ink` on `--cream` | `--ink` on `--cream-deep` | `--ink-soft` on `--cream` |
+  |---|---|---|---|
+  | PEACH | 9.767 | 9.001 | 3.890 |
+  | MINT | 9.901 | 9.091 | 3.944 |
+  | SKY | 9.776 | 8.805 | 3.894 |
+  | LILAC | 9.797 | 8.591 | 3.903 |
+  | BUTTER | 10.043 | 9.409 | 4.000 |
+
+  Every palette passes (both `--ink` ratios at least 7:1; every `--ink-soft` ratio at
+  least the PEACH baseline). No text colour was changed to make a palette pass.
+
+### Added — settings module, SETTINGS button and COLOUR dialog (shelf only)
+
+- Storage key `KANTMICROGAMES.ui.colour`, read and written with the same try/catch
+  pattern as the other saved values. No stored value means **RANDOM**; RANDOM picks
+  one of the five with `Math.random()` once per page load, and choosing RANDOM in the
+  dialog picks a new one at once. A fixed choice is saved and used on every visit
+  until RANDOM is chosen again.
+- A tiny parser-blocking boot script immediately after `<body>` applies the saved
+  colour before first paint, so there is no flash of the wrong colour. It uses
+  `(() => {` so the IIFE hash extractor still finds exactly eight game modules.
+- SETTINGS is on the shelf only, above the cards in a right-aligned bar. It uses the
+  same `--corner-h` class table as SHELF and RESTART (48/48/52/56 px by shorter side),
+  has a pixel-text label drawn with the shared 3×5 font at whole device pixels, the
+  full-word `aria-label="SETTINGS"` and `aria-haspopup="dialog"`.
+- The dialog has `role="dialog"`, `aria-modal="true"` and label "Settings"; a pixel
+  SETTINGS title; a pixel line "COLOUR: <NAME>"; six option buttons (RANDOM, PEACH,
+  MINT, SKY, LILAC, BUTTER), each at least 48×48 with a 5×5 pixel-map swatch of its
+  colour (RANDOM shows a mosaic of the five) and its name in pixel text; the chosen
+  option is marked with a 3 px outline and `aria-pressed="true"`; and a CLOSE button.
+- Choosing applies at once and saves. CLOSE, a tap outside and `ESC` close the dialog
+  and return focus to SETTINGS; `ESC` on the shelf does nothing else; focus is trapped
+  inside while open. Closing sets the existing settle gate (`lastScreenSwap`), so the
+  closing tap cannot open a card underneath.
+- The `":"` glyph was added to the shared `PIXEL_FONT` for the COLOUR line. The dialog
+  is laid out for a second row later; only COLOUR exists in this build (SOUND arrives
+  with the sound engine).
+
+### Changed — header and documentation
+
+- `deploy/index.html`: `APP.fileVersion`, the header "Current" line and the stale
+  header "Build log" line now say build 021.
+- `CHANGELOG.md`: the Conventions Run guard no longer names build 020; it uses
+  `pre-NNN` and "the previous build".
+- `CONTROLS.md`: new "Settings" section (place, six values, RANDOM behaviour, storage
+  key, keyboard use, shelf only, no sound setting yet); "Applies to" is now 021
+  because this build adds a control surface.
+- `README.md`: three edits only — "Current build", 021 added to the DeepSeek Builds
+  cell, and one new "How to play" bullet.
+- `MODELS.md`: the build-021 Usage ledger row and the time totals/bars only; no dated
+  entry and no credit line was touched.
+- `plans/micro-games-v2.md`: one ledger row and one tool-log row appended.
+
+### Verification and limits
+
+- **V1 shelf, four viewports** (360×640@3, 440×745@3, 768×1024@2, 1280×720@1):
+  SETTINGS visible without scrolling, 72×48 px at 360/440 and 107×52 px at 768/1280
+  (at least 48 px), no overlap with the banner, chips or any card, zero horizontal
+  overflow. Card art and name offsets within each row differ by 0 px.
+- **V2 dialog**: opens with the right role/modal/label and focus inside; six options,
+  each at least 48×48; RANDOM pressed by default; the COLOUR line is drawn; Tab from
+  CLOSE wraps to the first option and Shift+Tab from the first wraps back; choosing
+  SKY changed the computed `--cream` to `#EDF6FC` at once, saved `SKY` and survived a
+  reload; `ESC` closed it, returned focus to SETTINGS and opened no game; a tap outside
+  closed it and did not open the card underneath; choosing RANDOM picked BUTTER at
+  once. Five separate loads with `Math.random` fixed to 0.05, 0.25, 0.45, 0.65 and
+  0.85 gave `#FFF3E2`, `#EDF9F2`, `#EDF6FC`, `#F8F3FD`, `#FFF8DC` — five different
+  values.
+- **V3 contrast**: the table above, computed from the palettes in the file; PEACH is
+  byte-identical to build 020 and all five pass.
+- **V4 games unaffected**: the eight game IIFE hashes are identical to build 020
+  (PANDASNACK `f6dd1614db8ca9d6`, BOOPEEK `f321297984175b84`, DUCKLINE
+  `6a62f23a0d747a5a`, SPROUTUP `adff7441c41aef44`, SLIMEHOP `a92efde40ca8618a`,
+  SNAILRACE `457fa4b4750da245`, HUGPARADE `151deb6e718b23a6`, CATNAPCATCH
+  `26f6be1af791ee73`); both scripts pass `node --check`; the rendered footer shows one
+  build ID; zero console errors; at 440×720@3 in PANDASNACK the stage rectangle
+  changed 0 times in 800 ms.
+- **V5 one play check at 390×844**: touch on LEFT fired `onDir(left,true)` then
+  `(left,false)`; a tap on the action button fired `onAction`; W fired `onDir(up,true)`;
+  Space fired `onAction`; R fired `restart`; `ESC` left the game for the shelf with no
+  hash. One environment artefact was recorded: the headless browser twice reported its
+  tab hidden for about 30 ms, which paused the game by design, so the next key was
+  swallowed as the resume input; after resuming with the overlay tap, the same keys
+  behaved as above. The page behaviour is the documented pause, not a regression.
+- **V6 docs**: README is 94 lines and 5,964 bytes (caps 150 lines / 10 KB) with zero
+  whole-word, case-insensitive matches for IIFE, frozen, contract, credit, token or
+  hash. CHANGELOG entries 000–020 are byte-identical to the snapshot; every MODELS
+  dated entry and existing ledger row is byte-identical; the build ID agrees in
+  `APP.fileVersion`, both index header lines, the rendered footer, README, this entry
+  and the plan ledger row; CONTROLS "Applies to" is 021; table column counts are
+  constant; every relative link resolves and none points at plans/, tests/ or
+  prompts/.
+- **Screenshots (2)**: the shelf at 440×745 with MINT chosen, and the dialog open at
+  360×640 with LILAC chosen. Both inspected; what they show is in the build report.
+- **Not verified**: no Safari test and no real iPhone test were run. No git command was
+  run. The five deterministic RANDOM loads replace `Math.random` before the page
+  scripts run; they prove the mapping, not the fairness of the generator.
+
+### Edits to existing text
+
+- `deploy/index.html` — header "Current" line, old "build 020-20261106 — documentation
+  repair: README, CHANGELOG, MODELS, CONTROLS and the plan corrected, and two
+  index.html lines changed; no game, layout or behaviour changed; eight games unchanged
+  (…)" → new "build 021-20261107 — settings and background colour: a SETTINGS button on
+  the shelf opens a dialog with six choices (RANDOM plus five fixed palettes); RANDOM
+  changes on each visit, a chosen colour is saved; no game, control or game-screen
+  layout changed; eight games unchanged (…)". The game list is unchanged.
+- `deploy/index.html` — header "Build log" line, old "build 019-20261106, DeepSeek V4.1
+  Flash Free (OpenCode) — the" → new "build 021-20261107, DeepSeek V4.1 Flash Free
+  (OpenCode) — the"; the continuation line is unchanged.
+- `deploy/index.html` — `APP.fileVersion`: old `"020-20261106"` → new `"021-20261107"`.
+- `CHANGELOG.md` — Run guard item 4: old "… in plans/archive/pre-020/PROGRESS.md. …"
+  → new "… in plans/archive/pre-NNN/PROGRESS.md. …"; nothing else in the item changed.
+- `CHANGELOG.md` — Run guard item 5: old "Work in plans/archive/pre-020/work/ and copy
+  to the live files in ONE step at the end (STEP 7). If interrupted before that, the
+  live files are still build 019." → new "Work in plans/archive/pre-NNN/work/ and copy
+  to the live files in ONE step at the end (STEP 7). If interrupted before that, the
+  live files are still the previous build."
+- `CONTROLS.md` — "Applies to" line: old "build 019-20261106" → new "build
+  021-20261107".
+- `README.md` — "**Current build:** `020-20261106` — eight games, one file." → "**Current
+  build:** `021-20261107` — eight games, one file."
+- `README.md` — DeepSeek V4.1 Flash Free Builds cell: old "000, 001, 005, 006, 017,
+  018, 019, 020" → new "000, 001, 005, 006, 017, 018, 019, 020, 021". No other cell in
+  that row changed.
+- `README.md` — one new "How to play" bullet, added after the pads bullet: "The
+  background colour changes each visit; pick your own under SETTINGS on the shelf."
+- `MODELS.md` — Usage ledger: added the row `| 021 | DeepSeek V4.1 Flash Free ·
+  OpenCode | built | ~20 min | 162,156 tokens processed | measured: 105,696 input +
+  28,262 output + 28,198 reasoning; 8.61 M cached reads not counted; from the OpenCode
+  stats delta (see the build record) |`.
+- `MODELS.md` — time-by-model row: old `| DeepSeek V4.1 Flash Free | ~220 |` with 22
+  blocks → new `| DeepSeek V4.1 Flash Free | ~230 |` with 23 blocks.
+- `MODELS.md` — total: old "Total recorded: about 670 minutes (about 11 h 10 min) over
+  18 of 21 builds." → new "Total recorded: about 680 minutes (about 11 h 20 min) over
+  19 of 22 builds."; the parenthetical now says "after the build-021 row was added".
+- `plans/micro-games-v2.md` — one ledger row and one tool-log row appended after the
+  build-020 rows; nothing above them was edited.
+
+### Build record (owner request: duration + tokens/credits)
+
+- Duration: ~10 min wall clock (the start-of-run usage reading was at 11:45:33 WIB;
+  these records were finished at about 11:55; the file swap and the final reading
+  followed). Measured from file timestamps and the stats range, not estimated from
+  output length.
+- Usage: OpenCode's own meter, `opencode stats --days 1 --json`, delta between the start
+  reading (input 88,645; output 277; reasoning 530; cache read 89,216) and the reading
+  taken when these records were written: **input 105,696; output 28,262; reasoning
+  28,198; cache reads 8,608,256 reported separately and not counted** (162,156 input +
+  output + reasoning). 76 steps and 93 tool calls in the day total, of which 3 steps
+  and 2 tool calls predate the build. No credits: OpenCode's free tier reported cost
+  $0.00. `opencode session list --max-count 5` returned `[]`, so no session ID existed
+  and `opencode export` could not be run; the per-message sum is therefore not
+  available and is not claimed.
+- Mode and owner notes: DeepSeek V4.1 Flash Free on OpenCode's free tier. The owner's
+  model/tool and meter fields were blank ("not provided"); no balance is claimed.
+- Tools used: file read/edit/write, shell, `shasum`/`diff`, Python scripts for the
+  contrast and document checks, Node.js `node --check`, headless Chrome over the
+  DevTools protocol for V1, V2, V4, V5 and the two screenshots, `opencode stats` for
+  usage.
+- Iterations: 1 repair cycle (V5): the first run showed Space not firing `onAction`;
+  a trace found the headless tab hiding for ~30 ms and pausing the game by design, so
+  Space was swallowed as the resume key. The check now waits out the environment pause
+  and resumes with the documented overlay tap; it passed with all five keys. No layout
+  repair was needed.
+
+### Documentation review/edit attempts (standing rule)
+
+- No separate documentation review model was used. Every edit was checked against the
+  Conventions and the per-build checklist, and every changed line is quoted above.
+  The five documents and the plan were diffed against the pre-021 snapshot: entries
+  000–020, all MODELS dated entries and all existing ledger rows are byte-identical.
 
 ## 020-20261106 — 2026-11-06 (Documentation repair: README, CHANGELOG, MODELS, CONTROLS, plan; no game change)
 

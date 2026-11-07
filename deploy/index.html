@@ -6,14 +6,16 @@
   Repository : https://github.com/lohyapkant/KANTMICROGAMES
   Play online: https://kantmicrogames.lohyapkant.workers.dev/
   Hosting    : Cloudflare Workers (https://workers.cloudflare.com/)
-  Current    : build 020-20261106 — documentation repair: README, CHANGELOG,
-               MODELS, CONTROLS and the plan corrected, and two index.html
-               lines changed; no game, layout or behaviour changed; eight
-               games unchanged (PANDASNACK, BOOPEEK, DUCKLINE, SPROUTUP,
-               SLIMEHOP, SNAILRACE, HUGPARADE, CATNAPCATCH)
+  Current    : build 021-20261107 — settings and background colour: a
+               SETTINGS button on the shelf opens a dialog with six choices
+               (RANDOM plus five fixed palettes); RANDOM changes on each
+               visit, a chosen colour is saved; no game, control or
+               game-screen layout changed; eight games unchanged
+               (PANDASNACK, BOOPEEK, DUCKLINE, SPROUTUP, SLIMEHOP,
+               SNAILRACE, HUGPARADE, CATNAPCATCH)
   Names      : project and on-screen brand KANTMICROGAMES ·
                save keys and the console tag use the KANTMICROGAMES prefix
-  Build log  : build 019-20261106, DeepSeek V4.1 Flash Free (OpenCode) — the
+  Build log  : build 021-20261107, DeepSeek V4.1 Flash Free (OpenCode) — the
                full record of every build is in CHANGELOG.md
   ================================================================
 
@@ -72,6 +74,9 @@
             --ink:        #4A3B32;
             --ink-soft:   #8A776A;
             --outline:    #E8D8C2;
+            --glow-a:     #FFEFD8;
+            --glow-b:     #FDE4EA;
+            --opt-label:  2;
 
             /* Safe-area insets once, used everywhere. Tests can simulate a
                notch by overriding these four variables on <body>. */
@@ -157,12 +162,36 @@
             color: var(--ink);
             font-family: -apple-system, "SF Pro Rounded", "Segoe UI", system-ui, sans-serif;
             background:
-                radial-gradient(circle at 15% -10%, #FFEFD8 0%, transparent 34%),
-                radial-gradient(circle at 88% 4%, #FDE4EA 0%, transparent 30%),
+                radial-gradient(circle at 15% -10%, var(--glow-a) 0%, transparent 34%),
+                radial-gradient(circle at 88% 4%, var(--glow-b) 0%, transparent 30%),
                 linear-gradient(180deg, var(--cream) 0%, var(--cream-deep) 100%);
             user-select: none;
             -webkit-user-select: none;
             touch-action: manipulation; /* no accidental double-tap zoom on chrome */
+        }
+
+        /* Background palettes (build 021). Only the background tone changes:
+           --ink, --ink-soft and --panel stay fixed, and every stage/game
+           colour is untouched. PEACH is the build-020 palette byte for byte. */
+        body[data-colour="peach"] {
+            --cream: #FFF3E2; --cream-deep: #FFE8CC;
+            --glow-a: #FFEFD8; --glow-b: #FDE4EA; --outline: #E8D8C2;
+        }
+        body[data-colour="mint"] {
+            --cream: #EDF9F2; --cream-deep: #DBF2E5;
+            --glow-a: #DDF6E8; --glow-b: #D2F0E2; --outline: #CFE6D8;
+        }
+        body[data-colour="sky"] {
+            --cream: #EDF6FC; --cream-deep: #DCEBF8;
+            --glow-a: #DDEFFC; --glow-b: #D3E8FA; --outline: #CFE0EE;
+        }
+        body[data-colour="lilac"] {
+            --cream: #F8F3FD; --cream-deep: #EBE3F7;
+            --glow-a: #F0E6FC; --glow-b: #E8DBF8; --outline: #DED2EE;
+        }
+        body[data-colour="butter"] {
+            --cream: #FFF8DC; --cream-deep: #FFF0BF;
+            --glow-a: #FFF6CF; --glow-b: #FFEDC2; --outline: #EADFB8;
         }
 
         /* While a game is open the page is an app shell: it never scrolls. */
@@ -285,6 +314,39 @@
             100% { transform: scale(1); }
         }
 
+        /* SETTINGS lives on the shelf only (build 021). The button uses the
+           same class table as SHELF and RESTART (--corner-h). */
+        #shelfBar {
+            width: 100%;
+            max-width: 640px;
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 12px;
+        }
+
+        .shelfBtn {
+            min-width: 48px;
+            height: var(--corner-h);
+            padding: 0 var(--corner-pad);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 14px;
+            border: 1px solid var(--outline);
+            background: var(--panel);
+            box-shadow: 0 4px 0 rgba(74, 59, 50, 0.12);
+            cursor: pointer;
+            touch-action: manipulation;
+        }
+
+        .shelfBtn:active { transform: translateY(2px); box-shadow: 0 1px 0 rgba(74, 59, 50, 0.12); }
+
+        .shelfBtn canvas {
+            display: block;
+            image-rendering: crisp-edges;
+            image-rendering: pixelated;
+        }
+
         #shelf {
             width: 100%;
             max-width: 760px;
@@ -349,6 +411,99 @@
 
         .soonRow { display: flex; align-items: center; gap: 14px; }
         #soonMoon { flex: none; width: 56px; height: 56px; image-rendering: crisp-edges; image-rendering: pixelated; }
+
+        /* =============== settings dialog (build 021, shelf only) =============== */
+
+        #settingsScrim {
+            position: fixed;
+            inset: 0;
+            z-index: 60;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            background: rgba(74, 59, 50, 0.38);
+        }
+
+        #settingsDialog {
+            width: min(420px, 100%);
+            max-height: calc(100dvh - 32px);
+            overflow: auto;
+            padding: 18px;
+            border-radius: 20px;
+            border: 2px solid var(--outline);
+            background: var(--panel);
+            box-shadow: 0 18px 44px rgba(74, 59, 50, 0.28);
+            text-align: center;
+        }
+
+        #settingsDialog > canvas {
+            display: block;
+            margin: 0 auto 12px;
+            image-rendering: crisp-edges;
+            image-rendering: pixelated;
+        }
+
+        #colourLine { margin-bottom: 14px !important; }
+
+        #colourOptions {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+
+        .colourOpt {
+            min-height: 56px;
+            padding: 6px 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            border-radius: 12px;
+            border: 1px solid var(--outline);
+            background: var(--cream);
+            color: var(--ink);
+            cursor: pointer;
+            touch-action: manipulation;
+        }
+
+        .colourOpt .swatch {
+            width: 24px;
+            height: 24px;
+            image-rendering: crisp-edges;
+            image-rendering: pixelated;
+        }
+
+        .colourOpt canvas { display: block; }
+
+        .colourOpt[aria-pressed="true"] {
+            outline: 3px solid var(--ink);
+            outline-offset: 2px;
+        }
+
+        #settingsClose {
+            min-width: 120px;
+            min-height: 48px;
+            padding: 0 16px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 14px;
+            border: 1px solid var(--outline);
+            background: var(--panel);
+            box-shadow: 0 4px 0 rgba(74, 59, 50, 0.12);
+            cursor: pointer;
+            touch-action: manipulation;
+        }
+
+        #settingsClose:active { transform: translateY(2px); box-shadow: 0 1px 0 rgba(74, 59, 50, 0.12); }
+
+        #settingsClose canvas {
+            display: block;
+            image-rendering: crisp-edges;
+            image-rendering: pixelated;
+        }
 
         /* =============== game screen =============== */
 
@@ -735,6 +890,26 @@
     </style>
 </head>
 <body>
+<script>
+/* build 021 — apply the saved background colour before the shelf paints */
+(() => {
+    try {
+        const key = "KANTMICROGAMES.ui.colour";
+        const names = ["PEACH", "MINT", "SKY", "LILAC", "BUTTER"];
+        const choice = window.localStorage.getItem(key);
+        const fixed = names.indexOf(choice) >= 0;
+        const resolved = fixed ? choice : names[Math.floor(Math.random() * names.length)];
+        window.__kantBootColour = resolved;
+        document.body.setAttribute("data-colour", resolved.toLowerCase());
+        const cream = { PEACH: "#FFF3E2", MINT: "#EDF9F2", SKY: "#EDF6FC", LILAC: "#F8F3FD", BUTTER: "#FFF8DC" };
+        const meta = document.querySelector('meta[name="theme-color"]');
+        if (meta) meta.setAttribute("content", cream[resolved]);
+    } catch (error) {
+        window.__kantBootColour = "PEACH";
+        document.body.setAttribute("data-colour", "peach");
+    }
+})();
+</script>
 <div id="page">
 
     <!-- =============== the shelf screen (home) =============== -->
@@ -754,7 +929,24 @@
             <span class="chip"><i>✓</i> no ads, no accounts</span>
         </nav>
 
+        <div id="shelfBar">
+            <button type="button" id="btnSettings" class="shelfBtn" aria-label="SETTINGS" aria-haspopup="dialog">
+                <canvas data-label="SETTINGS" data-scale="--corner-label" width="1" height="5" aria-hidden="true"></canvas>
+            </button>
+        </div>
+
         <main id="shelf" aria-label="Micro games"></main>
+
+        <div id="settingsScrim" hidden>
+            <div id="settingsDialog" role="dialog" aria-modal="true" aria-label="Settings">
+                <canvas data-label="SETTINGS" data-scale="--corner-label" width="1" height="5" aria-hidden="true"></canvas>
+                <canvas id="colourLine" data-scale="--opt-label" width="1" height="5" aria-hidden="true"></canvas>
+                <div id="colourOptions" role="group" aria-label="Background colour"></div>
+                <button type="button" id="settingsClose" aria-label="CLOSE">
+                    <canvas data-label="CLOSE" data-scale="--corner-label" width="1" height="5" aria-hidden="true"></canvas>
+                </button>
+            </div>
+        </div>
     </section>
 
     <!-- =============== the game screen (one shared stage + pads) =============== -->
@@ -904,7 +1096,7 @@
 
 const APP = {
     name: "KANTMICROGAMES",
-    fileVersion: "020-20261106",       // build number of THIS one-file app
+    fileVersion: "021-20261107",       // build number of THIS one-file app
     savePrefix: "KANTMICROGAMES."      // best scores live at prefix + GAMEID + ".best"
 };
 
@@ -925,6 +1117,55 @@ function saveBest(gameId, value) {
         /* saving quietly refused; the run itself is unaffected */
     }
 }
+
+/* ==================================================================
+   BACKGROUND COLOUR (build 021) — one saved choice, six options.
+   RANDOM is the default and picks once per page load; a fixed choice
+   is saved and reused until RANDOM is chosen again. The inline script
+   is parser-blocking, so the attribute is set before first paint.
+   ================================================================== */
+
+const COLOUR_KEY = "KANTMICROGAMES.ui.colour";
+const COLOUR_NAMES = ["PEACH", "MINT", "SKY", "LILAC", "BUTTER"];
+const COLOUR_OPTIONS = ["RANDOM"].concat(COLOUR_NAMES);
+const COLOUR_CREAM = {
+    PEACH: "#FFF3E2", MINT: "#EDF9F2", SKY: "#EDF6FC", LILAC: "#F8F3FD", BUTTER: "#FFF8DC"
+};
+const COLOUR_DEEP = {
+    PEACH: "#FFE8CC", MINT: "#DBF2E5", SKY: "#DCEBF8", LILAC: "#EBE3F7", BUTTER: "#FFF0BF"
+};
+
+function readColourChoice() {
+    try {
+        const value = window.localStorage.getItem(COLOUR_KEY);
+        return COLOUR_NAMES.indexOf(value) >= 0 ? value : "RANDOM";
+    } catch (error) {
+        return "RANDOM";      // private browsing: random each visit, nothing saved
+    }
+}
+
+function saveColourChoice(value) {
+    try {
+        window.localStorage.setItem(COLOUR_KEY, value);
+    } catch (error) {
+        /* saving quietly refused; this visit still shows the choice */
+    }
+}
+
+function pickRandomColour() {
+    return COLOUR_NAMES[Math.floor(Math.random() * COLOUR_NAMES.length)];
+}
+
+function paintColour(name, reuse) {
+    const resolved = name === "RANDOM" ? (reuse || pickRandomColour()) : name;
+    document.body.setAttribute("data-colour", resolved.toLowerCase());
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute("content", COLOUR_CREAM[resolved]);
+    return resolved;
+}
+
+let colourChoice = readColourChoice();
+paintColour(colourChoice, colourChoice === "RANDOM" ? window.__kantBootColour : null);
 
 /* ==================================================================
    PART 1 — the shared pixel-art helpers (defined once, used by the
@@ -1018,6 +1259,7 @@ const PIXEL_FONT = {
     "!": ["010", "010", "010", "000", "010"],
     "?": ["111", "001", "010", "000", "010"],
     ".": ["000", "000", "000", "000", "010"],
+    ":": ["000", "010", "000", "010", "000"],
     "-": ["000", "000", "111", "000", "000"],
     "+": ["000", "010", "111", "010", "000"],
     "/": ["001", "001", "010", "100", "100"],
@@ -1281,6 +1523,126 @@ let lastScreenSwap = 0;
 /* Cards ignore clicks fired in the short window after a screen swap, so the
    tap that closes a game cannot also open the card that appears underneath. */
 function screenSettled() { return performance.now() - lastScreenSwap > SCREEN_SETTLE_MS; }
+
+/* ---------- settings dialog (build 021, shelf only) ---------- */
+
+const settingsBtnEl = document.getElementById("btnSettings");
+const settingsScrimEl = document.getElementById("settingsScrim");
+const settingsDialogEl = document.getElementById("settingsDialog");
+const colourOptionsEl = document.getElementById("colourOptions");
+const colourLineEl = document.getElementById("colourLine");
+const settingsCloseEl = document.getElementById("settingsClose");
+let settingsReturnFocus = null;
+
+const SWATCH_MAP = ["AABBA", "ABABA", "BABAB", "ABABA", "AABBA"];
+const RANDOM_SWATCH_MAP = ["ABCDE", "BCDEA", "CDEAB", "DEABC", "EABCD"];
+
+function paintSwatch(canvas, name) {
+    const s = 4;                    // 5 x 5 map at 4 device pixels = 20 px
+    canvas.width = 5 * s;
+    canvas.height = 5 * s;
+    const colors = name === "RANDOM"
+        ? { A: COLOUR_CREAM.PEACH, B: COLOUR_CREAM.MINT, C: COLOUR_CREAM.SKY,
+            D: COLOUR_CREAM.LILAC, E: COLOUR_CREAM.BUTTER }
+        : { A: COLOUR_CREAM[name], B: COLOUR_DEEP[name] };
+    paintPixels(canvas.getContext("2d"),
+        name === "RANDOM" ? RANDOM_SWATCH_MAP : SWATCH_MAP, colors, 0, 0, false, s);
+}
+
+function syncColourUI() {
+    colourOptionsEl.querySelectorAll(".colourOpt").forEach(function (button) {
+        button.setAttribute("aria-pressed",
+            button.getAttribute("data-colour") === colourChoice ? "true" : "false");
+    });
+    drawPixelLabel(colourLineEl, "COLOUR: " + colourChoice, "--opt-label");
+}
+
+function buildColourOptions() {
+    COLOUR_OPTIONS.forEach(function (name) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "colourOpt";
+        button.setAttribute("data-colour", name);
+        button.setAttribute("aria-label", name);
+        button.setAttribute("aria-pressed", "false");
+
+        const swatch = document.createElement("canvas");
+        swatch.className = "swatch";
+        swatch.setAttribute("aria-hidden", "true");
+        paintSwatch(swatch, name);
+
+        const label = document.createElement("canvas");
+        label.setAttribute("data-label", name);
+        label.setAttribute("data-scale", "--opt-label");
+        label.setAttribute("aria-hidden", "true");
+        label.width = 1;
+        label.height = 5;
+
+        button.appendChild(swatch);
+        button.appendChild(label);
+        button.addEventListener("click", function () {
+            colourChoice = name;
+            saveColourChoice(name);
+            paintColour(name);
+            syncColourUI();
+        });
+        colourOptionsEl.appendChild(button);
+    });
+}
+
+function openSettings() {
+    settingsReturnFocus = settingsBtnEl;
+    syncColourUI();
+    settingsScrimEl.hidden = false;
+    const chosen = colourOptionsEl.querySelector('[aria-pressed="true"]');
+    const first = chosen || colourOptionsEl.querySelector(".colourOpt");
+    if (first) first.focus();
+}
+
+function closeSettings() {
+    if (settingsScrimEl.hidden) return;
+    settingsScrimEl.hidden = true;
+    lastScreenSwap = performance.now();   // settle gate: a closing tap cannot open a card
+    if (settingsReturnFocus && typeof settingsReturnFocus.focus === "function") {
+        settingsReturnFocus.focus();
+    }
+}
+
+settingsBtnEl.addEventListener("click", function (event) {
+    event.stopPropagation();
+    openSettings();
+});
+
+settingsCloseEl.addEventListener("click", function () {
+    closeSettings();
+});
+
+settingsScrimEl.addEventListener("click", function (event) {
+    if (event.target === settingsScrimEl) closeSettings();
+});
+
+settingsDialogEl.addEventListener("keydown", function (event) {
+    if (event.key === "Escape") {
+        event.preventDefault();
+        event.stopPropagation();
+        closeSettings();
+        return;
+    }
+    if (event.key !== "Tab") return;
+    const focusables = Array.prototype.slice.call(settingsDialogEl.querySelectorAll("button")).filter(function (el) {
+        return !el.disabled && el.offsetParent !== null;
+    });
+    if (!focusables.length) return;
+    const first = focusables[0];
+    const last = focusables[focusables.length - 1];
+    if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+    }
+});
 
 function openGame(gameId) {
     const module2 = GAMES.find(function (game) { return game.id === gameId; });
@@ -1749,7 +2111,9 @@ restartBtnEl.addEventListener("click", function () {
     scheduleFit();
 });
 
+buildColourOptions();
 refreshPixelLabels();
+syncColourUI();
 
 /* ==================================================================
    PART 5 — GAME MODULES. One IIFE per game: it owns its own SETTINGS,

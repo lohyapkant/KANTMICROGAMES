@@ -4,7 +4,7 @@ Eight tiny pixel-art games in one HTML file. Open it, pick a game, play a minute
 
 Play online: <https://kantmicrogames.lohyapkant.workers.dev/>
 
-**Current build:** `020-20261106` — eight games, one file.
+**Current build:** `021-20261107` — eight games, one file.
 
 ## About this project
 
@@ -33,6 +33,7 @@ The full record of every build is in CHANGELOG.md.
 - `W A S D` or the arrow keys move. `SPACE`, the action pad or a tap on the stage acts.
 - `R` restarts at any time. `ESC` or the shelf button takes you back.
 - The on-screen pads are always shown: directions on the left, the action on the right.
+- The background colour changes each visit; pick your own under SETTINGS on the shelf.
 - Switching tabs or apps pauses the run. Page zoom is allowed.
 - Tip: add `#game=PANDASNACK` (or any game name) to the play link to jump straight into a game.
 
@@ -52,7 +53,7 @@ Keyboard, touch and device details are in CONTROLS.md.
 <!-- BEGIN:models-table  (add or edit rows only) -->
 | Model | Developer | Used via | Builds | How it went (owner notes, 2026-11-01) |
 |---|---|---|---|---|
-| DeepSeek V4.1 Flash Free | [DeepSeek](https://www.deepseek.com/) | OpenCode | 000, 001, 005, 006, 017, 018, 019, 020 | Clear pixel art and clean code (owner: "amazing"). |
+| DeepSeek V4.1 Flash Free | [DeepSeek](https://www.deepseek.com/) | OpenCode | 000, 001, 005, 006, 017, 018, 019, 020, 021 | Clear pixel art and clean code (owner: "amazing"). |
 | GLM-5.3 Flash Free | [Z.ai (Zhipu AI)](https://z.ai/) | OpenCode | 002, 003 | Worked mechanically; one game needed a full rework. |
 | Flint 40B Free | [Recursive](https://recursive.com/) | OpenCode | 004 | A working module, but its art had to be rebuilt. |
 | Gemini 3.8 Flash | [Google](https://gemini.google.com/) | Antigravity | 006, 007 | Picked up cleanly after a session limit; delivered SPROUTUP. |
