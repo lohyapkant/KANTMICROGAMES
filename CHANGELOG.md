@@ -2,7 +2,7 @@
 
 ## Conventions (read before adding an entry)
 
-Appendices A1-A9, A11, A12 and A13 (material moved out of the README in builds 012 and 020 and out of CONTROLS.md in builds 018, 019 and 020) start under '## Appendices (build 012)' at the bottom of this file.
+Appendices A1-A9, A11, A12, A13 and A14 (material moved out of the README in builds 012 and 020 and out of CONTROLS.md in builds 018, 019, 020 and 022) start under '## Appendices (build 012)' at the bottom of this file.
 
 - **Newest entry first.** Each entry starts with its build ID and the real finish date.
 - **Build IDs are `NNN-YYYYMMDD`**: a zero-padded project build number, then the finish
@@ -74,14 +74,14 @@ A prompt names one step or one small group of steps. The owner reads the usage m
      4. CONTROLS.md: only if controls changed. Its "Applies to" line names the last build whose controls it describes; do not bump it on other builds.
      5. MODELS.md: (a) every build: add one Usage ledger row per model that worked on the build, including failed, halted and prompt-only contributions, with numbers copied from the CHANGELOG Build record (the final figure), then recompute the totals under the table; (b) only when the owner supplies an observation: add a dated entry above the marker with a Source line. Never edit old entries.
      6. plans/micro-games-v2.md (private): add one ledger row and one tool-log row.
-     7. Prompt copy: save the owner's request verbatim as prompts/P-NN_<slug>.txt (private).
+     7. Prompt copy: save the owner's request verbatim as prompts/P-NN_<slug>.txt (private). The first line of the prompt copy names who wrote the prompt ('Prompt author: <name> (pasted verbatim by the owner)'); the entry's 'Built from prompt' line must say the same.
      8. deploy/index.html: update APP.fileVersion and the header "Current" line only. The footer reads the build from APP.fileVersion; never hard-code it.
      9. Frozen games: prove they are byte-identical (SHA-256 of each IIFE) and put the numbers in the entry.
     10. Consistency: the same build ID in APP.fileVersion, the index header, the rendered footer, README "Current build", the top CHANGELOG entry and the plan ledger row (CONTROLS excepted, see 4); the same six-game list in README, CONTROLS and the entry; the same copyright line in LICENSE and the index.html header.
     11. Honest usage: record time and usage in the unit the tool reports, say how it was counted, write "not recorded" if unknown, and never add across units.
     11. Honest usage: record time and usage in the unit the tool reports, say how it was counted, write "not recorded" if unknown, and never add across units.
     12. Git: end your report with the suggested commands in a code block and do not run them: `git status`, `git add <the changed public files>`, `git commit -m "build NNN-YYYYMMDD: <title>" -m "<two to four bullets>"`, `git tag build-NNN`, `git push`.
-    13. Meters: record what the tool's own usage meter shows at the start and the end, in its own unit, as supplied by the owner or visible to you. If you cannot see it, write "not visible to the model". Never estimate a balance. If two readings of the same usage disagree, record both, never add them, and write 'unreconciled' with what is known.
+    13. Meters: record what the tool's own usage meter shows at the start and the end, in its own unit, as supplied by the owner or visible to you. If you cannot see it, write "not visible to the model". Never estimate a balance. If two readings of the same usage disagree, record both, never add them, and write 'unreconciled' with what is known. The build's usage is the reading taken after the final swap; if an earlier reading was quoted, say so and say which one the ledger uses.
     14. Pixels: every new image, icon or badge is drawn from a pixel map. No image files, SVG or emoji as art.
     15. Stability: the stage must not change size at idle. After any change to `fitStage`, the top row or the controls, run the idle check (record the stage rectangle on every animation frame for 0.8 s at the named sizes; zero changes) before swapping files.
     Never delete, shorten or restructure any documentation file or section. If something looks wrong, say so in the entry instead of fixing it silently.
@@ -98,6 +98,83 @@ Free and trial tiers end without warning. Any model must be able to pick up wher
 7. Verification is a budget, not a goal: a small set of viewports, two repair cycles, then write 'not fixed' and move on. A test that cannot pass is a reason to stop and report, not to loop.
 
 <!-- NEW BUILD ENTRIES: paste the newest entry on the line below this comment, above the previous newest. Never edit older entries. -->
+
+## 022-20261107 — 2026-11-07 (Sound effects, a SOUND setting, and record corrections)
+
+Built from prompt: P-22, authored by Claude.ai Sonnet 5.5 Extra and pasted verbatim by the owner (sound effects, a SOUND setting, and record corrections; private archive file `prompts/P-22_sound-and-record-corrections.txt`)  
+Tool and models: **Gemini 3.8 Flash (Medium)** (Antigravity) started the build at 22:18 WIB and halted at STEP 4 at about 22:53 WIB when it ran out of tokens. **DeepSeek V4.1 Flash Free** (OpenCode) verified the work copies, ran STEP 5, swapped the files in and wrote most of STEP 6 (23:04-23:32 WIB), then stopped during the docs check when it ran out of tokens; a second OpenCode run finished the docs check and the records on 2026-11-08  
+Games in the one file: 8 (PANDASNACK 007-20261101 **frozen**, BOOPEEK 006-20261101
+**frozen**, DUCKLINE 005-20261101 **frozen**, SPROUTUP 007-20261101 **frozen**,
+SLIMEHOP 010-20261101 **frozen**, SNAILRACE 011-20261101 **frozen**, HUGPARADE
+015-20261102 (unchanged this build), CATNAPCATCH 016-20261102 (unchanged this build);
+file build **022-20261107**)
+
+### Added — sound effects (deploy/index.html, shell Web Audio API only)
+
+- Added a synthesized sound effects engine driven entirely by the shell:
+  - **BLIP**: action button press or stage tap (square wave, 660 → 990 Hz over 70 ms).
+  - **CHIRP**: screen score rises (two triangle notes 784 Hz then 1175 Hz, 55 ms each, 25 ms apart; rate-limited to at most one CHIRP per 90 ms).
+  - **FANFARE**: best score rises during a run, once per run, and only if the best score was above 0 when the run started (triangle arpeggio 523, 659, 784, 1047 Hz, 90 ms each).
+  - **BOOP**: RESTART button or R key (sine wave 392 → 262 Hz over 140 ms).
+  - **POP**: shelf card tap and SHELF button / Escape (triangle wave 523 → 784 Hz over 90 ms).
+  - **TICK**: opening/closing settings dialog and choosing any option (square wave 1200 Hz, 25 ms, quiet).
+- Web Audio API rules strictly observed: lazily creates AudioContext only after the first user gesture (`pointerdown`, `keydown`, `click`); no context created while SOUND is OFF; master gain capped at 0.25; simultaneous voices capped at 4 (oldest dropped); suspend on page hide / blur / pause and resume on return; all sounds synthesized in-page with zero external audio files.
+
+### Added — SOUND setting in shelf dialog (deploy/index.html)
+
+- Added a second row in `#settingsDialog` below COLOUR: pixel line `SOUND: ON` or `SOUND: OFF` and two option buttons, `ON` (default) and `OFF` (at least 48×48 px, pixel-text labels, `aria-pressed`, full-word `aria-label`).
+- Persisted under `KANTMICROGAMES.ui.sound`. Choosing applies immediately; choosing ON plays one TICK.
+- Shared option generation code refactored into `buildOptionButton` without duplication. Dialog still fits 360×640 with focus trap preserved.
+
+### Edits to existing text
+
+- **CHANGELOG Conventions checklist item 7:**
+  - Old: `     7. Prompt copy: save the owner's request verbatim as prompts/P-NN_<slug>.txt (private).`
+  - New: `     7. Prompt copy: save the owner's request verbatim as prompts/P-NN_<slug>.txt (private). The first line of the prompt copy names who wrote the prompt ('Prompt author: <name> (pasted verbatim by the owner)'); the entry's 'Built from prompt' line must say the same.`
+- **CHANGELOG Conventions checklist item 13:**
+  - Old: `    13. Meters: record what the tool's own usage meter shows at the start and the end, in its own unit, as supplied by the owner or visible to you. If you cannot see it, write "not visible to the model". Never estimate a balance. If two readings of the same usage disagree, record both, never add them, and write 'unreconciled' with what is known.`
+  - New: `    13. Meters: record what the tool's own usage meter shows at the start and the end, in its own unit, as supplied by the owner or visible to you. If you cannot see it, write "not visible to the model". Never estimate a balance. If two readings of the same usage disagree, record both, never add them, and write 'unreconciled' with what is known. The build's usage is the reading taken after the final swap; if an earlier reading was quoted, say so and say which one the ledger uses.`
+- **CONTROLS.md Settings section:**
+  - Replaced "It opens a dialog with one setting, **COLOUR**, the page background tone." with "It opens a dialog with two settings: **COLOUR**, the page background tone, and **SOUND**."
+  - Replaced "- No sound setting exists yet." with two bullets detailing SOUND ON/OFF and what cues the player hears.
+  - Archived both replaced passages verbatim in CHANGELOG Appendix A14.
+- **plans/micro-games-v2.md:** the 022 ledger row and tool-log row, first written by Gemini before the halt, were corrected in place to record the two-model handover; nothing else in the plan changed.
+- **README.md:**
+  - R1: "Current build" updated to `022-20261107`.
+  - R2: Added bullet "Sound effects are on by default; switch them off under SETTINGS on the shelf." to "How to play".
+  - R3: Gemini 3.8 Flash row in models table updated to include build 022 (`006, 007, 022`).
+  - R4: Claude.ai Sonnet 5.5 Extra row updated to include builds 017-022 (`009, 012, 013, 017, 018, 019, 020, 021, 022 (prompt only)`), and description updated.
+
+### Corrections to earlier records
+
+- Added addenda to CHANGELOG entries 018, 019, 020 correcting prompt author attribution to Claude.ai Sonnet 5.5 Extra (pasted verbatim by the owner).
+- Added addendum to CHANGELOG entry 021 naming prompt author Claude.ai Sonnet 5.5 Extra and recording the final post-swap OpenCode usage reading (203,831 tokens vs 162,156 recorded at writing time).
+- Inserted missing Claude.ai Sonnet 5.5 Extra prompt-only rows for builds 017–021 into MODELS.md usage ledger.
+- Replaced "Token totals: none" in MODELS.md with OpenCode token totals for builds 005, 017, and 021 (~2.74 M tokens).
+- Added dated owner notes in MODELS.md for DeepSeek V4.1 Flash Free (build 021) and Claude.ai Sonnet 5.5 Extra (builds 017–021).
+
+### Verification and limits
+
+- V1 ENGINE: PASS with an audio spy (fake AudioContext recording every oscillator, gain, start and stop). No context at page load; one context after the first pointerdown; all six cues at most 0.45 s with master gain 0.25; voice cap 4; 20 score increments in about 100 ms gave 2 CHIRPs; FANFARE never fired when `runBestAtStart` was 0, fired once above a positive start, and fired again after RESTART; hiding the page suspended the context; with SOUND OFF no context was ever created and no cue ran. One test repair: the first run counted CHIRP calls instead of the notes actually created.
+- V2 WIRING: PASS at 390x844 in PANDASNACK. Action button and stage tap gave BLIP; direction presses were silent; RESTART and R gave BOOP; SHELF and a card tap gave POP; settings open, choose and close gave TICK; the idle shelf stayed silent; 0 console errors. One test repair: the card tap fell inside the 400 ms settle gate and the test now waits past it.
+- V3 SETTINGS: PASS at 360x640. Dialog 121-519 px with both rows inside; 8 options, minimum 139x48; SOUND line drawn; RANDOM and ON pressed by default; OFF saved, marked and survived a reload; with nothing stored SOUND was ON; Esc closed the dialog and opened nothing.
+- V4 REGRESSION: PASS in the work copies and again on the live files after the swap. All 8 game IIFE hashes matched the build-021 values; `node --check` clean on both inline scripts; footer showed one build ID; 0 console errors; the stage rectangle did not change in 800 ms at idle (440x720); card art and name offsets were 0 px within every row at 440 and 1280 wide; the file grew by 13,821 bytes (13.5 KB, cap 15 KB); no new URL and no audio file reference.
+- V5 DOCS: PASS. README 95 lines and 6,147 bytes with none of the six forbidden words; old CHANGELOG entries byte-identical except the four appended addenda; MODELS dated entries and existing ledger rows byte-identical; one build ID everywhere; CONTROLS "Applies to" is this build; table column counts constant; relative links resolve; time totals recomputed by script.
+- Screenshot (1): the settings dialog at 360x640 on MINT with SOUND ON, fully inside the viewport. Seen: pixel-text SETTINGS title, "COLOUR: MINT", six swatch options with MINT outlined, "SOUND: ON", ON outlined and OFF, and CLOSE.
+- LIMIT: the sounds were not heard. The spy proves wiring, node creation, scheduling and parameters; it does not prove how anything sounds. Safari and the real iPhone were not tested.
+
+### Build record (owner request: duration + tokens/credits)
+
+- Duration: about 73 min of work. Gemini 3.8 Flash (Medium) in Antigravity: 22:18-22:53 WIB on 7 November (about 35 min). DeepSeek V4.1 Flash Free in OpenCode: 23:04-23:32 WIB on 7 November (about 28 min) and about 10 min on 8 November (about 38 min in total). The earlier "~25 min" figure was written before the first halt and is superseded.
+- Usage, Gemini: not recorded — time only (Antigravity showed no reading the model could see; owner notes blank).
+- Usage, DeepSeek V4.1 Flash Free via OpenCode, read by the model from `opencode stats`: start (7 November 23:04:29, before any edit) input 322,709 + output 53,330 + reasoning 39,068 = 415,107; steps 120; tool calls 135; cache reads 12,656,000. Final reading (`--days 2 --json`, 8 November 10:13:20, after the final swap and the docs check) input 632,570 + output 86,329 + reasoning 58,189 = 777,088; steps 189; tool calls 203; cache reads 19,768,192. Build usage = final minus start: input 309,861 + output 32,999 + reasoning 19,121 = **361,981 tokens**; 69 steps; 68 tool calls; cache reads 7,112,192 not counted; cost $0.00. An earlier post-swap reading of 249,131 tokens was quoted before the second halt; the ledger uses the final reading of 361,981.
+- Mode and owner notes: the owner asked that the Gemini halt and this continuation be recorded in the ledger; no other owner notes were supplied.
+- Tools used: file view/edit, shell (`python3`, `node --check`, `shasum`, `wc`), Headless Chrome over CDP, `opencode stats`.
+- Iterations: two test repairs in V1 and V2 (both test-side, not code changes); two checker corrections in V5 (expected A14/Conventions changes and the allowed time-table recompute); no code repair cycles; no rebuild loops.
+
+### Documentation review/edit attempts (standing rule)
+
+- No separate documentation review model was used. Every edit was checked against the Conventions and the per-build checklist, and every changed line is quoted above.
 
 ## 021-20261107 — 2026-11-07 (Settings and background colour: shelf-only dialog, six palettes; no game change)
 
@@ -297,6 +374,10 @@ file build **021-20261107**)
   The five documents and the plan were diffed against the pre-021 snapshot: entries
   000–020, all MODELS dated entries and all existing ledger rows are byte-identical.
 
+### Addendum — 2026-11-07 (corrections, recorded in build 022)
+- Author: P-21 was written by Claude.ai Sonnet 5.5 Extra and pasted verbatim by the owner; the entry names no author.
+- Usage: the figures in this entry are the OpenCode reading taken when the records were written (162,156 tokens). The reading after the final swap, which is the build's usage, is input 118,879, output 49,006, reasoning 35,946 = 203,831 tokens; cache reads 11,677,824 not counted; 108 steps; 126 tool calls; cost $0.00 (from the private build report).
+
 ## 020-20261106 — 2026-11-06 (Documentation repair: README, CHANGELOG, MODELS, CONTROLS, plan; no game change)
 
 Built from prompt: P-20 (the owner's documentation-repair prompt; private archive file `prompts/P-20_docs-repair.txt`)  
@@ -458,6 +539,9 @@ file build **020-20261106**)
   Conventions and the per-build checklist; the removed README section and CONTROLS sentence
   were copied verbatim into Appendix A13 before the edit.
 
+### Addendum — 2026-11-07 (correction, recorded in build 022)
+- The "Built from prompt" line calls this prompt the owner's. It was written by Claude.ai Sonnet 5.5 Extra and pasted verbatim by the owner. The prompt copy carried no author line.
+
 ## 019-20261106 — 2026-11-06 (Stage stability and crisp sizing: no idle vibration, whole-device-pixel cap)
 
 Built from prompt: P-19 (the owner's stage-stability and crisp-sizing prompt; private archive file `prompts/P-19_stage-stability.txt`)  
@@ -584,6 +668,9 @@ file build **019-20261106**)
 
 ### Addendum — 2026-11-06 (owner report, recorded in build 020)
 - The owner played all eight games on an iPhone 16 Pro Max in Safari (portrait) after this build and reported that the vibration is gone. That is the real-device check this report lists as not done. It covers the vibration only, not every other Safari behaviour. Recorded by DeepSeek V4.1 Flash Free from the owner's message.
+
+### Addendum — 2026-11-07 (correction, recorded in build 022)
+- The "Built from prompt" line calls this prompt the owner's. It was written by Claude.ai Sonnet 5.5 Extra and pasted verbatim by the owner. The prompt copy carried no author line.
 
 ## 018-20261104 — 2026-11-04 (Controls and top bar: pinned SHELF/RESTART, fixed pixel labels, no menu)
 
@@ -728,6 +815,8 @@ file build **018-20261104**)
   edits were checked against the Conventions and the per-build checklist; the old
   CONTROLS passages were copied verbatim into A11 before the rewrite.
 
+### Addendum — 2026-11-07 (correction, recorded in build 022)
+- The "Built from prompt" line calls this prompt the owner's. It was written by Claude.ai Sonnet 5.5 Extra and pasted verbatim by the owner. The prompt copy carried no author line.
 
 ## 017-20261103 — 2026-11-03 (Shell UX and process: MENU, PAD SIZE, crisp+ stage, tidy shelf)
 
@@ -3019,3 +3108,14 @@ From CONTROLS.md § Known control quirks (first bullet):
 
 - The shell writes its own hint line from the game's action label, so the frozen
   modules' original desktop hint strings are not shown. No game code had to change.
+
+### A14. Moved from CONTROLS.md in build 022
+
+The two passages in CONTROLS.md replaced in build 022:
+
+1. In "Settings", sentence:
+   > "It opens a dialog with one setting, **COLOUR**, the page background tone."
+
+2. In "Settings", bullet:
+   > "- No sound setting exists yet."
+

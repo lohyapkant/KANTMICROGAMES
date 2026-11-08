@@ -90,12 +90,20 @@ What each model used on each build. This is a record, not an opinion, and not a 
 | 014 | Qwen3.8-Flash · Qoder CLI | built | ~24 min | 8.9189 credits | measured: 124 requests (final figures from the CHANGELOG addendum) |
 | 015 | Qwen3.8-Flash · Qoder CLI | built | ~17 min | 7.8667 credits | measured: 147 requests (final figures from the CHANGELOG addendum) |
 | 016 | Qwen3.8-Flash · Qoder CLI | built | ~18 min | 10.2413 credits | measured: 198 requests (final figures from the CHANGELOG addendum) |
+| 017 | Claude.ai Sonnet 5.5 Extra · Claude.ai chat | wrote the prompt | — | — | not recorded |
 | 017 | Qwen3.8-Flash · Qoder CLI | built | ~99 min (1 h 38 min 49 s wall; 1 h 13 min 18 s active) | 52.7558 credits at 17:49; 300.8933 session credits at exit | measured: 104 billable requests at 17:49; Qoder exit report: plan 300/300, session 300.8933, 398 tool calls; the two meters are not added together |
 | 017 | DeepSeek V4.1 Flash Free · OpenCode | finished build 017 after the Qoder trial ended | ~25 min | 165,312 tokens processed | measured: 116,561 input + 23,506 output + 25,245 reasoning; 11.82 M cached reads not counted; 107 assistant turns |
+| 018 | Claude.ai Sonnet 5.5 Extra · Claude.ai chat | wrote the prompt | — | — | not recorded |
 | 018 | DeepSeek V4.1 Flash Free · OpenCode | built | ~35 min | — | not visible to the model; owner notes blank, no meter reading supplied |
+| 019 | Claude.ai Sonnet 5.5 Extra · Claude.ai chat | wrote the prompt | — | — | not recorded |
 | 019 | DeepSeek V4.1 Flash Free · OpenCode | built | ~30 min | — | not visible to the model; owner notes blank, no meter reading supplied |
+| 020 | Claude.ai Sonnet 5.5 Extra · Claude.ai chat | wrote the prompt | — | — | not recorded |
 | 020 | DeepSeek V4.1 Flash Free · OpenCode | built | ~15 min | — | not visible to the model; owner notes blank, no meter reading supplied |
+| 021 | Claude.ai Sonnet 5.5 Extra · Claude.ai chat | wrote the prompt | — | — | not recorded |
 | 021 | DeepSeek V4.1 Flash Free · OpenCode | built | ~10 min | 162,156 tokens processed | measured: 105,696 input + 28,262 output + 28,198 reasoning; 8.61 M cached reads not counted; OpenCode stats delta (see CHANGELOG build record) |
+| 022 | Claude.ai Sonnet 5.5 Extra · Claude.ai chat | wrote the prompt | — | — | not recorded |
+| 022 | Gemini 3.8 Flash · Google Antigravity | started build 022 (steps 0-4) and halted when it ran out of tokens | ~35 min | — | not recorded — time only |
+| 022 | DeepSeek V4.1 Flash Free · OpenCode | finished build 022 (steps 5-6) after the Gemini halt, in two runs (the first stopped during the docs check) | ~38 min | 361,981 tokens processed | measured: 309,861 input + 32,999 output + 19,121 reasoning; 7,112,192 cache reads not counted; 69 steps; 68 tool calls; OpenCode stats delta, final reading after the swap and the docs check (see CHANGELOG build record) |
 
 ### Totals that can honestly be added
 - **Credits, Qoder CLI, per-request transcript, builds 009-016:** 74.5874 credits over 1,143 billable requests.
@@ -104,21 +112,47 @@ What each model used on each build. This is a record, not an opinion, and not a 
 - **Approximate list-price value:** the plan meter reads 300 of 300 trial credits used, which is about US$3.00 at about US$0.01 per credit. An estimate, not a bill: the trial is free. Check https://docs.qoder.com/account/pricing before relying on it. Never converted for tokens and never added across tools.
 - **Iterations recorded (from build 017):** 4 over 1 build.
 - **Iterations recorded (build 018):** 1 repair cycle pair (a 280 px control clash, fixed by stacking the corner pair under 360 px and using 4 px page padding).
-- **Token totals: none.** The token figures count different things (for example ~2.37 M "processed" in build 005 against ~48,000 in build 007), so adding them would mean nothing.
+- **Tokens, OpenCode readings (input + output + reasoning; cache reads not counted), builds 005, 017 and 021:** about 2.74 M tokens in total (005 is approximate at about 2.37 M; 017 is 165,312; 021 is 203,831 at the final reading). Builds 018, 019 and 020 have no token reading. Other token figures count different things and are never added to these.
+- **Build 021 usage note:** the ledger row for build 021 shows the reading taken when the records were written (162,156 tokens); the build's usage after the final swap is 203,831 tokens. The row is a record and is not edited.
+- **Build 022 token reading:** 361,981 tokens (input 309,861 + output 32,999 + reasoning 19,121; 7,112,192 cache reads not counted; 69 steps; 68 tool calls; cost $0.00), from the OpenCode final reading after the swap and the docs check. An earlier post-swap reading of 249,131 was taken before the OpenCode run stopped and resumed; the ledger uses 361,981. Gemini 3.8 Flash's share of build 022 has no reading. The bullet above lists builds 005, 017 and 021 and is not edited.
 - **Time by model, approximate.** Builds 000-002 and the GPT-OSS attempt have no time recorded, so DeepSeek and GLM are undercounted. One block = 10 minutes, rounded half up.
 
 | Model | Minutes | At a glance |
 |---|---|---|
 | Qwen3.8-Flash | ~305 | ▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇ |
-| DeepSeek V4.1 Flash Free | ~230 | ▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇ |
+| DeepSeek V4.1 Flash Free | ~268 | ▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇ |
+| Gemini 3.8 Flash | ~60 | ▇▇▇▇▇▇ |
 | GLM-5.3 Flash Free | ~45 | ▇▇▇▇▇ |
 | Flint 40B Free | ~25 | ▇▇▇ |
-| Gemini 3.8 Flash | ~25 | ▇▇▇ |
 | Claude Opus 4.6 Thinking | ~20 | ▇▇ |
 | Shared session (build 006: DeepSeek + Gemini) | ~30 | ▇▇▇ |
 
-Total recorded: about 680 minutes (about 11 h 20 min) over 19 of 22 builds.
-(Totals were recomputed after the build-021 row was added; the CHANGELOG Build records remain the source of truth.)
+Total recorded: about 753 minutes (about 12 h 33 min) over 20 of 23 builds.
+(Totals were recomputed after the build-022 row was added; the CHANGELOG Build records remain the source of truth.)
+
+## 2026-11-07 — DeepSeek V4.1 Flash Free (OpenCode) — build 021
+
+Source: Owner's words (verbatim)
+
+Builds observed: `021-20261107`.
+
+The owner's notes: after trying build 021, the owner said, verbatim:
+
+> "I am quite happy with the settings button at the first initial page and the color matches the tone of the kantmicrogames"
+
+This is a dated owner note about one build on one day, not a model-written summary.
+
+## 2026-11-07 — Claude.ai Sonnet 5.5 Extra (Anthropic, chat) — prompt author, builds 017 to 021
+
+Source: Owner's words (verbatim)
+
+Builds observed: `017-20261103`, `018-20261104`, `019-20261106`, `020-20261106`, `021-20261107`.
+
+The owner's notes: the owner said, verbatim:
+
+> "I am happy with the way Claude Ai Sonnet 5.5 Extra has been providing the prompt to assist in the continued development."
+
+The prompts for these five builds were written by Claude.ai Sonnet 5.5 Extra and pasted into the executing tools by the owner. This is a dated owner note, not a ranking.
 
 ---
 

@@ -4,7 +4,7 @@ Eight tiny pixel-art games in one HTML file. Open it, pick a game, play a minute
 
 Play online: <https://kantmicrogames.lohyapkant.workers.dev/>
 
-**Current build:** `021-20261107` — eight games, one file.
+**Current build:** `022-20261107` — eight games, one file.
 
 ## About this project
 
@@ -33,6 +33,7 @@ The full record of every build is in CHANGELOG.md.
 - `W A S D` or the arrow keys move. `SPACE`, the action pad or a tap on the stage acts.
 - `R` restarts at any time. `ESC` or the shelf button takes you back.
 - The on-screen pads are always shown: directions on the left, the action on the right.
+- Sound effects are on by default; switch them off under SETTINGS on the shelf.
 - The background colour changes each visit; pick your own under SETTINGS on the shelf.
 - Switching tabs or apps pauses the run. Page zoom is allowed.
 - Tip: add `#game=PANDASNACK` (or any game name) to the play link to jump straight into a game.
@@ -53,14 +54,14 @@ Keyboard, touch and device details are in CONTROLS.md.
 <!-- BEGIN:models-table  (add or edit rows only) -->
 | Model | Developer | Used via | Builds | How it went (owner notes, 2026-11-01) |
 |---|---|---|---|---|
-| DeepSeek V4.1 Flash Free | [DeepSeek](https://www.deepseek.com/) | OpenCode | 000, 001, 005, 006, 017, 018, 019, 020, 021 | Clear pixel art and clean code (owner: "amazing"). |
+| DeepSeek V4.1 Flash Free | [DeepSeek](https://www.deepseek.com/) | OpenCode | 000, 001, 005, 006, 017, 018, 019, 020, 021, 022 | Clear pixel art and clean code (owner: "amazing"). |
 | GLM-5.3 Flash Free | [Z.ai (Zhipu AI)](https://z.ai/) | OpenCode | 002, 003 | Worked mechanically; one game needed a full rework. |
 | Flint 40B Free | [Recursive](https://recursive.com/) | OpenCode | 004 | A working module, but its art had to be rebuilt. |
-| Gemini 3.8 Flash | [Google](https://gemini.google.com/) | Antigravity | 006, 007 | Picked up cleanly after a session limit; delivered SPROUTUP. |
+| Gemini 3.8 Flash | [Google](https://gemini.google.com/) | Antigravity | 006, 007, 022 (started, halted) | Picked up cleanly after a session limit; delivered SPROUTUP. |
 | GPT-OSS 120B Medium | [OpenAI](https://openai.com/index/introducing-gpt-oss/) | Antigravity | 008 (attempt) | Abandoned: it deleted sections of the docs instead of editing them. |
 | Claude Opus 4.6 Thinking | [Anthropic](https://www.anthropic.com/) | Antigravity | 008 | Did most of the docs work, then halted mid-round. |
 | Qwen3.8-Flash | [Alibaba Qwen](https://qwen.ai/) | Qoder CLI | 008 (finish), 009, 010, 011, 012, 013, 014, 015, 016, 017 | Delivered the responsive shell and four new games, corrected HUGPARADE's movement and scoring in 015, then delivered CATNAPCATCH in 016; older games stayed unchanged. |
-| Claude.ai Sonnet 5.5 Extra | [Anthropic](https://claude.ai/) | Claude.ai chat | 009, 012, 013 (prompt only) | Wrote the responsive-shell prompt that Qwen executed. |
+| Claude.ai Sonnet 5.5 Extra | [Anthropic](https://claude.ai/) | Claude.ai chat | 009, 012, 013, 017, 018, 019, 020, 021, 022 (prompt only) | Wrote the responsive-shell prompt that Qwen executed, and later the prompts for builds 017 to 022. |
 <!-- END:models-table -->
 
 One person's dated snapshots from a handful of builds. Not a ranking. Time and usage for every build are tabulated in MODELS.md; the full record is in CHANGELOG.md. Most builds run on free or trial plans; how that works is in MODELS.md.

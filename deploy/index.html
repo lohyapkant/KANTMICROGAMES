@@ -6,16 +6,16 @@
   Repository : https://github.com/lohyapkant/KANTMICROGAMES
   Play online: https://kantmicrogames.lohyapkant.workers.dev/
   Hosting    : Cloudflare Workers (https://workers.cloudflare.com/)
-  Current    : build 021-20261107 — settings and background colour: a
-               SETTINGS button on the shelf opens a dialog with six choices
-               (RANDOM plus five fixed palettes); RANDOM changes on each
-               visit, a chosen colour is saved; no game, control or
-               game-screen layout changed; eight games unchanged
+  Current    : build 022-20261107 — sound effects, a SOUND setting, and
+               record corrections: shell-driven Web Audio cues (BLIP,
+               CHIRP, FANFARE, BOOP, POP, TICK), a SOUND ON/OFF row in the
+               shelf SETTINGS dialog (default ON, saved); no game, control
+               or game-screen layout changed; eight games unchanged
                (PANDASNACK, BOOPEEK, DUCKLINE, SPROUTUP, SLIMEHOP,
                SNAILRACE, HUGPARADE, CATNAPCATCH)
   Names      : project and on-screen brand KANTMICROGAMES ·
                save keys and the console tag use the KANTMICROGAMES prefix
-  Build log  : build 021-20261107, DeepSeek V4.1 Flash Free (OpenCode) — the
+  Build log  : build 022-20261107, Gemini 3.8 Flash (Antigravity) — the
                full record of every build is in CHANGELOG.md
   ================================================================
 
@@ -444,17 +444,18 @@
             image-rendering: pixelated;
         }
 
-        #colourLine { margin-bottom: 14px !important; }
+        #colourLine, #soundLine { margin-bottom: 14px !important; }
+        #soundLine { margin-top: 14px !important; }
 
-        #colourOptions {
+        #colourOptions, #soundOptions {
             display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr));
             gap: 10px;
             margin-bottom: 14px;
         }
 
-        .colourOpt {
-            min-height: 56px;
+        .colourOpt, .soundOpt {
+            min-height: 48px;
             padding: 6px 8px;
             display: flex;
             align-items: center;
@@ -475,9 +476,9 @@
             image-rendering: pixelated;
         }
 
-        .colourOpt canvas { display: block; }
+        .colourOpt canvas, .soundOpt canvas { display: block; }
 
-        .colourOpt[aria-pressed="true"] {
+        .colourOpt[aria-pressed="true"], .soundOpt[aria-pressed="true"] {
             outline: 3px solid var(--ink);
             outline-offset: 2px;
         }
@@ -942,6 +943,8 @@
                 <canvas data-label="SETTINGS" data-scale="--corner-label" width="1" height="5" aria-hidden="true"></canvas>
                 <canvas id="colourLine" data-scale="--opt-label" width="1" height="5" aria-hidden="true"></canvas>
                 <div id="colourOptions" role="group" aria-label="Background colour"></div>
+                <canvas id="soundLine" data-scale="--opt-label" width="1" height="5" aria-hidden="true"></canvas>
+                <div id="soundOptions" role="group" aria-label="Sound effects"></div>
                 <button type="button" id="settingsClose" aria-label="CLOSE">
                     <canvas data-label="CLOSE" data-scale="--corner-label" width="1" height="5" aria-hidden="true"></canvas>
                 </button>
@@ -1096,7 +1099,7 @@
 
 const APP = {
     name: "KANTMICROGAMES",
-    fileVersion: "021-20261107",       // build number of THIS one-file app
+    fileVersion: "022-20261107",       // build number of THIS one-file app
     savePrefix: "KANTMICROGAMES."      // best scores live at prefix + GAMEID + ".best"
 };
 
@@ -1166,6 +1169,294 @@ function paintColour(name, reuse) {
 
 let colourChoice = readColourChoice();
 paintColour(colourChoice, colourChoice === "RANDOM" ? window.__kantBootColour : null);
+
+/* ==================================================================
+   SOUND EFFECTS (build 022) — synthesized Web Audio shell cues.
+   D1: SOUND defaults to ON. No context is created until the player's
+   first user gesture (pointerdown/keydown/click). When SOUND is OFF
+   no context is ever created. Master gain at most 0.25; max 4 voices.
+   ================================================================== */
+
+const SOUND_KEY = "KANTMICROGAMES.ui.sound";
+const SOUND_OPTIONS = ["ON", "OFF"];
+
+function readSoundChoice() {
+    try {
+        const value = window.localStorage.getItem(SOUND_KEY);
+        return value === "OFF" ? "OFF" : "ON";
+    } catch (error) {
+        return "ON";
+    }
+}
+
+function saveSoundChoice(value) {
+    try {
+        window.localStorage.setItem(SOUND_KEY, value);
+    } catch (error) {
+        /* storage unavailable */
+    }
+}
+
+let soundChoice = readSoundChoice();
+let audioCtx = null;
+let masterGain = null;
+const activeVoices = [];
+
+function registerVoice(stopFn) {
+    if (activeVoices.length >= 4) {
+        const oldest = activeVoices.shift();
+        try { oldest(); } catch (e) {}
+    }
+    activeVoices.push(stopFn);
+    return function deregister() {
+        const idx = activeVoices.indexOf(stopFn);
+        if (idx >= 0) activeVoices.splice(idx, 1);
+    };
+}
+
+function createVoice(durationMs, cleanupFn) {
+    let cleaned = false;
+    function cleanup() {
+        if (cleaned) return;
+        cleaned = true;
+        deregister();
+        try { cleanupFn(); } catch (e) {}
+    }
+    const deregister = registerVoice(cleanup);
+    setTimeout(cleanup, durationMs + 30);
+    return cleanup;
+}
+
+function ensureAudioContext() {
+    if (soundChoice === "OFF") return null;
+    if (!audioCtx) {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContextClass) return null;
+        try {
+            audioCtx = new AudioContextClass();
+            masterGain = audioCtx.createGain();
+            masterGain.gain.value = 0.25;
+            masterGain.gain.setValueAtTime(0.25, audioCtx.currentTime);
+            masterGain.connect(audioCtx.destination);
+            try {
+                const buf = audioCtx.createBuffer(1, 1, 22050);
+                const src = audioCtx.createBufferSource();
+                src.buffer = buf;
+                src.connect(audioCtx.destination);
+                src.start(0);
+            } catch (err) {}
+        } catch (e) {
+            audioCtx = null;
+            return null;
+        }
+    }
+    if (audioCtx && audioCtx.state === "suspended") {
+        audioCtx.resume().catch(function () {});
+    }
+    return audioCtx;
+}
+
+function onFirstUserGesture() {
+    if (soundChoice === "ON") {
+        ensureAudioContext();
+    }
+}
+window.addEventListener("pointerdown", onFirstUserGesture, { capture: true, passive: true });
+window.addEventListener("keydown", onFirstUserGesture, { capture: true, passive: true });
+window.addEventListener("click", onFirstUserGesture, { capture: true, passive: true });
+
+function cueBlip() {
+    if (soundChoice === "OFF") return;
+    const ctx = ensureAudioContext();
+    if (!ctx) return;
+    const now = ctx.currentTime;
+    const p = 1 + (Math.random() * 0.06 - 0.03);
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = "square";
+    osc.frequency.setValueAtTime(660 * p, now);
+    osc.frequency.exponentialRampToValueAtTime(990 * p, now + 0.07);
+    gain.gain.setValueAtTime(0.001, now);
+    gain.gain.linearRampToValueAtTime(0.8, now + 0.005);
+    gain.gain.setValueAtTime(0.8, now + 0.06);
+    gain.gain.linearRampToValueAtTime(0.001, now + 0.07);
+    osc.connect(gain);
+    gain.connect(masterGain);
+    const cleanup = createVoice(70, function () {
+        try { osc.stop(0); } catch (e) {}
+        try { osc.disconnect(); } catch (e) {}
+        try { gain.disconnect(); } catch (e) {}
+    });
+    osc.onended = cleanup;
+    osc.start(now);
+    osc.stop(now + 0.07);
+}
+
+let lastChirpTime = 0;
+function cueChirp() {
+    if (soundChoice === "OFF") return;
+    const nowPerf = performance.now();
+    if (nowPerf - lastChirpTime < 90) return;
+    lastChirpTime = nowPerf;
+    const ctx = ensureAudioContext();
+    if (!ctx) return;
+    const now = ctx.currentTime;
+    const p = 1 + (Math.random() * 0.06 - 0.03);
+    const osc1 = ctx.createOscillator();
+    const gain1 = ctx.createGain();
+    osc1.type = "triangle";
+    osc1.frequency.setValueAtTime(784 * p, now);
+    gain1.gain.setValueAtTime(0.001, now);
+    gain1.gain.linearRampToValueAtTime(0.8, now + 0.005);
+    gain1.gain.setValueAtTime(0.8, now + 0.05);
+    gain1.gain.linearRampToValueAtTime(0.001, now + 0.055);
+    osc1.connect(gain1);
+    gain1.connect(masterGain);
+
+    const t2 = now + 0.08;
+    const osc2 = ctx.createOscillator();
+    const gain2 = ctx.createGain();
+    osc2.type = "triangle";
+    osc2.frequency.setValueAtTime(1175 * p, t2);
+    gain2.gain.setValueAtTime(0.001, t2);
+    gain2.gain.linearRampToValueAtTime(0.8, t2 + 0.005);
+    gain2.gain.setValueAtTime(0.8, t2 + 0.05);
+    gain2.gain.linearRampToValueAtTime(0.001, t2 + 0.055);
+    osc2.connect(gain2);
+    gain2.connect(masterGain);
+
+    const cleanup = createVoice(135, function () {
+        try { osc1.stop(0); } catch (e) {}
+        try { osc2.stop(0); } catch (e) {}
+        try { osc1.disconnect(); } catch (e) {}
+        try { osc2.disconnect(); } catch (e) {}
+        try { gain1.disconnect(); } catch (e) {}
+        try { gain2.disconnect(); } catch (e) {}
+    });
+    osc2.onended = cleanup;
+    osc1.start(now);
+    osc1.stop(now + 0.055);
+    osc2.start(t2);
+    osc2.stop(t2 + 0.055);
+}
+
+function cueFanfare() {
+    if (soundChoice === "OFF") return;
+    const ctx = ensureAudioContext();
+    if (!ctx) return;
+    const now = ctx.currentTime;
+    const p = 1 + (Math.random() * 0.06 - 0.03);
+    const freqs = [523, 659, 784, 1047];
+    const oscs = [];
+    const gains = [];
+    for (let i = 0; i < 4; i++) {
+        const t = now + i * 0.09;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = "triangle";
+        osc.frequency.setValueAtTime(freqs[i] * p, t);
+        gain.gain.setValueAtTime(0.001, t);
+        gain.gain.linearRampToValueAtTime(0.8, t + 0.005);
+        gain.gain.setValueAtTime(0.8, t + 0.08);
+        gain.gain.linearRampToValueAtTime(0.001, t + 0.09);
+        osc.connect(gain);
+        gain.connect(masterGain);
+        osc.start(t);
+        osc.stop(t + 0.09);
+        oscs.push(osc);
+        gains.push(gain);
+    }
+    const cleanup = createVoice(360, function () {
+        oscs.forEach(function (o) {
+            try { o.stop(0); } catch (e) {}
+            try { o.disconnect(); } catch (e) {}
+        });
+        gains.forEach(function (g) {
+            try { g.disconnect(); } catch (e) {}
+        });
+    });
+    oscs[3].onended = cleanup;
+}
+
+function cueBoop() {
+    if (soundChoice === "OFF") return;
+    const ctx = ensureAudioContext();
+    if (!ctx) return;
+    const now = ctx.currentTime;
+    const p = 1 + (Math.random() * 0.06 - 0.03);
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(392 * p, now);
+    osc.frequency.exponentialRampToValueAtTime(262 * p, now + 0.14);
+    gain.gain.setValueAtTime(0.001, now);
+    gain.gain.linearRampToValueAtTime(0.85, now + 0.008);
+    gain.gain.setValueAtTime(0.85, now + 0.12);
+    gain.gain.linearRampToValueAtTime(0.001, now + 0.14);
+    osc.connect(gain);
+    gain.connect(masterGain);
+    const cleanup = createVoice(140, function () {
+        try { osc.stop(0); } catch (e) {}
+        try { osc.disconnect(); } catch (e) {}
+        try { gain.disconnect(); } catch (e) {}
+    });
+    osc.onended = cleanup;
+    osc.start(now);
+    osc.stop(now + 0.14);
+}
+
+function cuePop() {
+    if (soundChoice === "OFF") return;
+    const ctx = ensureAudioContext();
+    if (!ctx) return;
+    const now = ctx.currentTime;
+    const p = 1 + (Math.random() * 0.06 - 0.03);
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = "triangle";
+    osc.frequency.setValueAtTime(523 * p, now);
+    osc.frequency.exponentialRampToValueAtTime(784 * p, now + 0.09);
+    gain.gain.setValueAtTime(0.001, now);
+    gain.gain.linearRampToValueAtTime(0.8, now + 0.006);
+    gain.gain.setValueAtTime(0.8, now + 0.075);
+    gain.gain.linearRampToValueAtTime(0.001, now + 0.09);
+    osc.connect(gain);
+    gain.connect(masterGain);
+    const cleanup = createVoice(90, function () {
+        try { osc.stop(0); } catch (e) {}
+        try { osc.disconnect(); } catch (e) {}
+        try { gain.disconnect(); } catch (e) {}
+    });
+    osc.onended = cleanup;
+    osc.start(now);
+    osc.stop(now + 0.09);
+}
+
+function cueTick() {
+    if (soundChoice === "OFF") return;
+    const ctx = ensureAudioContext();
+    if (!ctx) return;
+    const now = ctx.currentTime;
+    const p = 1 + (Math.random() * 0.06 - 0.03);
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = "square";
+    osc.frequency.setValueAtTime(1200 * p, now);
+    gain.gain.setValueAtTime(0.001, now);
+    gain.gain.linearRampToValueAtTime(0.3, now + 0.003);
+    gain.gain.setValueAtTime(0.3, now + 0.02);
+    gain.gain.linearRampToValueAtTime(0.001, now + 0.025);
+    osc.connect(gain);
+    gain.connect(masterGain);
+    const cleanup = createVoice(25, function () {
+        try { osc.stop(0); } catch (e) {}
+        try { osc.disconnect(); } catch (e) {}
+        try { gain.disconnect(); } catch (e) {}
+    });
+    osc.onended = cleanup;
+    osc.start(now);
+    osc.stop(now + 0.025);
+}
 
 /* ==================================================================
    PART 1 — the shared pixel-art helpers (defined once, used by the
@@ -1416,6 +1707,7 @@ function buildCard(game) {
        the finger (ghost click). */
     card.addEventListener("click", function () {
         if (!screenSettled()) return;
+        cuePop();
         openGame(game.id);
     });
 
@@ -1531,6 +1823,8 @@ const settingsScrimEl = document.getElementById("settingsScrim");
 const settingsDialogEl = document.getElementById("settingsDialog");
 const colourOptionsEl = document.getElementById("colourOptions");
 const colourLineEl = document.getElementById("colourLine");
+const soundOptionsEl = document.getElementById("soundOptions");
+const soundLineEl = document.getElementById("soundLine");
 const settingsCloseEl = document.getElementById("settingsClose");
 let settingsReturnFocus = null;
 
@@ -1549,6 +1843,34 @@ function paintSwatch(canvas, name) {
         name === "RANDOM" ? RANDOM_SWATCH_MAP : SWATCH_MAP, colors, 0, 0, false, s);
 }
 
+function buildOptionButton(group, name, isPressed, onClick, swatchPainter) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = group + "Opt";
+    button.setAttribute("data-" + group, name);
+    button.setAttribute("aria-label", name);
+    button.setAttribute("aria-pressed", isPressed ? "true" : "false");
+
+    if (swatchPainter) {
+        const swatch = document.createElement("canvas");
+        swatch.className = "swatch";
+        swatch.setAttribute("aria-hidden", "true");
+        swatchPainter(swatch, name);
+        button.appendChild(swatch);
+    }
+
+    const label = document.createElement("canvas");
+    label.setAttribute("data-label", name);
+    label.setAttribute("data-scale", "--opt-label");
+    label.setAttribute("aria-hidden", "true");
+    label.width = 1;
+    label.height = 5;
+
+    button.appendChild(label);
+    button.addEventListener("click", onClick);
+    return button;
+}
+
 function syncColourUI() {
     colourOptionsEl.querySelectorAll(".colourOpt").forEach(function (button) {
         button.setAttribute("aria-pressed",
@@ -1557,42 +1879,45 @@ function syncColourUI() {
     drawPixelLabel(colourLineEl, "COLOUR: " + colourChoice, "--opt-label");
 }
 
+function syncSoundUI() {
+    soundOptionsEl.querySelectorAll(".soundOpt").forEach(function (button) {
+        button.setAttribute("aria-pressed",
+            button.getAttribute("data-sound") === soundChoice ? "true" : "false");
+    });
+    drawPixelLabel(soundLineEl, "SOUND: " + soundChoice, "--opt-label");
+}
+
 function buildColourOptions() {
     COLOUR_OPTIONS.forEach(function (name) {
-        const button = document.createElement("button");
-        button.type = "button";
-        button.className = "colourOpt";
-        button.setAttribute("data-colour", name);
-        button.setAttribute("aria-label", name);
-        button.setAttribute("aria-pressed", "false");
-
-        const swatch = document.createElement("canvas");
-        swatch.className = "swatch";
-        swatch.setAttribute("aria-hidden", "true");
-        paintSwatch(swatch, name);
-
-        const label = document.createElement("canvas");
-        label.setAttribute("data-label", name);
-        label.setAttribute("data-scale", "--opt-label");
-        label.setAttribute("aria-hidden", "true");
-        label.width = 1;
-        label.height = 5;
-
-        button.appendChild(swatch);
-        button.appendChild(label);
-        button.addEventListener("click", function () {
+        const button = buildOptionButton("colour", name, name === colourChoice, function () {
             colourChoice = name;
             saveColourChoice(name);
             paintColour(name);
             syncColourUI();
-        });
+            cueTick();
+        }, paintSwatch);
         colourOptionsEl.appendChild(button);
+    });
+}
+
+function buildSoundOptions() {
+    SOUND_OPTIONS.forEach(function (name) {
+        const button = buildOptionButton("sound", name, name === soundChoice, function () {
+            soundChoice = name;
+            saveSoundChoice(name);
+            syncSoundUI();
+            if (name === "ON") {
+                cueTick();
+            }
+        }, null);
+        soundOptionsEl.appendChild(button);
     });
 }
 
 function openSettings() {
     settingsReturnFocus = settingsBtnEl;
     syncColourUI();
+    syncSoundUI();
     settingsScrimEl.hidden = false;
     const chosen = colourOptionsEl.querySelector('[aria-pressed="true"]');
     const first = chosen || colourOptionsEl.querySelector(".colourOpt");
@@ -1601,6 +1926,7 @@ function openSettings() {
 
 function closeSettings() {
     if (settingsScrimEl.hidden) return;
+    cueTick();
     settingsScrimEl.hidden = true;
     lastScreenSwap = performance.now();   // settle gate: a closing tap cannot open a card
     if (settingsReturnFocus && typeof settingsReturnFocus.focus === "function") {
@@ -1610,6 +1936,7 @@ function closeSettings() {
 
 settingsBtnEl.addEventListener("click", function (event) {
     event.stopPropagation();
+    cueTick();
     openSettings();
 });
 
@@ -1644,6 +1971,72 @@ settingsDialogEl.addEventListener("keydown", function (event) {
     }
 });
 
+let runBoundaryTime = 0;
+let runBestAtStart = 0;
+let fanfareDone = false;
+let lastSeenScore = 0;
+let scoreObserver = null;
+let bestObserver = null;
+
+function markRunBoundary() {
+    runBoundaryTime = performance.now();
+    fanfareDone = false;
+    const b = parseInt(bestEl.textContent, 10);
+    runBestAtStart = Number.isFinite(b) ? b : 0;
+    const s = parseInt(scoreEl.textContent, 10);
+    lastSeenScore = Number.isFinite(s) ? s : 0;
+}
+
+function handleScoreChange() {
+    if (performance.now() - runBoundaryTime < 150) {
+        const val = parseInt(scoreEl.textContent, 10);
+        if (Number.isFinite(val)) lastSeenScore = val;
+        return;
+    }
+    const val = parseInt(scoreEl.textContent, 10);
+    if (Number.isFinite(val)) {
+        if (val > lastSeenScore) {
+            lastSeenScore = val;
+            cueChirp();
+        } else {
+            lastSeenScore = val;
+        }
+    }
+}
+
+function handleBestChange() {
+    if (performance.now() - runBoundaryTime < 150) return;
+    const val = parseInt(bestEl.textContent, 10);
+    if (Number.isFinite(val)) {
+        if (val > runBestAtStart && runBestAtStart > 0 && !fanfareDone) {
+            fanfareDone = true;
+            cueFanfare();
+        }
+    }
+}
+
+function setupScoreObservers() {
+    if (!scoreObserver) {
+        scoreObserver = new MutationObserver(handleScoreChange);
+        scoreObserver.observe(scoreEl, { childList: true, characterData: true, subtree: true });
+    }
+    if (!bestObserver) {
+        bestObserver = new MutationObserver(handleBestChange);
+        bestObserver.observe(bestEl, { childList: true, characterData: true, subtree: true });
+    }
+}
+
+function removeScoreObservers() {
+    if (scoreObserver) {
+        scoreObserver.disconnect();
+        scoreObserver = null;
+    }
+    if (bestObserver) {
+        bestObserver.disconnect();
+        bestObserver = null;
+    }
+}
+
 function openGame(gameId) {
     const module2 = GAMES.find(function (game) { return game.id === gameId; });
     if (!module2) return;
@@ -1661,6 +2054,8 @@ function openGame(gameId) {
     setActionLabel(module2.actionLabel);
     scoreEl.textContent = "0";
     bestEl.textContent = String(readBest(gameId));
+    setupScoreObservers();
+    markRunBoundary();
     msgEl.textContent = "";
     updateHints();
     fitStage();
@@ -1676,6 +2071,7 @@ function openGame(gameId) {
 }
 
 function openShelf() {
+    if (ACTIVE.module) cuePop();
     releaseAllDirs(ACTIVE.module);
     if (ACTIVE.module) ACTIVE.module.stop();
     ACTIVE.module = null;
@@ -1686,6 +2082,7 @@ function openShelf() {
     bodyEl.classList.remove("playing");
     bodyEl.removeAttribute("data-layout");
     buildShelf();                     // fresh best-score lines on the cards
+    removeScoreObservers();
     setHash("");
     lastScreenSwap = performance.now();
 }
@@ -1839,6 +2236,9 @@ function frame(now) {
    the HTML overlay. The input that resumes is swallowed so it cannot also
    dash or poke. */
 function pauseForLifecycle() {
+    if (audioCtx && audioCtx.state === "running") {
+        try { audioCtx.suspend(); } catch (e) {}
+    }
     if (!ACTIVE.module || ACTIVE.paused) return;
     releaseAllDirs(ACTIVE.module);
     ACTIVE.paused = true;
@@ -1846,6 +2246,9 @@ function pauseForLifecycle() {
 }
 
 function resumeFromUserInput() {
+    if (audioCtx && audioCtx.state === "suspended" && soundChoice === "ON") {
+        try { audioCtx.resume(); } catch (e) {}
+    }
     if (!ACTIVE.paused) return;
     ACTIVE.paused = false;
     pauseOverlayEl.hidden = true;
@@ -1853,7 +2256,16 @@ function resumeFromUserInput() {
 }
 
 document.addEventListener("visibilitychange", function () {
-    if (document.visibilityState === "hidden") pauseForLifecycle();
+    if (document.visibilityState === "hidden") {
+        pauseForLifecycle();
+        if (audioCtx && audioCtx.state === "running") {
+            try { audioCtx.suspend(); } catch (e) {}
+        }
+    } else {
+        if (audioCtx && audioCtx.state === "suspended" && soundChoice === "ON" && !ACTIVE.paused) {
+            try { audioCtx.resume(); } catch (e) {}
+        }
+    }
 });
 window.addEventListener("pagehide", pauseForLifecycle);
 window.addEventListener("blur", pauseForLifecycle);
@@ -1924,9 +2336,9 @@ window.addEventListener("keydown", function (event) {
     if (event.repeat) return;
     const dir = DIR_KEYS[code];
     if (dir) { ACTIVE.module.onDir(dir, true); pressPadVisual(dir, true); return; }
-    if (code === "Space") { ACTIVE.module.onAction(); return; }
+    if (code === "Space") { cueBlip(); ACTIVE.module.onAction(); return; }
     if (code === "Escape") { openShelf(); return; }
-    if (code === "KeyR") { ACTIVE.module.restart(); scheduleFit(); return; }
+    if (code === "KeyR") { cueBoop(); markRunBoundary(); ACTIVE.module.restart(); scheduleFit(); return; }
     if (isNonAnyKey(code)) return;
     if (typeof ACTIVE.module.onAnyKey === "function") ACTIVE.module.onAnyKey();
 });
@@ -2053,6 +2465,7 @@ dirClusterEl.addEventListener("contextmenu", function (event) { event.preventDef
             try { dashBtnEl.setPointerCapture(event.pointerId); } catch (error) { /* fine */ }
         }
         if (ACTIVE.paused) { resumeFromUserInput(); return; }
+        cueBlip();
         if (ACTIVE.module) ACTIVE.module.onAction();
     };
     const up = function () { dashBtnEl.classList.remove("press"); };
@@ -2081,6 +2494,7 @@ stageCanvas.addEventListener("pointerup", function (event) {
     stagePress = null;
     if (moved > 12 || !quick) return;
     if (ACTIVE.paused) { resumeFromUserInput(); return; }
+    cueBlip();
     if (ACTIVE.module) ACTIVE.module.onStageTap();
 });
 ["pointercancel", "lostpointercapture"].forEach(function (type) {
@@ -2107,13 +2521,17 @@ shelfBtnEl.addEventListener("click", function () {
 restartBtnEl.addEventListener("click", function () {
     if (!screenSettled() || !ACTIVE.module) return;
     resumeFromUserInput();
+    cueBoop();
+    markRunBoundary();
     ACTIVE.module.restart();
     scheduleFit();
 });
 
 buildColourOptions();
+buildSoundOptions();
 refreshPixelLabels();
 syncColourUI();
+syncSoundUI();
 
 /* ==================================================================
    PART 5 — GAME MODULES. One IIFE per game: it owns its own SETTINGS,

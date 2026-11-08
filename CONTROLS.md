@@ -1,4 +1,4 @@
-<!-- Applies to: build 021-20261107 · eight games · changes to controls are recorded in CHANGELOG.md -->
+<!-- Applies to: build 022-20261107 · eight games · changes to controls are recorded in CHANGELOG.md -->
 # KANTMICROGAMES — Controls
 
 Which controls exist, how they behave on each kind of device, and why.
@@ -31,8 +31,7 @@ and down do nothing.
 
 ## Settings
 
-SETTINGS is on the shelf only; no game screen has it. It opens a dialog with one
-setting, **COLOUR**, the page background tone.
+SETTINGS is on the shelf only; no game screen has it. It opens a dialog with two settings: **COLOUR**, the page background tone, and **SOUND**.
 
 - Six values: **RANDOM** (the default) and five fixed palettes: **PEACH**, **MINT**,
   **SKY**, **LILAC**, **BUTTER**.
@@ -44,7 +43,8 @@ setting, **COLOUR**, the page background tone.
   stays inside the dialog while it is open.
 - Text colours, the stage and every game's colours do not change; only the background
   tone does.
-- No sound setting exists yet.
+- **SOUND** is the second row: **ON** (the default) or **OFF**, saved under `KANTMICROGAMES.ui.sound`. The sounds are short effects made inside the page; no audio files are loaded. A browser only allows sound after your first tap or key press, and on some phones the ringer switch can mute it.
+- What you hear: a blip on the action button or a tap on the stage, a chirp when the score goes up, a short fanfare when you beat your best (not on your very first run), a boop on RESTART, a pop when a game opens or you go back to the shelf, and a soft tick in settings. Direction buttons are silent.
 
 ## Controls on the game screen
 
