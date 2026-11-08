@@ -63,6 +63,7 @@ Appendices A1-A9, A11, A12, A13 and A14 (material moved out of the README in bui
 4. Checkpoint: after each step write "DONE step N / NEXT step N+1" in plans/archive/pre-NNN/PROGRESS.md. If a limit, error or quota message appears, finish the current edit, update PROGRESS.md and stop.
 5. Work in plans/archive/pre-NNN/work/ and copy to the live files in ONE step at the end (STEP 7). If interrupted before that, the live files are still the previous build.
 6. Report what you skipped. A smaller true report beats a larger guessed one.
+7. Write PASS, "verified" or any result only after the check has actually run. Before that write "pending".
 
 A prompt names one step or one small group of steps. The owner reads the usage meter between runs.
 
@@ -81,7 +82,7 @@ A prompt names one step or one small group of steps. The owner reads the usage m
     11. Honest usage: record time and usage in the unit the tool reports, say how it was counted, write "not recorded" if unknown, and never add across units.
     11. Honest usage: record time and usage in the unit the tool reports, say how it was counted, write "not recorded" if unknown, and never add across units.
     12. Git: end your report with the suggested commands in a code block and do not run them: `git status`, `git add <the changed public files>`, `git commit -m "build NNN-YYYYMMDD: <title>" -m "<two to four bullets>"`, `git tag build-NNN`, `git push`.
-    13. Meters: record what the tool's own usage meter shows at the start and the end, in its own unit, as supplied by the owner or visible to you. If you cannot see it, write "not visible to the model". Never estimate a balance. If two readings of the same usage disagree, record both, never add them, and write 'unreconciled' with what is known. The build's usage is the reading taken after the final swap; if an earlier reading was quoted, say so and say which one the ledger uses.
+    13. Meters: record what the tool's own usage meter shows at the start and the end, in its own unit, as supplied by the owner or visible to you. If you cannot see it, write "not visible to the model". Never estimate a balance. If two readings of the same usage disagree, record both, never add them, and write 'unreconciled' with what is known. The build's usage is the reading taken after the final swap; if an earlier reading was quoted, say so and say which one the ledger uses. For a build that spans several runs or days, take the usage reading at the end of every run (including a halted one), use the same JSON command with a window that includes the first run's start day, and show each run's share.
     14. Pixels: every new image, icon or badge is drawn from a pixel map. No image files, SVG or emoji as art.
     15. Stability: the stage must not change size at idle. After any change to `fitStage`, the top row or the controls, run the idle check (record the stage rectangle on every animation frame for 0.8 s at the named sizes; zero changes) before swapping files.
     Never delete, shorten or restructure any documentation file or section. If something looks wrong, say so in the entry instead of fixing it silently.
@@ -96,8 +97,74 @@ Free and trial tiers end without warning. Any model must be able to pick up wher
 5. One build, one prompt, one focus. Split big requests into several builds.
 6. Never carry a claim forward (credits left, tests passed) without checking it again.
 7. Verification is a budget, not a goal: a small set of viewports, two repair cycles, then write 'not fixed' and move on. A test that cannot pass is a reason to stop and report, not to loop.
+8. If a run halts, write a HANDOVER section in PROGRESS.md: what is done, what is verified (with the actual result), what is pending and the NEXT step. The next model checks the earlier work against the prompt before continuing.
 
 <!-- NEW BUILD ENTRIES: paste the newest entry on the line below this comment, above the previous newest. Never edit older entries. -->
+
+## 023-20261109 — 2026-11-09 (Shelf helpers: times opened, sort row, pick of the day)
+
+Built from prompt: P-23, authored by Claude.ai Sonnet 5.5 Extra and pasted verbatim by the owner (shelf helpers: times opened, sort row, pick of the day; private archive file `prompts/P-23_shelf-helpers.txt`)  
+Tool and model: **DeepSeek V4.1 Flash Free** (OpenCode)  
+Games in the one file: 8 (PANDASNACK 007-20261101 **frozen**, BOOPEEK 006-20261101
+**frozen**, DUCKLINE 005-20261101 **frozen**, SPROUTUP 007-20261101 **frozen**,
+SLIMEHOP 010-20261101 **frozen**, SNAILRACE 011-20261101 **frozen**, HUGPARADE
+015-20261102 (unchanged this build), CATNAPCATCH 016-20261102 (unchanged this build);
+file build **023-20261109**)
+
+### Added — times opened (deploy/index.html, shelf only)
+
+- Added `readOpens` / `saveOpens` beside `readBest`, using `APP.savePrefix + gameId + ".opens"` and the same try/catch pattern. `openGame` adds one after the module lookup and the already-open check, so a repeat call and an unknown id add nothing; RESTART, resume and returning from a pause do not add one.
+- The card line under each game now reads "not played yet" (opens 0 and best 0), "opened 1 time" / "opened N times" (best 0, opens above 0), or "best score B · opened N times" (best above 0). The shelf is rebuilt on return from a game, so the lines are current.
+
+### Added — sort row (deploy/index.html, shelf only)
+
+- Added `#sortBar` between `#shelfBar` and `#shelf`: a pixel-text SORT label and five pixel-text buttons (DEFAULT, A-Z, BEST, UNPLAYED, MOST OPENED), each at least 48 px tall using the class table (`--corner-h` 48/48/52/56), `aria-pressed` with a 3 px outline, full-word aria-labels, wrapping to a second line when needed.
+- Orders are stable: DEFAULT is the registry order and the tie-break of every other order; A-Z by name; BEST by saved best score descending with unplayed games last; UNPLAYED with never-opened games first; MOST OPENED by opens descending. COMING SOON is always last.
+- Choosing reorders the existing card elements (no rebuild), saves `KANTMICROGAMES.ui.sort` (DEFAULT, AZ, BEST, UNPLAYED, MOST; missing or invalid means DEFAULT), plays the existing TICK cue and announces "Sorted by <label>" in a polite live region. The shelf re-sorts whenever it is shown, and tab order follows the sorted DOM.
+
+### Added — pick of the day (deploy/index.html, shelf only)
+
+- Added `#pickBanner` above the sort row: the pixel-text label PICK OF THE DAY, the game name in pixel text, a 200x96 preview painted by the game's `previewPaint` exactly as a card does, and the concept line. Its aria-label is "Pick of the day: <name>. Play"; a tap does what a card tap does (`screenSettled()`, `cuePop()`, `openGame`).
+- The choice uses the local date string YYYY-MM-DD. A stored `<today>:<GAMEID>` is reused when the game exists; otherwise the pool is every game with 0 opens and 0 best score (or all games when none qualify) and the index is the local day number modulo the pool length. The result is saved under `KANTMICROGAMES.ui.pick` and does not change during the day, even after the game is opened.
+
+### Edits to existing text
+
+- **CHANGELOG Conventions — Run guard:** the new rule is quoted exactly as the prompt supplied it ("8. Write PASS, ..."). The list in this file ended at rule 6, so it is added as rule 7 to keep the sequence unbroken; the prompt called it rule 8.
+  - Old: the Run guard ended at `6. Report what you skipped. A smaller true report beats a larger guessed one.`
+  - New: that line, then `7. Write PASS, "verified" or any result only after the check has actually run. Before that write "pending".`
+- **CHANGELOG Conventions — Continuity item 8:**
+  - Old: the Continuity list ended at `7. Verification is a budget, not a goal: ...`
+  - New: that item, then `8. If a run halts, write a HANDOVER section in PROGRESS.md: what is done, what is verified (with the actual result), what is pending and the NEXT step. The next model checks the earlier work against the prompt before continuing.`
+- **CHANGELOG Conventions — checklist item 13:** appended ` For a build that spans several runs or days, take the usage reading at the end of every run (including a halted one), use the same JSON command with a window that includes the first run's start day, and show each run's share.`
+- **CONTROLS.md:** added the Shelf section after Settings with the three helpers, and set "Applies to" to `build 023-20261109`.
+- **README.md:**
+  - R1: "Current build" updated to `023-20261109`.
+  - R2: added the bullet "The shelf offers a pick of the day and can sort the games by name, best score, unplayed or most opened." to "How to play".
+  - R3: DeepSeek V4.1 Flash Free row gains 023; Claude.ai Sonnet 5.5 Extra row gains 023.
+
+### Verification and limits
+
+- V1 OPENS: PASS — stub storage; card tap = 1; RESTART and R stayed 1; a second open = 2; `#game=BOOPEEK` = 1; a repeat call for the open game and an unknown id added nothing; 0 console errors.
+- V2 CARD LINES: PASS — "best score 5 · opened 3 times", "opened 2 times", "not played yet" and "opened 1 time" all appeared for matching stored values; returning after play refreshed the line to "best score 5 · opened 4 times"; 0 console errors.
+- V3 SORT: PASS — all five orders matched the script-computed order; `aria-pressed` correct; COMING SOON last; the live region announced the sort; the choice survived a reload; an invalid stored value gave DEFAULT; Enter and Space both chose; every button at least 48 px tall; no horizontal overflow at 280, 360, 440, 768 or 1280; 0 console errors. One test-side repair (the CDP Enter dispatch lacked its text/native code); no app code changed.
+- V4 PICK: PASS — with a fake `Date` for 2026-11-09, 11-10 and 11-11: the same day gave the same game across reloads; opening the pick did not change that day's pick; with all games but one opened the pick was the unplayed game; with every game opened the pick came from all eight; the banner tap, Enter and Space each opened it and added exactly one open; 0 console errors. One test-side repair (the CDP Space dispatch lacked the text/char events a real Space sends); no app code changed.
+- V5 LAYOUT: PASS — SETTINGS bottom edge 384.8 px at 360x640; card art and name offsets had 0.0 px spread within every row at 390, 768 and 1280 wide; no horizontal overflow at 280, 360, 390, 440, 768 or 1280; 0 console errors.
+- V6 REGRESSION: PASS — all eight IIFE hashes equal F5; `node --check` clean on both inline scripts; the footer shows one build ID; 0 console errors; the stage rectangle was identical in all nine samples over 800 ms at 440x720 @3; the audio spy showed the sort choice creates the TICK voice (square, about 1233 Hz) and the banner creates the POP voice (triangle, about 516 Hz). Repeated on the live files after the one-step swap: PASS.
+- V7 DOCS: PASS — README 96 lines / 6,263 bytes and none of the six forbidden whole words; CHANGELOG entries 000-022 byte-identical (210,193-byte tail from the 022 entry); MODELS 37 existing ledger rows and all existing dated entries byte-identical; the build ID is correct at every current anchor; table columns constant; relative links resolve; the time total script-summed to 753 minutes and every bar matched. Two test-side repairs (a wrong plan path, then three check bugs); no document was changed for them.
+- Screenshots (2): `plans/archive/pre-023/shelf-440-unplayed.jpg` and `plans/archive/pre-023/shelf-1280-az.jpg`, both looked at. At 440x745: SETTINGS in the first screenful, PICK OF THE DAY showing SPROUT UP, UNPLAYED outlined, SPROUTUP first. At 1280x720: A-Z outlined, the visible cards Boo Peek / Catnap Catch / Duck Line in alphabetical order, no overflow.
+- LIMIT: Safari and the real iPhone were not tested by me. All browser checks ran in headless Chrome over CDP. The sounds were not heard; the spy proves wiring, voice choice and parameters, not how they sound. The full viewport matrix, landscape play and long-run play were skipped under the run guard's budget.
+
+### Build record (owner request: duration + tokens/credits)
+
+- Duration: about 17 min to the final usage reading (2026-11-09, 00:04:26-00:21:47 WIB); the records were written after that reading.
+- Usage: 187,025 tokens processed = 109,671 input + 36,437 output + 40,917 reasoning; 7,591,808 cache reads separate and NOT counted; 67 steps; 68 tool calls; cost $0.00. Counted with `opencode stats --days 2 --json`: the final reading after the swap and the live regression minus the start reading taken before any edit, JSON fields only. `opencode stats --days 2 --models` showed 9.6m tokens, 89 steps and $0.00 and was not mixed in. No earlier reading was used. The session list returned no rows, so no export was summed; the JSON did not show assistant turns.
+- Mode and owner notes: DeepSeek V4.1 Flash Free via OpenCode. Selection mode/effort, owner notes, a previous-run usage reading and other-tool meter readings: not provided (blank in the prompt). No other tool was used.
+- Tools used: OpenCode (shell and file edits); Python 3 for exact-match edits and the docs check; Node.js with headless Chrome 156 over the DevTools Protocol for V1-V6; `node --check`; `python3 -m http.server` as the local test server.
+- Iterations: 0 app-code repair cycles. 4 test-side repair cycles: V3 Enter dispatch, V4 Space dispatch, and V7 twice (a wrong plan path, then three check bugs). No problem was left "not fixed".
+
+### Documentation review/edit attempts (standing rule)
+
+- No separate documentation review model was used. Every edit was checked against the Conventions and the per-build checklist, and every changed line is quoted above.
 
 ## 022-20261107 — 2026-11-07 (Sound effects, a SOUND setting, and record corrections)
 

@@ -6,16 +6,16 @@
   Repository : https://github.com/lohyapkant/KANTMICROGAMES
   Play online: https://kantmicrogames.lohyapkant.workers.dev/
   Hosting    : Cloudflare Workers (https://workers.cloudflare.com/)
-  Current    : build 022-20261107 — sound effects, a SOUND setting, and
-               record corrections: shell-driven Web Audio cues (BLIP,
-               CHIRP, FANFARE, BOOP, POP, TICK), a SOUND ON/OFF row in the
-               shelf SETTINGS dialog (default ON, saved); no game, control
-               or game-screen layout changed; eight games unchanged
+  Current    : build 023-20261109 — shelf helpers: a times-opened count on
+               every card, a SORT row (DEFAULT, A-Z, BEST, UNPLAYED, MOST
+               OPENED) with a saved choice, and a PICK OF THE DAY banner
+               that prefers unplayed games; no game, control, sound cue or
+               game-screen layout changed; eight games unchanged
                (PANDASNACK, BOOPEEK, DUCKLINE, SPROUTUP, SLIMEHOP,
                SNAILRACE, HUGPARADE, CATNAPCATCH)
   Names      : project and on-screen brand KANTMICROGAMES ·
                save keys and the console tag use the KANTMICROGAMES prefix
-  Build log  : build 022-20261107, Gemini 3.8 Flash (Antigravity) — the
+  Build log  : build 023-20261109, DeepSeek V4.1 Flash Free (OpenCode) — the
                full record of every build is in CHANGELOG.md
   ================================================================
 
@@ -345,6 +345,117 @@
             display: block;
             image-rendering: crisp-edges;
             image-rendering: pixelated;
+        }
+
+        /* Build 023: the pick of the day. A wide card above the sort row. */
+        #pickBanner {
+            width: 100%;
+            max-width: 760px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 12px;
+            padding: 14px 18px;
+            border-radius: 22px;
+            border: 2px solid var(--outline);
+            background: var(--panel);
+            box-shadow: 0 10px 24px rgba(74, 59, 50, 0.10);
+            color: var(--ink);
+            text-align: left;
+            font-family: inherit;
+            cursor: pointer;
+            touch-action: manipulation;
+        }
+
+        #pickBanner:active { transform: translateY(2px); }
+
+        #pickPreview {
+            flex: none;
+            width: 120px;
+            height: auto;
+            aspect-ratio: 200 / 96;
+            border-radius: 14px;
+            image-rendering: crisp-edges;
+            image-rendering: pixelated;
+            background: #FFF6E4;
+            border: 1px dashed var(--outline);
+        }
+
+        #pickText {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 6px;
+            min-width: 0;
+        }
+
+        #pickText canvas { display: block; image-rendering: crisp-edges; image-rendering: pixelated; }
+
+        #pickConcept {
+            font-size: 13px;
+            font-weight: 600;
+            line-height: 1.4;
+            color: var(--ink-soft);
+        }
+
+        @media (max-width: 359px) {
+            #pickBanner { padding: 12px; gap: 10px; }
+            #pickPreview { width: 84px; }
+        }
+
+        /* Build 023: the sort row sits between SETTINGS and the cards. It
+           wraps to a second line when the labels need the room. */
+        #sortBar {
+            width: 100%;
+            max-width: 760px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+
+        #sortLabel { display: block; margin-right: 4px; }
+
+        .sortBtn {
+            min-width: 48px;
+            min-height: 48px;
+            height: var(--corner-h);
+            padding: 0 var(--corner-pad);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            border: 1px solid var(--outline);
+            background: var(--cream);
+            color: var(--ink);
+            cursor: pointer;
+            touch-action: manipulation;
+        }
+
+        .sortBtn[aria-pressed="true"] {
+            outline: 3px solid var(--ink);
+            outline-offset: 2px;
+        }
+
+        .sortBtn canvas {
+            display: block;
+            image-rendering: crisp-edges;
+            image-rendering: pixelated;
+        }
+
+        .visuallyHidden {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            margin: -1px;
+            padding: 0;
+            overflow: hidden;
+            clip: rect(0 0 0 0);
+            clip-path: inset(50%);
+            white-space: nowrap;
+            border: 0;
         }
 
         #shelf {
@@ -936,6 +1047,35 @@
             </button>
         </div>
 
+        <button type="button" id="pickBanner" aria-label="Pick of the day">
+            <canvas id="pickPreview" width="200" height="96" aria-hidden="true"></canvas>
+            <span id="pickText">
+                <canvas id="pickLabel" data-label="PICK OF THE DAY" data-scale="--opt-label" width="1" height="5" aria-hidden="true"></canvas>
+                <canvas id="pickName" data-scale="--corner-label" width="1" height="5" aria-hidden="true"></canvas>
+                <span id="pickConcept"></span>
+            </span>
+        </button>
+
+        <div id="sortBar" role="group" aria-label="Sort the games">
+            <canvas id="sortLabel" data-label="SORT" data-scale="--corner-label" width="1" height="5" aria-hidden="true"></canvas>
+            <button type="button" class="sortBtn" data-sort="DEFAULT" aria-label="Sort by default order" aria-pressed="true">
+                <canvas data-label="DEFAULT" data-scale="--corner-label" width="1" height="5" aria-hidden="true"></canvas>
+            </button>
+            <button type="button" class="sortBtn" data-sort="AZ" aria-label="Sort by name, A to Z" aria-pressed="false">
+                <canvas data-label="A-Z" data-scale="--corner-label" width="1" height="5" aria-hidden="true"></canvas>
+            </button>
+            <button type="button" class="sortBtn" data-sort="BEST" aria-label="Sort by best score" aria-pressed="false">
+                <canvas data-label="BEST" data-scale="--corner-label" width="1" height="5" aria-hidden="true"></canvas>
+            </button>
+            <button type="button" class="sortBtn" data-sort="UNPLAYED" aria-label="Sort by unplayed" aria-pressed="false">
+                <canvas data-label="UNPLAYED" data-scale="--corner-label" width="1" height="5" aria-hidden="true"></canvas>
+            </button>
+            <button type="button" class="sortBtn" data-sort="MOST" aria-label="Sort by most opened" aria-pressed="false">
+                <canvas data-label="MOST OPENED" data-scale="--corner-label" width="1" height="5" aria-hidden="true"></canvas>
+            </button>
+        </div>
+        <p id="sortLive" class="visuallyHidden" role="status" aria-live="polite"></p>
+
         <main id="shelf" aria-label="Micro games"></main>
 
         <div id="settingsScrim" hidden>
@@ -1099,7 +1239,7 @@
 
 const APP = {
     name: "KANTMICROGAMES",
-    fileVersion: "022-20261107",       // build number of THIS one-file app
+    fileVersion: "023-20261109",       // build number of THIS one-file app
     savePrefix: "KANTMICROGAMES."      // best scores live at prefix + GAMEID + ".best"
 };
 
@@ -1119,6 +1259,40 @@ function saveBest(gameId, value) {
     } catch (error) {
         /* saving quietly refused; the run itself is unaffected */
     }
+}
+
+/* Build 023: how many times a game was opened on this device. One count per
+   open (card tap, pick banner, #game= link); RESTART, resume and a pause do
+   not add one. Same try/catch pattern as readBest / saveBest. */
+function readOpens(gameId) {
+    try {
+        const value = window.localStorage.getItem(APP.savePrefix + gameId + ".opens");
+        const parsed = value === null ? 0 : parseInt(value, 10);
+        return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
+    } catch (error) {
+        return 0;
+    }
+}
+
+function saveOpens(gameId, value) {
+    try {
+        window.localStorage.setItem(APP.savePrefix + gameId + ".opens", String(value));
+    } catch (error) {
+        /* saving quietly refused; the count is only cosmetic */
+    }
+}
+
+function opensText(count) {
+    return count === 1 ? "opened 1 time" : "opened " + count + " times";
+}
+
+/* One line under every card: best score and opens, or "not played yet". */
+function cardBestText(gameId) {
+    const best = readBest(gameId);
+    const opens = readOpens(gameId);
+    if (best <= 0 && opens === 0) return "not played yet";
+    if (best <= 0) return opensText(opens);
+    return "best score " + best + " · " + opensText(opens);
 }
 
 /* ==================================================================
@@ -1699,6 +1873,7 @@ function buildCard(game) {
     const card = document.createElement("button");
     card.type = "button";
     card.className = "card";
+    card.setAttribute("data-game", game.id);
     card.setAttribute("aria-label", "Play " + game.name);
     /* A click opens the game: mouse, tap, keyboard Enter/Space and assistive
        tech all produce one. A drag that starts on a card scrolls and never
@@ -1733,8 +1908,7 @@ function buildCard(game) {
 
     const best = document.createElement("div");
     best.className = "best";
-    const saved = readBest(game.id);
-    best.textContent = (saved > 0) ? "best score " + saved : "not played yet";
+    best.textContent = cardBestText(game.id);
     card.appendChild(best);
 
     return card;
@@ -1765,6 +1939,174 @@ function buildComingSoonCard() {
     return card;
 }
 
+/* Build 023: the sort row. The choice is saved; an unknown value means
+   DEFAULT. Sorting only reorders the existing card elements. */
+const SORT_KEY = "KANTMICROGAMES.ui.sort";
+const SORT_OPTIONS = ["DEFAULT", "AZ", "BEST", "UNPLAYED", "MOST"];
+const SORT_LABELS = { DEFAULT: "DEFAULT", AZ: "A-Z", BEST: "BEST", UNPLAYED: "UNPLAYED", MOST: "MOST OPENED" };
+
+function readSortChoice() {
+    try {
+        const value = window.localStorage.getItem(SORT_KEY);
+        return SORT_OPTIONS.indexOf(value) >= 0 ? value : "DEFAULT";
+    } catch (error) {
+        return "DEFAULT";
+    }
+}
+
+function saveSortChoice(value) {
+    try {
+        window.localStorage.setItem(SORT_KEY, value);
+    } catch (error) {
+        /* saving quietly refused; sorting still works this visit */
+    }
+}
+
+let sortChoice = readSortChoice();
+
+function gameIsUnplayed(game) {
+    return readOpens(game.id) === 0 && readBest(game.id) === 0;
+}
+
+/* Stable: ties keep the registry order, so DEFAULT is the spine of every
+   other order. */
+function sortedGames() {
+    const list = GAMES.slice();
+    const rank = new Map(GAMES.map(function (game, index) { return [game.id, index]; }));
+    const tie = function (a, b) { return rank.get(a.id) - rank.get(b.id); };
+    if (sortChoice === "AZ") {
+        list.sort(function (a, b) { return a.name.localeCompare(b.name) || tie(a, b); });
+    } else if (sortChoice === "BEST") {
+        list.sort(function (a, b) {
+            const ua = gameIsUnplayed(a), ub = gameIsUnplayed(b);
+            if (ua !== ub) return ua ? 1 : -1;
+            return (readBest(b.id) - readBest(a.id)) || tie(a, b);
+        });
+    } else if (sortChoice === "UNPLAYED") {
+        list.sort(function (a, b) {
+            return ((gameIsUnplayed(b) ? 1 : 0) - (gameIsUnplayed(a) ? 1 : 0)) || tie(a, b);
+        });
+    } else if (sortChoice === "MOST") {
+        list.sort(function (a, b) { return (readOpens(b.id) - readOpens(a.id)) || tie(a, b); });
+    }
+    return list;
+}
+
+function applyShelfOrder() {
+    const shelf = document.getElementById("shelf");
+    const soon = shelf.querySelector(".card.soon");
+    const cards = new Map();
+    shelf.querySelectorAll(".card[data-game]").forEach(function (card) {
+        cards.set(card.getAttribute("data-game"), card);
+    });
+    sortedGames().forEach(function (game) {
+        const card = cards.get(game.id);
+        if (card) shelf.appendChild(card);
+    });
+    if (soon) shelf.appendChild(soon);      // COMING SOON is always last
+}
+
+const sortBarEl = document.getElementById("sortBar");
+const sortLiveEl = document.getElementById("sortLive");
+
+function syncSortUI() {
+    sortBarEl.querySelectorAll(".sortBtn").forEach(function (button) {
+        button.setAttribute("aria-pressed",
+            button.getAttribute("data-sort") === sortChoice ? "true" : "false");
+    });
+}
+
+sortBarEl.addEventListener("click", function (event) {
+    const button = event.target.closest ? event.target.closest(".sortBtn") : null;
+    if (!button) return;
+    sortChoice = button.getAttribute("data-sort");
+    saveSortChoice(sortChoice);
+    syncSortUI();
+    applyShelfOrder();
+    cueTick();
+    sortLiveEl.textContent = "Sorted by " + SORT_LABELS[sortChoice];
+});
+
+/* Build 023: pick of the day. One game per local calendar day, preferring
+   games with no opens and no best score. The saved pick does not change
+   during the day, even after the game is opened. */
+const PICK_KEY = "KANTMICROGAMES.ui.pick";
+
+function localDateString(date) {
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return date.getFullYear() + "-" + month + "-" + day;
+}
+
+/* Days since 1970-01-01 for a local calendar date, without Date.UTC, so a
+   test that replaces Date still gets a plain number. */
+function localDayNumber(date) {
+    let y = date.getFullYear();
+    const m = date.getMonth() + 1;
+    const d = date.getDate();
+    y -= m <= 2 ? 1 : 0;
+    const era = Math.floor(y / 400);
+    const yoe = y - era * 400;
+    const doy = Math.floor((153 * (m + (m > 2 ? -3 : 9)) + 2) / 5) + d - 1;
+    const doe = yoe * 365 + Math.floor(yoe / 4) - Math.floor(yoe / 100) + doy;
+    return era * 146097 + doe - 719468;
+}
+
+function choosePickId() {
+    if (!GAMES.length) return null;
+    const now = new Date();
+    const today = localDateString(now);
+    try {
+        const stored = window.localStorage.getItem(PICK_KEY);
+        if (stored) {
+            const cut = stored.indexOf(":");
+            if (cut > 0 && stored.slice(0, cut) === today) {
+                const id = stored.slice(cut + 1);
+                if (GAMES.some(function (game) { return game.id === id; })) return id;
+            }
+        }
+    } catch (error) {
+        /* storage unavailable: pick fresh, just do not save */
+    }
+    const unplayed = GAMES.filter(gameIsUnplayed);
+    const pool = unplayed.length ? unplayed : GAMES;
+    const day = localDayNumber(now);
+    const index = ((day % pool.length) + pool.length) % pool.length;
+    const chosen = pool[index].id;
+    try {
+        window.localStorage.setItem(PICK_KEY, today + ":" + chosen);
+    } catch (error) {
+        /* saving quietly refused */
+    }
+    return chosen;
+}
+
+const pickBannerEl = document.getElementById("pickBanner");
+const pickPreviewEl = document.getElementById("pickPreview");
+const pickNameEl = document.getElementById("pickName");
+const pickConceptEl = document.getElementById("pickConcept");
+let pickGameId = null;
+
+function buildPick() {
+    const id = choosePickId();
+    const game = GAMES.find(function (entry) { return entry.id === id; });
+    if (!game) { pickBannerEl.hidden = true; return; }
+    pickBannerEl.hidden = false;
+    pickGameId = game.id;
+    pickBannerEl.setAttribute("aria-label", "Pick of the day: " + game.name + ". Play");
+    drawPixelLabel(pickNameEl, game.name, "--corner-label");
+    pickConceptEl.textContent = game.concept;
+    const ctx = pickPreviewEl.getContext("2d");
+    ctx.clearRect(0, 0, pickPreviewEl.width, pickPreviewEl.height);
+    if (typeof game.previewPaint === "function") game.previewPaint(ctx);
+}
+
+pickBannerEl.addEventListener("click", function () {
+    if (!screenSettled() || !pickGameId) return;
+    cuePop();
+    openGame(pickGameId);
+});
+
 function buildShelf() {
     const shelf = document.getElementById("shelf");
     shelf.innerHTML = "";
@@ -1772,6 +2114,9 @@ function buildShelf() {
         shelf.appendChild(buildCard(game));
     });
     shelf.appendChild(buildComingSoonCard());
+    applyShelfOrder();
+    syncSortUI();
+    buildPick();
 }
 
 /* ==================================================================
@@ -2041,6 +2386,7 @@ function openGame(gameId) {
     const module2 = GAMES.find(function (game) { return game.id === gameId; });
     if (!module2) return;
     if (ACTIVE.module && ACTIVE.module.id === gameId) return;   // idempotent
+    saveOpens(gameId, readOpens(gameId) + 1);                   // one per open
     if (ACTIVE.module) { releaseAllDirs(ACTIVE.module); ACTIVE.module.stop(); }
     ACTIVE.module = module2;
     ACTIVE.paused = false;

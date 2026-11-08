@@ -104,6 +104,8 @@ What each model used on each build. This is a record, not an opinion, and not a 
 | 022 | Claude.ai Sonnet 5.5 Extra · Claude.ai chat | wrote the prompt | — | — | not recorded |
 | 022 | Gemini 3.8 Flash · Google Antigravity | started build 022 (steps 0-4) and halted when it ran out of tokens | ~35 min | — | not recorded — time only |
 | 022 | DeepSeek V4.1 Flash Free · OpenCode | finished build 022 (steps 5-6) after the Gemini halt, in two runs (the first stopped during the docs check) | ~38 min | 361,981 tokens processed | measured: 309,861 input + 32,999 output + 19,121 reasoning; 7,112,192 cache reads not counted; 69 steps; 68 tool calls; OpenCode stats delta, final reading after the swap and the docs check (see CHANGELOG build record) |
+| 023 | Claude.ai Sonnet 5.5 Extra · Claude.ai chat | wrote the prompt | — | — | not recorded |
+| 023 | DeepSeek V4.1 Flash Free · OpenCode | built | ~17 min | 187,025 tokens processed | measured: 109,671 input + 36,437 output + 40,917 reasoning; 7,591,808 cache reads not counted; 67 steps; 68 tool calls; OpenCode stats delta, final reading after the swap and the live regression (see CHANGELOG build record) |
 
 ### Totals that can honestly be added
 - **Credits, Qoder CLI, per-request transcript, builds 009-016:** 74.5874 credits over 1,143 billable requests.
@@ -112,23 +114,23 @@ What each model used on each build. This is a record, not an opinion, and not a 
 - **Approximate list-price value:** the plan meter reads 300 of 300 trial credits used, which is about US$3.00 at about US$0.01 per credit. An estimate, not a bill: the trial is free. Check https://docs.qoder.com/account/pricing before relying on it. Never converted for tokens and never added across tools.
 - **Iterations recorded (from build 017):** 4 over 1 build.
 - **Iterations recorded (build 018):** 1 repair cycle pair (a 280 px control clash, fixed by stacking the corner pair under 360 px and using 4 px page padding).
-- **Tokens, OpenCode readings (input + output + reasoning; cache reads not counted), builds 005, 017 and 021:** about 2.74 M tokens in total (005 is approximate at about 2.37 M; 017 is 165,312; 021 is 203,831 at the final reading). Builds 018, 019 and 020 have no token reading. Other token figures count different things and are never added to these.
+- **Tokens, OpenCode readings (input + output + reasoning; cache reads not counted), builds 005, 017, 021 and 023:** about 2.93 M tokens in total (005 is approximate at about 2.37 M; 017 is 165,312; 021 is 203,831 at the final reading; 023 is 187,025). Builds 018, 019 and 020 have no token reading. Other token figures count different things and are never added to these.
 - **Build 021 usage note:** the ledger row for build 021 shows the reading taken when the records were written (162,156 tokens); the build's usage after the final swap is 203,831 tokens. The row is a record and is not edited.
-- **Build 022 token reading:** 361,981 tokens (input 309,861 + output 32,999 + reasoning 19,121; 7,112,192 cache reads not counted; 69 steps; 68 tool calls; cost $0.00), from the OpenCode final reading after the swap and the docs check. An earlier post-swap reading of 249,131 was taken before the OpenCode run stopped and resumed; the ledger uses 361,981. Gemini 3.8 Flash's share of build 022 has no reading. The bullet above lists builds 005, 017 and 021 and is not edited.
+- **Build 022 token reading:** 361,981 tokens (input 309,861 + output 32,999 + reasoning 19,121; 7,112,192 cache reads not counted; 69 steps; 68 tool calls; cost $0.00), from the OpenCode final reading after the swap and the docs check. An earlier post-swap reading of 249,131 was taken before the OpenCode run stopped and resumed; the ledger uses 361,981. Gemini 3.8 Flash's share of build 022 has no reading. The bullet above listed builds 005, 017 and 021 when this note was written; build 023 extended it.
 - **Time by model, approximate.** Builds 000-002 and the GPT-OSS attempt have no time recorded, so DeepSeek and GLM are undercounted. One block = 10 minutes, rounded half up.
 
 | Model | Minutes | At a glance |
 |---|---|---|
 | Qwen3.8-Flash | ~305 | ▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇ |
-| DeepSeek V4.1 Flash Free | ~268 | ▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇ |
+| DeepSeek V4.1 Flash Free | ~285 | ▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇ |
 | Gemini 3.8 Flash | ~60 | ▇▇▇▇▇▇ |
 | GLM-5.3 Flash Free | ~45 | ▇▇▇▇▇ |
 | Flint 40B Free | ~25 | ▇▇▇ |
 | Claude Opus 4.6 Thinking | ~20 | ▇▇ |
 | Shared session (build 006: DeepSeek + Gemini) | ~30 | ▇▇▇ |
 
-Total recorded: about 753 minutes (about 12 h 33 min) over 20 of 23 builds.
-(Totals were recomputed after the build-022 row was added; the CHANGELOG Build records remain the source of truth.)
+Total recorded: about 770 minutes (about 12 h 50 min) over 21 of 24 builds.
+(Totals were recomputed after the build-023 row was added; the CHANGELOG Build records remain the source of truth.)
 
 ## 2026-11-07 — DeepSeek V4.1 Flash Free (OpenCode) — build 021
 
@@ -478,6 +480,18 @@ The owner's notes: after build 019, on an iPhone 16 Pro Max in Safari (portrait)
 > "Wow - it fixed it. I played all the games and there is no vibration in the image."
 
 Build 018 had put the controls and top bar to the owner's design; build 019 removed a layout loop that made the stage vibrate on phones. This is a dated owner note about one device on one day, not a model-written summary.
+
+## 2026-11-09 — Gemini 3.8 Flash (Medium) (Antigravity) and DeepSeek V4.1 Flash Free (OpenCode) — build 022
+
+Source: Owner's words (verbatim)
+
+Builds observed: `022-20261107`.
+
+The owner's notes: after trying build 022, which Gemini 3.8 Flash (Medium) started in Antigravity and DeepSeek V4.1 Flash Free finished in OpenCode after both ran out of free-tier quota, the owner said, verbatim:
+
+> "Sound works, and we will keep it this way for now pending a future refinement."
+
+This is a dated owner note about one build, not a model-written summary.
 
 <!-- NEW ENTRIES ABOVE THIS LINE. Never edit existing entries. -->
 

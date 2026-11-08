@@ -1,4 +1,4 @@
-<!-- Applies to: build 022-20261107 · eight games · changes to controls are recorded in CHANGELOG.md -->
+<!-- Applies to: build 023-20261109 · eight games · changes to controls are recorded in CHANGELOG.md -->
 # KANTMICROGAMES — Controls
 
 Which controls exist, how they behave on each kind of device, and why.
@@ -45,6 +45,14 @@ SETTINGS is on the shelf only; no game screen has it. It opens a dialog with two
   tone does.
 - **SOUND** is the second row: **ON** (the default) or **OFF**, saved under `KANTMICROGAMES.ui.sound`. The sounds are short effects made inside the page; no audio files are loaded. A browser only allows sound after your first tap or key press, and on some phones the ringer switch can mute it.
 - What you hear: a blip on the action button or a tap on the stage, a chirp when the score goes up, a short fanfare when you beat your best (not on your very first run), a boop on RESTART, a pop when a game opens or you go back to the shelf, and a soft tick in settings. Direction buttons are silent.
+
+## Shelf
+
+The shelf has three helpers. None of them change a game.
+
+- **PICK OF THE DAY** is one game chosen for today by the date on your device. It prefers a game you have never opened and stays the same all day, even after you open it. Tap it to play.
+- **SORT** reorders the cards: **DEFAULT** (the usual order), **A-Z** (by name), **BEST** (highest saved best score first), **UNPLAYED** (never-opened games first) or **MOST OPENED**. The choice is saved under `KANTMICROGAMES.ui.sort`. COMING SOON always stays last.
+- Each card shows its best score and how many times you opened it. The count is saved on your device under `KANTMICROGAMES.<GAME>.opens`; it counts opens, not runs, and restarting does not add one.
 
 ## Controls on the game screen
 
