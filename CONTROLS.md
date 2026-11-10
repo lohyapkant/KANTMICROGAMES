@@ -1,4 +1,4 @@
-<!-- Applies to: build 023-20261109 · eight games · changes to controls are recorded in CHANGELOG.md -->
+<!-- Applies to: build 024-20261110 · eight games · changes to controls are recorded in CHANGELOG.md -->
 # KANTMICROGAMES — Controls
 
 Which controls exist, how they behave on each kind of device, and why.
@@ -53,6 +53,23 @@ The shelf has three helpers. None of them change a game.
 - **PICK OF THE DAY** is one game chosen for today by the date on your device. It prefers a game you have never opened and stays the same all day, even after you open it. Tap it to play.
 - **SORT** reorders the cards: **DEFAULT** (the usual order), **A-Z** (by name), **BEST** (highest saved best score first), **UNPLAYED** (never-opened games first) or **MOST OPENED**. The choice is saved under `KANTMICROGAMES.ui.sort`. COMING SOON always stays last.
 - Each card shows its best score and how many times you opened it. The count is saved on your device under `KANTMICROGAMES.<GAME>.opens`; it counts opens, not runs, and restarting does not add one.
+
+## Badges
+
+Badges reward what you try. They are worked out on your device from your best scores, your opened counts and the days you played; nothing is sent anywhere. **BADGES** on the shelf, with your count such as 3/8, opens the list: earned badges show in colour with the day you earned them, and locked ones are grey with the rule in plain words. A short note appears on the shelf when you earn a new one. No badge changes a game.
+
+| Badge | How to earn it |
+|---|---|
+| FIRST STEPS | Open any game. |
+| EXPLORER | Open every game at least once. |
+| SCORER | Score at least 1 point in any game. |
+| COLLECTOR | Score in 4 different games. |
+| ALL STARS | Score in every game. |
+| REGULAR | Open games on 3 different days. |
+| FAN | Open the same game 10 times. |
+| DAILY PICK | Open the pick of the day on the day it is picked. |
+
+The days you opened games (the last 60) are saved under `KANTMICROGAMES.ui.days`, earned badges under `KANTMICROGAMES.ui.badges`, and a note that you opened the pick of the day under `KANTMICROGAMES.ui.pickhit`.
 
 ## Controls on the game screen
 

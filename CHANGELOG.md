@@ -25,6 +25,7 @@ Appendices A1-A9, A11, A12, A13 and A14 (material moved out of the README in bui
 - **Naming.** The project name is KANTMICROGAMES (one word). Older singular spellings stay
   in historical entries, appendices, the local folder name and archived prompt copies, on
   purpose. The old README "About the name" text is archived in Appendix A1.
+- **Model names and effort.** Effort is a setting, not part of the model name. Earlier records merged them: "Claude.ai Sonnet 5.5 Extra" is Claude Sonnet 5.5 at Extra effort, and "GPT-OSS 120B Medium" and "Gemini 3.8 Flash (Medium)" name a Medium effort setting. Those records stay as written. From build 024 write the model name exactly as the tool shows it and put the effort in the build record ("Mode and owner notes") and in the ledger's Role cell, for example "built (effort High)".
 - **Public and private.** `plans/`, `tests/` and `prompts/` are private. Entries name them
   as plain text, never as links.
 - **Corrections are dated, not silent.** If a past record was wrong, fix it and say which
@@ -101,6 +102,67 @@ Free and trial tiers end without warning. Any model must be able to pick up wher
 
 <!-- NEW BUILD ENTRIES: paste the newest entry on the line below this comment, above the previous newest. Never edit older entries. -->
 
+## 024-20261110 — 2026-11-10 (Badges: eight shell-level badges with pixel icons)
+
+Built from prompt: P-24, authored by Claude.ai Sonnet 5.5 Extra and pasted verbatim by the owner (badges: eight shell-level badges with pixel icons, a BADGES button and dialog, and a new-badge note; private archive file `prompts/P-24_badges.txt`)  
+Tool and model: **DeepSeek V4.1 Flash Free** (OpenCode)  
+Games in the one file: 8 (PANDASNACK 007-20261101 **frozen**, BOOPEEK 006-20261101
+**frozen**, DUCKLINE 005-20261101 **frozen**, SPROUTUP 007-20261101 **frozen**,
+SLIMEHOP 010-20261101 **frozen**, SNAILRACE 011-20261101 **frozen**, HUGPARADE
+015-20261102 (unchanged this build), CATNAPCATCH 016-20261102 (unchanged this build);
+file build **024-20261110**)
+
+### Added — badge data and rules (deploy/index.html, shelf and runtime only)
+
+- Three device-only keys, read and written with the same try/catch pattern as the other saved values: `KANTMICROGAMES.ui.days` (distinct local `YYYY-MM-DD` dates on which a game was opened, newest last, at most 60), `KANTMICROGAMES.ui.pickhit` (the date the pick of the day was opened on its own day, set once) and `KANTMICROGAMES.ui.badges` (JSON `{BADGEID: "YYYY-MM-DD earned"}`). Corrupt values are treated as empty and never throw.
+- `openGame` records today in `ui.days` and sets `ui.pickhit` when the opened game is the saved pick for today, right after the existing opens increment. RESTART, resume, a pause and a repeat call for the open game add nothing.
+- `computeBadges()` returns the eight badges from the live best scores, opened counts, saved days and pick-hit, plus any badge already stored as earned (earned stays earned). `syncBadges()` saves newly earned badges with today's date and returns their ids; `buildShelf()` calls it on every shelf show, so the first shelf view after an upgrade earns what the player already qualifies for. Every-game rules use the `GAMES` registry and no rule depends on how high a score is.
+- Eight rules: FIRST STEPS open any game; EXPLORER open every game; SCORER a saved best above 0; COLLECTOR a best above 0 in 4 games; ALL STARS a best above 0 in every game; REGULAR 3 distinct days; FAN the same game opened 10 times; DAILY PICK the pick opened on its own day.
+
+### Added — pixel icons (deploy/index.html, shelf only)
+
+- Eight 10x10 pixel maps with a dark outline and at most five colours: a paw print, a compass, a star, a gem, a crown, a calendar page, a heart and a sun. Earned badges use the colour palette; locked badges keep the shape and swap in a grey palette.
+- `paintBadgeIcon` uses the shared `paintPixels` helper, sets `n = round(4 x devicePixelRatio)` (at least 1), canvas CSS size `n x 10 / devicePixelRatio`, so the CSS width times DPR divided by 10 is a whole number, and sets `image-rendering: pixelated` last.
+
+### Added — BADGES button, dialog and new-badge note (deploy/index.html, shelf only)
+
+- `#btnBadges.shelfBtn` sits beside SETTINGS in `#shelfBar` (the bar wraps with a 12 px gap). Its pixel label reads `BADGES 3/8` with the live count, redrawn through `data-label` and `refreshPixelLabels()`; its aria-label is "Badges: 3 of 8 earned" and it has `aria-haspopup="dialog"`. Both buttons stay in the first screenful at 360x640 and the bar may wrap on narrow screens.
+- `#badgesScrim` / `#badgesDialog` (`role="dialog"`, `aria-modal="true"`, label "Badges") mirror the settings dialog: a pixel BADGES title, a pixel line `EARNED 3 OF 8`, then `#badgeList` (`tabindex="0"`, `role="region"`, label "Badge list") with eight tiles in a two-column grid (one column under about 300 px). Each tile has the icon, the name in pixel text, the rule in plain text and a plain state ("EARNED 2026-11-10" or "LOCKED"), with aria-labels such as "EXPLORER, earned" and "EXPLORER, locked: open every game at least once". The list scrolls inside the dialog; CLOSE (pixel text, at least 48 px tall) stays visible at 360x640.
+- Focus is trapped in the dialog; Esc, CLOSE and an outside tap close it and return focus to BADGES; closing sets the settle gate so the closing tap cannot open a card underneath; opening and closing play the existing TICK, and no new cue was added.
+- `#badgeToast` (`role="status"`, `aria-live="polite"`) appears on the shelf for about 4 seconds when `syncBadges()` finds new badges: pixel NEW BADGE and the name, or NEW BADGES and the count, with the names in the live text. A tap hides it; it does not cover the screen or block taps elsewhere; `openGame` hides it, so it never appears during a game.
+
+### Edits to existing text
+
+- `deploy/index.html` — header "Current" line and `APP.fileVersion`: build `023-20261109` → `024-20261110`; header "Build log" line names build 024 and DeepSeek V4.1 Flash Free (OpenCode).
+- `CONTROLS.md` — "Applies to" is now `build 024-20261110`; new "Badges" section after "Shelf" with the eight rules and the three storage keys.
+- `README.md` — R1 "Current build" is `024-20261110`; R2 adds the bullet "Badges reward what you try, from your first game to scoring in all eight; see them under BADGES on the shelf."; R3 adds 024 to the DeepSeek V4.1 Flash Free and Claude.ai Sonnet 5.5 Extra rows.
+- `CHANGELOG.md` — Conventions gain the "Model names and effort" bullet; entry 023 gains the dated addendum recording the owner-supplied effort details.
+- `MODELS.md` — rule 8, the 2026-11-10 owner entry for build 023, the 024 Claude.ai and DeepSeek ledger rows, the OpenCode token bullet, and only the time totals and bars were recomputed.
+- `plans/micro-games-v2.md` — one ledger row, one tool-log row and Roadmap v5 appended.
+
+### Verification and limits
+
+- **V1 RULES: PASS.** Nineteen seeded scenarios with a fake local `Date` (2026-11-10) and stubbed storage: empty gave 0 of 8; one open earned FIRST STEPS and zero did not; all eight opened earned EXPLORER and seven did not; one best above 0 earned SCORER; a best in 4 games earned COLLECTOR and 3 did not; a best in all 8 earned ALL STARS and 7 did not; 3 saved days earned REGULAR and 2 did not; 10 opens of one game earned FAN and 9 did not; DAILY PICK was earned by a stored hit and by opening the saved pick on its day, and not by opening another game that day or the pick on a different day. 0 console errors.
+- **V2 ROBUST: PASS.** Corrupt `ui.badges` ("not json at all"), `ui.days` ("garbage,,2026-13-99,2026-11-10") and `ui.pickhit` ("nonsense") were read as empty without a throw; a stored FIRST STEPS stayed earned with its 2026-11-09 date after a reload and still counted 1 of 8; 70 seeded days were capped to the last 60 with today newest last after an open; a corrupt pick-hit earned nothing. 0 console errors.
+- **V3 DIALOG: PASS after one test-side repair.** At 360x640 @3 the dialog opened by tap, Enter and Space; `role="dialog"`, `aria-modal="true"`, label "Badges", list `role="region"`, label "Badge list", `tabindex="0"`; eight tiles with the expected earned/locked states, dates and aria-labels; the dialog (16-624 px) and CLOSE (558-606 px) fitted inside 640; Tab wrapped from the last control to the list and Shift+Tab back; Esc, CLOSE and an outside tap closed it, returned focus to BADGES and opened no game; a closing tap over an exposed card at 768x1024 opened no game. The first run's closing-tap point was under the dialog at 360 px; the check was moved to 768 px. 0 console errors.
+- **V4 BUTTON AND NOTE: PASS.** The label went 0/8 → 1/8 with the matching aria-label when a badge was earned between two shelf views; the note carried "FIRST STEPS"; a tap dismissed it; a later shelf view with nothing new showed no note; a reload kept 1 of 8 and did not bring the note back; earning two at once showed "New badges: FIRST STEPS, SCORER" and 2 of 8. 0 console errors.
+- **V5 LAYOUT AND REGRESSION: PASS after three test-side repairs.** At 360x640 BADGES and SETTINGS both ended at 384.8 px, shared the 48 px height and did not overlap; no horizontal overflow at 280, 360, 440, 768 or 1280; card art and name offsets had 0.0 px spread within every row at 390, 768 and 1280; the seeded counts, five sort buttons, pick banner, A-Z reorder and DEFAULT restore were unchanged; the stage rectangle was identical in all 9 samples over 800 ms at 440x720@3; all eight IIFE hashes matched F6; `node --check` was clean on both inline scripts; the footer showed one build ID; the audio spy showed exactly two square TICK cues (about 1226.7 Hz and 1179.7 Hz) for opening and closing, and only the six existing cue functions exist; icon CSS width × DPR / 10 was 4, 8 and 12 at DPR 1, 2 and 3; 0 console errors. The repairs were all in the test: the pick aria-label expectation, a sort tap that needed the button scrolled into view, and an audio spy that read the oscillator frequency before its scheduled value. **Repeated on the live files after the one-step swap: PASS.**
+- **V6 DOCS: PASS.** README is 97 lines and 6,399 bytes (limits 150 and 10 KB) and names none of IIFE, frozen, contract, credit, token or hash; CHANGELOG entries 000-022 are byte-identical to the pre-024 snapshot, entry 023 is unchanged apart from the one dated addendum, the Conventions changed only by the one "Model names and effort" bullet, and the appendices are unchanged; MODELS dated entries and every existing ledger row are byte-identical, the two 024 rows exist, and the time table adds up to its stated total (805 minutes over 22 of 25 builds); the build ID 024-20261110 is at every current anchor (README, CHANGELOG heading, CONTROLS "Applies to", index header "Current" and "Build log", `APP.fileVersion`, plan ledger); the CONTROLS badge table and MODELS time table keep constant column counts; every relative link resolves; the work copies were checked before the swap and the same check was repeated on the live files after it.
+- **Screenshots (2), both looked at.** `plans/archive/pre-024/badges-440.png`: at 440x745 the BADGES dialog shows the pixel title and EARNED 2 OF 8, a pink paw and a gold star in colour, six grey locked icons (compass, gem, crown, calendar, heart, sun), the rules and states, and CLOSE visible. `plans/archive/pre-024/shelf-360-note.png`: at 360x640 BADGES 2/8 and SETTINGS sit in the first screenful, the pick banner is below, and the NEW BADGES 2 note is at the bottom over the banner text.
+- **Not verified:** Safari and the real iPhone were not tested by me; all browser checks ran in headless Chrome over the DevTools Protocol. No sound was heard; the spy proves TICK wiring, voice and frequency only. A real screen reader, a real touch device, landscape play and long-run play were not tested under the run guard's budget.
+
+### Build record (owner request: duration + tokens/credits)
+
+- Duration: about 33 min (2026-11-10, 18:45:05-19:17:54 WIB), to the final reading taken after the one-step swap and the live V5 regression.
+- Usage: 301,245 tokens processed = 177,793 input + 52,299 output + 71,153 reasoning; 16,589,568 cache reads separate and NOT counted; 164 steps; 170 tool calls; cost $0.00. Counted with `opencode stats --days 2 --json` as the final reading after the swap and the live regression minus the start reading taken before any edit, JSON fields only. `opencode stats --days 2 --models` was not mixed in. No earlier reading was used; the JSON did not show assistant turns.
+- Mode and owner notes: DeepSeek V4.1 Flash Free, effort High, in OpenCode. The owner notes and a previous-run usage reading were blank. No other tool was used.
+- Tools used: OpenCode (shell and file edits); Node.js 26 with headless Chrome over the DevTools Protocol for V1-V5 and the two screenshots; Python 3 for the IIFE hashes and exact-match edits; `node --check`; a small local HTTP server for the test pages.
+- Iterations: 0 app-code repair cycles. 4 test-side repair cycles: V3 closing-tap point, V5 pick aria expectation, V5 sort tap scroll, V5 audio spy timing. No problem was left "not fixed".
+
+### Documentation review/edit attempts (standing rule)
+
+- No separate documentation review model was used. Every edit was checked against the Conventions and the per-build checklist, and every changed line is quoted above.
+
 ## 023-20261109 — 2026-11-09 (Shelf helpers: times opened, sort row, pick of the day)
 
 Built from prompt: P-23, authored by Claude.ai Sonnet 5.5 Extra and pasted verbatim by the owner (shelf helpers: times opened, sort row, pick of the day; private archive file `prompts/P-23_shelf-helpers.txt`)  
@@ -165,6 +227,11 @@ file build **023-20261109**)
 ### Documentation review/edit attempts (standing rule)
 
 - No separate documentation review model was used. Every edit was checked against the Conventions and the per-build checklist, and every changed line is quoted above.
+
+### Addendum — 2026-11-10 (owner-supplied details, recorded in build 024)
+- Model as shown by the tool: DeepSeek V4.1 Flash Free, effort High, in OpenCode.
+- The prompt (P-23) was written by Claude Sonnet 5.5 at Extra effort in the Claude.ai web app and pasted verbatim by the owner.
+- The selection mode/effort field in the owner notes was blank when the build ran.
 
 ## 022-20261107 — 2026-11-07 (Sound effects, a SOUND setting, and record corrections)
 

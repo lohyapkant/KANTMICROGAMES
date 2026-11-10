@@ -6,16 +6,15 @@
   Repository : https://github.com/lohyapkant/KANTMICROGAMES
   Play online: https://kantmicrogames.lohyapkant.workers.dev/
   Hosting    : Cloudflare Workers (https://workers.cloudflare.com/)
-  Current    : build 023-20261109 — shelf helpers: a times-opened count on
-               every card, a SORT row (DEFAULT, A-Z, BEST, UNPLAYED, MOST
-               OPENED) with a saved choice, and a PICK OF THE DAY banner
-               that prefers unplayed games; no game, control, sound cue or
+  Current    : build 024-20261110 — badges: eight shell-level badges with
+               10x10 pixel icons, a BADGES button and dialog on the shelf,
+               and a new-badge note; no game, control, sound cue or
                game-screen layout changed; eight games unchanged
                (PANDASNACK, BOOPEEK, DUCKLINE, SPROUTUP, SLIMEHOP,
                SNAILRACE, HUGPARADE, CATNAPCATCH)
   Names      : project and on-screen brand KANTMICROGAMES ·
                save keys and the console tag use the KANTMICROGAMES prefix
-  Build log  : build 023-20261109, DeepSeek V4.1 Flash Free (OpenCode) — the
+  Build log  : build 024-20261110, DeepSeek V4.1 Flash Free (OpenCode) — the
                full record of every build is in CHANGELOG.md
   ================================================================
 
@@ -320,6 +319,8 @@
             width: 100%;
             max-width: 640px;
             display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
             justify-content: flex-end;
             margin-bottom: 12px;
         }
@@ -612,6 +613,142 @@
         #settingsClose:active { transform: translateY(2px); box-shadow: 0 1px 0 rgba(74, 59, 50, 0.12); }
 
         #settingsClose canvas {
+            display: block;
+            image-rendering: crisp-edges;
+            image-rendering: pixelated;
+        }
+
+        /* =============== badges (build 024, shelf only) =============== */
+
+        #badgesScrim {
+            position: fixed;
+            inset: 0;
+            z-index: 61;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            background: rgba(74, 59, 50, 0.38);
+        }
+
+        #badgesDialog {
+            width: min(560px, 100%);
+            max-height: calc(100dvh - 32px);
+            display: flex;
+            flex-direction: column;
+            padding: 16px;
+            border-radius: 20px;
+            border: 2px solid var(--outline);
+            background: var(--panel);
+            box-shadow: 0 18px 44px rgba(74, 59, 50, 0.28);
+            text-align: center;
+        }
+
+        #badgesDialog > canvas {
+            display: block;
+            margin: 0 auto 10px;
+            image-rendering: crisp-edges;
+            image-rendering: pixelated;
+        }
+
+        #badgeList {
+            flex: 1 1 auto;
+            min-height: 0;
+            overflow: auto;
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+            margin: 4px 0 14px;
+            padding: 4px;
+            border-radius: 12px;
+            text-align: left;
+        }
+
+        @media (max-width: 300px) {
+            #badgeList { grid-template-columns: 1fr; }
+        }
+
+        .badgeTile {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 8px;
+            border-radius: 14px;
+            border: 1px solid var(--outline);
+            background: var(--cream);
+            text-align: center;
+        }
+
+        .badgeTile canvas { display: block; }
+
+        .badgeTile .badgeName {
+            image-rendering: crisp-edges;
+            image-rendering: pixelated;
+        }
+
+        .badgeRule {
+            margin: 0;
+            font-size: 0.72rem;
+            line-height: 1.25;
+            color: var(--ink-soft);
+        }
+
+        .badgeState {
+            margin: 0;
+            font-size: 0.66rem;
+            font-weight: 800;
+            letter-spacing: 0.04em;
+            color: var(--ink);
+        }
+
+        .badgeTile[data-earned="false"] .badgeState { color: var(--ink-soft); }
+
+        #badgesClose {
+            flex: none;
+            align-self: center;
+            min-width: 120px;
+            min-height: 48px;
+            padding: 0 16px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 14px;
+            border: 1px solid var(--outline);
+            background: var(--panel);
+            box-shadow: 0 4px 0 rgba(74, 59, 50, 0.12);
+            cursor: pointer;
+            touch-action: manipulation;
+        }
+
+        #badgesClose:active { transform: translateY(2px); box-shadow: 0 1px 0 rgba(74, 59, 50, 0.12); }
+
+        #badgesClose canvas {
+            display: block;
+            image-rendering: crisp-edges;
+            image-rendering: pixelated;
+        }
+
+        #badgeToast {
+            position: fixed;
+            left: 50%;
+            bottom: calc(var(--sai-b) + 16px);
+            transform: translateX(-50%);
+            z-index: 45;
+            max-width: calc(100vw - 32px);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 16px;
+            border-radius: 14px;
+            border: 2px solid var(--outline);
+            background: var(--panel);
+            box-shadow: 0 10px 24px rgba(74, 59, 50, 0.22);
+            cursor: pointer;
+            touch-action: manipulation;
+        }
+
+        #badgeToast canvas {
             display: block;
             image-rendering: crisp-edges;
             image-rendering: pixelated;
@@ -1042,6 +1179,9 @@
         </nav>
 
         <div id="shelfBar">
+            <button type="button" id="btnBadges" class="shelfBtn" aria-label="Badges: 0 of 8 earned" aria-haspopup="dialog">
+                <canvas data-label="BADGES 0/8" data-scale="--corner-label" width="1" height="5" aria-hidden="true"></canvas>
+            </button>
             <button type="button" id="btnSettings" class="shelfBtn" aria-label="SETTINGS" aria-haspopup="dialog">
                 <canvas data-label="SETTINGS" data-scale="--corner-label" width="1" height="5" aria-hidden="true"></canvas>
             </button>
@@ -1089,6 +1229,23 @@
                     <canvas data-label="CLOSE" data-scale="--corner-label" width="1" height="5" aria-hidden="true"></canvas>
                 </button>
             </div>
+        </div>
+
+        <div id="badgesScrim" hidden>
+            <div id="badgesDialog" role="dialog" aria-modal="true" aria-label="Badges">
+                <canvas data-label="BADGES" data-scale="--corner-label" width="1" height="5" aria-hidden="true"></canvas>
+                <canvas id="badgesEarnedLine" data-scale="--opt-label" width="1" height="5" aria-hidden="true"></canvas>
+                <div id="badgeList" tabindex="0" role="region" aria-label="Badge list"></div>
+                <button type="button" id="badgesClose" aria-label="CLOSE">
+                    <canvas data-label="CLOSE" data-scale="--corner-label" width="1" height="5" aria-hidden="true"></canvas>
+                </button>
+            </div>
+        </div>
+
+        <div id="badgeToast" role="status" aria-live="polite" hidden>
+            <canvas id="badgeToastLabel" data-scale="--corner-label" width="1" height="5" aria-hidden="true"></canvas>
+            <canvas id="badgeToastName" data-scale="--corner-label" width="1" height="5" aria-hidden="true"></canvas>
+            <span id="badgeToastLive" class="visuallyHidden"></span>
         </div>
     </section>
 
@@ -1239,7 +1396,7 @@
 
 const APP = {
     name: "KANTMICROGAMES",
-    fileVersion: "023-20261109",       // build number of THIS one-file app
+    fileVersion: "024-20261110",       // build number of THIS one-file app
     savePrefix: "KANTMICROGAMES."      // best scores live at prefix + GAMEID + ".best"
 };
 
@@ -2117,6 +2274,322 @@ function buildShelf() {
     applyShelfOrder();
     syncSortUI();
     buildPick();
+    const freshBadges = syncBadges();  // earn anything already qualified for
+    syncBadgesButton();
+    if (freshBadges.length) showBadgeToast(freshBadges);
+}
+
+/* Build 024: badges. Everything is worked out on this device from the saved
+   best scores, opened counts and the days a game was opened. Corrupt values
+   are treated as empty; a badge once earned stays earned. */
+const DAYS_KEY = "KANTMICROGAMES.ui.days";
+const PICKHIT_KEY = "KANTMICROGAMES.ui.pickhit";
+const BADGES_KEY = "KANTMICROGAMES.ui.badges";
+const DAYS_MAX = 60;
+
+const BADGE_DEFS = [
+    { id: "FIRSTSTEPS", name: "FIRST STEPS", rule: "Open any game." },
+    { id: "EXPLORER", name: "EXPLORER", rule: "Open every game at least once." },
+    { id: "SCORER", name: "SCORER", rule: "Score at least 1 point in any game." },
+    { id: "COLLECTOR", name: "COLLECTOR", rule: "Score in 4 different games." },
+    { id: "ALLSTARS", name: "ALL STARS", rule: "Score in every game." },
+    { id: "REGULAR", name: "REGULAR", rule: "Open games on 3 different days." },
+    { id: "FAN", name: "FAN", rule: "Open the same game 10 times." },
+    { id: "DAILYPICK", name: "DAILY PICK", rule: "Open the pick of the day on the day it is picked." }
+];
+
+/* Eight 10x10 icons. O is the dark outline; A/B/C are fills (at most five
+   colours per icon). Locked badges reuse the shape with a grey palette. */
+const BADGE_ICONS = {
+    FIRSTSTEPS: {
+        map: [
+            "..........",
+            ".OO..OO...",
+            "OAAOOAAO..",
+            ".OO..OO...",
+            "...OO..OO.",
+            "..OAAOOAAO",
+            "...OO..OO.",
+            "..OOOOOO..",
+            ".OBBBBBBO.",
+            "..OOOOOO.."
+        ],
+        colors: { O: "#4A3B32", A: "#F2A7B8", B: "#E07E97" }
+    },
+    EXPLORER: {
+        map: [
+            "..OOOOOO..",
+            ".OAAAAAAO.",
+            "OAAACCAAAO",
+            "OAACCCCAAO",
+            "OAABBBBAAO",
+            "OAAABBAAAO",
+            "OAAAAAAAAO",
+            ".OAAAAAAO.",
+            "..OOOOOO..",
+            ".........."
+        ],
+        colors: { O: "#4A3B32", A: "#F4E3C1", B: "#4C86C6", C: "#D0554B" }
+    },
+    SCORER: {
+        map: [
+            "....OO....",
+            "...OAAO...",
+            "...OAAO...",
+            "OOOAAAAOOO",
+            "OAAAAAAAAO",
+            ".OAAAAAAO.",
+            "..OAAAAO..",
+            ".OAAOOAAO.",
+            ".OAO..OAO.",
+            "..O....O.."
+        ],
+        colors: { O: "#4A3B32", A: "#F2C14E", B: "#D9A22F" }
+    },
+    COLLECTOR: {
+        map: [
+            "..OOOOOO..",
+            ".OAAAAAAO.",
+            "OAAAAAAAAO",
+            "OAAABBAAAO",
+            "OAAAABBAAO",
+            ".OAAAAAAO.",
+            "..OAAAAO..",
+            "...OAAO...",
+            "....OO....",
+            ".........."
+        ],
+        colors: { O: "#4A3B32", A: "#57B8C9", B: "#A8E3EC" }
+    },
+    ALLSTARS: {
+        map: [
+            "..........",
+            ".OO.OO.OO.",
+            "OAAOAAOAAO",
+            "OACAAAACAO",
+            "OAAAAAAAAO",
+            "OACAAAACAO",
+            "OBBBBBBBBO",
+            "OOOOOOOOOO",
+            "..........",
+            ".........."
+        ],
+        colors: { O: "#4A3B32", A: "#F2C14E", B: "#D9A22F", C: "#D0554B" }
+    },
+    REGULAR: {
+        map: [
+            "..O....O..",
+            "..O....O..",
+            "OOOOOOOOOO",
+            "OCCCCCCCCO",
+            "OCCCCCCCCO",
+            "OAAAAAAAAO",
+            "OABAAABAAO",
+            "OAAAAAAAAO",
+            "OABAAABAAO",
+            "OOOOOOOOOO"
+        ],
+        colors: { O: "#4A3B32", A: "#FBF3E3", B: "#C9B79A", C: "#D0554B" }
+    },
+    FAN: {
+        map: [
+            "..OO..OO..",
+            ".OAAOOAAO.",
+            "OABAAAAAAO",
+            "OAAAAAAAAO",
+            "OAAAAAAAAO",
+            ".OAAAAAAO.",
+            "..OAAAAO..",
+            "...OAAO...",
+            "....OO....",
+            ".........."
+        ],
+        colors: { O: "#4A3B32", A: "#E2606E", B: "#F29AA4" }
+    },
+    DAILYPICK: {
+        map: [
+            "....OO....",
+            "...O..O...",
+            "..OOOOOO..",
+            ".OAAAAAAO.",
+            "OOABBBBAOO",
+            "OOABBBBAOO",
+            ".OAAAAAAO.",
+            "..OOOOOO..",
+            "...O..O...",
+            "....OO...."
+        ],
+        colors: { O: "#4A3B32", A: "#F2A33C", B: "#F9D56E" }
+    }
+};
+
+const BADGE_LOCKED_COLORS = { O: "#6B6259", A: "#C9C2B8", B: "#A79F93", C: "#DCD6CC" };
+
+function paintBadgeIcon(canvas, badgeId, earned) {
+    const art = BADGE_ICONS[badgeId];
+    if (!canvas || !art) return;
+    const dpr = window.devicePixelRatio || 1;
+    const n = Math.max(1, Math.round(4 * dpr));      // whole device pixels per art pixel
+    canvas.width = 10 * n;
+    canvas.height = 10 * n;
+    canvas.style.width = (canvas.width / dpr) + "px";
+    canvas.style.height = (canvas.height / dpr) + "px";
+    canvas.style.imageRendering = "pixelated";       // last, as the house rule asks
+    const ctx = canvas.getContext("2d");
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    paintPixels(ctx, art.map, earned ? art.colors : BADGE_LOCKED_COLORS, 0, 0, false, n);
+}
+
+function isDayString(value) {
+    if (typeof value !== "string") return false;
+    const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+    if (!match) return false;
+    const year = Number(match[1]);
+    const month = Number(match[2]);
+    const day = Number(match[3]);
+    if (month < 1 || month > 12 || day < 1 || day > 31) return false;
+    const check = new Date(year, month - 1, day);
+    return check.getFullYear() === year && check.getMonth() === month - 1 && check.getDate() === day;
+}
+
+function readDays() {
+    try {
+        const raw = window.localStorage.getItem(DAYS_KEY);
+        if (!raw) return [];
+        const seen = {};
+        const days = [];
+        raw.split(",").forEach(function (part) {
+            const day = part.trim();
+            if (!isDayString(day) || seen[day]) return;
+            seen[day] = true;
+            days.push(day);
+        });
+        return days.slice(-DAYS_MAX);
+    } catch (error) {
+        return [];
+    }
+}
+
+function saveDays(days) {
+    try {
+        window.localStorage.setItem(DAYS_KEY, days.join(","));
+    } catch (error) {
+        /* saving quietly refused; badges still work from live counts */
+    }
+}
+
+/* Today's date, once, newest last; the list holds at most 60 distinct days. */
+function recordOpenDay() {
+    const today = localDateString(new Date());
+    const days = readDays().filter(function (day) { return day !== today; });
+    days.push(today);
+    while (days.length > DAYS_MAX) days.shift();
+    saveDays(days);
+}
+
+function readPickHit() {
+    try {
+        const raw = window.localStorage.getItem(PICKHIT_KEY);
+        return isDayString(raw) ? raw : "";
+    } catch (error) {
+        return "";
+    }
+}
+
+/* Set once, when a game is opened whose id equals the saved pick for today. */
+function recordPickHit(gameId) {
+    if (readPickHit()) return;
+    const today = localDateString(new Date());
+    try {
+        const stored = window.localStorage.getItem(PICK_KEY);
+        if (!stored) return;
+        const cut = stored.indexOf(":");
+        if (cut <= 0) return;
+        if (stored.slice(0, cut) !== today) return;
+        if (stored.slice(cut + 1) !== gameId) return;
+        window.localStorage.setItem(PICKHIT_KEY, today);
+    } catch (error) {
+        /* saving quietly refused */
+    }
+}
+
+function readBadges() {
+    try {
+        const raw = window.localStorage.getItem(BADGES_KEY);
+        if (!raw) return {};
+        const parsed = JSON.parse(raw);
+        if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return {};
+        const badges = {};
+        BADGE_DEFS.forEach(function (def) {
+            if (isDayString(parsed[def.id])) badges[def.id] = parsed[def.id];
+        });
+        return badges;
+    } catch (error) {
+        return {};     // corrupt JSON: start from empty, recompute
+    }
+}
+
+function saveBadges(badges) {
+    try {
+        window.localStorage.setItem(BADGES_KEY, JSON.stringify(badges));
+    } catch (error) {
+        /* saving quietly refused */
+    }
+}
+
+function computeBadges() {
+    const stored = readBadges();
+    let openedAny = false;
+    let openedAll = GAMES.length > 0;
+    let scoredAny = false;
+    let scoredAll = GAMES.length > 0;
+    let scoredCount = 0;
+    let fan = false;
+    GAMES.forEach(function (game) {
+        const opens = readOpens(game.id);
+        const best = readBest(game.id);
+        if (opens > 0) openedAny = true;
+        else openedAll = false;
+        if (opens >= 10) fan = true;
+        if (best > 0) {
+            scoredAny = true;
+            scoredCount += 1;
+        } else {
+            scoredAll = false;
+        }
+    });
+    const earnedByRule = {
+        FIRSTSTEPS: openedAny,
+        EXPLORER: openedAll,
+        SCORER: scoredAny,
+        COLLECTOR: scoredCount >= 4,
+        ALLSTARS: scoredAll,
+        REGULAR: readDays().length >= 3,
+        FAN: fan,
+        DAILYPICK: readPickHit() !== ""
+    };
+    return BADGE_DEFS.map(function (def) {
+        return {
+            id: def.id,
+            name: def.name,
+            rule: def.rule,
+            earned: Boolean(stored[def.id] || earnedByRule[def.id])
+        };
+    });
+}
+
+function syncBadges() {
+    const today = localDateString(new Date());
+    const stored = readBadges();
+    const fresh = [];
+    computeBadges().forEach(function (badge) {
+        if (badge.earned && !stored[badge.id]) {
+            stored[badge.id] = today;
+            fresh.push(badge.id);
+        }
+    });
+    if (fresh.length) saveBadges(stored);
+    return fresh;
 }
 
 /* ==================================================================
@@ -2316,6 +2789,179 @@ settingsDialogEl.addEventListener("keydown", function (event) {
     }
 });
 
+/* ---------- badges dialog and new-badge note (build 024, shelf only) ---------- */
+
+const badgesBtnEl = document.getElementById("btnBadges");
+const badgesScrimEl = document.getElementById("badgesScrim");
+const badgesDialogEl = document.getElementById("badgesDialog");
+const badgesEarnedLineEl = document.getElementById("badgesEarnedLine");
+const badgeListEl = document.getElementById("badgeList");
+const badgesCloseEl = document.getElementById("badgesClose");
+const badgeToastEl = document.getElementById("badgeToast");
+const badgeToastLabelEl = document.getElementById("badgeToastLabel");
+const badgeToastNameEl = document.getElementById("badgeToastName");
+const badgeToastLiveEl = document.getElementById("badgeToastLive");
+let badgesReturnFocus = null;
+let badgeToastTimer = 0;
+
+function badgeRuleSpoken(rule) {
+    const plain = rule.replace(/\.$/, "");
+    return plain.charAt(0).toLowerCase() + plain.slice(1);
+}
+
+function syncBadgesButton() {
+    const total = BADGE_DEFS.length;
+    let earned = 0;
+    computeBadges().forEach(function (badge) { if (badge.earned) earned += 1; });
+    const label = badgesBtnEl.querySelector("canvas[data-label]");
+    if (label) label.setAttribute("data-label", "BADGES " + earned + "/" + total);
+    badgesBtnEl.setAttribute("aria-label", "Badges: " + earned + " of " + total + " earned");
+    refreshPixelLabels();
+}
+
+function buildBadgeTiles() {
+    const stored = readBadges();
+    const badges = computeBadges();
+    let earned = 0;
+    badges.forEach(function (badge) { if (badge.earned) earned += 1; });
+    drawPixelLabel(badgesEarnedLineEl, "EARNED " + earned + " OF " + badges.length, "--opt-label");
+    badgeListEl.innerHTML = "";
+    badges.forEach(function (badge) {
+        const tile = document.createElement("div");
+        tile.className = "badgeTile";
+        tile.setAttribute("role", "group");
+        tile.setAttribute("data-earned", badge.earned ? "true" : "false");
+        tile.setAttribute("aria-label", badge.earned
+            ? badge.name + ", earned"
+            : badge.name + ", locked: " + badgeRuleSpoken(badge.rule));
+
+        const icon = document.createElement("canvas");
+        icon.className = "badgeIcon";
+        icon.setAttribute("aria-hidden", "true");
+        paintBadgeIcon(icon, badge.id, badge.earned);
+        tile.appendChild(icon);
+
+        const name = document.createElement("canvas");
+        name.className = "badgeName";
+        name.setAttribute("data-label", badge.name);
+        name.setAttribute("data-scale", "--corner-label");
+        name.setAttribute("aria-hidden", "true");
+        name.width = 1;
+        name.height = 5;
+        tile.appendChild(name);
+
+        const rule = document.createElement("p");
+        rule.className = "badgeRule";
+        rule.textContent = badge.rule;
+        tile.appendChild(rule);
+
+        const state = document.createElement("p");
+        state.className = "badgeState";
+        state.textContent = badge.earned
+            ? "EARNED " + (stored[badge.id] || localDateString(new Date()))
+            : "LOCKED";
+        tile.appendChild(state);
+
+        badgeListEl.appendChild(tile);
+    });
+    refreshPixelLabels();
+}
+
+function openBadges() {
+    badgesReturnFocus = badgesBtnEl;
+    syncBadges();
+    syncBadgesButton();
+    buildBadgeTiles();
+    badgesScrimEl.hidden = false;
+    badgeListEl.focus();
+}
+
+function closeBadges() {
+    if (badgesScrimEl.hidden) return;
+    cueTick();
+    badgesScrimEl.hidden = true;
+    lastScreenSwap = performance.now();   // settle gate: a closing tap cannot open a card
+    if (badgesReturnFocus && typeof badgesReturnFocus.focus === "function") {
+        badgesReturnFocus.focus();
+    }
+}
+
+function showBadgeToast(ids) {
+    if (!ids || !ids.length) return;
+    const names = ids.map(function (id) {
+        const def = BADGE_DEFS.find(function (entry) { return entry.id === id; });
+        return def ? def.name : id;
+    });
+    if (ids.length === 1) {
+        drawPixelLabel(badgeToastLabelEl, "NEW BADGE", "--corner-label");
+        drawPixelLabel(badgeToastNameEl, names[0], "--corner-label");
+    } else {
+        drawPixelLabel(badgeToastLabelEl, "NEW BADGES", "--corner-label");
+        drawPixelLabel(badgeToastNameEl, String(ids.length), "--corner-label");
+    }
+    badgeToastLiveEl.textContent = ids.length === 1
+        ? "New badge: " + names[0]
+        : "New badges: " + names.join(", ");
+    badgeToastEl.hidden = false;
+    if (badgeToastTimer) window.clearTimeout(badgeToastTimer);
+    badgeToastTimer = window.setTimeout(function () {
+        badgeToastTimer = 0;
+        badgeToastEl.hidden = true;
+    }, 4000);
+}
+
+function hideBadgeToast() {
+    if (badgeToastTimer) {
+        window.clearTimeout(badgeToastTimer);
+        badgeToastTimer = 0;
+    }
+    badgeToastEl.hidden = true;
+}
+
+badgesBtnEl.addEventListener("click", function (event) {
+    event.stopPropagation();
+    cueTick();
+    openBadges();
+});
+
+badgesCloseEl.addEventListener("click", function () {
+    closeBadges();
+});
+
+badgesScrimEl.addEventListener("click", function (event) {
+    if (event.target === badgesScrimEl) closeBadges();
+});
+
+badgeToastEl.addEventListener("click", function (event) {
+    event.stopPropagation();
+    hideBadgeToast();
+});
+
+badgesDialogEl.addEventListener("keydown", function (event) {
+    if (event.key === "Escape") {
+        event.preventDefault();
+        event.stopPropagation();
+        closeBadges();
+        return;
+    }
+    if (event.key !== "Tab") return;
+    const focusables = Array.prototype.slice.call(
+        badgesDialogEl.querySelectorAll("button, [tabindex=\"0\"]")
+    ).filter(function (el) {
+        return !el.disabled && el.offsetParent !== null;
+    });
+    if (!focusables.length) return;
+    const first = focusables[0];
+    const last = focusables[focusables.length - 1];
+    if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+    }
+});
+
 let runBoundaryTime = 0;
 let runBestAtStart = 0;
 let fanfareDone = false;
@@ -2387,6 +3033,9 @@ function openGame(gameId) {
     if (!module2) return;
     if (ACTIVE.module && ACTIVE.module.id === gameId) return;   // idempotent
     saveOpens(gameId, readOpens(gameId) + 1);                   // one per open
+    recordOpenDay();                                            // build 024: badge data
+    recordPickHit(gameId);
+    hideBadgeToast();                                           // never during a game
     if (ACTIVE.module) { releaseAllDirs(ACTIVE.module); ACTIVE.module.stop(); }
     ACTIVE.module = module2;
     ACTIVE.paused = false;
