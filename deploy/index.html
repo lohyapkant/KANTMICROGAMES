@@ -6,15 +6,15 @@
   Repository : https://github.com/lohyapkant/KANTMICROGAMES
   Play online: https://kantmicrogames.lohyapkant.workers.dev/
   Hosting    : Cloudflare Workers (https://workers.cloudflare.com/)
-  Current    : build 025-20261113 — settings gains a DATA row with a
-               two-step RESET MY DATA that erases this device's scores,
-               opened counts and badges and keeps COLOUR, SOUND and SORT;
-               no game, control or sound cue changed; eight games unchanged
+  Current    : build 026-20261113 — all eight games are now FROZEN
                (PANDASNACK, BOOPEEK, DUCKLINE, SPROUTUP, SLIMEHOP,
-               SNAILRACE, HUGPARADE, CATNAPCATCH)
+               SNAILRACE, HUGPARADE, CATNAPCATCH); HUGPARADE and
+               CATNAPCATCH were the last two and are frozen at their
+               015-20261102 and 016-20261102 content; comment text and the
+               docs changed, every game module stayed byte-identical
   Names      : project and on-screen brand KANTMICROGAMES ·
                save keys and the console tag use the KANTMICROGAMES prefix
-  Build log  : build 025-20261113, DeepSeek V4.1 Flash Free (OpenCode) — the
+  Build log  : build 026-20261113, DeepSeek V4.1 Flash Free (OpenCode) — the
                full record of every build is in CHANGELOG.md
   ================================================================
 
@@ -1407,16 +1407,18 @@
    5. Do not copy one game's character art into another game. Panda,
       mouse, mallard, seedling and slime shapes must stay visually
       distinct.
-   6. PANDASNACK (content 007-20261101), BOOPEEK (content 006-20261101),
-      DUCKLINE (content 005-20261101), SPROUTUP (content 007-20261101),
-      SLIMEHOP (content 010-20261101) and SNAILRACE (content 011-20261101)
-      are FROZEN by owner request: do not restyle, rebalance or refactor
-      them unless the owner asks. (Build 010 changed only their unused
-      `saveKey` label string when the storage prefix was renamed; art,
-      tuning and behaviour are untouched. Build 016 left all six
-      byte-identical, and left HUGPARADE unchanged at content
-      015-20261102. Build 017 changed the shared shell only: all eight
-      game modules are byte-identical to build 016.)
+   6. All eight games are FROZEN by owner request: PANDASNACK (content
+      007-20261101), BOOPEEK (content 006-20261101), DUCKLINE (content
+      005-20261101), SPROUTUP (content 007-20261101), SLIMEHOP (content
+      010-20261101), SNAILRACE (content 011-20261101), HUGPARADE (content
+      015-20261102) and CATNAPCATCH (content 016-20261102). Do not
+      restyle, rebalance or refactor them unless the owner unfreezes one
+      in the prompt. (Build 010 changed only their unused `saveKey` label
+      string when the storage prefix was renamed; art, tuning and
+      behaviour are untouched. Build 016 left all six earlier games
+      byte-identical. Build 017 changed the shared shell only. Build 026
+      froze HUGPARADE and CATNAPCATCH while leaving all eight game
+      modules byte-identical to build 025.)
    7. Add a new game as a NEW IIFE registered in GAMES; never graft a
       new game into an existing module.
    ================================================================== */
@@ -1460,7 +1462,7 @@
 
 const APP = {
     name: "KANTMICROGAMES",
-    fileVersion: "025-20261113",       // build number of THIS one-file app
+    fileVersion: "026-20261113",       // build number of THIS one-file app
     savePrefix: "KANTMICROGAMES."      // best scores live at prefix + GAMEID + ".best"
 };
 
@@ -3741,12 +3743,14 @@ syncSoundUI();
    * SNAILRACE is FROZEN at content 011-20261101 — Nibbles races two garden
      rivals across a picnic blanket to the strawberry; frozen when the
      HUGPARADE round shipped.
-   * HUGPARADE is unchanged at content 015-20261102 (build 016 did not
-     touch it): Momo hunts for Bibi in a hedge maze that redraws itself;
-     PEEK shows the next hedges; each hug is worth 1 plus one per heart.
-   * CATNAPCATCH is live (content 016-20261102): Mochi the kitten sleeps
-     on a cushion while a paper pillow catches falling noisemakers. Three
-     clangs end the nap; POUF widens the pillow.
+   * HUGPARADE is FROZEN at content 015-20261102 — approved as-is by the
+     owner, build 026. Momo hunts for Bibi in a hedge maze that redraws
+     itself; PEEK shows the next hedges; each hug is worth 1 plus one per
+     heart.
+   * CATNAPCATCH is FROZEN at content 016-20261102 — approved as-is by
+     the owner, build 026. Mochi the kitten sleeps on a cushion while a
+     paper pillow catches falling noisemakers. Three clangs end the nap;
+     POUF widens the pillow.
    ================================================================== */
 
 (function () {
@@ -7501,7 +7505,7 @@ syncSoundUI();
 
 
 /* ==================================================================
-   PART 5-F — SNAILRACE module (content 011-20261101)
+   PART 5-F — SNAILRACE module (content 011-20261101) — FROZEN
    ------------------------------------------------------------------
    MODULE BOUNDARY — READ BEFORE EDITING
    * Everything inside this IIFE is PRIVATE to SNAILRACE: SETTINGS, PAL,
@@ -8295,9 +8299,13 @@ syncSoundUI();
 
 
 /* ==================================================================
-   PART 5-G — HUGPARADE module (content 015-20261102)
+   PART 5-G — HUGPARADE module (content 015-20261102) — FROZEN
    ------------------------------------------------------------------
    MODULE BOUNDARY — READ BEFORE EDITING
+   * MODULE: HUGPARADE — content 015-20261102 — FROZEN.
+     Owner request (build 026): the hedge-maze hug chase is approved
+     as-is. Do not restyle, rebalance or refactor this module; ask the
+     owner before touching its art.
    * Everything inside this IIFE is PRIVATE to HUGPARADE: SETTINGS,
      palette, hedge maps, maze state, timers and draw helpers.
    * Do NOT read or write other modules' names from here, and do NOT
@@ -9374,9 +9382,13 @@ syncSoundUI();
 
 
 /* ==================================================================
-   PART 5-H — CATNAPCATCH module (content 016-20261102)
+   PART 5-H — CATNAPCATCH module (content 016-20261102) — FROZEN
    ------------------------------------------------------------------
    MODULE BOUNDARY — READ BEFORE EDITING
+   * MODULE: CATNAPCATCH — content 016-20261102 — FROZEN.
+     Owner request (build 026): the sleepy kitten noisemaker catch is
+     approved as-is. Do not restyle, rebalance or refactor this module;
+     ask the owner before touching its art.
    * Everything inside this IIFE is PRIVATE to CATNAPCATCH: SETTINGS,
      palette, sprite maps, room state, timers and draw helpers.
    * Do NOT read or write other modules' names from here, and do NOT

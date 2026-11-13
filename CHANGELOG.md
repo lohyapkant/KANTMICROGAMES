@@ -86,6 +86,7 @@ A prompt names one step or one small group of steps. The owner reads the usage m
     13. Meters: record what the tool's own usage meter shows at the start and the end, in its own unit, as supplied by the owner or visible to you. If you cannot see it, write "not visible to the model". Never estimate a balance. If two readings of the same usage disagree, record both, never add them, and write 'unreconciled' with what is known. The build's usage is the reading taken after the final swap; if an earlier reading was quoted, say so and say which one the ledger uses. For a build that spans several runs or days, take the usage reading at the end of every run (including a halted one), use the same JSON command with a window that includes the first run's start day, and show each run's share.
     14. Pixels: every new image, icon or badge is drawn from a pixel map. No image files, SVG or emoji as art.
     15. Stability: the stage must not change size at idle. After any change to `fitStage`, the top row or the controls, run the idle check (record the stage rectangle on every animation frame for 0.8 s at the named sizes; zero changes) before swapping files.
+    16. Audit manifest: write tests/audit-manifest-NNN.txt (SHA-256 and line counts of each file before and after; SHA-256 of every CHANGELOG entry, MODELS dated entry, ledger row and game module before and after; usage readings) with a throwaway script, so an auditor can verify history without the old files.
     Never delete, shorten or restructure any documentation file or section. If something looks wrong, say so in the entry instead of fixing it silently.
 
 ### Continuity when a free tier runs out
@@ -101,6 +102,70 @@ Free and trial tiers end without warning. Any model must be able to pick up wher
 8. If a run halts, write a HANDOVER section in PROGRESS.md: what is done, what is verified (with the actual result), what is pending and the NEXT step. The next model checks the earlier work against the prompt before continuing.
 
 <!-- NEW BUILD ENTRIES: paste the newest entry on the line below this comment, above the previous newest. Never edit older entries. -->
+
+## 026-20261113 — 2026-11-13 (Freeze the last two games, and the agent handbook)
+
+Built from prompt: P-26, authored by Claude.ai Sonnet 5.5 Extra and pasted verbatim by the owner (freeze the last two games and write the agent handbook; private archive file `prompts/P-26_freeze-and-handbook.txt`)  
+Tool and model: **DeepSeek V4.1 Flash Free** (OpenCode), effort High  
+Games in the one file: 8 (PANDASNACK 007-20261101 [**frozen**], BOOPEEK 006-20261101
+[**frozen**], DUCKLINE 005-20261101 [**frozen**], SPROUTUP 007-20261101 [**frozen**],
+SLIMEHOP 010-20261101 [**frozen**], SNAILRACE 011-20261101 [**frozen**], HUGPARADE
+015-20261102 [**frozen**], CATNAPCATCH 016-20261102 [**frozen**]; file build
+**026-20261113**)
+
+### Added — the last two games are FROZEN (deploy/index.html, comment text only)
+
+- Owner request, verbatim: "Please freeze the remaining games as well if not frozen yet since the games are functional."
+- HUGPARADE (content 015-20261102) and CATNAPCATCH (content 016-20261102) now read FROZEN "approved as-is by the owner, build 026" in the boundary warning, and their PART 5-G and PART 5-H headings end "— FROZEN" with a `MODULE:` line in the same style as BOOPEEK and DUCKLINE.
+- READ ME FIRST rule 6 now lists all eight games as FROZEN and says a frozen game is not restyled, rebalanced or refactored unless the owner unfreezes it in the prompt. The SNAILRACE heading also gained its missing "— FROZEN" tag, so all eight module headings now carry it; PANDASNACK carries its `MODULE:` line inside its own IIFE and that text was not touched.
+- No character inside any game IIFE changed. All eight hashes are identical to build 025: PANDASNACK `f6dd1614db8ca9d6`, BOOPEEK `f321297984175b84`, DUCKLINE `6a62f23a0d747a5a`, SPROUTUP `adff7441c41aef44`, SLIMEHOP `a92efde40ca8618a`, SNAILRACE `457fa4b4750da245`, HUGPARADE `151deb6e718b23a6`, CATNAPCATCH `26f6be1af791ee73`.
+
+### Added — AGENTS.md (private, project root)
+
+- New 80-line handbook for a tool that has never seen the project, in seven sections: what this is; hard rules (one file, offline, the 100 x 100 stage, all eight games frozen, the module contract, no git, no delete/move/rename, public versus private files); before you edit (Conventions, work copies, one swap, PASS only after a check, up to three short questions); 15-20 `grep -n` anchors instead of reading `deploy/index.html` whole; where things live; records; when stuck.
+- Every function, element id and path it names was checked against the files. One path fix came out of the check: the stuck section names `plans/archive/pre-NNN/PROGRESS.md` instead of a bare file name, so every path resolves.
+
+### Added — plans/new-game-guide.md and its toy-game proof (private)
+
+- New 248-line guide in seven sections: the 17-member module contract and when the shell calls each member; a minimal annotated module in CATNAPCATCH's section order; how a module talks to the shell (`syncChrome` and `#scoreVal` / `#bestVal` / `#msg`, `readBest` / `saveBest` and the real save key, `actionLabel`, the 200 x 96 `previewPaint`, and why badges, opened counts and the five sorts depend on `id` and the saved best); the seven README design rules plus the in-canvas how-to card, pixel-art and no-emoji rules; an 11-line acceptance checklist; a concept-sheet template; and the steps and records for a new-game build, with one build adding one game.
+- Proven with a temporary TESTGAME in `plans/archive/pre-026/work/guide-test/index.html`, built from the guide's skeleton alone: it registered as a ninth card, showed painted preview art, opened from its card, moved a square with D (hero min x 46 to 90), scored 1 after 1.4 s with the best chip following, reset to score 0 on one R press, passed `node --check` on both inline scripts and produced 0 console errors. The temporary copy is not part of the live files.
+- The toy test did not wait out the 60-second run, so `finishRun` and best persistence across a reload were not exercised by it; that line stays in the guide's checklist for real games.
+
+### Added — audit manifests (CHANGELOG Conventions)
+
+- Per-build checklist item 16 now requires `tests/audit-manifest-NNN.txt`: SHA-256 and line counts of each file before and after; SHA-256 of every CHANGELOG entry, MODELS dated entry, ledger row and game module before and after; and the usage readings, written with a throwaway script so an auditor can verify history without the old files.
+- `tests/audit-manifest-026.txt` follows that format for this build.
+
+### Edits to existing text
+
+- `deploy/index.html` — header "Current" line now describes build 026 and the all-frozen state; header "Build log" names build 026 and DeepSeek V4.1 Flash Free (OpenCode); `APP.fileVersion` is `026-20261113`.
+- `CHANGELOG.md` — the new Per-build checklist item 16 (above); this entry.
+- `README.md` — "Current build" is `026-20261113`; the DeepSeek V4.1 Flash Free Builds cell gains 026 and the Claude.ai Sonnet 5.5 Extra cell gains 026 (prompt only). Nothing else changed.
+- `MODELS.md` — the 026 prompt and build rows; the time table and bars recomputed; the OpenCode token bullet extended to build 026.
+- `plans/micro-games-v2.md` — one ledger row and one tool-log row.
+
+### Verification and limits
+
+- **V1 HASHES, SYNTAX, FOOTER: PASS.** All eight IIFE hashes equalled the build-025 values; `node --check` was clean on both inline scripts; one browser load at 360x640 @3 showed `APP.fileVersion` 026-20261113, exactly one build ID in the footer and eight shelf cards; 0 console errors.
+- **V2 FREEZE: PASS.** Rule 6 says all eight are FROZEN; the boundary warning has one `is FROZEN at content` line for each of the eight; no "is live", "still live" or "unchanged at content" text remains; the HUGPARADE, CATNAPCATCH and SNAILRACE headings end "— FROZEN"; the hashes prove no game module changed.
+- **V3 AGENTS.md: PASS.** 80 lines; all 11 named functions and all 8 named element ids exist in `index.html`; every named path resolves (AGENTS.md and plans/new-game-guide.md exist as work copies and go live in the swap); no secrets.
+- **V4 GUIDE: PASS.** 248 lines; all 17 contract members are named in the guide and present in CATNAPCATCH's real `GAMES.push`; the toy test above passed.
+- **V5 DOCS: PASS after one test-side repair.** README was 98 lines and 6,515 bytes with none of IIFE, frozen, contract, credit, token or hash as whole words; CHANGELOG entries 000-025 were byte-identical (241,131 bytes from the 025 heading down); MODELS dated entries and all existing ledger rows were byte-identical; the 026 build ID was current in `APP.fileVersion`, the README "Current build" line, the top CHANGELOG entry and the plan ledger row; every table kept constant column counts; every relative link resolved. The repair was in the test script: a loop counter was declared `const` and incremented.
+- **Not verified:** Mistral Vibe did not run this build, so the handbook and guide are proven by the toy test and script checks, not by a cold model using them. No real Safari, iPhone, touch device or screen reader was tested; all browser checks ran in headless Chrome. No sound was heard. The guide was not proven against a second full game.
+
+### Build record (owner request: duration + tokens/credits)
+
+- Duration: about 15 min (2026-11-13, 07:16:17-07:31:41 WIB), to the final reading taken after the one-step swap and the live V1 check.
+- Usage: 272,819 tokens processed = 185,995 input + 50,082 output + 36,742 reasoning; 10,087,168 cache reads separate and NOT counted; 93 steps; 115 tool calls; cost $0.00.
+- How counted: `opencode stats --days 2 --json` at the start, before any edit (input 349,824; output 52,868; reasoning 35,982; cache reads 12,554,240; steps 116; tool calls 141), and after the swap and the live V1 check (input 535,819; output 102,950; reasoning 72,724; cache reads 22,641,408; steps 209; tool calls 256). Build usage is the second reading minus the first, JSON fields only. `opencode stats --days 1 --models` was not mixed in: it reported 24.3m tokens over 215 steps for today in one aggregate, without the input/output/reasoning split. `opencode session list --max-count 5` returned no rows, so no export was summed. Assistant turns were not shown.
+- Mode and owner notes: DeepSeek V4.1 Flash Free, effort High, in OpenCode. The prompt (P-26) was authored by Claude.ai Sonnet 5.5 Extra and pasted verbatim by the owner. No other tool was used.
+- Tools used: OpenCode (shell and file edits); Node.js 26 with headless Chrome over the DevTools Protocol for V1 and the guide test; Python 3 for the hashes, exact-match edits and the audit manifest; `node --check`; a small local HTTP server for the test pages.
+- Iterations: 0 app-code repair cycles. The toy-game test passed on its first run; V1-V4 passed on their first runs except one V3 check script that resolved two work-copy paths from the wrong directory (test-side, fixed and re-run).
+
+### Documentation review/edit attempts (standing rule)
+
+- No separate documentation review model was used. Every edit was checked against the Conventions and the per-build checklist, and every changed line is quoted above.
+
 
 ## 025-20261113 — 2026-11-13 (Reset my data: a two-step erase in settings)
 
