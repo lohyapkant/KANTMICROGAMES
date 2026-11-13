@@ -6,15 +6,15 @@
   Repository : https://github.com/lohyapkant/KANTMICROGAMES
   Play online: https://kantmicrogames.lohyapkant.workers.dev/
   Hosting    : Cloudflare Workers (https://workers.cloudflare.com/)
-  Current    : build 024-20261110 — badges: eight shell-level badges with
-               10x10 pixel icons, a BADGES button and dialog on the shelf,
-               and a new-badge note; no game, control, sound cue or
-               game-screen layout changed; eight games unchanged
+  Current    : build 025-20261113 — settings gains a DATA row with a
+               two-step RESET MY DATA that erases this device's scores,
+               opened counts and badges and keeps COLOUR, SOUND and SORT;
+               no game, control or sound cue changed; eight games unchanged
                (PANDASNACK, BOOPEEK, DUCKLINE, SPROUTUP, SLIMEHOP,
                SNAILRACE, HUGPARADE, CATNAPCATCH)
   Names      : project and on-screen brand KANTMICROGAMES ·
                save keys and the console tag use the KANTMICROGAMES prefix
-  Build log  : build 024-20261110, DeepSeek V4.1 Flash Free (OpenCode) — the
+  Build log  : build 025-20261113, DeepSeek V4.1 Flash Free (OpenCode) — the
                full record of every build is in CHANGELOG.md
   ================================================================
 
@@ -613,6 +613,53 @@
         #settingsClose:active { transform: translateY(2px); box-shadow: 0 1px 0 rgba(74, 59, 50, 0.12); }
 
         #settingsClose canvas {
+            display: block;
+            image-rendering: crisp-edges;
+            image-rendering: pixelated;
+        }
+
+        /* =============== data row (build 025, shelf only) =============== */
+
+        #dataLine { margin-top: 14px !important; margin-bottom: 10px !important; }
+
+        #dataRow {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 14px;
+        }
+
+        #dataConfirm { margin-bottom: 14px; }
+
+        #dataWarning {
+            margin: 0 0 12px;
+            font-size: 0.8rem;
+            line-height: 1.35;
+            color: var(--ink);
+        }
+
+        #dataConfirmRow {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .dataBtn {
+            min-height: 48px;
+            padding: 0 16px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 14px;
+            border: 1px solid var(--outline);
+            background: var(--panel);
+            box-shadow: 0 4px 0 rgba(74, 59, 50, 0.12);
+            cursor: pointer;
+            touch-action: manipulation;
+        }
+
+        .dataBtn:active { transform: translateY(2px); box-shadow: 0 1px 0 rgba(74, 59, 50, 0.12); }
+
+        .dataBtn canvas {
             display: block;
             image-rendering: crisp-edges;
             image-rendering: pixelated;
@@ -1225,6 +1272,23 @@
                 <div id="colourOptions" role="group" aria-label="Background colour"></div>
                 <canvas id="soundLine" data-scale="--opt-label" width="1" height="5" aria-hidden="true"></canvas>
                 <div id="soundOptions" role="group" aria-label="Sound effects"></div>
+                <canvas id="dataLine" data-label="DATA" data-scale="--opt-label" width="1" height="5" aria-hidden="true"></canvas>
+                <div id="dataRow" role="group" aria-label="Data">
+                    <button type="button" id="btnResetData" class="dataBtn" aria-label="RESET MY DATA">
+                        <canvas data-label="RESET MY DATA" data-scale="--opt-label" width="1" height="5" aria-hidden="true"></canvas>
+                    </button>
+                </div>
+                <div id="dataConfirm" hidden>
+                    <p id="dataWarning">Erase scores, opened counts and badges on this device? COLOUR, SOUND and SORT stay.</p>
+                    <div id="dataConfirmRow" role="group" aria-label="Confirm erase">
+                        <button type="button" id="btnCancelReset" class="dataBtn" aria-label="CANCEL">
+                            <canvas data-label="CANCEL" data-scale="--opt-label" width="1" height="5" aria-hidden="true"></canvas>
+                        </button>
+                        <button type="button" id="btnEraseData" class="dataBtn" aria-label="ERASE">
+                            <canvas data-label="ERASE" data-scale="--opt-label" width="1" height="5" aria-hidden="true"></canvas>
+                        </button>
+                    </div>
+                </div>
                 <button type="button" id="settingsClose" aria-label="CLOSE">
                     <canvas data-label="CLOSE" data-scale="--corner-label" width="1" height="5" aria-hidden="true"></canvas>
                 </button>
@@ -1396,7 +1460,7 @@
 
 const APP = {
     name: "KANTMICROGAMES",
-    fileVersion: "024-20261110",       // build number of THIS one-file app
+    fileVersion: "025-20261113",       // build number of THIS one-file app
     savePrefix: "KANTMICROGAMES."      // best scores live at prefix + GAMEID + ".best"
 };
 
@@ -2230,10 +2294,20 @@ function choosePickId() {
     const day = localDayNumber(now);
     const index = ((day % pool.length) + pool.length) % pool.length;
     const chosen = pool[index].id;
+    /* Build 025: the load right after ERASE shows today's pick but does not
+       write it back, so the erased key stays gone until the next visit. */
+    let erasedLoad = false;
     try {
-        window.localStorage.setItem(PICK_KEY, today + ":" + chosen);
+        erasedLoad = window.sessionStorage.getItem("KANTMICROGAMES.erased") === "1";
     } catch (error) {
-        /* saving quietly refused */
+        erasedLoad = false;
+    }
+    if (!erasedLoad) {
+        try {
+            window.localStorage.setItem(PICK_KEY, today + ":" + chosen);
+        } catch (error) {
+            /* saving quietly refused */
+        }
     }
     return chosen;
 }
@@ -2276,7 +2350,25 @@ function buildShelf() {
     buildPick();
     const freshBadges = syncBadges();  // earn anything already qualified for
     syncBadgesButton();
+    if (checkErasedNote()) return;     // build 025: one note after an erase
     if (freshBadges.length) showBadgeToast(freshBadges);
+}
+
+/* Build 025: after ERASE the page reloads; the flag lives for one shelf view. */
+function checkErasedNote() {
+    let flag = "";
+    try {
+        flag = window.sessionStorage.getItem("KANTMICROGAMES.erased") || "";
+    } catch (error) {
+        flag = "";
+    }
+    if (flag !== "1") return false;
+    try {
+        window.sessionStorage.removeItem("KANTMICROGAMES.erased");
+    } catch (error) {
+        /* the note still shows once in this page life */
+    }
+    return showErasedNote();
 }
 
 /* Build 024: badges. Everything is worked out on this device from the saved
@@ -2644,6 +2736,13 @@ const colourLineEl = document.getElementById("colourLine");
 const soundOptionsEl = document.getElementById("soundOptions");
 const soundLineEl = document.getElementById("soundLine");
 const settingsCloseEl = document.getElementById("settingsClose");
+const dataRowEl = document.getElementById("dataRow");
+const dataConfirmEl = document.getElementById("dataConfirm");
+const resetDataBtnEl = document.getElementById("btnResetData");
+const cancelResetBtnEl = document.getElementById("btnCancelReset");
+const eraseDataBtnEl = document.getElementById("btnEraseData");
+const DATA_SETTLE_MS = 400;      // a double tap cannot reach ERASE
+let dataConfirmAt = 0;
 let settingsReturnFocus = null;
 
 const SWATCH_MAP = ["AABBA", "ABABA", "BABAB", "ABABA", "AABBA"];
@@ -2732,8 +2831,78 @@ function buildSoundOptions() {
     });
 }
 
+/* ---------- reset my data (build 025, shelf only) ---------- */
+
+function showDataRow() {
+    dataConfirmEl.hidden = true;
+    dataRowEl.hidden = false;
+    resetDataBtnEl.focus();
+}
+
+function showDataConfirm() {
+    dataConfirmAt = performance.now();
+    dataRowEl.hidden = true;
+    dataConfirmEl.hidden = false;
+    cancelResetBtnEl.focus();       // CANCEL first; ERASE is never focused by default
+}
+
+function cancelDataConfirm() {
+    if (dataConfirmEl.hidden) return;
+    cueTick();
+    showDataRow();
+}
+
+function confirmEraseAllowed() {
+    return !dataConfirmEl.hidden && performance.now() - dataConfirmAt > DATA_SETTLE_MS;
+}
+
+/* Every key D1 erases, built from GAMES so a future game is included. */
+function buildEraseKeys() {
+    const keys = [];
+    GAMES.forEach(function (game) {
+        keys.push(APP.savePrefix + game.id + ".best");
+        keys.push(APP.savePrefix + game.id + ".opens");
+    });
+    keys.push("KANTMICROGAMES.ui.pick", "KANTMICROGAMES.ui.days",
+              "KANTMICROGAMES.ui.pickhit", "KANTMICROGAMES.ui.badges");
+    return keys;
+}
+
+function eraseMyData() {
+    const ERASED_KEYS = buildEraseKeys();
+    ERASED_KEYS.forEach(function (key) {
+        try {
+            window.localStorage.removeItem(key);
+        } catch (error) {
+            /* private browsing: the key cannot be removed, the reload still runs */
+        }
+    });
+    try {
+        window.sessionStorage.setItem("KANTMICROGAMES.erased", "1");
+    } catch (error) {
+        /* no sessionStorage: the note is skipped, the data is still gone */
+    }
+    window.location.reload();
+}
+
+resetDataBtnEl.addEventListener("click", function () {
+    cueTick();
+    showDataConfirm();
+});
+
+cancelResetBtnEl.addEventListener("click", function () {
+    cancelDataConfirm();
+});
+
+eraseDataBtnEl.addEventListener("click", function () {
+    if (!confirmEraseAllowed()) return;
+    cueTick();
+    eraseMyData();
+});
+
 function openSettings() {
     settingsReturnFocus = settingsBtnEl;
+    showDataRow();
     syncColourUI();
     syncSoundUI();
     settingsScrimEl.hidden = false;
@@ -2770,7 +2939,11 @@ settingsDialogEl.addEventListener("keydown", function (event) {
     if (event.key === "Escape") {
         event.preventDefault();
         event.stopPropagation();
-        closeSettings();
+        if (!dataConfirmEl.hidden) {
+            cancelDataConfirm();      // first Esc: back to the DATA row
+            return;
+        }
+        closeSettings();              // second Esc: close the dialog
         return;
     }
     if (event.key !== "Tab") return;
@@ -2888,6 +3061,7 @@ function closeBadges() {
 
 function showBadgeToast(ids) {
     if (!ids || !ids.length) return;
+    badgeToastNameEl.hidden = false;
     const names = ids.map(function (id) {
         const def = BADGE_DEFS.find(function (entry) { return entry.id === id; });
         return def ? def.name : id;
@@ -2916,6 +3090,20 @@ function hideBadgeToast() {
         badgeToastTimer = 0;
     }
     badgeToastEl.hidden = true;
+}
+
+/* Build 025: the one note after ERASE, reusing the shelf note. */
+function showErasedNote() {
+    drawPixelLabel(badgeToastLabelEl, "ERASED", "--corner-label");
+    badgeToastNameEl.hidden = true;
+    badgeToastLiveEl.textContent = "Your scores, opened counts and badges were erased on this device.";
+    badgeToastEl.hidden = false;
+    if (badgeToastTimer) window.clearTimeout(badgeToastTimer);
+    badgeToastTimer = window.setTimeout(function () {
+        badgeToastTimer = 0;
+        badgeToastEl.hidden = true;
+    }, 4000);
+    return true;
 }
 
 badgesBtnEl.addEventListener("click", function (event) {

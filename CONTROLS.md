@@ -1,4 +1,4 @@
-<!-- Applies to: build 024-20261110 · eight games · changes to controls are recorded in CHANGELOG.md -->
+<!-- Applies to: build 025-20261113 · eight games · changes to controls are recorded in CHANGELOG.md -->
 # KANTMICROGAMES — Controls
 
 Which controls exist, how they behave on each kind of device, and why.
@@ -31,7 +31,7 @@ and down do nothing.
 
 ## Settings
 
-SETTINGS is on the shelf only; no game screen has it. It opens a dialog with two settings: **COLOUR**, the page background tone, and **SOUND**.
+SETTINGS is on the shelf only; no game screen has it. It opens a dialog with three rows: **COLOUR**, the page background tone, **SOUND**, and **DATA**.
 
 - Six values: **RANDOM** (the default) and five fixed palettes: **PEACH**, **MINT**,
   **SKY**, **LILAC**, **BUTTER**.
@@ -45,6 +45,7 @@ SETTINGS is on the shelf only; no game screen has it. It opens a dialog with two
   tone does.
 - **SOUND** is the second row: **ON** (the default) or **OFF**, saved under `KANTMICROGAMES.ui.sound`. The sounds are short effects made inside the page; no audio files are loaded. A browser only allows sound after your first tap or key press, and on some phones the ringer switch can mute it.
 - What you hear: a blip on the action button or a tap on the stage, a chirp when the score goes up, a short fanfare when you beat your best (not on your very first run), a boop on RESTART, a pop when a game opens or you go back to the shelf, and a soft tick in settings. Direction buttons are silent.
+- **DATA** has one button, **RESET MY DATA**. It asks you to confirm, then erases this device's best scores, opened counts, badges, days played and today's pick, and reloads the page. COLOUR, SOUND and SORT are kept. Nothing is sent anywhere, so nothing is erased anywhere else.
 
 ## Shelf
 

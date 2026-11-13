@@ -81,7 +81,7 @@ A prompt names one step or one small group of steps. The owner reads the usage m
      9. Frozen games: prove they are byte-identical (SHA-256 of each IIFE) and put the numbers in the entry.
     10. Consistency: the same build ID in APP.fileVersion, the index header, the rendered footer, README "Current build", the top CHANGELOG entry and the plan ledger row (CONTROLS excepted, see 4); the same six-game list in README, CONTROLS and the entry; the same copyright line in LICENSE and the index.html header.
     11. Honest usage: record time and usage in the unit the tool reports, say how it was counted, write "not recorded" if unknown, and never add across units.
-    11. Honest usage: record time and usage in the unit the tool reports, say how it was counted, write "not recorded" if unknown, and never add across units.
+    11b. Honest usage: record time and usage in the unit the tool reports, say how it was counted, write "not recorded" if unknown, and never add across units.
     12. Git: end your report with the suggested commands in a code block and do not run them: `git status`, `git add <the changed public files>`, `git commit -m "build NNN-YYYYMMDD: <title>" -m "<two to four bullets>"`, `git tag build-NNN`, `git push`.
     13. Meters: record what the tool's own usage meter shows at the start and the end, in its own unit, as supplied by the owner or visible to you. If you cannot see it, write "not visible to the model". Never estimate a balance. If two readings of the same usage disagree, record both, never add them, and write 'unreconciled' with what is known. The build's usage is the reading taken after the final swap; if an earlier reading was quoted, say so and say which one the ledger uses. For a build that spans several runs or days, take the usage reading at the end of every run (including a halted one), use the same JSON command with a window that includes the first run's start day, and show each run's share.
     14. Pixels: every new image, icon or badge is drawn from a pixel map. No image files, SVG or emoji as art.
@@ -101,6 +101,58 @@ Free and trial tiers end without warning. Any model must be able to pick up wher
 8. If a run halts, write a HANDOVER section in PROGRESS.md: what is done, what is verified (with the actual result), what is pending and the NEXT step. The next model checks the earlier work against the prompt before continuing.
 
 <!-- NEW BUILD ENTRIES: paste the newest entry on the line below this comment, above the previous newest. Never edit older entries. -->
+
+## 025-20261113 — 2026-11-13 (Reset my data: a two-step erase in settings)
+
+Built from prompt: P-25, authored by Claude.ai Sonnet 5.5 Extra and pasted verbatim by the owner (reset my data: a two-step erase in settings; private archive file `prompts/P-25_reset-my-data.txt`)  
+Tool and model: **DeepSeek V4.1 Flash Free** (OpenCode)  
+Games in the one file: 8 (PANDASNACK 007-20261101 **frozen**, BOOPEEK 006-20261101
+**frozen**, DUCKLINE 005-20261101 **frozen**, SPROUTUP 007-20261101 **frozen**,
+SLIMEHOP 010-20261101 **frozen**, SNAILRACE 011-20261101 **frozen**, HUGPARADE
+015-20261102 (unchanged this build), CATNAPCATCH 016-20261102 (unchanged this build);
+file build **025-20261113**)
+
+### Added — DATA row and two-step reset (deploy/index.html, settings only)
+
+- The settings dialog gains a third row, **DATA**, under COLOUR and SOUND: a pixel-text line, a `RESET MY DATA` button (full-word aria-label, 48 px tall), then a hidden confirm state.
+- RESET replaces the row with the plain warning "Erase scores, opened counts and badges on this device? COLOUR, SOUND and SORT stay." and two buttons, CANCEL and ERASE. CANCEL is focused first; ERASE is never focused by default. The confirm buttons do nothing for the first 400 ms (`DATA_SETTLE_MS`), so a double tap cannot erase.
+- `buildEraseKeys()` builds the erase list from `GAMES`, so a future game is included automatically: every game's `.best` and `.opens`, plus `ui.pick`, `ui.days`, `ui.pickhit` and `ui.badges`. `eraseMyData()` removes each key in its own try/catch, sets `sessionStorage["KANTMICROGAMES.erased"] = "1"` and calls `location.reload()`. `ui.colour`, `ui.sound`, `ui.sort` and the legacy `ui.pads`, `ui.hand`, `ui.padsize` are kept.
+- Esc on the confirm step cancels back to the DATA row and returns focus to RESET; a second Esc closes the dialog. The focus trap includes the new buttons. TICK plays on opening the dialog, RESET, CANCEL and ERASE; no new cue was added.
+
+### Added — the one note after ERASE (deploy/index.html, shelf only)
+
+- After the reload, `checkErasedNote()` reads and removes the session flag and reuses `#badgeToast`: pixel `ERASED`, the old name canvas hidden, and the live text "Your scores, opened counts and badges were erased on this device." for about 4 seconds. `buildShelf()` checks it before the new-badge note, so the two never stack; it appears once and not on later loads.
+- The load right after ERASE also shows the daily pick without writing `ui.pick` back, so that erased key stays gone; the next visit saves the pick normally.
+
+### Edits to existing text
+
+- `deploy/index.html` — header "Current" line and `APP.fileVersion`: build `024-20261110` → `025-20261113`; header "Build log" names build 025 and DeepSeek V4.1 Flash Free (OpenCode).
+- `CONTROLS.md` — "Applies to" is now `build 025-20261113`; the Settings opening sentence names three rows (COLOUR, SOUND and DATA); a DATA bullet follows the SOUND bullets.
+- `README.md` — R1 "Current build" is `025-20261113`; R2 adds the bullet "SETTINGS can erase your scores, counts and badges on this device."; R3 adds 025 to the DeepSeek V4.1 Flash Free and Claude.ai Sonnet 5.5 Extra rows; R4 changes the Claude.ai row's "How it went" from "and later the prompts for builds 017 to 022." to "and later the prompts for builds 017 onward."
+- `CHANGELOG.md` — the second Per-build checklist item numbered "11." is relabelled "11b." so the list reads 11 then 11b (old: `    11. Honest usage: ...`; new: `    11b. Honest usage: ...`). Both lines had identical text; only the second label changes.
+- `MODELS.md` — the time table's DeepSeek figure was corrected from ~320 to ~318 and the total from ~805 to ~803 (the ledger rows, with the shared session row counted separately); the two 025 ledger rows then took the table to ~331 and ~816, with the bars recomputed at 10 minutes per block, and the token bullet now includes 025.
+- `plans/micro-games-v2.md` — one ledger row, one tool-log row and Roadmap v6 appended.
+
+### Verification and limits
+
+- **V1 ERASE: PASS after one test-side repair.** Seeded all eight `.best`/`.opens`, all seven shell keys and the three legacy keys. After ERASE and the reload every erased key was gone; only `ui.colour`, `ui.sound`, `ui.sort`, `ui.pads`, `ui.hand`, `ui.padsize` remained with their exact values; all eight cards read "not played yet"; BADGES read 0/8; opening PANDASNACK showed BEST 0; the ERASED note showed once with the exact live text and did not return after another reload; 0 console errors. The repair was in the test: the first card sat below the viewport and needed scrolling into view before the tap.
+- **V2 CONFIRM FLOW: PASS.** At 360x640 @3 the dialog fitted in both states with CLOSE visible; CANCEL was focused first and ERASE was never focused; ERASE inside the 400 ms gate did nothing; CANCEL changed no saved data and returned focus to RESET; the first Esc cancelled and kept the dialog open, the second closed it and returned focus to SETTINGS; a double tap on RESET did not erase; Tab stayed inside the dialog through 24 presses in each state; 0 console errors.
+- **V3 REGRESSION: PASS after five test-side repairs.** All eight IIFE hashes equalled F5; `node --check` was clean on both inline scripts; card counts, the BADGES count and the eight-tile badges dialog worked; six COLOUR options and two SOUND options both saved and applied; the sort row saved AZ, updated the press and reordered; the pick banner opened DUCKLINE; the footer showed one build ID (025-20261113); `APP.fileVersion` was 025-20261113; the idle stage kept its position and size over 2.5 s at 440x720 @3; no horizontal overflow at 280, 360, 440, 768 or 1280; the audio spy recorded only 1200 Hz square TICK voices; 0 console errors. The repairs were all in the test: two canvas labels read as attributes instead of pixels, the audio spy read the oscillator type before the cue set it, the sort live text expected the wrong wording, and one card tap needed scrolling into view.
+- **V4 DOCS: PASS, then re-run after the records: PASS.** README 98 lines / 6,491 bytes and no forbidden whole words; CHANGELOG entries 000-024 byte-identical; MODELS existing ledger rows and every dated entry byte-identical; the same build ID current in index, README, CONTROLS, CHANGELOG and the plan; every table kept constant columns; every relative link resolved; the time table recomputed from the ledger to DeepSeek ~331 and total ~816, 23 of 26 builds, bars at 10 minutes per block.
+- **Screenshots (2), both looked at.** The two images were written by the throwaway harness in `/tmp/kant-025/` and are not part of the repository. At 360x640 the confirm step showed the warning, CANCEL and ERASE side by side and CLOSE below them. The shelf after the reset showed the pixel ERASED note over two empty cards reading "not played yet".
+- **Not verified:** Safari and the real iPhone were not tested by me; all browser checks ran in headless Chrome over the DevTools Protocol. No sound was heard; the spy proves TICK wiring, voice and frequency only. A real screen reader, a real touch device, landscape play and long-run play were not tested under the run guard's budget. The screenshots lived in the temporary harness folder and are not kept in the repository.
+
+### Build record (owner request: duration + tokens/credits)
+
+- Duration: about 13 min (2026-11-13, 06:51:36-07:04:38 WIB), to the final reading taken after the one-step swap and the live V3 regression.
+- Usage: 241,367 tokens processed = 183,163 input + 35,981 output + 22,223 reasoning; 8,790,144 cache reads separate and NOT counted; 81 steps; 103 tool calls; cost $0.00. Counted with `opencode stats --days 2 --json` as the final reading after the swap and the live regression minus the start reading taken before any edit, JSON fields only. `opencode stats --days 2 --models` was not mixed in. The session list returned no rows, so no export was summed; the JSON did not show assistant turns.
+- Mode and owner notes: DeepSeek V4.1 Flash Free, effort High, in OpenCode. The prompt (P-25) was authored by Claude.ai Sonnet 5.5 Extra and pasted verbatim by the owner. No other tool was used.
+- Tools used: OpenCode (shell and file edits); Node.js 26 with headless Chrome over the DevTools Protocol for V1-V4 and the two screenshots; Python 3 for the IIFE hashes, exact-match edits and the audit manifest; `node --check`; a small local HTTP server for the test pages.
+- Iterations: 0 app-code repair cycles. 6 test-side repair cycles: V1 card scroll, V3 canvas-label reads twice, V3 audio-spy timing, V3 sort wording, plus the V1 screenshot scroll so the empty cards were visible. No problem was left "not fixed".
+
+### Documentation review/edit attempts (standing rule)
+
+- No separate documentation review model was used. Every edit was checked against the Conventions and the per-build checklist, and every changed line is quoted above.
 
 ## 024-20261110 — 2026-11-10 (Badges: eight shell-level badges with pixel icons)
 
