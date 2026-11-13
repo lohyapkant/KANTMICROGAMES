@@ -19,7 +19,7 @@ each build. It is a record, not an opinion.
 6. When one model delivers several builds, write one entry per build and name the build in
    the heading.
 7. The Usage ledger is a record, not an observation. Add one row per model per build, every
-   build, copied from the CHANGELOG Build record. Observation entries stay owner-only.
+   build, copied from the build's Build record. Observation entries stay owner-only.
 8. Model names are written exactly as the tool shows them; effort is recorded separately (in the ledger's Role cell). Earlier entries merge the two and are kept as written.
 
 **Project links (kept current for every model reading this file)**
@@ -30,8 +30,8 @@ each build. It is a record, not an opinion.
 - Project name: **KANTMICROGAMES** (repository, worker and public address). The app, the
   save keys (`KANTMICROGAMES.<GAME>.best`, `KANTMICROGAMES.ui.*`) and the console tag use
   that name from build 010; the local folder is `KANTMICROGAME/` and the archived prompt
-  copies keep their original spellings. For both, see Naming in `CHANGELOG.md` →
-  Conventions.
+  copies keep their original spellings. For both, see Naming in the author's private
+  build conventions.
 - License: MIT (see `LICENSE` and the header comment in `deploy/index.html`). Legal name of
   the original creator: **Loh Yap Kant**, with help from the models observed below.
 
@@ -42,7 +42,7 @@ This project is built on free and trial plans on purpose, to see what a person w
 - **Claude.ai chat** (used to write some of the prompts) runs on a plan with a usage window that the owner describes as about 5 hours. Its usage is read by the owner from Claude's usage page, in percent of the window, not tokens.
 - Earlier builds used OpenCode's free models and Antigravity.
 - **Update, 2026-11-03:** the Qoder trial credits are used up (plan meter 300/300; the trial itself ends 2026-11-15 at 15:24:49 GMT+7). Build 017 was finished on OpenCode with DeepSeek V4.1 Flash Free, and builds 018 onward run on OpenCode's free models unless noted.
-When a quota runs out the work pauses and resumes with whatever is available (see CHANGELOG.md → Conventions → Continuity when a free tier runs out).
+When a quota runs out the work pauses and resumes with whatever is available (the author's private build conventions cover what to do when a free tier runs out).
 
 ## Usage meters explained
 
@@ -62,7 +62,7 @@ page says "to confirm" or "not confirmed".
 What each model used on each build. This is a record, not an opinion, and not a ranking.
 
 - One row per model per build. Failed, halted and prompt-only contributions get a row too.
-- Numbers are copied from the build's Build record in CHANGELOG.md. If a figure was corrected later, the final one is used.
+- Numbers are copied from the build's Build record (the long-form record is private; from build 027 the public CHANGELOG.md entry repeats the time and usage). If a figure was corrected later, the final one is used.
 - **Tokens and credits are different units.** Credits are a tool's billing unit (here Qoder CLI), not tokens and not money. Token figures were counted in different ways (see "How counted"), so they are never added together.
 - "—" means not recorded. "~" means approximate.
 
@@ -113,6 +113,8 @@ What each model used on each build. This is a record, not an opinion, and not a 
 | 025 | DeepSeek V4.1 Flash Free · OpenCode | built (effort High) | ~13 min | 241,367 tokens processed | measured: 183,163 input + 35,981 output + 22,223 reasoning; 8,790,144 cache reads not counted; 81 steps; 103 tool calls; OpenCode stats delta, final reading after the swap and the live regression (see CHANGELOG build record) |
 | 026 | Claude.ai Sonnet 5.5 Extra · Claude.ai chat | wrote the prompt (effort Extra) | — | — | not recorded |
 | 026 | DeepSeek V4.1 Flash Free · OpenCode | built (effort High) | ~15 min | 272,819 tokens processed | measured: 185,995 input + 50,082 output + 36,742 reasoning; 10,087,168 cache reads not counted; 93 steps; 115 tool calls; OpenCode stats delta, final reading after the swap and the live check (see CHANGELOG build record) |
+| 027 | Claude.ai Sonnet 5.5 Extra · Claude.ai chat | wrote the prompt (effort Extra) | — | — | not recorded |
+| 027 | DeepSeek V4.1 Flash Free · OpenCode | built (effort High) | ~6 min | 117,458 tokens processed | measured: 73,339 input + 25,499 output + 18,620 reasoning; 5,544,064 cache reads not counted; 44 steps; 46 tool calls; OpenCode stats delta, final reading after the swap and the live check (see the build record in plans/buildlog/027-20261114.md) |
 
 ### Totals that can honestly be added
 - **Credits, Qoder CLI, per-request transcript, builds 009-016:** 74.5874 credits over 1,143 billable requests.
@@ -121,7 +123,7 @@ What each model used on each build. This is a record, not an opinion, and not a 
 - **Approximate list-price value:** the plan meter reads 300 of 300 trial credits used, which is about US$3.00 at about US$0.01 per credit. An estimate, not a bill: the trial is free. Check https://docs.qoder.com/account/pricing before relying on it. Never converted for tokens and never added across tools.
 - **Iterations recorded (from build 017):** 4 over 1 build.
 - **Iterations recorded (build 018):** 1 repair cycle pair (a 280 px control clash, fixed by stacking the corner pair under 360 px and using 4 px page padding).
-- **Tokens, OpenCode readings (input + output + reasoning; cache reads not counted), builds 005, 017, 021, 023, 024, 025 and 026:** about 3.73 M tokens in total (005 is approximate at about 2.37 M; 017 is 165,312; 021 is 203,831 at the final reading; 023 is 187,025; 024 is 301,245 at the final reading after the swap and the live regression; 025 is 241,367 at the final reading after the swap and the live regression; 026 is 272,819 at the final reading after the swap and the live check). Builds 018, 019 and 020 have no token reading. Other token figures count different things and are never added to these.
+- **Tokens, OpenCode readings (input + output + reasoning; cache reads not counted), builds 005, 017, 021, 023, 024, 025, 026 and 027:** about 3.86 M tokens in total (005 is approximate at about 2.37 M; 017 is 165,312; 021 is 203,831 at the final reading; 023 is 187,025; 024 is 301,245 at the final reading after the swap and the live regression; 025 is 241,367 at the final reading after the swap and the live regression; 026 is 272,819 at the final reading after the swap and the live check; 027 is 117,458 at the final reading after the swap and the live check). Builds 018, 019 and 020 have no token reading. Other token figures count different things and are never added to these. (The build 026 total should have read 3.74 M; corrected in build 027.)
 - **Build 021 usage note:** the ledger row for build 021 shows the reading taken when the records were written (162,156 tokens); the build's usage after the final swap is 203,831 tokens. The row is a record and is not edited.
 - **Build 022 token reading:** 361,981 tokens (input 309,861 + output 32,999 + reasoning 19,121; 7,112,192 cache reads not counted; 69 steps; 68 tool calls; cost $0.00), from the OpenCode final reading after the swap and the docs check. An earlier post-swap reading of 249,131 was taken before the OpenCode run stopped and resumed; the ledger uses 361,981. Gemini 3.8 Flash's share of build 022 has no reading. The bullet above listed builds 005, 017 and 021 when this note was written; build 023 extended it.
 - **Time by model, approximate.** Builds 000-002 and the GPT-OSS attempt have no time recorded, so DeepSeek and GLM are undercounted. One block = 10 minutes, rounded half up.
@@ -129,14 +131,14 @@ What each model used on each build. This is a record, not an opinion, and not a 
 | Model | Minutes | At a glance |
 |---|---|---|
 | Qwen3.8-Flash | ~305 | ▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇ |
-| DeepSeek V4.1 Flash Free | ~346 | ▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇ |
+| DeepSeek V4.1 Flash Free | ~352 | ▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇ |
 | Gemini 3.8 Flash | ~60 | ▇▇▇▇▇▇ |
 | GLM-5.3 Flash Free | ~45 | ▇▇▇▇▇ |
 | Flint 40B Free | ~25 | ▇▇▇ |
 | Claude Opus 4.6 Thinking | ~20 | ▇▇ |
 | Shared session (build 006: DeepSeek + Gemini) | ~30 | ▇▇▇ |
 
-Total recorded: about 831 minutes (about 13 h 51 min) over 24 of 27 builds.
+Total recorded: about 837 minutes (about 13 h 57 min) over 25 of 28 builds.
 (Totals were recomputed after the build-025 row was added and the earlier correction applied; the CHANGELOG Build records remain the source of truth.)
 
 ## 2026-11-07 — DeepSeek V4.1 Flash Free (OpenCode) — build 021

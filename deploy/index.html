@@ -6,16 +6,15 @@
   Repository : https://github.com/lohyapkant/KANTMICROGAMES
   Play online: https://kantmicrogames.lohyapkant.workers.dev/
   Hosting    : Cloudflare Workers (https://workers.cloudflare.com/)
-  Current    : build 026-20261113 — all eight games are now FROZEN
-               (PANDASNACK, BOOPEEK, DUCKLINE, SPROUTUP, SLIMEHOP,
-               SNAILRACE, HUGPARADE, CATNAPCATCH); HUGPARADE and
-               CATNAPCATCH were the last two and are frozen at their
-               015-20261102 and 016-20261102 content; comment text and the
-               docs changed, every game module stayed byte-identical
+  Current    : build 027-20261114 — records only: CHANGELOG.md is now a short
+               record of every build and the long-form build records moved
+               to the author's private archive; no game, layout or
+               behaviour changed, every game module stayed byte-identical
+               and all eight games remain FROZEN
   Names      : project and on-screen brand KANTMICROGAMES ·
                save keys and the console tag use the KANTMICROGAMES prefix
-  Build log  : build 026-20261113, DeepSeek V4.1 Flash Free (OpenCode) — the
-               full record of every build is in CHANGELOG.md
+  Build log  : build 027-20261114, DeepSeek V4.1 Flash Free (OpenCode) — a short
+               record of every build is in CHANGELOG.md
   ================================================================
 
   SPDX-License-Identifier: MIT
@@ -1448,9 +1447,10 @@
    shell and no game).
 
    Every finished build's full record — model and tool, effort,
-   duration, and tokens or credits — lives in CHANGELOG.md, under
-   Conventions → Per-build checklist. This header and the page footer
-   show only the current build; the README carries the summary rows.
+   duration, and tokens or credits — is kept in the author's private
+   build records; CHANGELOG.md carries a short summary of each build.
+   This header and the page footer show only the current build; the
+   README carries the summary rows.
    The owner's standing request; keep it exact and keep it honest.
    Owner observations about model strengths are dated entries in
    MODELS.md — add a new dated line, never rewrite an old one.
@@ -1462,7 +1462,7 @@
 
 const APP = {
     name: "KANTMICROGAMES",
-    fileVersion: "026-20261113",       // build number of THIS one-file app
+    fileVersion: "027-20261114",       // build number of THIS one-file app
     savePrefix: "KANTMICROGAMES."      // best scores live at prefix + GAMEID + ".best"
 };
 
