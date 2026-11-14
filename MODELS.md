@@ -118,6 +118,7 @@ What each model used on each build. This is a record, not an opinion, and not a 
 | 028 | DeepSeek V4.1 Flash Free · OpenCode | built (effort High) | ~26 min | 303,053 tokens processed | measured: 212,643 input + 50,583 output + 39,827 reasoning; 12,895,360 cache reads not counted; 109 steps; 109 tool calls; OpenCode stats delta, final reading after the swap and the live check (see the build record in plans/buildlog/028-20261114.md) |
 | 029 | Claude.ai Sonnet 5.5 · Claude.ai chat | wrote the prompt (effort High) | — | — | not recorded |
 | 029 | Mistral Medium 3.5 High · Vibe CLI | built (effort High) | ~60+ min | ~96.3k tokens (96,334 total, 95,104 cached) | session-wide stats from Vibe CLI Agent Statistics; Last Turn reading (build prompt may have overwritten previous turn); Cost: ~$6.62; Model: Mistral Medium 3.5 via mistral provider |
+| 030 | GPT-6 · Codex | built (effort not visible) | <10 min | — | not visible to the model; time only |
 | 027 | DeepSeek V4.1 Flash Free · OpenCode | built (effort High) | ~6 min | 117,458 tokens processed | measured: 73,339 input + 25,499 output + 18,620 reasoning; 5,544,064 cache reads not counted; 44 steps; 46 tool calls; OpenCode stats delta, final reading after the swap and the live check (see the build record in plans/buildlog/027-20261114.md) |
 
 ### Totals that can honestly be added

@@ -9,6 +9,16 @@ A short record of every build, newest first. Each entry gives the build ID, the 
 
 <!-- NEW ENTRIES: paste the newest short entry on the line below this comment, above the previous newest. Never edit older entries except to add a dated correction line in the header. -->
 
+## 030-20261114 — 2026-11-14 (PENGUINSLIDE syntax repair restores app startup)
+
+Built from prompt: P-30 (repair the broken index page; the owner unfreezes PENGUINSLIDE)  
+Tool and model: **GPT-6** (Codex); effort not visible  
+What changed: fixed a missing comma in PENGUINSLIDE's settings object. The syntax error stopped the shared page script from loading, so the shelf and game controls did not initialize.  
+Games changed: PENGUINSLIDE v2 (frozen build 030-20261114)  
+Checked: inline JavaScript syntax and project checker passed on the work copy  
+Not checked: interactive browser play, Safari, real phone or sound  
+Time and usage: under 10 min; not recorded — time only
+
 ## 029-20261114 — 2026-11-14 (PENGUINSLIDE: ninth game with slide-and-push ice puzzle)
 
 Built from prompt: P-29, authored by Claude.ai Sonnet 5.5, effort High (pasted verbatim by the owner)

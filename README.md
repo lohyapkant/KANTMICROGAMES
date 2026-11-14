@@ -4,7 +4,7 @@ Eight tiny pixel-art games in one HTML file. Open it, pick a game, play a minute
 
 Play online: <https://kantmicrogames.lohyapkant.workers.dev/>
 
-**Current build:** `029-20261114` — nine games, one file.
+**Current build:** `030-20261114` — nine games, one file.
 
 ## About this project
 

@@ -6,9 +6,8 @@
   Repository : https://github.com/lohyapkant/KANTMICROGAMES
   Play online: https://kantmicrogames.lohyapkant.workers.dev/
   Hosting    : Cloudflare Workers (https://workers.cloudflare.com/)
-  Current    : build 029-20261114 — PENGUINSLIDE: new ninth game with
-               slide-and-push ice puzzle mechanics, 60-second timer, and
-               score based on remaining time; all nine games FROZEN
+  Current    : build 030-20261114 — fixed PENGUINSLIDE JavaScript syntax
+               so the app boots and the shelf and games respond again
   Names      : project and on-screen brand KANTMICROGAMES ·
                save keys and the console tag use the KANTMICROGAMES prefix
   Build log  : build 028-20261114, DeepSeek V4.1 Flash Free (OpenCode) — a short
@@ -1484,7 +1483,7 @@
 
 const APP = {
     name: "KANTMICROGAMES",
-    fileVersion: "029-20261114",       // build number of THIS one-file app
+    fileVersion: "030-20261114",       // build number of THIS one-file app
     savePrefix: "KANTMICROGAMES."      // best scores live at prefix + GAMEID + ".best"
 };
 
@@ -2120,7 +2119,7 @@ function paintPandaSnackPreview(ctx) {
    the module's own versionNumber, the build where its content last changed.
    Keep this table in step with plans/game-versions.txt; the check script,
    tests/check-project.py, compares them. */
-const GAME_REVISIONS = { PANDASNACK: { revision: 1, frozen: true }, BOOPEEK: { revision: 2, frozen: true }, DUCKLINE: { revision: 1, frozen: true }, SPROUTUP: { revision: 1, frozen: true }, SLIMEHOP: { revision: 1, frozen: true }, SNAILRACE: { revision: 1, frozen: true }, HUGPARADE: { revision: 2, frozen: true }, CATNAPCATCH: { revision: 2, frozen: true }, PENGUINSLIDE: { revision: 1, frozen: true } };
+const GAME_REVISIONS = { PANDASNACK: { revision: 1, frozen: true }, BOOPEEK: { revision: 2, frozen: true }, DUCKLINE: { revision: 1, frozen: true }, SPROUTUP: { revision: 1, frozen: true }, SLIMEHOP: { revision: 1, frozen: true }, SNAILRACE: { revision: 1, frozen: true }, HUGPARADE: { revision: 2, frozen: true }, CATNAPCATCH: { revision: 2, frozen: true }, PENGUINSLIDE: { revision: 2, frozen: true } };
 
 /* The identity line's sizes, named so the code below has no loose numbers.
    The height is only a fallback: the real height comes from the CSS. */
@@ -10535,7 +10534,7 @@ syncSoundUI();
 
     const SETTINGS = {
         gameName: "PENGUINSLIDE",
-        versionNumber: "029-20261114",
+        versionNumber: "030-20261114",
         stageSize: 100,
         saveKey: "KANTMICROGAMES.PENGUINSLIDE.best",
 
@@ -10583,7 +10582,7 @@ syncSoundUI();
         overPlateHeight: 30,  // game over plate height
         overTitleY: 42,       // game over title Y position
         overScoreY: 52,       // score text Y position
-        overPromptY: 62
+        overPromptY: 62,
 
         /* Palette — colors for the arctic theme */
         palette: {
