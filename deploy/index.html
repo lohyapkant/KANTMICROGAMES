@@ -6,14 +6,14 @@
   Repository : https://github.com/lohyapkant/KANTMICROGAMES
   Play online: https://kantmicrogames.lohyapkant.workers.dev/
   Hosting    : Cloudflare Workers (https://workers.cloudflare.com/)
-  Current    : build 027-20261114 — records only: CHANGELOG.md is now a short
-               record of every build and the long-form build records moved
-               to the author's private archive; no game, layout or
-               behaviour changed, every game module stayed byte-identical
-               and all eight games remain FROZEN
+  Current    : build 028-20261114 — handbook v2 and game identity: game names
+               show in ALL CAPS, each game has a revision number and a small
+               identity line, the rules moved into a checked handbook; every
+               game module stayed byte-identical and all eight games remain
+               FROZEN
   Names      : project and on-screen brand KANTMICROGAMES ·
                save keys and the console tag use the KANTMICROGAMES prefix
-  Build log  : build 027-20261114, DeepSeek V4.1 Flash Free (OpenCode) — a short
+  Build log  : build 028-20261114, DeepSeek V4.1 Flash Free (OpenCode) — a short
                record of every build is in CHANGELOG.md
   ================================================================
 
@@ -1154,6 +1154,28 @@
 
         body.playing #meta { display: none; }
 
+        /* Build 028: the identity line. It is fixed to the bottom of the
+           viewport and outside the page flow, so showing it can never move
+           the stage or the controls. JavaScript shows it only when the
+           space below the controls is tall enough, and it is never shown on
+           the shelf. */
+        #gameIdentity {
+            position: fixed;
+            left: 0;
+            right: 0;
+            bottom: env(safe-area-inset-bottom, 0px);
+            margin: 0;
+            text-align: center;
+            font-size: 0.72rem;
+            font-weight: 600;
+            line-height: 12px;
+            color: var(--ink-soft);
+            pointer-events: none;
+            z-index: 30;
+        }
+
+        body:not(.playing) #gameIdentity { display: none; }
+
         #meta .v {
             display: inline-block;
             margin-bottom: 7px;
@@ -1374,6 +1396,8 @@
         <a href="https://kantmicrogames.lohyapkant.workers.dev/" style="color:inherit">Play Online</a> ·
         <a href="https://github.com/lohyapkant/KANTMICROGAMES/blob/HEAD/LICENSE" style="color:inherit">MIT License</a> © 2026 Loh Yap Kant
     </footer>
+
+    <p id="gameIdentity" hidden></p>
 </div>
 
 <script>
@@ -1462,7 +1486,7 @@
 
 const APP = {
     name: "KANTMICROGAMES",
-    fileVersion: "027-20261114",       // build number of THIS one-file app
+    fileVersion: "028-20261114",       // build number of THIS one-file app
     savePrefix: "KANTMICROGAMES."      // best scores live at prefix + GAMEID + ".best"
 };
 
@@ -2092,12 +2116,66 @@ function paintPandaSnackPreview(ctx) {
     paintPixels(ctx, WASP_PREVIEW, WASP_PREVIEW_COLORS, 152, 62, false, 2);
 }
 
+/* Build 028: each game's revision number and its frozen flag. A revision is
+   the count of times the owner has revised that game's play or content; only
+   the owner sets it, in a prompt. The frozen build is not stored here: it is
+   the module's own versionNumber, the build where its content last changed.
+   Keep this table in step with plans/game-versions.txt; the check script,
+   tests/check-project.py, compares them. */
+const GAME_REVISIONS = { PANDASNACK: { revision: 1, frozen: true }, BOOPEEK: { revision: 2, frozen: true }, DUCKLINE: { revision: 1, frozen: true }, SPROUTUP: { revision: 1, frozen: true }, SLIMEHOP: { revision: 1, frozen: true }, SNAILRACE: { revision: 1, frozen: true }, HUGPARADE: { revision: 2, frozen: true }, CATNAPCATCH: { revision: 2, frozen: true } };
+
+/* The identity line's sizes, named so the code below has no loose numbers.
+   The height is only a fallback: the real height comes from the CSS. */
+const IDENTITY_LINE_HEIGHT_PIXELS = 12;
+const IDENTITY_LINE_SPARE_PIXELS = 4;
+
+/* The name the shell shows for a game: always the ALL-CAPS registry id, never
+   the module's own prettier name. One spelling everywhere keeps the shelf,
+   the pick banner and the game screen in step. */
+function displayName(game) {
+    return game.id;
+}
+
+/* The small identity line for one game, for example
+   "CATNAPCATCH v2 · frozen build 016-20261102". A game missing from the
+   revision table shows "v?" instead of throwing. */
+function gameIdentityText(game) {
+    const entry = GAME_REVISIONS[game.id] || { revision: "?", frozen: false };
+    const kind = entry.frozen ? "frozen build " : "build ";
+    return displayName(game) + " v" + entry.revision + " · " + kind + game.versionNumber;
+}
+
+/* Build 028: fill and place the identity line, and show it only when there is
+   room. It reads layout and toggles one fixed element, so it can never move
+   the stage. Called at the end of fitStage and whenever a game opens. */
+function updateGameIdentity() {
+    if (!ACTIVE.module) {
+        gameIdentityEl.hidden = true;
+        return;
+    }
+    gameIdentityEl.textContent = APP.name + " build " + APP.fileVersion + " · " +
+        gameIdentityText(ACTIVE.module);
+    /* The lowest edge of anything that sits below the stage. In landscape the
+       controls row has no box of its own, so its two clusters are measured. */
+    const boxes = [bezelEl, controlsRowEl, dirClusterEl, actionClusterEl, msgEl];
+    let lowestEdge = 0;
+    boxes.forEach(function (box) {
+        if (!box) return;
+        const rect = box.getBoundingClientRect();
+        if (rect.height > 0 || rect.width > 0) lowestEdge = Math.max(lowestEdge, rect.bottom);
+    });
+    const lineHeight = parseFloat(window.getComputedStyle(gameIdentityEl).lineHeight) ||
+        IDENTITY_LINE_HEIGHT_PIXELS;
+    const spare = window.innerHeight - lowestEdge;
+    gameIdentityEl.hidden = spare < lineHeight + IDENTITY_LINE_SPARE_PIXELS;
+}
+
 function buildCard(game) {
     const card = document.createElement("button");
     card.type = "button";
     card.className = "card";
     card.setAttribute("data-game", game.id);
-    card.setAttribute("aria-label", "Play " + game.name);
+    card.setAttribute("aria-label", "Play " + displayName(game));
     /* A click opens the game: mouse, tap, keyboard Enter/Space and assistive
        tech all produce one. A drag that starts on a card scrolls and never
        activates it, and the brief gate after a screen swap stops the click
@@ -2113,7 +2191,7 @@ function buildCard(game) {
     preview.className = "preview";
     preview.width = 200;
     preview.height = 96;
-    preview.setAttribute("aria-label", "Pixel-art preview of " + game.name);
+    preview.setAttribute("aria-label", "Pixel-art preview of " + displayName(game));
     if (typeof game.previewPaint === "function") {
         game.previewPaint(preview.getContext("2d"));
     }
@@ -2121,7 +2199,7 @@ function buildCard(game) {
 
     const title = document.createElement("div");
     title.className = "name";
-    title.textContent = game.name;
+    title.textContent = displayName(game);
     card.appendChild(title);
 
     const concept = document.createElement("div");
@@ -2198,7 +2276,7 @@ function sortedGames() {
     const rank = new Map(GAMES.map(function (game, index) { return [game.id, index]; }));
     const tie = function (a, b) { return rank.get(a.id) - rank.get(b.id); };
     if (sortChoice === "AZ") {
-        list.sort(function (a, b) { return a.name.localeCompare(b.name) || tie(a, b); });
+        list.sort(function (a, b) { return displayName(a).localeCompare(displayName(b)) || tie(a, b); });
     } else if (sortChoice === "BEST") {
         list.sort(function (a, b) {
             const ua = gameIsUnplayed(a), ub = gameIsUnplayed(b);
@@ -2326,8 +2404,8 @@ function buildPick() {
     if (!game) { pickBannerEl.hidden = true; return; }
     pickBannerEl.hidden = false;
     pickGameId = game.id;
-    pickBannerEl.setAttribute("aria-label", "Pick of the day: " + game.name + ". Play");
-    drawPixelLabel(pickNameEl, game.name, "--corner-label");
+    pickBannerEl.setAttribute("aria-label", "Pick of the day: " + displayName(game) + ". Play");
+    drawPixelLabel(pickNameEl, displayName(game), "--corner-label");
     pickConceptEl.textContent = game.concept;
     const ctx = pickPreviewEl.getContext("2d");
     ctx.clearRect(0, 0, pickPreviewEl.width, pickPreviewEl.height);
@@ -2713,6 +2791,9 @@ const dashBtnEl = document.getElementById("pDash");
 const shelfBtnEl = document.getElementById("btnShelf");
 const restartBtnEl = document.getElementById("btnRestart");
 const verEl = document.getElementById("verBox");
+const gameIdentityEl = document.getElementById("gameIdentity");
+const controlsRowEl = document.getElementById("controlsRow");
+const actionClusterEl = document.getElementById("actionCluster");
 
 const STAGE_SIZE = 100;
 const STAGE_MIN_WHOLE = 2;      // D3: below 200 px the scale becomes fractional
@@ -3234,7 +3315,7 @@ function openGame(gameId) {
     shelfScreenEl.hidden = true;
     gameScreenEl.hidden = false;
     bodyEl.classList.add("playing");
-    gameTitleEl.textContent = module2.name;
+    gameTitleEl.textContent = displayName(module2);
     gameTaglineEl.textContent = module2.tagline;
     setActionLabel(module2.actionLabel);
     scoreEl.textContent = "0";
@@ -3266,6 +3347,7 @@ function openShelf() {
     shelfScreenEl.hidden = false;
     bodyEl.classList.remove("playing");
     bodyEl.removeAttribute("data-layout");
+    gameIdentityEl.hidden = true;
     buildShelf();                     // fresh best-score lines on the cards
     removeScoreObservers();
     setHash("");
@@ -3372,6 +3454,10 @@ function fitStage() {
     const currentH = parseFloat(stageCanvas.style.height);
     if (!(Math.abs(currentW - cssSize) < 0.005)) stageCanvas.style.width = cssSize + "px";
     if (!(Math.abs(currentH - cssSize) < 0.005)) stageCanvas.style.height = cssSize + "px";
+
+    /* Build 028: after the new size is written, decide whether the identity
+       line fits below the controls. Nothing here changes the size above. */
+    updateGameIdentity();
 }
 
 let fitScheduled = false;

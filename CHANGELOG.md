@@ -5,6 +5,19 @@ A short record of every build, newest first. Each entry gives the build ID, the 
 - **Build IDs are `NNN-YYYYMMDD`:** a zero-padded build number, then the date. A game's version number is the build where its content last changed.
 - **The project name is `KANTMICROGAMES`.** Entries up to build 009 used older singular spellings; they are historical records and are not rewritten.
 - **Corrections are dated, not silent.** A wrong past record is corrected by a dated line that names the build that corrected it.
+- **Corrected in build 028:** 13 lines in entries 000 to 018 were cut off mid-sentence when this record was made in build 027; they were restored in full from the private record. (The build 028 prompt expected 15: entries 001 and 000 were named too, but their lines were already whole, so nothing there needed changing.)
+
+<!-- NEW ENTRIES: paste the newest short entry on the line below this comment, above the previous newest. Never edit older entries except to add a dated correction line in the header. -->
+
+## 028-20261114 — 2026-11-14 (Handbook v2 and game identity: ALL-CAPS names, revisions, checked rules)
+
+Built from prompt: P-28, authored by Claude.ai Sonnet 5.5 at High effort and pasted verbatim by the owner (handbook v2 and game identity)  
+Tool and model: **DeepSeek V4.1 Flash Free** (OpenCode); effort High  
+What changed: game names now show in ALL CAPS on the shelf and in play; each game records a revision number and a small identity line shows it with the game's frozen build when the screen has room; the build rules moved into a checked handbook and the public changelog's cut-off lines were restored. No game changed.  
+Games changed: none (all eight game modules are byte-identical to build 027)  
+Checked: V1-V7 passed: eight module hashes unchanged, both inline scripts parse, the check script prints 12 of 12 PASS on the mirror and live trees, the readable counts are zero, 13 changelog lines matched the frozen full copy, and the browser checks passed at 7 viewports x 8 games with the identity line shown only at 1280x800 and 1920x1080.  
+Not checked: no Safari, real phone or sound test; the identity line was checked in headless Chrome only; the new rules, check script and templates have not yet been used by a cold model.  
+Time and usage: about 26 min; 303,053 tokens processed
 
 ## 027-20261114 — 2026-11-14 (Records: a short public changelog; long-form records kept private)
 
@@ -65,62 +78,62 @@ What changed: Fixed — the stage no longer vibrates at idle (F1)
 Time and usage: See the Usage ledger in MODELS.md, build 019.
 
 ## 018-20261104 — 2026-11-04 (Controls and top bar: pinned SHELF/RESTART, fixed pixel labels, no menu)  
-Built from prompt: P-18 (the owner's controls-and-top-bar prompt; its text said "build 019"  
+Built from prompt: P-18 (the owner's controls-and-top-bar prompt; its text said "build 019" and "currently build 018", but the repo was at build 017 with no 018 anywhere, so the owner confirmed this run is build 018; private archive file `prompts/P-18_controls-and-top-bar.txt`)  
 Tool and model: **DeepSeek V4.1 Flash Free** (OpenCode)  
 What changed: Removed — MENU and the three pad options (deploy/index.html, PART 3 + PART 4)  
 Time and usage: See the Usage ledger in MODELS.md, build 018.
 
 ## 017-20261103 — 2026-11-03 (Shell UX and process: MENU, PAD SIZE, crisp+ stage, tidy shelf)  
-Built from prompt: P-17 (a process-and-shell prompt authored by Claude.ai Sonnet 5.5  
+Built from prompt: P-17 (a process-and-shell prompt authored by Claude.ai Sonnet 5.5 Extra, pasted verbatim with the owner-notes fields left blank; private archive file `prompts/P-17_shell-ux-and-process.txt`)  
 Tool and model: **Qwen3.8-Flash (Qoder CLI)**  
 What changed: Changed — shelf cards align (deploy/index.html, PART 3)  
 Time and usage: See the Usage ledger in MODELS.md, build 017.
 
 ## 016-20261102 — 2026-11-02 (Round 8: CATNAPCATCH)  
-Built from prompt: P-16 (the owner's Round 8 request for CATNAPCATCH, pasted verbatim,  
+Built from prompt: P-16 (the owner's Round 8 request for CATNAPCATCH, pasted verbatim, typos included; private archive file `prompts/P-16_catnapcatch.txt`)  
 Tool and model: **Qwen3.8-Flash (Qoder CLI)**  
 What changed: Added — CATNAPCATCH, the eighth game (deploy/index.html, PART 5-H)  
 Time and usage: See the Usage ledger in MODELS.md, build 016.
 
 ## 015-20261102 — 2026-11-02 (Round 7 fixes: HUGPARADE rails and hug scoring)  
-Built from prompt: P-15 (the owner's request to correct HUGPARADE before starting  
+Built from prompt: P-15 (the owner's request to correct HUGPARADE before starting CATNAPCATCH, pasted verbatim, typos included; private archive file `prompts/P-15_hugparade-fixes.txt`)  
 Tool and model: **Qwen3.8-Flash (Qoder CLI)**  
 What changed: Changed — HUGPARADE movement now runs on cell rails (deploy/index.html, PART 5-G)  
 Time and usage: See the Usage ledger in MODELS.md, build 015.
 
 ## 014-20261102 — 2026-11-02 (Round 7: HUGPARADE)  
-Built from prompt: P-14 (the owner's Round 7 request for HUGPARADE, pasted verbatim,  
+Built from prompt: P-14 (the owner's Round 7 request for HUGPARADE, pasted verbatim, typos included; private archive file `prompts/P-14_hugparade.txt`)  
 Tool and model: **Qwen3.8-Flash (Qoder CLI)**  
 What changed: Added — HUGPARADE, the seventh game (deploy/index.html, PART 5-G)  
 Time and usage: See the Usage ledger in MODELS.md, build 014.
 
 ## 013-20261102 — 2026-11-02 (usage ledger, copyright and README fixes)  
-Built from prompt: P-13 (the owner's usage-ledger and consistency request, written by  
+Built from prompt: P-13 (the owner's usage-ledger and consistency request, written by Claude.ai Sonnet 5.5 Extra and pasted verbatim; private archive file `prompts/P-13_usage-ledger-and-fixes.txt`)  
 Tool and model: **Qwen3.8-Flash (Qoder CLI)**  
 What changed: Added — Usage ledger in MODELS.md  
 Time and usage: See the Usage ledger in MODELS.md, build 013.
 
 ## 012-20261101 — 2026-11-01 (documentation restructure)  
-Built from prompt: P-12 (the owner's docs-restructure request, written by Claude.ai Sonnet  
+Built from prompt: P-12 (the owner's docs-restructure request, written by Claude.ai Sonnet 5.5 Extra and pasted verbatim; private archive file `prompts/P-12_documentation-restructure.txt`)  
 Tool and model: **Qwen3.8-Flash (Qoder CLI)**  
 What changed: Changed — documentation restructure (no game changes)  
 Time and usage: See the Usage ledger in MODELS.md, build 012.
 
 ## 011-20261101 — 2026-11-01 (Round 6 — SNAILRACE, SPROUTUP + SLIMEHOP frozen)  
-Built from prompt: P-11 (the owner's Round 6 request, saved verbatim in  
-Tool and model: **Qwen3.8-Flash (Qoder CLI)** — recorded per the owner's standing request in  
+Built from prompt: P-11 (the owner's Round 6 request, saved verbatim in `prompts/P-11_snailrace.txt`)  
+Tool and model: **Qwen3.8-Flash (Qoder CLI)** — recorded per the owner's standing request in changelog, README, plan, MODELS.md and the prompt copy  
 What changed: Added — SNAILRACE module (PART 5-F)  
 Time and usage: See the Usage ledger in MODELS.md, build 011.
 
 ## 010-20261101 — 2026-11-01 (SLIMEHOP + KANTMICROGAMES rename)  
-Built from prompt: P-10 (the owner's Round 5 request, saved verbatim in  
-Tool and model: **Qwen3.8-Flash (Qoder CLI)** — recorded per the owner's standing request in  
+Built from prompt: P-10 (the owner's Round 5 request, saved verbatim in `prompts/P-10_slimehop.txt`)  
+Tool and model: **Qwen3.8-Flash (Qoder CLI)** — recorded per the owner's standing request in changelog, README, plan, MODELS.md and the prompt copy  
 What changed: Added — SLIMEHOP module (PART 5-E)  
 Time and usage: See the Usage ledger in MODELS.md, build 010.
 
 ## 009-20261101 — 2026-11-01 (responsive shell)  
-Built from prompt: P-09 (responsive shell — phones, tablets, foldables, desktops); the  
-Tool and model: **Qwen3.8-Flash (Qoder CLI)** — recorded per the owner's standing request in  
+Built from prompt: P-09 (responsive shell — phones, tablets, foldables, desktops); the prompt was **authored by Claude.ai Sonnet 5.5 Extra** and is saved unaltered in `prompts/P-09_responsive-shell.txt`  
+Tool and model: **Qwen3.8-Flash (Qoder CLI)** — recorded per the owner's standing request in changelog, README, plan, MODELS.md and the prompt copy  
 What changed: Changed — shelf (F1, F2, F3)  
 Time and usage: See the Usage ledger in MODELS.md, build 009.
 

@@ -114,6 +114,8 @@ What each model used on each build. This is a record, not an opinion, and not a 
 | 026 | Claude.ai Sonnet 5.5 Extra · Claude.ai chat | wrote the prompt (effort Extra) | — | — | not recorded |
 | 026 | DeepSeek V4.1 Flash Free · OpenCode | built (effort High) | ~15 min | 272,819 tokens processed | measured: 185,995 input + 50,082 output + 36,742 reasoning; 10,087,168 cache reads not counted; 93 steps; 115 tool calls; OpenCode stats delta, final reading after the swap and the live check (see CHANGELOG build record) |
 | 027 | Claude.ai Sonnet 5.5 Extra · Claude.ai chat | wrote the prompt (effort Extra) | — | — | not recorded |
+| 028 | Claude.ai Sonnet 5.5 · Claude.ai chat | wrote the prompt (effort High; prompts up to build 027 were written at Extra) | — | — | not recorded |
+| 028 | DeepSeek V4.1 Flash Free · OpenCode | built (effort High) | ~26 min | 303,053 tokens processed | measured: 212,643 input + 50,583 output + 39,827 reasoning; 12,895,360 cache reads not counted; 109 steps; 109 tool calls; OpenCode stats delta, final reading after the swap and the live check (see the build record in plans/buildlog/028-20261114.md) |
 | 027 | DeepSeek V4.1 Flash Free · OpenCode | built (effort High) | ~6 min | 117,458 tokens processed | measured: 73,339 input + 25,499 output + 18,620 reasoning; 5,544,064 cache reads not counted; 44 steps; 46 tool calls; OpenCode stats delta, final reading after the swap and the live check (see the build record in plans/buildlog/027-20261114.md) |
 
 ### Totals that can honestly be added
@@ -123,7 +125,7 @@ What each model used on each build. This is a record, not an opinion, and not a 
 - **Approximate list-price value:** the plan meter reads 300 of 300 trial credits used, which is about US$3.00 at about US$0.01 per credit. An estimate, not a bill: the trial is free. Check https://docs.qoder.com/account/pricing before relying on it. Never converted for tokens and never added across tools.
 - **Iterations recorded (from build 017):** 4 over 1 build.
 - **Iterations recorded (build 018):** 1 repair cycle pair (a 280 px control clash, fixed by stacking the corner pair under 360 px and using 4 px page padding).
-- **Tokens, OpenCode readings (input + output + reasoning; cache reads not counted), builds 005, 017, 021, 023, 024, 025, 026 and 027:** about 3.86 M tokens in total (005 is approximate at about 2.37 M; 017 is 165,312; 021 is 203,831 at the final reading; 023 is 187,025; 024 is 301,245 at the final reading after the swap and the live regression; 025 is 241,367 at the final reading after the swap and the live regression; 026 is 272,819 at the final reading after the swap and the live check; 027 is 117,458 at the final reading after the swap and the live check). Builds 018, 019 and 020 have no token reading. Other token figures count different things and are never added to these. (The build 026 total should have read 3.74 M; corrected in build 027.)
+- **Tokens, OpenCode readings (input + output + reasoning; cache reads not counted), builds 005, 017, 021, 023, 024, 025, 026, 027 and 028:** about 4.16 M tokens in total (005 is approximate at about 2.37 M; 017 is 165,312; 021 is 203,831 at the final reading; 023 is 187,025; 024 is 301,245 at the final reading after the swap and the live regression; 025 is 241,367 at the final reading after the swap and the live regression; 026 is 272,819 at the final reading after the swap and the live check; 027 is 117,458 at the final reading after the swap and the live check; 028 is 303,053 at the final reading after the swap and the live check). Builds 018, 019 and 020 have no token reading. Other token figures count different things and are never added to these. (The build 026 total should have read 3.74 M; corrected in build 027. The build 028 total was recomputed from the listed figures.)
 - **Build 021 usage note:** the ledger row for build 021 shows the reading taken when the records were written (162,156 tokens); the build's usage after the final swap is 203,831 tokens. The row is a record and is not edited.
 - **Build 022 token reading:** 361,981 tokens (input 309,861 + output 32,999 + reasoning 19,121; 7,112,192 cache reads not counted; 69 steps; 68 tool calls; cost $0.00), from the OpenCode final reading after the swap and the docs check. An earlier post-swap reading of 249,131 was taken before the OpenCode run stopped and resumed; the ledger uses 361,981. Gemini 3.8 Flash's share of build 022 has no reading. The bullet above listed builds 005, 017 and 021 when this note was written; build 023 extended it.
 - **Time by model, approximate.** Builds 000-002 and the GPT-OSS attempt have no time recorded, so DeepSeek and GLM are undercounted. One block = 10 minutes, rounded half up.
@@ -131,15 +133,15 @@ What each model used on each build. This is a record, not an opinion, and not a 
 | Model | Minutes | At a glance |
 |---|---|---|
 | Qwen3.8-Flash | ~305 | ▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇ |
-| DeepSeek V4.1 Flash Free | ~352 | ▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇ |
+| DeepSeek V4.1 Flash Free | ~378 | ▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇ |
 | Gemini 3.8 Flash | ~60 | ▇▇▇▇▇▇ |
 | GLM-5.3 Flash Free | ~45 | ▇▇▇▇▇ |
 | Flint 40B Free | ~25 | ▇▇▇ |
 | Claude Opus 4.6 Thinking | ~20 | ▇▇ |
 | Shared session (build 006: DeepSeek + Gemini) | ~30 | ▇▇▇ |
 
-Total recorded: about 837 minutes (about 13 h 57 min) over 25 of 28 builds.
-(Totals were recomputed after the build-025 row was added and the earlier correction applied; the CHANGELOG Build records remain the source of truth.)
+Total recorded: about 863 minutes (about 14 h 23 min) over 26 of 29 builds.
+(Totals were recomputed after the build-028 row was added and the earlier corrections applied; the build records remain the source of truth (the long-form ones are private; the public CHANGELOG.md entry repeats the time and usage).)
 
 ## 2026-11-07 — DeepSeek V4.1 Flash Free (OpenCode) — build 021
 
@@ -515,6 +517,23 @@ The owner's notes: after build 023, which ran in a single OpenCode run at High e
 > "So far, it looks great on the phone."
 
 This is a dated owner note about one build, not a model-written summary.
+
+
+## 2026-11-14 — Claude.ai Sonnet 5.5 (Anthropic, chat) — effort lowered from Extra to High
+
+Source: Owner's words (verbatim), recorded by DeepSeek V4.1 Flash Free from the owner's message
+
+Builds observed: `028-20261114`.
+
+The owner's notes: in the message that carried the build 028 prompt, the owner said, verbatim:
+
+> "I see the message that I have used 77% of my weekly limit in the free tier, and I have set your effort to "High" now, and hopefully nothing critical is loss from your capabilities compared to "Extra" effort."
+
+> "Please also note that in ledger/records for the MODELS file on the change in effort."
+
+Prompts for builds 009 to 027 were written at Extra effort; the prompt for build 028 was the first written at High.
+
+This is a dated owner note about one setting on one day, not a model-written summary.
 
 <!-- NEW ENTRIES ABOVE THIS LINE. Never edit existing entries. -->
 

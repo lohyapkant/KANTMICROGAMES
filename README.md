@@ -4,7 +4,7 @@ Eight tiny pixel-art games in one HTML file. Open it, pick a game, play a minute
 
 Play online: <https://kantmicrogames.lohyapkant.workers.dev/>
 
-**Current build:** `027-20261114` — eight games, one file.
+**Current build:** `028-20261114` — eight games, one file.
 
 ## About this project
 
@@ -57,7 +57,7 @@ Keyboard, touch and device details are in CONTROLS.md.
 <!-- BEGIN:models-table  (add or edit rows only) -->
 | Model | Developer | Used via | Builds | How it went (owner notes, 2026-11-01) |
 |---|---|---|---|---|
-| DeepSeek V4.1 Flash Free | [DeepSeek](https://www.deepseek.com/) | OpenCode | 000, 001, 005, 006, 017, 018, 019, 020, 021, 022, 023, 024, 025, 026, 027 | Clear pixel art and clean code (owner: "amazing"). |
+| DeepSeek V4.1 Flash Free | [DeepSeek](https://www.deepseek.com/) | OpenCode | 000, 001, 005, 006, 017, 018, 019, 020, 021, 022, 023, 024, 025, 026, 027, 028 | Clear pixel art and clean code (owner: "amazing"). |
 | GLM-5.3 Flash Free | [Z.ai (Zhipu AI)](https://z.ai/) | OpenCode | 002, 003 | Worked mechanically; one game needed a full rework. |
 | Flint 40B Free | [Recursive](https://recursive.com/) | OpenCode | 004 | A working module, but its art had to be rebuilt. |
 | Gemini 3.8 Flash | [Google](https://gemini.google.com/) | Antigravity | 006, 007, 022 (started, halted) | Picked up cleanly after a session limit; delivered SPROUTUP. |
@@ -65,6 +65,7 @@ Keyboard, touch and device details are in CONTROLS.md.
 | Claude Opus 4.6 Thinking | [Anthropic](https://www.anthropic.com/) | Antigravity | 008 | Did most of the docs work, then halted mid-round. |
 | Qwen3.8-Flash | [Alibaba Qwen](https://qwen.ai/) | Qoder CLI | 008 (finish), 009, 010, 011, 012, 013, 014, 015, 016, 017 | Delivered the responsive shell and four new games, corrected HUGPARADE's movement and scoring in 015, then delivered CATNAPCATCH in 016; older games stayed unchanged. |
 | Claude.ai Sonnet 5.5 Extra | [Anthropic](https://claude.ai/) | Claude.ai chat | 009, 012, 013, 017, 018, 019, 020, 021, 022, 023 (prompt only), 024 (prompt only), 025 (prompt only), 026 (prompt only), 027 (prompt only) | Wrote the responsive-shell prompt that Qwen executed, and later the prompts for builds 017 onward. |
+| Claude.ai Sonnet 5.5 (effort High) | [Anthropic](https://claude.ai/) | Claude.ai chat | 028 (prompt only) | Owner note, 2026-11-14: effort lowered from Extra to High after the free-tier weekly meter passed 77%; same house rules. |
 <!-- END:models-table -->
 
 One person's dated snapshots from a handful of builds. Not a ranking. Time and usage for every build are tabulated in MODELS.md; a short record of every build is in CHANGELOG.md. Most builds run on free or trial plans; how that works is in MODELS.md.
