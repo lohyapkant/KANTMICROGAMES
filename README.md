@@ -4,7 +4,7 @@ Eight tiny pixel-art games in one HTML file. Open it, pick a game, play a minute
 
 Play online: <https://kantmicrogames.lohyapkant.workers.dev/>
 
-**Current build:** `028-20261114` — eight games, one file.
+**Current build:** `029-20261114` — nine games, one file.
 
 ## About this project
 
@@ -26,6 +26,7 @@ A short record of every build is in CHANGELOG.md; the long-form build records ar
 | SNAILRACE | Nibbles races two garden snails to a picnic strawberry; lettuce zooms, salt stings. |
 | HUGPARADE | Momo steps along hedge rails, gathers hearts, and hugs Bibi before the maze reshapes; each heart makes the hug worth more. |
 | CATNAPCATCH | Slide a paper pillow under a sleeping kitten and catch the falling noisemakers; three clangs wake the nap. |
+| PENGUINSLIDE | Pip the penguin slides on ice tiles and pushes ice blocks to build a path to an ice fish within 60 seconds. |
 
 ## How to play
 
@@ -58,6 +59,7 @@ Keyboard, touch and device details are in CONTROLS.md.
 | Model | Developer | Used via | Builds | How it went (owner notes, 2026-11-01) |
 |---|---|---|---|---|
 | DeepSeek V4.1 Flash Free | [DeepSeek](https://www.deepseek.com/) | OpenCode | 000, 001, 005, 006, 017, 018, 019, 020, 021, 022, 023, 024, 025, 026, 027, 028 | Clear pixel art and clean code (owner: "amazing"). |
+| Mistral Medium 3.5 High | [Mistral AI](https://mistral.ai/) | Vibe CLI | 029 | First build by this tool: added PENGUINSLIDE game. |
 | GLM-5.3 Flash Free | [Z.ai (Zhipu AI)](https://z.ai/) | OpenCode | 002, 003 | Worked mechanically; one game needed a full rework. |
 | Flint 40B Free | [Recursive](https://recursive.com/) | OpenCode | 004 | A working module, but its art had to be rebuilt. |
 | Gemini 3.8 Flash | [Google](https://gemini.google.com/) | Antigravity | 006, 007, 022 (started, halted) | Picked up cleanly after a session limit; delivered SPROUTUP. |

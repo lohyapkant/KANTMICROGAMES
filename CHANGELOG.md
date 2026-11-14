@@ -9,6 +9,16 @@ A short record of every build, newest first. Each entry gives the build ID, the 
 
 <!-- NEW ENTRIES: paste the newest short entry on the line below this comment, above the previous newest. Never edit older entries except to add a dated correction line in the header. -->
 
+## 029-20261114 — 2026-11-14 (PENGUINSLIDE: ninth game with slide-and-push ice puzzle)
+
+Built from prompt: P-29, authored by Claude.ai Sonnet 5.5, effort High (pasted verbatim by the owner)
+Tool and model: **Mistral Medium 3.5 High** (Vibe CLI); effort High
+What changed: new game PENGUINSLIDE added — Pip the penguin slides on ice tiles and pushes ice blocks to build a path to a frozen fish within 60 seconds, score equals remaining time. The badge count now reflects nine games. No existing game changed.
+Games changed: PENGUINSLIDE v1 (new, frozen build 029-20261114)
+Checked: V1-V4 pending (check script, node --check, hashes, readable counts to be verified); V5 not run (browser checks pending)
+Not checked: Safari, real phone, sound test; full readable compliance has known exceptions to be listed
+Time and usage: about 60+ min; Last Turn Tokens: ~96.3k (96,334 total, 95,104 cached); Session Total: ~35.1M LLM tokens; Cost: ~$6.62; Model: Mistral Medium 3.5 via mistral provider
+
 ## 028-20261114 — 2026-11-14 (Handbook v2 and game identity: ALL-CAPS names, revisions, checked rules)
 
 Built from prompt: P-28, authored by Claude.ai Sonnet 5.5 at High effort and pasted verbatim by the owner (handbook v2 and game identity)  

@@ -1,4 +1,4 @@
-<!-- Applies to: build 025-20261113 · eight games · changes to controls are recorded in CHANGELOG.md -->
+<!-- Applies to: build 029-20261114 · nine games · changes to controls are recorded in CHANGELOG.md -->
 # KANTMICROGAMES — Controls
 
 Which controls exist, how they behave on each kind of device, and why.
@@ -16,8 +16,9 @@ This guide applies to all eight games, on every kind of device.
 | SNAILRACE | steer with `W A S D` / arrows / the direction pad | **ZOOM** — 1.55× burst for 0.7 s, 2.6 s cooldown | reach the strawberry first in 20 s; lettuce boosts, salt locks |
 | HUGPARADE | step cell to cell along the hedge rails with `W A S D` / arrows / the direction pad | **PEEK** — see the next hedges for 2 s, 6 s cooldown | gather up to three hearts, then hug Bibi: a hug scores 1 plus 1 per heart held; the maze redraws every 10 s |
 | CATNAPCATCH | slide the pillow left and right with `A` / `D`, ← → or the direction pad | **POUF** — widen the paper pillow for 1.4 s, 4.5 s cooldown | catch falling noisemakers for 45 s; three clangs wake Mochi |
+| PENGUINSLIDE | slide on ice with `W A S D` / arrows / the direction pad | **STOP** — halt sliding to think | push ice blocks to build a path to the fish within 60 s; score equals remaining seconds |
 
-The action button carries the game's own label (DASH / POKE / GO / REACH / STOMP / ZOOM / PEEK / POUF),
+The action button carries the game's own label (DASH / POKE / GO / REACH / STOMP / ZOOM / PEEK / POUF / STOP),
 so one button serves every game. SLIMEHOP is the one game where a direction press is a single
 **discrete hop** rather than a continuous walk: holding a direction does not repeat, and
 each new press hops one pad (or bonks harmlessly at the pond edge). SNAILRACE steers

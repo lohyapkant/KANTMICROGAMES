@@ -6,11 +6,9 @@
   Repository : https://github.com/lohyapkant/KANTMICROGAMES
   Play online: https://kantmicrogames.lohyapkant.workers.dev/
   Hosting    : Cloudflare Workers (https://workers.cloudflare.com/)
-  Current    : build 028-20261114 — handbook v2 and game identity: game names
-               show in ALL CAPS, each game has a revision number and a small
-               identity line, the rules moved into a checked handbook; every
-               game module stayed byte-identical and all eight games remain
-               FROZEN
+  Current    : build 029-20261114 — PENGUINSLIDE: new ninth game with
+               slide-and-push ice puzzle mechanics, 60-second timer, and
+               score based on remaining time; all nine games FROZEN
   Names      : project and on-screen brand KANTMICROGAMES ·
                save keys and the console tag use the KANTMICROGAMES prefix
   Build log  : build 028-20261114, DeepSeek V4.1 Flash Free (OpenCode) — a short
@@ -1430,18 +1428,18 @@
    5. Do not copy one game's character art into another game. Panda,
       mouse, mallard, seedling and slime shapes must stay visually
       distinct.
-   6. All eight games are FROZEN by owner request: PANDASNACK (content
+   6. All nine games are FROZEN by owner request: PANDASNACK (content
       007-20261101), BOOPEEK (content 006-20261101), DUCKLINE (content
       005-20261101), SPROUTUP (content 007-20261101), SLIMEHOP (content
       010-20261101), SNAILRACE (content 011-20261101), HUGPARADE (content
-      015-20261102) and CATNAPCATCH (content 016-20261102). Do not
-      restyle, rebalance or refactor them unless the owner unfreezes one
-      in the prompt. (Build 010 changed only their unused `saveKey` label
+      015-20261102), CATNAPCATCH (content 016-20261102) and PENGUINSLIDE (content
+      029-20261114). Do not restyle, rebalance or refactor them unless the owner
+      unfreezes one in the prompt. (Build 010 changed only their unused `saveKey` label
       string when the storage prefix was renamed; art, tuning and
       behaviour are untouched. Build 016 left all six earlier games
       byte-identical. Build 017 changed the shared shell only. Build 026
       froze HUGPARADE and CATNAPCATCH while leaving all eight game
-      modules byte-identical to build 025.)
+      modules byte-identical to build 025. Build 029 adds PENGUINSLIDE.
    7. Add a new game as a NEW IIFE registered in GAMES; never graft a
       new game into an existing module.
    ================================================================== */
@@ -1486,7 +1484,7 @@
 
 const APP = {
     name: "KANTMICROGAMES",
-    fileVersion: "028-20261114",       // build number of THIS one-file app
+    fileVersion: "029-20261114",       // build number of THIS one-file app
     savePrefix: "KANTMICROGAMES."      // best scores live at prefix + GAMEID + ".best"
 };
 
@@ -2122,7 +2120,7 @@ function paintPandaSnackPreview(ctx) {
    the module's own versionNumber, the build where its content last changed.
    Keep this table in step with plans/game-versions.txt; the check script,
    tests/check-project.py, compares them. */
-const GAME_REVISIONS = { PANDASNACK: { revision: 1, frozen: true }, BOOPEEK: { revision: 2, frozen: true }, DUCKLINE: { revision: 1, frozen: true }, SPROUTUP: { revision: 1, frozen: true }, SLIMEHOP: { revision: 1, frozen: true }, SNAILRACE: { revision: 1, frozen: true }, HUGPARADE: { revision: 2, frozen: true }, CATNAPCATCH: { revision: 2, frozen: true } };
+const GAME_REVISIONS = { PANDASNACK: { revision: 1, frozen: true }, BOOPEEK: { revision: 2, frozen: true }, DUCKLINE: { revision: 1, frozen: true }, SPROUTUP: { revision: 1, frozen: true }, SLIMEHOP: { revision: 1, frozen: true }, SNAILRACE: { revision: 1, frozen: true }, HUGPARADE: { revision: 2, frozen: true }, CATNAPCATCH: { revision: 2, frozen: true }, PENGUINSLIDE: { revision: 1, frozen: true } };
 
 /* The identity line's sizes, named so the code below has no loose numbers.
    The height is only a fallback: the real height comes from the CSS. */
@@ -10497,6 +10495,986 @@ syncSoundUI();
         actionLabel: "POUF",
         hint: "desktop: A and D slide the pillow · SPACE or tap stage to POUF wider · R restart · ESC shelf",
         previewPaint: paintCatnapCatchPreview,
+        start, stop, restart,
+        update, paint, onDir, onAction, onStageTap, onAnyKey
+    });
+})();
+
+
+/* ==================================================================
+   PART 5-I — PENGUINSLIDE module (content 029-20261114)
+   ================================================================
+   HOW THIS GAME WORKS
+   - Pip the penguin slides on ice tiles and pushes ice blocks to create
+     a path to a frozen fish.
+   - The game world is a 10x10 grid (100x100 pixels) with ice tiles, water,
+     ice blocks, and a fish.
+   - The penguin ALWAYS slides when moving; press ACTION (STOP) to stop.
+   - Ice blocks slide until they hit terrain or water.
+   - The penguin cannot cross water unless an ice block is on it.
+   - Ice blocks can be pushed by the penguin if they slide into them.
+   - Goal: reach the fish within 60 seconds.
+   - Score: remaining seconds (1 second = 1 point).
+   - Controls: arrow keys to set direction, ACTION/SPACE to stop sliding.
+   
+   SETTINGS groups:
+   - gameSettings: game name, version, stage size
+   - timeSettings: round time limit
+   - gridSettings: grid size, cell size
+   - movementSettings: penguin slide speed, stop cooldown
+   - blockSettings: ice block slide behavior
+   - palette: all colors used in the game
+   
+   STATES: TITLE (how-to card), PLAY (active game), OVER (game ended)
+   ================================================================ */
+
+(function () {
+    "use strict";
+
+    /* ---------- PENGUINSLIDE settings (private) ---------- */
+
+    const SETTINGS = {
+        gameName: "PENGUINSLIDE",
+        versionNumber: "029-20261114",
+        stageSize: 100,
+        saveKey: "KANTMICROGAMES.PENGUINSLIDE.best",
+
+        /* Time settings — how long a round lasts and how time is tracked */
+        roundTimeLimitSeconds: 60,
+
+        /* Grid settings — the game uses a 10x10 grid with 10x10 pixel cells */
+        gridSize: 10,
+        cellSizePixels: 10,
+
+        /* Movement settings — how fast the penguin slides and cooldowns */
+        penguinSlideSpeed: 100,  // pixels per second the penguin slides
+        stopCooldownSeconds: 0.2,  // brief cooldown after stopping
+
+        /* Block settings — ice block movement behavior */
+        blockSlideSpeed: 150,  // pixels per second ice blocks slide
+        blockSlideDelay: 0.1,  // delay before block starts sliding after being pushed
+
+        /* Starting positions — where the penguin and fish begin */
+        penguinStartX: 50,  // center of stage horizontally
+        penguinStartY: 50,  // center of stage vertically
+        fishStartX: 80,    // fish spawn position X
+        fishStartY: 20,    // fish spawn position Y
+        
+        /* Stage boundaries — minimum safe distances from edges */
+        minSafeEdgePixels: 5,  // minimum distance from stage edge
+        
+        /* Title card settings — position and size of how-to card elements */
+        titlePlateX: 5,         // how-to card plate X position
+        titlePlateY: 18,        // how-to card plate Y position
+        titlePlateWidth: 90,   // how-to card plate width
+        titlePlateHeight: 64,  // how-to card plate height
+        titleTextY: 25,        // title text Y position
+        titleLine1Y: 38,       // first instruction line Y position
+        titleLine2Y: 46,       // second instruction line Y position
+        titleLine3Y: 54,       // third instruction line Y position
+        titleLine4Y: 62,       // fourth instruction line Y position
+        titlePromptY: 72,      // prompt text Y position
+        titleBlinkSeconds: 0.6,
+        
+        /* Game over screen settings — position of game over elements */
+        overPlateX: 10,        // game over plate X position
+        overPlateY: 35,       // game over plate Y position
+        overPlateWidth: 80,   // game over plate width
+        overPlateHeight: 30,  // game over plate height
+        overTitleY: 42,       // game over title Y position
+        overScoreY: 52,       // score text Y position
+        overPromptY: 62
+
+        /* Palette — colors for the arctic theme */
+        palette: {
+            /* Ice and snow */
+            iceLight: "#E6F7FF",
+            iceMid: "#B3E0FF",
+            iceDark: "#80CCFF",
+            snow: "#FFFFFF",
+            
+            /* Water */
+            waterLight: "#A8D8FF",
+            waterMid: "#76B8FF",
+            waterDark: "#4494FF",
+            
+            /* Terrain/rocks */
+            rockLight: "#8A8A8A",
+            rockMid: "#6A6A6A",
+            rockDark: "#4A4A4A",
+            
+            /* Penguin colors */
+            penguinBlack: "#1A1A1A",
+            penguinWhite: "#F0F0F0",
+            penguinOrange: "#FFA500",
+            penguinYellow: "#FFD700",
+            
+            /* Ice blocks */
+            iceBlockLight: "#D0F0FF",
+            iceBlockMid: "#A8E0FF",
+            iceBlockDark: "#80C8FF",
+            iceBlockOutline: "#60A0D0",
+            
+            /* Fish */
+            fishRed: "#FF6B6B",
+            fishWhite: "#FFE0E0",
+            fishOutline: "#CC4040",
+            
+            /* UI/text colors */
+            textDark: "#1A1A2E",
+            textLight: "#E6E6FF",
+            bgPlate: "rgba(200, 220, 255, 0.90)"
+        }
+    };
+
+    const SET = SETTINGS;
+    const PAL = SETTINGS.palette;
+    const STAGE = SETTINGS.stageSize;
+    const CELL = SETTINGS.cellSizePixels;
+
+    /* ---------- PENGUINSLIDE private state ---------- */
+
+    /* Game states for the module */
+    const STATE = { TITLE: "title", PLAY: "play", OVER: "over" };
+
+    /* Fixed timestep for deterministic physics */
+    const STEP_SECONDS = 1 / 60;
+
+    /* Current game state */
+    let penguinState = STATE.TITLE;
+    let penguinStateT = 0;
+    let penguinClock = 0;
+    let penguinRoundT = 0;
+    let penguinScore = 0;
+    let penguinBest = 0;
+    let penguinEndReason = "";
+
+    /* Movement state */
+    let penguinX = 50;  // center of stage
+    let penguinY = 50;
+    let penguinVX = 0;  // current velocity
+    let penguinVY = 0;
+    let penguinSlideAccumulator = 0;
+    let penguinStopCooldown = 0;
+
+    /* Direction inputs */
+    let penguinDir = null;  // current desired direction: "up", "down", "left", "right", or null
+    let penguinStopPressed = false;
+
+    /* Ice block state */
+    let iceBlocks = [];
+    let iceBlockSlideQueue = [];
+
+    /* Fish position */
+    let fishX = 80;
+    let fishY = 80;
+
+    /* Accumulator for fixed timestep */
+    let penguinAccumulator = 0;
+
+    /* Held direction keys */
+    const held = { up: false, down: false, left: false, right: false };
+
+    /* ---------- PENGUINSLIDE grid and level data ---------- */
+
+    /* Simple fixed level for v1 — a small pond with ice blocks
+       Format: 0 = ice tile, 1 = water, 2 = rock/terrain, 3 = fish spawn
+       The penguin starts at position (5,5) in grid coordinates (50,50 in pixels) */
+    const LEVEL_GRID = [
+        [2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+        [2, 0, 0, 0, 0, 0, 0, 0, 0, 2],
+        [2, 0, 1, 1, 1, 1, 1, 1, 0, 2],
+        [2, 0, 1, 1, 1, 1, 1, 1, 0, 2],
+        [2, 0, 1, 1, 0, 0, 1, 1, 0, 2],
+        [2, 0, 1, 1, 0, 0, 1, 1, 0, 2],
+        [2, 0, 1, 1, 1, 1, 1, 1, 0, 2],
+        [2, 0, 1, 1, 1, 1, 1, 1, 0, 2],
+        [2, 0, 0, 0, 0, 0, 0, 0, 0, 2],
+        [2, 2, 2, 2, 2, 2, 2, 2, 2, 2]
+    ];
+
+    /* Ice block starting positions (in grid coordinates) */
+    const INITIAL_BLOCKS = [
+        { x: 2, y: 1, vx: 0, vy: 0, sliding: false },
+        { x: 6, y: 1, vx: 0, vy: 0, sliding: false },
+        { x: 2, y: 8, vx: 0, vy: 0, sliding: false },
+        { x: 6, y: 8, vx: 0, vy: 0, sliding: false }
+    ];
+
+    /* ---------- PENGUINSLIDE sprite maps (pixel art) ---------- */
+
+    /* Penguin sprite — 8x12 pixels, facing right
+       Format: . = transparent, B = black, W = white, O = orange, Y = yellow
+       Simple side view: body, head, beak */
+    const PENGUIN_MAP_RIGHT = [
+        "...BB...",
+        "..BBBB..",
+        ".BBWWBB.",
+        ".BWWWWB.",
+        ".BWWWWB.",
+        ".BBWWBB.",
+        "..BBBB..",
+        "...BB...",
+        "...OO...",
+        "...OO...",
+        "..OOO...",
+        ".OOOO..."
+    ];
+
+    const PENGUIN_MAP_LEFT = [
+        "...BB...",
+        "..BBBB..",
+        ".BBWWBB.",
+        ".BWWWWB.",
+        ".BWWWWB.",
+        ".BBWWBB.",
+        "..BBBB..",
+        "...BB...",
+        "...OO...",
+        "...OO...",
+        "...OOO..",
+        "..OOOO."
+    ];
+
+    const PENGUIN_MAP_UP = [
+        "...BB...",
+        "..BBBB..",
+        ".BBBBBB.",
+        ".BWWWWB.",
+        ".BWWWWB.",
+        ".BWWWWB.",
+        "..OOO...",
+        "..OOO...",
+        "...O....",
+        "...O....",
+        "........",
+        "........"
+    ];
+
+    const PENGUIN_MAP_DOWN = [
+        "........",
+        "........",
+        "...O....",
+        "...O....",
+        "..OOO...",
+        ".BWWWWB.",
+        ".BWWWWB.",
+        ".BWWWWB.",
+        ".BBBBBB.",
+        "..BBBB..",
+        "...BB..."
+    ];
+
+    /* Ice block sprite — 8x8 pixels */
+    const ICE_BLOCK_MAP = [
+        ".LLLLL.",
+        "LMMMML",
+        "LMMMML",
+        "LMMMML",
+        "LMMMML",
+        "LMMMML",
+        "LDDDDL",
+        ".LLLLL."
+    ];
+
+    /* Fish sprite — 6x4 pixels */
+    const FISH_MAP = [
+        ".RRR.",
+        "RWWWR",
+        "RWRWR",
+        ".RRR."
+    ];
+
+    /* ---------- PENGUINSLIDE run setup (private) ---------- */
+
+    /* Clear all held directions */
+    function clearHeld() {
+        held.up = held.down = held.left = held.right = false;
+        penguinDir = null;
+        penguinStopPressed = false;
+    }
+
+    /* Reset the game run — set everything back to starting state for a new game */
+    function resetRun() {
+        penguinScore = 0;
+        penguinRoundT = 0;
+        penguinStateT = 0;
+        penguinX = SET.penguinStartX;
+        penguinY = SET.penguinStartY;
+        penguinVX = 0;
+        penguinVY = 0;
+        penguinSlideAccumulator = 0;
+        penguinStopCooldown = 0;
+        penguinEndReason = "";
+        clearHeld();
+
+        /* Reset ice blocks to their initial positions */
+        iceBlocks = JSON.parse(JSON.stringify(INITIAL_BLOCKS));
+        iceBlockSlideQueue = [];
+
+        /* Reset fish position to starting location */
+        fishX = SET.fishStartX;
+        fishY = SET.fishStartY;
+
+        penguinState = STATE.PLAY;
+        syncChrome(true);
+    }
+
+    /* Finish the game run */
+    function finishRun() {
+        if (penguinScore > penguinBest) {
+            penguinBest = penguinScore;
+            saveBest(SET.gameName, penguinScore);
+        }
+        penguinState = STATE.OVER;
+        penguinStateT = 0;
+        penguinEndReason = "time up";
+        syncChrome(true);
+    }
+
+    /* Check if a position is on an ice tile (slidable) */
+    function isIceTile(gridX, gridY) {
+        if (gridX < 0 || gridX >= SET.gridSize || gridY < 0 || gridY >= SET.gridSize) {
+            return false;
+        }
+        return LEVEL_GRID[gridY][gridX] === 0;
+    }
+
+    /* Check if a position is water */
+    function isWater(gridX, gridY) {
+        if (gridX < 0 || gridX >= SET.gridSize || gridY < 0 || gridY >= SET.gridSize) {
+            return false;
+        }
+        return LEVEL_GRID[gridY][gridX] === 1;
+    }
+
+    /* Check if a position is terrain/rock (blocks movement) */
+    function isTerrain(gridX, gridY) {
+        if (gridX < 0 || gridX >= SET.gridSize || gridY < 0 || gridY >= SET.gridSize) {
+            return true;  // Out of bounds is treated as terrain
+        }
+        return LEVEL_GRID[gridY][gridX] === 2;
+    }
+
+    /* Check if there's an ice block at a grid position */
+    function isIceBlockAt(gridX, gridY) {
+        for (let i = 0; i < iceBlocks.length; i++) {
+            const block = iceBlocks[i];
+            if (Math.floor(block.x) === gridX && Math.floor(block.y) === gridY) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /* Convert pixel coordinates to grid coordinates */
+    function pixelToGrid(px, py) {
+        return {
+            x: Math.floor(px / CELL),
+            y: Math.floor(py / CELL)
+        };
+    }
+
+    /* Get the current penguin sprite map based on direction */
+    function getPenguinMap() {
+        if (penguinVX > 0) return PENGUIN_MAP_RIGHT;
+        if (penguinVX < 0) return PENGUIN_MAP_LEFT;
+        if (penguinVY < 0) return PENGUIN_MAP_UP;
+        if (penguinVY > 0) return PENGUIN_MAP_DOWN;
+        return PENGUIN_MAP_RIGHT;  // default facing right when not moving
+    }
+
+    /* ---------- PENGUINSLIDE world step (private) ---------- */
+
+    function stepWorld(dt) {
+        penguinStateT += dt;
+        
+        if (penguinState !== STATE.PLAY) {
+            return;
+        }
+
+        penguinRoundT += dt;
+        penguinClock += dt;
+        penguinAccumulator += dt;
+
+        /* Handle stop cooldown */
+        if (penguinStopCooldown > 0) {
+            penguinStopCooldown -= dt;
+            if (penguinStopCooldown < 0) penguinStopCooldown = 0;
+        }
+
+        /* Process fixed timestep updates */
+        let steps = 0;
+        while (penguinAccumulator >= STEP_SECONDS && steps < 4) {
+            stepPhysics(STEP_SECONDS);
+            penguinAccumulator -= STEP_SECONDS;
+            steps++;
+        }
+        if (steps === 4) penguinAccumulator = 0;
+
+        /* Update sliding ice blocks */
+        processBlockSlides(dt);
+
+        /* Check for win condition */
+        if (checkWin()) {
+            finishRun();
+            penguinEndReason = "fish reached";
+        }
+
+        /* Check for time limit */
+        if (penguinRoundT >= SET.roundTimeLimitSeconds) {
+            finishRun();
+            penguinEndReason = "time up";
+        }
+
+        /* Update score based on remaining time */
+        penguinScore = Math.max(0, Math.floor(SET.roundTimeLimitSeconds - penguinRoundT));
+        syncChrome(false);
+    }
+
+    /* Physics step for penguin movement */
+    function stepPhysics(dt) {
+        /* Get direction from held keys */
+        let newDir = null;
+        if (held.left) newDir = "left";
+        if (held.right) newDir = "right";
+        if (held.up) newDir = "up";
+        if (held.down) newDir = "down";
+
+        /* If a new direction is pressed and we're not sliding, start sliding */
+        if (newDir && !penguinDir && penguinVX === 0 && penguinVY === 0 && penguinStopCooldown <= 0) {
+            penguinDir = newDir;
+            startSliding(newDir);
+        }
+
+        /* If we're sliding, continue in that direction */
+        if (penguinDir) {
+            continueSliding(penguinDir, dt);
+        }
+
+        /* If stop was pressed and cooldown is over, stop */
+        if (penguinStopPressed && penguinStopCooldown <= 0 && (penguinVX !== 0 || penguinVY !== 0)) {
+            stopSliding();
+            penguinStopPressed = false;
+        }
+    }
+
+    /* Start sliding in a direction */
+    function startSliding(dir) {
+        switch (dir) {
+            case "up":
+                penguinVY = -SET.penguinSlideSpeed;
+                penguinVX = 0;
+                break;
+            case "down":
+                penguinVY = SET.penguinSlideSpeed;
+                penguinVX = 0;
+                break;
+            case "left":
+                penguinVX = -SET.penguinSlideSpeed;
+                penguinVY = 0;
+                break;
+            case "right":
+                penguinVX = SET.penguinSlideSpeed;
+                penguinVY = 0;
+                break;
+        }
+    }
+
+    /* Continue sliding */
+    function continueSliding(dir, dt) {
+        /* Save previous position for collision detection */
+        const prevX = penguinX;
+        const prevY = penguinY;
+
+        /* Update position */
+        penguinX += penguinVX * dt;
+        penguinY += penguinVY * dt;
+
+        /* Clamp to stage boundaries */
+        penguinX = Math.max(5, Math.min(STAGE - 5, penguinX));
+        penguinY = Math.max(5, Math.min(STAGE - 5, penguinY));
+
+        /* Get grid positions */
+        const grid = pixelToGrid(penguinX, penguinY);
+        const prevGrid = pixelToGrid(prevX, prevY);
+
+        /* Check for collisions */
+        if (grid.x !== prevGrid.x || grid.y !== prevGrid.y) {
+            /* We've moved to a new grid cell */
+            
+            /* Check if we hit terrain */
+            if (isTerrain(grid.x, grid.y)) {
+                /* Bounce back */
+                penguinX = prevX;
+                penguinY = prevY;
+                penguinVX = 0;
+                penguinVY = 0;
+                penguinDir = null;
+                return;
+            }
+
+            /* Check if we hit water */
+            if (isWater(grid.x, grid.y)) {
+                /* Check if there's an ice block on this water */
+                if (!isIceBlockAt(grid.x, grid.y)) {
+                    /* Cannot cross water without ice block */
+                    penguinX = prevX;
+                    penguinY = prevY;
+                    penguinVX = 0;
+                    penguinVY = 0;
+                    penguinDir = null;
+                    return;
+                }
+            }
+
+            /* Check if we hit an ice block */
+            if (isIceBlockAt(grid.x, grid.y)) {
+                /* Option 1: Stop at the ice block */
+                penguinX = prevX;
+                penguinY = prevY;
+                penguinVX = 0;
+                penguinVY = 0;
+                penguinDir = null;
+                
+                /* Option 2: Push the ice block (will be handled by pushBlock) */
+                pushBlock(dir, grid.x, grid.y);
+            }
+        }
+    }
+
+    /* Push an ice block in a direction */
+    function pushBlock(dir, blockGridX, blockGridY) {
+        /* Find the block at this position */
+        let blockIndex = -1;
+        for (let i = 0; i < iceBlocks.length; i++) {
+            if (Math.floor(iceBlocks[i].x) === blockGridX && Math.floor(iceBlocks[i].y) === blockGridY) {
+                blockIndex = i;
+                break;
+            }
+        }
+
+        if (blockIndex === -1) return;
+
+        /* Check if the block can be pushed in this direction */
+        const block = iceBlocks[blockIndex];
+        let newBlockX = block.x;
+        let newBlockY = block.y;
+
+        switch (dir) {
+            case "up": newBlockY -= 1; break;
+            case "down": newBlockY += 1; break;
+            case "left": newBlockX -= 1; break;
+            case "right": newBlockX += 1; break;
+        }
+
+        /* Check if new position is valid for the block */
+        const newGridX = Math.floor(newBlockX);
+        const newGridY = Math.floor(newBlockY);
+
+        /* Block cannot be pushed into terrain */
+        if (isTerrain(newGridX, newGridY)) return;
+
+        /* Block cannot be pushed into water (it would sink) */
+        if (isWater(newGridX, newGridY)) return;
+
+        /* Block cannot be pushed into another ice block */
+        if (isIceBlockAt(newGridX, newGridY)) return;
+
+        /* Block can be pushed — start it sliding */
+        iceBlockSlideQueue.push({
+            index: blockIndex,
+            targetX: newBlockX * CELL + CELL / 2,
+            targetY: newBlockY * CELL + CELL / 2,
+            direction: dir
+        });
+
+        /* Stop the penguin after pushing */
+        penguinVX = 0;
+        penguinVY = 0;
+        penguinDir = null;
+    }
+
+    /* Process ice block slides */
+    /* Process ice block slides — moves blocks that are in the slide queue */
+    function processBlockSlides(dt) {
+        for (let queueIndex = iceBlockSlideQueue.length - 1; queueIndex >= 0; queueIndex--) {
+            const slide = iceBlockSlideQueue[queueIndex];
+            const block = iceBlocks[slide.index];
+
+            /* Calculate direction vector */
+            let velocityX = 0, velocityY = 0;
+            const speed = SET.blockSlideSpeed;
+
+            switch (slide.direction) {
+                case "up": velocityY = -speed * dt; break;
+                case "down": velocityY = speed * dt; break;
+                case "left": velocityX = -speed * dt; break;
+                case "right": velocityX = speed * dt; break;
+            }
+
+            /* Move the block */
+            block.x += velocityX;
+            block.y += velocityY;
+
+            /* Check if we've reached the target */
+            const reachedTarget = (
+                (slide.direction === "left" && block.x <= slide.targetX) ||
+                (slide.direction === "right" && block.x >= slide.targetX) ||
+                (slide.direction === "up" && block.y <= slide.targetY) ||
+                (slide.direction === "down" && block.y >= slide.targetY)
+            );
+
+            if (reachedTarget) {
+                block.x = slide.targetX;
+                block.y = slide.targetY;
+                block.sliding = false;
+                iceBlockSlideQueue.splice(i, 1);
+            }
+        }
+    }
+
+    /* Check if penguin reached the fish */
+    function checkWin() {
+        const penguinGrid = pixelToGrid(penguinX, penguinY);
+        const fishGrid = pixelToGrid(fishX, fishY);
+        
+        return penguinGrid.x === fishGrid.x && penguinGrid.y === fishGrid.y;
+    }
+
+    /* Stop sliding */
+    function stopSliding() {
+        penguinVX = 0;
+        penguinVY = 0;
+        penguinDir = null;
+        penguinStopCooldown = SET.stopCooldownSeconds;
+    }
+
+    /* ---------- PENGUINSLIDE effects (private, drawn as pixels) ---------- */
+
+    /* ---------- PENGUINSLIDE painting (private) ---------- */
+
+    function paint(ctx) {
+        /* Clear background */
+        ctx.fillStyle = PAL.iceLight;
+        ctx.fillRect(0, 0, STAGE, STAGE);
+
+        /* Draw grid background */
+        paintGrid(ctx);
+
+        /* Draw ice blocks */
+        paintIceBlocks(ctx);
+
+        /* Draw fish */
+        paintFish(ctx);
+
+        /* Draw penguin */
+        paintPenguin(ctx);
+
+        /* Draw UI elements */
+        if (penguinState === STATE.TITLE) {
+            paintTitle(ctx);
+        } else if (penguinState === STATE.OVER) {
+            paintOver(ctx);
+        }
+
+        /* Draw score in the message area (handled by syncChrome) */
+    }
+
+    /* Draw the game grid */
+    /* Draw the game grid — paints ice, water, and terrain tiles */
+    function paintGrid(ctx) {
+        for (let gridY = 0; gridY < SET.gridSize; gridY++) {
+            for (let gridX = 0; gridX < SET.gridSize; gridX++) {
+                const cellType = LEVEL_GRID[gridY][gridX];
+                const pixelX = gridX * CELL;
+                const pixelY = gridY * CELL;
+
+                switch (cellType) {
+                    case 0:  // Ice
+                        ctx.fillStyle = PAL.iceMid;
+                        ctx.fillRect(pixelX, pixelY, CELL, CELL);
+                        /* Add subtle ice texture */
+                        ctx.fillStyle = PAL.iceDark;
+                        ctx.fillRect(pixelX + 2, pixelY + 2, 2, 2);
+                        ctx.fillRect(pixelX + SET.cellSizePixels - 3, pixelY + SET.cellSizePixels - 3, 2, 2);
+                        break;
+                    case 1:  // Water
+                        ctx.fillStyle = PAL.waterMid;
+                        ctx.fillRect(pixelX, pixelY, CELL, CELL);
+                        /* Water texture */
+                        ctx.fillStyle = PAL.waterDark;
+                        ctx.fillRect(pixelX, pixelY + CELL - 3, CELL, 3);
+                        break;
+                    case 2:  // Terrain/Rock
+                        ctx.fillStyle = PAL.rockMid;
+                        ctx.fillRect(pixelX, pixelY, CELL, CELL);
+                        /* Rock texture */
+                        ctx.fillStyle = PAL.rockLight;
+                        ctx.fillRect(pixelX + 1, pixelY + 1, 3, 3);
+                        ctx.fillStyle = PAL.rockDark;
+                        ctx.fillRect(pixelX + 6, pixelY + 6, 3, 3);
+                        break;
+                }
+            }
+        }
+    }
+
+    /* Draw ice blocks */
+    /* Draw ice blocks — renders each ice block using its sprite map */
+    function paintIceBlocks(ctx) {
+        for (let blockIndex = 0; blockIndex < iceBlocks.length; blockIndex++) {
+            const block = iceBlocks[blockIndex];
+            const drawX = Math.round(block.x - 4);
+            const drawY = Math.round(block.y - 4);
+
+            /* Draw ice block using sprite map */
+            paintPixels(ctx, ICE_BLOCK_MAP, drawX, drawY, {
+                L: PAL.iceBlockLight,
+                M: PAL.iceBlockMid,
+                D: PAL.iceBlockDark,
+                O: PAL.iceBlockOutline
+            });
+        }
+    }
+
+    /* Draw fish — renders the fish sprite at its position */
+    function paintFish(ctx) {
+        const drawX = Math.round(fishX - 3);
+        const drawY = Math.round(fishY - 2);
+
+        paintPixels(ctx, FISH_MAP, drawX, drawY, {
+            R: PAL.fishRed,
+            W: PAL.fishWhite,
+            O: PAL.fishOutline
+        });
+    }
+
+    /* Draw penguin — renders the penguin using the appropriate sprite based on direction */
+    function paintPenguin(ctx) {
+        const map = getPenguinMap();
+        const drawX = Math.round(penguinX - 4);
+        const drawY = Math.round(penguinY - 6);
+
+        paintPixels(ctx, map, drawX, drawY, {
+            B: PAL.penguinBlack,
+            W: PAL.penguinWhite,
+            O: PAL.penguinOrange,
+            Y: PAL.penguinYellow
+        });
+
+        /* Add subtle shadow */
+        ctx.fillStyle = "rgba(0, 0, 0, 0.1)";
+        ctx.fillRect(drawX + 2, drawY + 11, 4, 1);
+    }
+
+    /* Draw the title/how-to card */
+    /* Draw the title/how-to card — shows game name and instructions on title screen */
+    function paintTitle(ctx) {
+        /* Semi-transparent background plate */
+        paintRoundBlob(ctx, SET.titlePlateX, SET.titlePlateY, SET.titlePlateWidth, SET.titlePlateHeight, PAL.bgPlate);
+
+        /* Title */
+        paintPixelText(ctx, "PENGUINSLIDE", 50, SET.titleTextY, PAL.textDark, null, 2);
+
+        /* How-to instructions (4 lines max, 22 chars each, no apostrophe) */
+        paintPixelText(ctx, "SLIDE ON ICE TILES", 50, SET.titleLine1Y, PAL.textDark, null, 1);
+        paintPixelText(ctx, "PUSH BLOCKS TO MAKE PATH", 50, SET.titleLine2Y, PAL.textDark, null, 1);
+        paintPixelText(ctx, "REACH THE FISH", 50, SET.titleLine3Y, PAL.textDark, null, 1);
+        paintPixelText(ctx, "STOP TO THINK ABOUT MOVE", 50, SET.titleLine4Y, PAL.textDark, null, 1);
+
+        /* Blinking prompt */
+        if (Math.floor(penguinClock / SET.titleBlinkSeconds) % 2 === 0) {
+            paintPixelText(ctx, "PRESS ANY KEY OR TAP", 50, SET.titlePromptY, PAL.textDark, null, 1);
+        }
+    }
+
+    /* Draw the game over screen */
+    /* Draw the game over screen — shows result and score when game ends */
+    function paintOver(ctx) {
+        /* Semi-transparent background plate */
+        paintRoundBlob(ctx, SET.overPlateX, SET.overPlateY, SET.overPlateWidth, SET.overPlateHeight, PAL.bgPlate);
+
+        /* Game over text */
+        paintPixelText(ctx, penguinEndReason === "fish reached" ? "YOU GOT THE FISH" : "TIME UP", 50, SET.overTitleY, PAL.textDark, null, 2);
+
+        /* Score */
+        paintPixelText(ctx, "SCORE " + penguinScore, 50, SET.overScoreY, PAL.textDark, null, 1);
+
+        /* Restart prompt */
+        paintPixelText(ctx, "PRESS R TO GO AGAIN", 50, SET.overPromptY, PAL.textDark, null, 1);
+    }
+
+    /* ---------- PENGUINSLIDE shelf card preview (private) ---------- */
+
+    function paintPreview(ctx) {
+        /* Draw a simple preview scene */
+        ctx.fillStyle = PAL.iceLight;
+        ctx.fillRect(0, 0, 200, 96);
+
+        /* Draw some ice tiles */
+        for (let x = 10; x < 190; x += 20) {
+            for (let y = 10; y < 86; y += 20) {
+                ctx.fillStyle = PAL.iceMid;
+                ctx.fillRect(x, y, 10, 10);
+            }
+        }
+
+        /* Draw penguin */
+        const px = 80;
+        const py = 50;
+        ctx.fillStyle = PAL.penguinWhite;
+        ctx.fillRect(px - 3, py - 3, 6, 6);
+        ctx.fillStyle = PAL.penguinBlack;
+        ctx.fillRect(px - 2, py - 2, 4, 4);
+
+        /* Draw an ice block */
+        ctx.fillStyle = PAL.iceBlockMid;
+        ctx.fillRect(120, 30, 8, 8);
+
+        /* Draw fish */
+        ctx.fillStyle = PAL.fishRed;
+        ctx.fillRect(150, 60, 6, 4);
+
+        /* Label */
+        paintPixelText(ctx, "PENGUINSLIDE", 100, 80, PAL.textDark, null, 1);
+    }
+
+    /* ---------- PENGUINSLIDE chrome sync ---------- */
+
+    /* Chrome sync state — remembers last values to avoid redundant DOM writes */
+    let shownScore = null;
+    let shownBest = null;
+    let shownMsg = null;
+
+    /* Sync chrome — update score, best, and message chips when they change */
+    function syncChrome(force) {
+        const bestNow = Math.max(penguinBest, penguinScore);
+
+        if (force || shownScore !== penguinScore) {
+            shownScore = penguinScore;
+            scoreEl.textContent = String(penguinScore);
+        }
+
+        if (force || shownBest !== bestNow) {
+            shownBest = bestNow;
+            bestEl.textContent = String(bestNow);
+        }
+
+        let msg = "";
+        if (penguinState === STATE.TITLE) {
+            msg = "SLIDE ON ICE PUSH BLOCKS TO REACH FISH IN 60 SECONDS";
+        } else if (penguinState === STATE.PLAY) {
+            if (penguinDir) {
+                msg = "SLIDING " + penguinDir.toUpperCase() + " PRESS STOP TO HALT";
+            } else {
+                msg = "USE ARROWS TO MOVE PRESS STOP TO HALT";
+            }
+        } else if (penguinState === STATE.OVER) {
+            msg = penguinEndReason + " SCORE " + penguinScore + " PRESS R TO RESTART";
+        }
+
+        if (force || shownMsg !== msg) {
+            shownMsg = msg;
+            msgEl.textContent = msg;
+        }
+    }
+
+    /* ---------- PENGUINSLIDE module contract ---------- */
+
+    function start() {
+        penguinBest = readBest(SET.gameName);
+        penguinScore = 0;
+        penguinRoundT = 0;
+        penguinStateT = 0;
+        penguinX = 50;
+        penguinY = 50;
+        penguinVX = 0;
+        penguinVY = 0;
+        penguinSlideAccumulator = 0;
+        penguinStopCooldown = 0;
+        penguinEndReason = "";
+        clearHeld();
+
+        /* Initialize ice blocks */
+        iceBlocks = JSON.parse(JSON.stringify(INITIAL_BLOCKS));
+        iceBlockSlideQueue = [];
+
+        /* Initialize fish */
+        fishX = 80;
+        fishY = 20;
+
+        penguinState = STATE.TITLE;
+        penguinAccumulator = 0;
+        penguinClock = 0;
+        clearHeld();
+        syncChrome(true);
+    }
+
+    /* Stop the game — clear all held directions and stop the penguin */
+    function stop() {
+        clearHeld();
+        penguinVX = 0;
+        penguinVY = 0;
+        penguinDir = null;
+    }
+
+    /* Restart the game — clear held directions and reset the run */
+    function restart() {
+        clearHeld();
+        resetRun();
+    }
+
+    /* Handle directional input — store pressed state and reset on first press when not playing */
+    function onDir(dir, pressed) {
+        if (!(dir in held)) return;
+        held[dir] = pressed;
+
+        if (pressed && penguinState !== STATE.PLAY && penguinStateT > 0.35) {
+            resetRun();
+        }
+    }
+
+    /* Handle action input — reset when on title card, or set stop flag when playing */
+    function onAction() {
+        if (penguinState !== STATE.PLAY && penguinStateT > 0.35) {
+            resetRun();
+            return;
+        }
+
+        /* In PLAY state, ACTION means STOP */
+        if (penguinState === STATE.PLAY) {
+            penguinStopPressed = true;
+        }
+    }
+
+    /* Handle stage tap — treat as action input */
+    function onStageTap() {
+        onAction();
+    }
+
+    /* Handle any key — treat as action input */
+    function onAnyKey() {
+        onAction();
+    }
+
+    /* Update the game — clamp delta time, step world, and update chrome */
+    function update(rawDt) {
+        const dt = rawDt > 0.25 ? 0.25 : rawDt;
+        stepWorld(dt);
+        syncChrome(false);
+    }
+
+    /* Register the game module */
+    GAMES.push({
+        id: SET.gameName,
+        versionNumber: SET.versionNumber,
+        name: "Penguin Slide",
+        tagline: "slide, push, and reach the fish",
+        concept: "Pip the penguin slides on ice and pushes ice blocks to build a path to a frozen fish. The penguin always slides until you press STOP. Ice blocks slide until they hit terrain or water. Reach the fish within 60 seconds to score points based on remaining time.",
+        actionLabel: "STOP",
+        hint: "desktop: arrow keys slide · SPACE or tap stage to STOP · R restart · ESC shelf",
+        previewPaint: paintPreview,
         start, stop, restart,
         update, paint, onDir, onAction, onStageTap, onAnyKey
     });
