@@ -55,6 +55,8 @@ page says "to confirm" or "not confirmed".
 | Qoder CLI | credits spent per request; heavier models and longer work spend more | credits | the 14-day Pro trial (300 credits from first sign-in) ends on its date and unused credits are cleared; list price is about US$0.01 per credit | Qoder usage page | https://docs.qoder.com/account/pricing |
 | Claude.ai chat | how much of the usage window is used | percent of the window, not tokens | the window resets (owner: about 5 hours); exact rules to confirm | Claude's usage page, read by the owner | to confirm |
 | OpenCode | the Console tracks usage with budget controls, credits can be added to a workspace, and open-source model access comes through Go subscriptions (US$10 / US$40 / US$20 per member per month) | credits; US$ per month | how added credits expire is not stated on the page read; subscriptions are monthly | the OpenCode Console, Usage and Billing pages | https://opencode.ai/v2/docs/console/ |
+| Vibe CLI | build 029 records Agent Statistics with session token totals and cost; start/final readings were not captured | tokens; US$ | reset rules not recorded | Vibe CLI Agent Statistics | owner-provided build 029 record |
+| OpenAI Codex CLI | owner-provided display exposes total, input, output, reasoning, and cached input counts | tokens | reset rules not recorded | Codex CLI usage display | owner-provided build 031 reading |
 | Antigravity | the free Individual plan (US$0/month) works on basic weekly rate limits; Google AI Pro and Ultra add higher rate limits and a flexible AI credit pool; organizations use Google Cloud with consumption-based API pricing | weekly rate limits; credits | rate limits reset weekly; credit-pool rules are on the plans docs | the Antigravity pricing page and its plans docs | https://antigravity.google/pricing |
 
 ## Usage ledger
@@ -118,7 +120,8 @@ What each model used on each build. This is a record, not an opinion, and not a 
 | 028 | DeepSeek V4.1 Flash Free · OpenCode | built (effort High) | ~26 min | 303,053 tokens processed | measured: 212,643 input + 50,583 output + 39,827 reasoning; 12,895,360 cache reads not counted; 109 steps; 109 tool calls; OpenCode stats delta, final reading after the swap and the live check (see the build record in plans/buildlog/028-20261114.md) |
 | 029 | Claude.ai Sonnet 5.5 · Claude.ai chat | wrote the prompt (effort High) | — | — | not recorded |
 | 029 | Mistral Medium 3.5 High · Vibe CLI | built (effort High) | ~60+ min | ~96.3k tokens (96,334 total, 95,104 cached) | session-wide stats from Vibe CLI Agent Statistics; Last Turn reading (build prompt may have overwritten previous turn); Cost: ~$6.62; Model: Mistral Medium 3.5 via mistral provider |
-| 030 | GPT-6 · Codex | built (effort not visible) | <10 min | — | not visible to the model; time only |
+| 030 | GPT-6-Luna · OpenAI Codex CLI | built (effort High) | — | — | meter and duration not recorded; corrected in build 031 |
+| 031 | GPT-6-Luna · OpenAI Codex CLI | built (effort High) | — | — | start reading: 133,712 total (118,604 input + 15,108 output, including 6,657 reasoning; 1,707,264 cached input shown separately); final reading not supplied, so build usage not recorded |
 | 027 | DeepSeek V4.1 Flash Free · OpenCode | built (effort High) | ~6 min | 117,458 tokens processed | measured: 73,339 input + 25,499 output + 18,620 reasoning; 5,544,064 cache reads not counted; 44 steps; 46 tool calls; OpenCode stats delta, final reading after the swap and the live check (see the build record in plans/buildlog/027-20261114.md) |
 
 ### Totals that can honestly be added
@@ -537,6 +540,14 @@ The owner's notes: in the message that carried the build 028 prompt, the owner s
 Prompts for builds 009 to 027 were written at Extra effort; the prompt for build 028 was the first written at High.
 
 This is a dated owner note about one setting on one day, not a model-written summary.
+
+## 2026-11-14 — Owner observation — Mistral Medium 3.5 High (Vibe CLI), PENGUINSLIDE
+
+Source: Owner's words (verbatim)
+
+Builds observed: `029-20261114`, `031-20261114`.
+
+The owner reported after trying the page: “And Now I see how bad the game was created by Mistral - there is no penguin or ice block. In fact, there is no game so to speak.” Build 031 replaces the PENGUINSLIDE module with a visible penguin, block, river bridge puzzle, and timed goal. This note records the owner's feedback on that build, not a general model ranking.
 
 <!-- NEW ENTRIES ABOVE THIS LINE. Never edit existing entries. -->
 

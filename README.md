@@ -1,10 +1,10 @@
 # KANTMICROGAMES
 
-Eight tiny pixel-art games in one HTML file. Open it, pick a game, play a minute.
+Nine tiny pixel-art games in one HTML file. Open it, pick a game, play a minute.
 
 Play online: <https://kantmicrogames.lohyapkant.workers.dev/>
 
-**Current build:** `030-20261114` — nine games, one file.
+**Current build:** `031-20261114` — nine games, one file.
 
 ## About this project
 
@@ -26,7 +26,7 @@ A short record of every build is in CHANGELOG.md; the long-form build records ar
 | SNAILRACE | Nibbles races two garden snails to a picnic strawberry; lettuce zooms, salt stings. |
 | HUGPARADE | Momo steps along hedge rails, gathers hearts, and hugs Bibi before the maze reshapes; each heart makes the hug worth more. |
 | CATNAPCATCH | Slide a paper pillow under a sleeping kitten and catch the falling noisemakers; three clangs wake the nap. |
-| PENGUINSLIDE | Pip the penguin slides on ice tiles and pushes ice blocks to build a path to an ice fish within 60 seconds. |
+| PENGUINSLIDE | Help Pip slide an ice block onto an icy river, cross the bridge, and reach the fish before time runs out. |
 
 ## How to play
 
@@ -36,7 +36,7 @@ A short record of every build is in CHANGELOG.md; the long-form build records ar
 - The on-screen pads are always shown: directions on the left, the action on the right.
 - Sound effects are on by default; switch them off under SETTINGS on the shelf.
 - The shelf offers a pick of the day and can sort the games by name, best score, unplayed or most opened.
-- Badges reward what you try, from your first game to scoring in all eight; see them under BADGES on the shelf.
+- Badges reward what you try, from your first game to scoring in all nine; see them under BADGES on the shelf.
 - The background colour changes each visit; pick your own under SETTINGS on the shelf.
 - SETTINGS can erase your scores, counts and badges on this device.
 - Switching tabs or apps pauses the run. Page zoom is allowed.
@@ -53,13 +53,16 @@ Keyboard, touch and device details are in CONTROLS.md.
 | Google Antigravity | agent-first development platform | https://antigravity.google/ |
 | Qoder CLI | terminal coding agent | https://qoder.com/ |
 | Claude.ai | chat assistant (used to write some of the prompts) | https://claude.ai/ |
+| Vibe CLI | Mistral coding agent | https://mistral.ai/ |
+| OpenAI Codex CLI | OpenAI command-line coding agent | https://openai.com/ |
 <!-- END:tools-table -->
 
 <!-- BEGIN:models-table  (add or edit rows only) -->
 | Model | Developer | Used via | Builds | How it went (owner notes, 2026-11-01) |
 |---|---|---|---|---|
 | DeepSeek V4.1 Flash Free | [DeepSeek](https://www.deepseek.com/) | OpenCode | 000, 001, 005, 006, 017, 018, 019, 020, 021, 022, 023, 024, 025, 026, 027, 028 | Clear pixel art and clean code (owner: "amazing"). |
-| Mistral Medium 3.5 High | [Mistral AI](https://mistral.ai/) | Vibe CLI | 029 | First build by this tool: added PENGUINSLIDE game. |
+| Mistral Medium 3.5 High | [Mistral AI](https://mistral.ai/) | Vibe CLI | 029 | Initial PENGUINSLIDE version; rebuilt in build 031 after the owner found the character art and puzzle were not usable. |
+| GPT-6-Luna | [OpenAI](https://openai.com/) | OpenAI Codex CLI | 030, 031 | Owner feedback led to a complete PENGUINSLIDE rebuild in build 031. |
 | GLM-5.3 Flash Free | [Z.ai (Zhipu AI)](https://z.ai/) | OpenCode | 002, 003 | Worked mechanically; one game needed a full rework. |
 | Flint 40B Free | [Recursive](https://recursive.com/) | OpenCode | 004 | A working module, but its art had to be rebuilt. |
 | Gemini 3.8 Flash | [Google](https://gemini.google.com/) | Antigravity | 006, 007, 022 (started, halted) | Picked up cleanly after a session limit; delivered SPROUTUP. |

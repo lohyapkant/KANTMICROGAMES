@@ -8,6 +8,18 @@ A short record of every build, newest first. Each entry gives the build ID, the 
 - **Corrected in build 028:** 13 lines in entries 000 to 018 were cut off mid-sentence when this record was made in build 027; they were restored in full from the private record. (The build 028 prompt expected 15: entries 001 and 000 were named too, but their lines were already whole, so nothing there needed changing.)
 
 <!-- NEW ENTRIES: paste the newest short entry on the line below this comment, above the previous newest. Never edit older entries except to add a dated correction line in the header. -->
+- **Owner feedback recorded in build 031:** the original PENGUINSLIDE did not render Pip or the ice block and was not a usable game; build 031 replaces it with a playable bridge puzzle.
+
+## 031-20261114 — 2026-11-14 (PENGUINSLIDE rebuilt as a playable bridge puzzle)
+
+Built from prompt: P-31, owner request to redo PENGUINSLIDE from the Build 29 concept; prompt effort not recorded  
+Tool and model: **GPT-6-Luna** (OpenAI Codex CLI); effort High  
+What changed: rebuilt PENGUINSLIDE with visible pixel-art Pip, an ice block, a frozen river bridge puzzle, STOP control, and a 60-second score run. The owner reported that the prior version had no visible penguin or block and was not a usable game.  
+Games changed: PENGUINSLIDE v3 (frozen build 031-20261114)  
+Checked: inline syntax, readable-code, isolated game route, and project checks passed on the work copy  
+Not checked: interactive browser, Safari, real phone, stage-size matrix and sound checks not run  
+Time and usage: not recorded; final Codex CLI reading was not supplied
+- **Corrected in build 031:** Build 030 used GPT-6-Luna via OpenAI Codex CLI at High effort; its usage and duration were not recorded.
 
 ## 030-20261114 — 2026-11-14 (PENGUINSLIDE syntax repair restores app startup)
 
