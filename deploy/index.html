@@ -6,8 +6,8 @@
   Repository : https://github.com/lohyapkant/KANTMICROGAMES
   Play online: https://kantmicrogames.lohyapkant.workers.dev/
   Hosting    : Cloudflare Workers (https://workers.cloudflare.com/)
-  Current    : build 036-20261115 — PENGUINSLIDE v8 in warm top-down
-               3/4 view, 7x7 grid, three brakes and a two-tile river
+  Current    : build 037-20261115 — PENGUINSLIDE v9 in warm top-down
+               3/4 view, seal patrol, belly-slide dash, six fish to win
   Names      : project and on-screen brand KANTMICROGAMES ·
                save keys and the console tag use the KANTMICROGAMES prefix
   Build log  : build 028-20261114, DeepSeek V4.1 Flash Free (OpenCode) — a short
@@ -1483,7 +1483,7 @@
 
 const APP = {
     name: "KANTMICROGAMES",
-    fileVersion: "036-20261115",       // build number of THIS one-file app
+    fileVersion: "037-20261115",       // build number of THIS one-file app
     savePrefix: "KANTMICROGAMES."      // best scores live at prefix + GAMEID + ".best"
 };
 
@@ -2119,7 +2119,7 @@ function paintPandaSnackPreview(ctx) {
    the module's own versionNumber, the build where its content last changed.
    Keep this table in step with plans/game-versions.txt; the check script,
    tests/check-project.py, compares them. */
-const GAME_REVISIONS = { PANDASNACK: { revision: 1, frozen: true }, BOOPEEK: { revision: 2, frozen: true }, DUCKLINE: { revision: 1, frozen: true }, SPROUTUP: { revision: 1, frozen: true }, SLIMEHOP: { revision: 1, frozen: true }, SNAILRACE: { revision: 1, frozen: true }, HUGPARADE: { revision: 2, frozen: true }, CATNAPCATCH: { revision: 2, frozen: true }, PENGUINSLIDE: { revision: 8, frozen: true } };
+const GAME_REVISIONS = { PANDASNACK: { revision: 1, frozen: true }, BOOPEEK: { revision: 2, frozen: true }, DUCKLINE: { revision: 1, frozen: true }, SPROUTUP: { revision: 1, frozen: true }, SLIMEHOP: { revision: 1, frozen: true }, SNAILRACE: { revision: 1, frozen: true }, HUGPARADE: { revision: 2, frozen: true }, CATNAPCATCH: { revision: 2, frozen: true }, PENGUINSLIDE: { revision: 9, frozen: true } };
 
 /* The identity line's sizes, named so the code below has no loose numbers.
    The height is only a fallback: the real height comes from the CSS. */
@@ -10501,34 +10501,32 @@ syncSoundUI();
 
 
 /* ==================================================================
-   PART 5-I — PENGUINSLIDE module (content 036-20261115)
+   PART 5-I — PENGUINSLIDE module (content 037-20261115)
    ================================================================
    HOW THIS GAME WORKS
-   - Pip the baby penguin slides across a 7 by 7 field of arctic ice,
+   - Pip the baby penguin waddles across a 7 by 7 field of arctic ice,
      seen from above at a warm three-quarter angle.
    - Every tile is 12 pixels; the board sits at 8,12 under a slim HUD band.
-   - A two-tile-wide river runs down columns 3 and 4 from top to bottom.
-   - Press an arrow key or WASD to slide Pip that way.
-   - Pip slides until a wall, a pine tree, a boulder, a block or the
-     water edge stops him. He never falls in; the ice is gentle.
-   - The first bump into a block stops Pip and shows PRESS AGAIN TO PUSH.
-     Pressing the same direction again pushes the block.
-   - A pushed block slides until an obstacle or the water.
-   - Water without a bridge sinks the block and leaves a bridge tile.
-   - Water with a bridge lets the block slide over it into the next
-     water tile, so one push can finish a two-tile crossing.
-   - Bridge both water columns in the same row, then slide across.
-   - Step onto the golden fish to win. The score is the seconds left.
-   - BRAKE (the action button, SPACE, or a tap on the stage) stops Pip
-     at the next tile and uses one of the three snowflake brakes.
-   - The run lasts 60 seconds. R restarts the same layout with a fresh
-     clock and three fresh brakes; leaving and re-entering picks a new one.
-   - STATES: TITLE (how-to card), PLAY (the puzzle), OVER (result card).
-   - CONTROLS: arrows or WASD slide, SPACE or tap brakes, R restarts,
+   - A two-tile-wide river runs down columns 3 and 4. Two permanent
+     bridges cross it, one at row 2 and one at row 4.
+   - Press an arrow key or WASD to waddle one tile that way. Hold the
+     key to keep waddling. Pip never falls in the water; the ice is kind.
+   - SPACE, the action button or a tap is a BELLY-SLIDE DASH: Pip shoots
+     two tiles forward, then the dash needs a short recharge.
+   - One golden fish appears at a time on a safe tile. Eat six to win.
+   - Grumpy seals slide along authored patrol routes. One seal guards the
+     north bridge, one guards the south bridge. A bump costs one heart,
+     knocks Pip back one tile and gives him a moment of safety.
+   - Three hearts. Lose them all and the seals win. There is no clock;
+     time only adds a speed bonus to the score.
+   - The second seal surfaces at fish three, far from Pip, with a splash
+     and a one-second wake-up so it can never ambush him.
+   - STATES: TITLE (how-to card), PLAY (the patrol), OVER (result card).
+   - CONTROLS: arrows or WASD waddle, SPACE or tap dashes, R restarts,
      ESC returns to the shelf.
-   - SETTINGS groups: board geometry, run rules, movement timing, effect
-     timing, sprite feet offsets, HUD layout, card layout, shelf preview
-     layout, and the palette.
+   - SETTINGS groups: board geometry, run rules, waddle and dash timing,
+     seal patrol, fish spawning, effect timing, sprite feet offsets, HUD
+     layout, card layout, shelf preview layout, and the palette.
    ================================================================ */
 (function () {
     "use strict";
@@ -10537,8 +10535,9 @@ syncSoundUI();
        plain explanation of what changing it does. */
     const SETTINGS = {
         gameName: "PENGUINSLIDE",
-        versionNumber: "036-20261115",
+        versionNumber: "037-20261115",
         stageSize: 100,
+        stageCenterX: 50,
 
         /* Board geometry: a 7 by 7 grid of 12px tiles under the HUD band. */
         gridColumns: 7,
@@ -10551,43 +10550,81 @@ syncSoundUI();
         boardSizePixels: 84,
         hudHeight: 11,
         waterColumns: [3, 4],
+        bridgeRows: [2, 4],
 
-        /* Run rules: a 60 second clock and three brakes per run. */
-        roundSeconds: 60,
-        brakesPerRun: 3,
+        /* Where Pip starts each run and on the how-to card. */
+        startColumn: 1,
+        startRow: 3,
 
-        /* Movement timing: how long one tile of a slide or push takes. */
-        slideSecondsPerTile: 0.055,
-        blockSecondsPerTile: 0.05,
-        bumpSeconds: 0.2,
-        bumpNudgePixels: 2,
-        waddleSeconds: 0.1,
+        /* Run rules: six fish win the run; three bumps end it. */
+        fishToWin: 6,
+        heartsPerRun: 3,
+        fishPoints: 100,
+        heartPoints: 100,
+        timeBonusSeconds: 60,
+        timeBonusPointsPerSecond: 5,
 
-        /* Effect timing: messages, splashes, snow puffs, cheering and water. */
+        /* Waddle timing: one press moves one tile; holding repeats. */
+        waddleSecondsPerTile: 0.09,
+        heldRepeatSeconds: 0.22,
+
+        /* Belly-slide dash: two tiles, then a short recharge. */
+        dashTiles: 2,
+        dashSecondsPerTile: 0.045,
+        dashCooldownSeconds: 1.0,
+
+        /* Seal patrol: a slow first seal and a slower second one. */
+        sealStartSpeed: 2.0,
+        sealSpeedPerFish: 0.15,
+        sealBStartSpeed: 1.5,
+        sealBSpeedPerFish: 0.1,
+        sealSecondFishIndex: 3,
+        sealWakeSeconds: 1.0,
+        sealHitRadiusTiles: 0.72,
+        sealHitSeconds: 1.2,
+        sealFeetOffset: 9,
+        sealShadowHalfWidth: 7,
+        sealWakeRingPixels: 10,
+
+        /* Fish spawning: one at a time, never right beside a seal. */
+        spawnSafeTiles: 2,
+        spawnPlayerGapTiles: 2,
+        fishSpawnDelaySeconds: 0.35,
+        fishRetrySeconds: 0.2,
+
+        /* Effect timing and sizes. */
         messageSeconds: 2.2,
         splashSeconds: 0.5,
         splashGravityPixels: 120,
         snowPuffSeconds: 0.45,
+        sparkleSeconds: 0.45,
+        sparkleSpreadPixels: 8,
+        sparkleLiftPixels: 18,
+        sparkleLiftStepPixels: 6,
         cheerSeconds: 1.4,
         rippleSeconds: 0.9,
         fishBobSeconds: 1.5,
         titleBlinkSeconds: 0.55,
         sparkleRisePixels: 9,
+        blinkSeconds: 0.08,
+        bumpSeconds: 0.2,
+        bumpNudgePixels: 2,
 
         /* Sprite feet offsets: how far above the contact shadow each ends. */
         pipFeetOffset: 15,
-        blockFeetOffset: 11,
         fishFeetOffset: 8,
         treeFeetOffset: 19,
         boulderFeetOffset: 9,
+        blockFeetOffset: 11,
 
         /* HUD layout inside the 100px stage. */
         hudTextY: 3,
-        timerCenterX: 18,
-        brakeLabelCenterX: 54,
-        brakePipFirstX: 68,
-        brakePipGapX: 8,
-        brakePipY: 2,
+        fishLabelCenterX: 20,
+        heartFirstX: 62,
+        heartGapX: 8,
+        heartY: 2,
+        dashIconX: 90,
+        dashIconY: 2,
 
         /* How-to and result cards: the title panel is a little wider so the
            twelve-letter game name fits at double size. */
@@ -10600,6 +10637,7 @@ syncSoundUI();
         titleNameY: 22,
         titleLineOneY: 38,
         titleLineGapY: 8,
+        titleSealTopY: 68,
         overCardTop: 18,
         overCardHeight: 60,
         overTitleY: 27,
@@ -10607,6 +10645,7 @@ syncSoundUI();
         overBestY: 54,
         overPromptY: 64,
         overPipCenterX: 16,
+        overSealCenterX: 84,
         overFishCenterX: 84,
         overSpriteFeetY: 36,
 
@@ -10623,6 +10662,23 @@ syncSoundUI();
         previewRimTop: 10,
         previewRimWidth: 172,
         previewRimHeight: 76,
+        previewSealColumn: 5,
+        previewSealRow: 2,
+        previewPipColumn: 1,
+        previewPipRow: 3,
+        previewFishColumn: 6,
+        previewFishRow: 3,
+        previewTreeOneColumn: 0,
+        previewTreeTwoColumn: 2,
+        previewTreeRow: 2,
+        previewBoulderColumn: 6,
+        previewBoulderRow: 1,
+        previewFinColumn: 4,
+        previewFinRow: 3,
+        previewFinDropPixels: 8,
+        previewTreeFeetDropPixels: 3,
+        previewBoulderFeetDropPixels: 4,
+        previewSparkleLiftPixels: 10,
 
         /* Palette: cold ice blues, warm beak and scarf, one golden fish. */
         palette: {
@@ -10650,6 +10706,9 @@ syncSoundUI();
             goldLight: "#FFE39A",
             rock: "#7B8FA1",
             rockLight: "#A9BAC7",
+            sealDark: "#5E6E7E",
+            heart: "#F25C6E",
+            heartLight: "#FF9DB0",
             panel: "rgba(20, 34, 48, 0.94)",
             panelEdge: "rgba(232, 247, 253, 0.18)"
         }
@@ -10701,11 +10760,40 @@ syncSoundUI();
         L: PAL.rockLight
     };
 
-    /* The brake snowflake: snow white with an ice-blue inner star. */
-    const BRAKE_COLORS = {
+    /* The big grey seal: navy outline, pale grey body, snow muzzle and belly. */
+    const SEAL_A_COLORS = {
+        D: PAL.navy,
+        M: PAL.rock,
         W: PAL.snow,
-        L: PAL.iceLight
+        E: PAL.navy,
+        N: PAL.navy
     };
+
+    /* The smaller dark seal: a deeper grey body with the same snow belly. */
+    const SEAL_B_COLORS = {
+        D: PAL.navy,
+        M: PAL.sealDark,
+        W: PAL.snow,
+        E: PAL.navy,
+        N: PAL.navy
+    };
+
+    /* A full heart and a spent one, drawn three times in the HUD. */
+    const HEART_COLORS = {
+        D: PAL.navy,
+        L: PAL.heartLight,
+        W: PAL.heart
+    };
+
+    const HEART_DIM_COLORS = {
+        D: PAL.navy,
+        L: PAL.hudDim,
+        W: PAL.hudDim
+    };
+
+    /* The little dash chevron: bright when ready, dim while recharging. */
+    const DASH_COLORS = { D: PAL.iceLight };
+    const DASH_DIM_COLORS = { D: PAL.hudDim };
 
     /* A one-colour copy of every sprite key, used to draw a soft halo
        behind the two little portraits on the result card. */
@@ -10717,7 +10805,9 @@ syncSoundUI();
         Y: PAL.iceLight,
         R: PAL.iceLight,
         L: PAL.iceLight,
-        B: PAL.iceLight
+        B: PAL.iceLight,
+        E: PAL.iceLight,
+        N: PAL.iceLight
     };
 
     /* The eight pixels around a pixel, walked when drawing the halo. */
@@ -10728,7 +10818,7 @@ syncSoundUI();
     ];
 
     /* Pip facing the camera: the pose he holds on the how-to card and
-       after a downward slide. 14 wide, 16 tall, feet in the last row. */
+       while waddling down. 14 wide, 16 tall, feet in the last row. */
     const PIP_FRONT = [
         "....DDDDDD....",
         "...DMMMMMMD...",
@@ -10748,7 +10838,7 @@ syncSoundUI();
         "..OOO....OOO.."
     ];
 
-    /* Pip from behind, used after a slide upward. */
+    /* Pip from behind, used after a step upward. */
     const PIP_BACK = [
         "....DDDDDD....",
         "...DMMMMMMD...",
@@ -10788,7 +10878,7 @@ syncSoundUI();
         "..OOO..OOO...."
     ];
 
-    /* Pip crouched into a sideways slide, scarf streaming behind him. */
+    /* Pip crouched into a sideways belly-slide, scarf streaming behind him. */
     const PIP_SLIDE_SIDE = [
         "..............",
         "..............",
@@ -10808,7 +10898,7 @@ syncSoundUI();
         ".............."
     ];
 
-    /* Pip crouched into a slide toward the camera. */
+    /* Pip crouched into a belly-slide toward the camera. */
     const PIP_SLIDE_DOWN = [
         "..............",
         "..............",
@@ -10828,7 +10918,7 @@ syncSoundUI();
         ".............."
     ];
 
-    /* Pip crouched into a slide away from the camera. */
+    /* Pip crouched into a belly-slide away from the camera. */
     const PIP_SLIDE_UP = [
         "..............",
         "..............",
@@ -10935,66 +11025,85 @@ syncSoundUI();
         "....DDDD...."
     ];
 
-    /* The brake snowflake, 7 by 7, drawn once per brake left in the HUD. */
-    const BRAKE = [
-        "...W...",
-        ".W.W.W.",
-        "..LWL..",
-        "WLLWLLW",
-        "..LWL..",
-        ".W.W.W.",
-        "...W..."
+    /* The grumpy seal, 16 wide and 10 tall, belly-sliding to the right:
+       round head with a white muzzle, one eye, a dark nose, a forked tail
+       at the left and a long white belly along the ice. */
+    const SEAL = [
+        "................",
+        ".........DDDD...",
+        ".......DDMMMMDD.",
+        "......DMMWWWMMD.",
+        ".....DMMWWEWMMDN",
+        "..D..DMMWWWMMMD.",
+        ".DDDDDMMMMMMMMD.",
+        "DMMMMMMWWWWWWWD.",
+        ".DMMMMWWWWWWWD..",
+        "..DDDDDDDDDD...."
     ];
 
-    /* ---------- the four hand-made layouts ---------- */
+    /* A seven-pixel heart, filled when Pip is safe and dimmed when spent. */
+    const HEART = [
+        ".DD.DD.",
+        "DLWWWWD",
+        "DWWWWWD",
+        "DWWWWWD",
+        ".DWWWD.",
+        "..DWD..",
+        "...D..."
+    ];
 
-    /* Each layout was proved solvable with a small solver before shipping.
-       The comment beside each title is one winning line of presses. */
-    const LAYOUTS = [
-        {
-            title: "FIRST CROSSING",          /* R R R */
-            playerColumn: 1,
-            playerRow: 3,
-            blocks: [{ column: 2, row: 3 }, { column: 1, row: 5 }, { column: 5, row: 2 }],
-            bridges: [{ column: 3, row: 3 }],
-            trees: [{ column: 1, row: 1 }, { column: 5, row: 1 }, { column: 5, row: 5 }],
-            boulders: [{ column: 6, row: 1 }],
-            fishColumn: 6,
-            fishRow: 3
-        },
-        {
-            title: "BRAKE TO LINE UP",        /* up with one brake, then R R R */
-            playerColumn: 1,
-            playerRow: 4,
-            blocks: [{ column: 2, row: 2 }, { column: 5, row: 4 }, { column: 5, row: 5 }],
-            bridges: [{ column: 3, row: 2 }],
-            trees: [{ column: 0, row: 1 }, { column: 6, row: 1 }],
-            boulders: [{ column: 6, row: 0 }],
-            fishColumn: 6,
-            fishRow: 2
-        },
-        {
-            title: "MOVE IT INTO LINE",       /* D D L D R R R */
-            playerColumn: 1,
-            playerRow: 1,
-            blocks: [{ column: 1, row: 2 }, { column: 5, row: 1 }, { column: 5, row: 5 }],
-            bridges: [{ column: 3, row: 4 }],
-            trees: [{ column: 0, row: 1 }, { column: 6, row: 1 }],
-            boulders: [{ column: 1, row: 5 }, { column: 0, row: 5 }],
-            fishColumn: 6,
-            fishRow: 4
-        },
-        {
-            title: "TWO BRIDGES",             /* D R R U, one brake, then the long way */
-            playerColumn: 0,
-            playerRow: 2,
-            blocks: [{ column: 2, row: 3 }, { column: 1, row: 1 }, { column: 5, row: 5 }],
-            bridges: [],
-            trees: [{ column: 5, row: 1 }],
-            boulders: [{ column: 1, row: 4 }, { column: 0, row: 4 }],
-            fishColumn: 6,
-            fishRow: 3
-        }
+    /* The HUD dash chevron: a little forward arrow that dims on cooldown. */
+    const DASH = [
+        "..D....",
+        ".DD....",
+        "DDDDD..",
+        ".DD....",
+        "..D...."
+    ];
+
+    /* The fixed cover on the ice: three pines, two boulders, two blocks.
+       The seals bounce around these, so they also make safe pockets. */
+    const TREES = [
+        { column: 1, row: 1 },
+        { column: 5, row: 1 },
+        { column: 2, row: 5 }
+    ];
+
+    const BOULDERS = [
+        { column: 6, row: 2 },
+        { column: 0, row: 3 }
+    ];
+
+    const BLOCKS = [
+        { column: 6, row: 3 },
+        { column: 3, row: 5 }
+    ];
+
+    /* Seal A loops around the north bridge and the west ice. */
+    const SEAL_A_ROUTE = [
+        { column: 0, row: 0 },
+        { column: 2, row: 0 },
+        { column: 2, row: 2 },
+        { column: 5, row: 2 },
+        { column: 2, row: 2 },
+        { column: 0, row: 2 },
+        { column: 0, row: 0 }
+    ];
+
+    /* Seal B loops the long way round and guards the south bridge. */
+    const SEAL_B_ROUTE = [
+        { column: 6, row: 6 },
+        { column: 5, row: 6 },
+        { column: 5, row: 4 },
+        { column: 2, row: 4 },
+        { column: 0, row: 4 },
+        { column: 0, row: 6 },
+        { column: 1, row: 6 },
+        { column: 1, row: 4 },
+        { column: 2, row: 4 },
+        { column: 5, row: 4 },
+        { column: 6, row: 4 },
+        { column: 6, row: 6 }
     ];
 
     /* The three screens the module can be on. */
@@ -11008,8 +11117,11 @@ syncSoundUI();
         right: { stepX: 1, stepY: 0 }
     };
 
+    /* The four direction names, walked when the game searches the board. */
+    const DIRECTION_NAMES = ["up", "down", "left", "right"];
+
     /* Fixed snowflake spots in the margin ring, so snowfall never hides
-       the puzzle. The clock shifts each one by a pixel or two. */
+       the board. The clock shifts each one by a pixel or two. */
     const SNOWFLAKES = [
         { x: 3, y: 18 }, { x: 95, y: 26 }, { x: 4, y: 46 }, { x: 96, y: 62 },
         { x: 3, y: 78 }, { x: 94, y: 88 }, { x: 5, y: 33 }, { x: 97, y: 44 },
@@ -11019,17 +11131,24 @@ syncSoundUI();
     /* ---------- live state ---------- */
 
     let phase = PHASE.TITLE;
-    let layoutIndex = 0;
-    let playerColumn = 1;
-    let playerRow = 3;
+    let playerColumn = SETTINGS.startColumn;
+    let playerRow = SETTINGS.startRow;
     let pipFacing = "down";
-    let slidePath = [];
-    let slideStepClock = 0;
-    let slideDirection = "right";
-    let slideArmsPush = false;
-    let brakeRequested = false;
-    let brakesLeft = 3;
-    let timeLeft = 60;
+    let waddleMotion = null;
+    let dashMotion = null;
+    let queuedDirection = "";
+    let holdClock = 0;
+    let dashCooldown = 0;
+    let fishColumn = 6;
+    let fishRow = 3;
+    let fishVisible = true;
+    let fishEaten = 0;
+    let fishSpawnClock = 0;
+    let heartsLeft = SETTINGS.heartsPerRun;
+    let invulnerableClock = 0;
+    let seals = [];
+    let secondSealSurfaced = false;
+    let runSeconds = 0;
     let score = 0;
     let bestScore = 0;
     let endReason = "";
@@ -11037,24 +11156,18 @@ syncSoundUI();
     let gameClock = 0;
     let bumpClock = 0;
     let bumpDirection = "down";
-    let armedPush = null;
-    let blockMotion = null;
-    let blocks = [];
-    let bridges = [];
-    let trees = [];
-    let boulders = [];
-    let fishColumn = 6;
-    let fishRow = 3;
     let splashParticles = [];
     let snowPuffs = [];
+    let sparkles = [];
     let statusMessage = "";
     let statusClock = 0;
     let shownScore = null;
     let shownBest = null;
     let shownMessage = null;
+    let patrolOnly = false;
 
     /* Which directions are currently held down, so key repeat never turns
-       one press into a second slide. */
+       one press into a second waddle. */
     const heldDirections = { up: false, down: false, left: false, right: false };
 
     /* ---------- board geometry ---------- */
@@ -11062,6 +11175,11 @@ syncSoundUI();
     /* True when a column belongs to the two-tile river. */
     function isWaterColumn(column) {
         return SETTINGS.waterColumns.indexOf(column) !== -1;
+    }
+
+    /* True when a row carries one of the two permanent bridges. */
+    function isBridgeRow(row) {
+        return SETTINGS.bridgeRows.indexOf(row) !== -1;
     }
 
     /* True when a cell lies inside the seven by seven board. */
@@ -11092,149 +11210,39 @@ syncSoundUI();
 
     /* ---------- board lookups ---------- */
 
-    /* The block standing on a cell, or null when the cell is clear. */
-    function blockAt(column, row) {
-        for (let i = 0; i < blocks.length; i++) {
-            if (blocks[i].column === column && blocks[i].row === row) return blocks[i];
-        }
-        return null;
-    }
-
-    /* The bridge lying on a cell, or null when the water is open. */
-    function bridgeAt(column, row) {
-        for (let i = 0; i < bridges.length; i++) {
-            if (bridges[i].column === column && bridges[i].row === row) return bridges[i];
-        }
-        return null;
-    }
-
-    /* The pine standing on a cell, or null. */
+    /* The pine standing on a cell, or null when the cell is clear. */
     function treeAt(column, row) {
-        for (let i = 0; i < trees.length; i++) {
-            if (trees[i].column === column && trees[i].row === row) return trees[i];
+        for (let i = 0; i < TREES.length; i++) {
+            if (TREES[i].column === column && TREES[i].row === row) return TREES[i];
         }
         return null;
     }
 
     /* The boulder standing on a cell, or null. */
     function boulderAt(column, row) {
-        for (let i = 0; i < boulders.length; i++) {
-            if (boulders[i].column === column && boulders[i].row === row) return boulders[i];
+        for (let i = 0; i < BOULDERS.length; i++) {
+            if (BOULDERS[i].column === column && BOULDERS[i].row === row) return BOULDERS[i];
         }
         return null;
     }
 
-    /* True when Pip may slide into a cell: ice or bridge, with no obstacle. */
+    /* The ice block standing on a cell, or null. */
+    function blockAt(column, row) {
+        for (let i = 0; i < BLOCKS.length; i++) {
+            if (BLOCKS[i].column === column && BLOCKS[i].row === row) return BLOCKS[i];
+        }
+        return null;
+    }
+
+    /* True when Pip may enter a cell: ice or bridge, with no cover. */
     function canPipEnter(column, row) {
         if (!isInsideBoard(column, row)) return false;
-        if (blockAt(column, row) || treeAt(column, row) || boulderAt(column, row)) return false;
-        if (isWaterColumn(column) && !bridgeAt(column, row)) return false;
+        if (treeAt(column, row) || boulderAt(column, row) || blockAt(column, row)) return false;
+        if (isWaterColumn(column) && !isBridgeRow(row)) return false;
         return true;
     }
 
-    /* ---------- setting up a layout ---------- */
-
-    /* Copy one layout into the live state and clear every effect. */
-    function loadLayout(index) {
-        const layout = LAYOUTS[index];
-        layoutIndex = index;
-        playerColumn = layout.playerColumn;
-        playerRow = layout.playerRow;
-        pipFacing = "down";
-        slidePath = [];
-        slideStepClock = 0;
-        brakeRequested = false;
-        armedPush = null;
-        blockMotion = null;
-        bumpClock = 0;
-        blocks = [];
-        for (let i = 0; i < layout.blocks.length; i++) {
-            blocks.push({
-                column: layout.blocks[i].column,
-                row: layout.blocks[i].row
-            });
-        }
-        bridges = [];
-        for (let i = 0; i < layout.bridges.length; i++) {
-            bridges.push({
-                column: layout.bridges[i].column,
-                row: layout.bridges[i].row,
-                natural: true
-            });
-        }
-        trees = [];
-        for (let i = 0; i < layout.trees.length; i++) {
-            trees.push({
-                column: layout.trees[i].column,
-                row: layout.trees[i].row
-            });
-        }
-        boulders = [];
-        for (let i = 0; i < layout.boulders.length; i++) {
-            boulders.push({
-                column: layout.boulders[i].column,
-                row: layout.boulders[i].row
-            });
-        }
-        fishColumn = layout.fishColumn;
-        fishRow = layout.fishRow;
-        splashParticles = [];
-        snowPuffs = [];
-        statusMessage = "";
-        statusClock = 0;
-    }
-
-    /* Pick a layout at random, never the same one twice in a row. */
-    function pickLayoutIndex() {
-        let choice = Math.floor(Math.random() * LAYOUTS.length);
-        if (LAYOUTS.length > 1 && choice === layoutIndex) {
-            choice = (choice + 1) % LAYOUTS.length;
-        }
-        return choice;
-    }
-
-    /* Start a fresh run with a full clock and three brakes. */
-    function beginRun() {
-        loadLayout(layoutIndex);
-        phase = PHASE.PLAY;
-        timeLeft = SETTINGS.roundSeconds;
-        score = SETTINGS.roundSeconds;
-        brakesLeft = SETTINGS.brakesPerRun;
-        gameClock = 0;
-        cheerClock = 0;
-        endReason = "";
-        clearHeld();
-        syncChrome(true);
-    }
-
-    /* End the run on a win or on time, and save a new best score. */
-    function finishRun(reason) {
-        if (phase !== PHASE.PLAY) return;
-        phase = PHASE.OVER;
-        endReason = reason;
-        slidePath = [];
-        slideStepClock = 0;
-        brakeRequested = false;
-        armedPush = null;
-        if (reason === "win") {
-            score = Math.max(0, Math.ceil(timeLeft));
-            cheerClock = 0;
-            if (score > bestScore) {
-                bestScore = score;
-                saveBest(SETTINGS.gameName, bestScore);
-            }
-        } else {
-            score = 0;
-        }
-        syncChrome(true);
-    }
-
-    /* ---------- sliding and pushing ---------- */
-
-    /* True while Pip or a block is still moving; input waits for a rest. */
-    function isBusy() {
-        return slidePath.length > 0 || blockMotion !== null;
-    }
+    /* ---------- waddling and dashing ---------- */
 
     /* Release every held direction, used when a run starts or a screen swaps. */
     function clearHeld() {
@@ -11256,45 +11264,18 @@ syncSoundUI();
         bumpDirection = direction;
     }
 
-    /* Remember a block in front of Pip so the next press pushes it. */
-    function armPushIfBlockAhead(direction) {
-        const step = DIRECTION_STEPS[direction];
-        const aheadColumn = playerColumn + step.stepX;
-        const aheadRow = playerRow + step.stepY;
-        const block = blockAt(aheadColumn, aheadRow);
-        if (block) {
-            armedPush = { block: block, direction: direction };
-            showStatus("PRESS AGAIN TO PUSH");
-        } else {
-            armedPush = null;
-        }
-    }
-
-    /* Try one press in a direction: bump, push, or slide to a rest. */
-    function attemptMove(direction) {
-        const step = DIRECTION_STEPS[direction];
-        const aheadColumn = playerColumn + step.stepX;
-        const aheadRow = playerRow + step.stepY;
+    /* Try one press in a direction: step a tile or bump into the scenery. */
+    function attemptStep(direction) {
+        if (phase !== PHASE.PLAY) return;
         pipFacing = direction;
-        bumpClock = 0;
-
-        const block = blockAt(aheadColumn, aheadRow);
-        if (block) {
-            const repeat = armedPush && armedPush.block === block &&
-                armedPush.direction === direction;
-            if (repeat) {
-                pushBlock(block, direction);
-            } else {
-                armedPush = { block: block, direction: direction };
-                startBump(direction);
-                spawnSnowPuff(aheadColumn, aheadRow);
-                showStatus("PRESS AGAIN TO PUSH");
-            }
+        if (dashMotion) return;
+        if (waddleMotion) {
+            queuedDirection = direction;
             return;
         }
-
-        armedPush = null;
-
+        const step = DIRECTION_STEPS[direction];
+        const aheadColumn = playerColumn + step.stepX;
+        const aheadRow = playerRow + step.stepY;
         if (!isInsideBoard(aheadColumn, aheadRow)) {
             startBump(direction);
             showStatus("THE ICE ENDS HERE");
@@ -11311,169 +11292,442 @@ syncSoundUI();
             showStatus("PIP BUMPED A BOULDER");
             return;
         }
-        if (isWaterColumn(aheadColumn) && !bridgeAt(aheadColumn, aheadRow)) {
+        if (blockAt(aheadColumn, aheadRow)) {
             startBump(direction);
-            showStatus("COLD WATER! PUSH A BLOCK IN");
+            showStatus("PIP BUMPED AN ICE BLOCK");
             return;
         }
+        if (isWaterColumn(aheadColumn) && !isBridgeRow(aheadRow)) {
+            startBump(direction);
+            showStatus("COLD WATER! USE A BRIDGE");
+            return;
+        }
+        waddleMotion = {
+            fromColumn: playerColumn,
+            fromRow: playerRow,
+            clock: 0
+        };
+        playerColumn = aheadColumn;
+        playerRow = aheadRow;
+        queuedDirection = "";
+        bumpClock = 0;
+        statusMessage = "";
+        statusClock = 0;
+    }
 
+    /* Move Pip along the current waddle, then take a queued direction. */
+    function advanceWaddle(dt) {
+        if (!waddleMotion) return;
+        waddleMotion.clock += dt;
+        if (waddleMotion.clock < SETTINGS.waddleSecondsPerTile) return;
+        waddleMotion = null;
+        eatFishIfHere();
+        if (phase !== PHASE.PLAY) return;
+        if (checkSealHit()) return;
+        if (queuedDirection) {
+            const nextDirection = queuedDirection;
+            queuedDirection = "";
+            attemptStep(nextDirection);
+        }
+    }
+
+    /* Repeat the held direction so a long press keeps Pip walking. */
+    function handleHeldDirection(dt) {
+        if (waddleMotion || dashMotion) return;
+        let held = "";
+        if (heldDirections.up) held = "up";
+        else if (heldDirections.down) held = "down";
+        else if (heldDirections.left) held = "left";
+        else if (heldDirections.right) held = "right";
+        if (!held) {
+            holdClock = 0;
+            return;
+        }
+        holdClock += dt;
+        if (holdClock < SETTINGS.heldRepeatSeconds) return;
+        holdClock = 0;
+        attemptStep(held);
+    }
+
+    /* Belly-slide two tiles forward, or explain why the dash cannot fire. */
+    function requestDash() {
+        if (phase !== PHASE.PLAY) return;
+        if (dashCooldown > 0) {
+            showStatus("DASH IS RECHARGING");
+            return;
+        }
+        if (dashMotion || waddleMotion) return;
+        const step = DIRECTION_STEPS[pipFacing];
         const path = [];
         let column = playerColumn;
         let row = playerRow;
-        while (true) {
+        for (let i = 0; i < SETTINGS.dashTiles; i++) {
             const nextColumn = column + step.stepX;
             const nextRow = row + step.stepY;
             if (!canPipEnter(nextColumn, nextRow)) break;
             column = nextColumn;
             row = nextRow;
             path.push({ column: column, row: row });
-            if (column === fishColumn && row === fishRow) break;
         }
         if (path.length === 0) {
-            startBump(direction);
-            showStatus("PIP IS BLOCKED");
+            startBump(pipFacing);
             return;
         }
-
-        slidePath = path;
-        slideStepClock = 0;
-        slideDirection = direction;
-        slideArmsPush = true;
-        brakeRequested = false;
-        statusMessage = "";
-        statusClock = 0;
-    }
-
-    /* Work out where a pushed block travels, and whether it sinks. */
-    function computeBlockPath(block, direction) {
-        const step = DIRECTION_STEPS[direction];
-        let column = block.column;
-        let row = block.row;
-        const path = [];
-        while (true) {
-            const nextColumn = column + step.stepX;
-            const nextRow = row + step.stepY;
-            if (!isInsideBoard(nextColumn, nextRow)) break;
-            if (treeAt(nextColumn, nextRow) || boulderAt(nextColumn, nextRow)) break;
-            if (blockAt(nextColumn, nextRow)) break;
-            if (isWaterColumn(nextColumn)) {
-                if (bridgeAt(nextColumn, nextRow)) {
-                    column = nextColumn;
-                    row = nextRow;
-                    path.push({ column: column, row: row });
-                    continue;
-                }
-                path.push({ column: nextColumn, row: nextRow });
-                return { path: path, moved: true, sink: true };
-            }
-            column = nextColumn;
-            row = nextRow;
-            path.push({ column: column, row: row });
-        }
-        return { path: path, moved: path.length > 0, sink: false };
-    }
-
-    /* Push one block, step Pip into its old tile, and let it slide. */
-    function pushBlock(block, direction) {
-        const plan = computeBlockPath(block, direction);
-        armedPush = null;
-        if (!plan.moved) {
-            startBump(direction);
-            showStatus("THE BLOCK CANNOT MOVE");
-            return;
-        }
-        blockMotion = {
-            block: block,
-            path: plan.path,
-            clock: 0,
-            sink: plan.sink
+        dashMotion = {
+            fromColumn: playerColumn,
+            fromRow: playerRow,
+            path: path,
+            clock: 0
         };
-        slidePath = [{ column: block.column, row: block.row }];
-        slideStepClock = 0;
-        slideDirection = direction;
-        slideArmsPush = false;
-        brakeRequested = false;
+        dashCooldown = SETTINGS.dashCooldownSeconds;
+        spawnDashPuff(playerColumn, playerRow);
         statusMessage = "";
         statusClock = 0;
     }
 
-    /* Move Pip along the current slide path, one tile at a time. */
-    function advanceSlide(dt) {
-        if (slidePath.length === 0) return;
-        slideStepClock += dt;
-        while (slidePath.length > 0 && slideStepClock >= SETTINGS.slideSecondsPerTile) {
-            slideStepClock -= SETTINGS.slideSecondsPerTile;
-            const nextCell = slidePath.shift();
+    /* Move Pip along a dash, checking the fish and the seals every tile. */
+    function advanceDash(dt) {
+        if (!dashMotion) return;
+        dashMotion.clock += dt;
+        while (dashMotion.path.length > 0 &&
+                dashMotion.clock >= SETTINGS.dashSecondsPerTile) {
+            dashMotion.clock -= SETTINGS.dashSecondsPerTile;
+            const nextCell = dashMotion.path.shift();
+            dashMotion.fromColumn = playerColumn;
+            dashMotion.fromRow = playerRow;
             playerColumn = nextCell.column;
             playerRow = nextCell.row;
-            if (brakeRequested) {
-                brakeRequested = false;
-                brakesLeft = Math.max(0, brakesLeft - 1);
-                slidePath = [];
-                slideStepClock = 0;
-                spawnBrakePuff();
-                showStatus("BRAKED! " + brakesLeft + " BRAKES LEFT");
-                if (slideArmsPush) armPushIfBlockAhead(slideDirection);
+            spawnDashPuff(playerColumn, playerRow);
+            eatFishIfHere();
+            if (phase !== PHASE.PLAY) {
+                dashMotion = null;
                 return;
             }
-            if (playerColumn === fishColumn && playerRow === fishRow) {
-                slidePath = [];
-                slideStepClock = 0;
-                finishRun("win");
+            if (checkSealHit()) {
+                dashMotion = null;
                 return;
             }
         }
-        if (slidePath.length === 0) {
-            slideStepClock = 0;
-            if (slideArmsPush) armPushIfBlockAhead(slideDirection);
+        if (dashMotion && dashMotion.path.length === 0 &&
+                dashMotion.clock >= SETTINGS.dashSecondsPerTile) {
+            dashMotion = null;
         }
     }
 
-    /* Move a pushed block along its path; sink it into a bridge at the end. */
-    function advanceBlock(dt) {
-        if (!blockMotion) return;
-        blockMotion.clock += dt;
-        while (blockMotion.path.length > 0 &&
-                blockMotion.clock >= SETTINGS.blockSecondsPerTile) {
-            blockMotion.clock -= SETTINGS.blockSecondsPerTile;
-            const nextCell = blockMotion.path.shift();
-            blockMotion.block.column = nextCell.column;
-            blockMotion.block.row = nextCell.row;
+    /* ---------- seals ---------- */
+
+    /* Build one seal at a route waypoint, aimed at the next waypoint. */
+    function makeSeal(route, waypointIndex, speed, colors) {
+        const point = route[waypointIndex];
+        return {
+            route: route,
+            waypointIndex: (waypointIndex + 1) % route.length,
+            column: point.column,
+            row: point.row,
+            speed: speed,
+            colors: colors,
+            wakeClock: 0,
+            facingRight: true
+        };
+    }
+
+    /* Seal A starts slow and speeds up a little with every fish eaten. */
+    function sealASpeed() {
+        return SETTINGS.sealStartSpeed + fishEaten * SETTINGS.sealSpeedPerFish;
+    }
+
+    /* Seal B starts slower and only speeds up after fish three. */
+    function sealBSpeed() {
+        const extraFish = Math.max(0, fishEaten - SETTINGS.sealSecondFishIndex);
+        return SETTINGS.sealBStartSpeed + extraFish * SETTINGS.sealBSpeedPerFish;
+    }
+
+    /* Keep both seals' speeds in step with the fish Pip has eaten. */
+    function refreshSealSpeeds() {
+        if (seals.length > 0) seals[0].speed = sealASpeed();
+        if (seals.length > 1) seals[1].speed = sealBSpeed();
+    }
+
+    /* Slide every awake seal toward its next waypoint. */
+    function advanceSeals(dt) {
+        for (let i = 0; i < seals.length; i++) {
+            const seal = seals[i];
+            if (seal.wakeClock > 0) {
+                seal.wakeClock = Math.max(0, seal.wakeClock - dt);
+                continue;
+            }
+            const target = seal.route[seal.waypointIndex];
+            const deltaColumn = target.column - seal.column;
+            const deltaRow = target.row - seal.row;
+            const distance = Math.sqrt(deltaColumn * deltaColumn + deltaRow * deltaRow);
+            const stepDistance = seal.speed * dt;
+            if (distance <= stepDistance) {
+                seal.column = target.column;
+                seal.row = target.row;
+                seal.waypointIndex = (seal.waypointIndex + 1) % seal.route.length;
+                const nextPoint = seal.route[seal.waypointIndex];
+                if (nextPoint.column !== seal.column) {
+                    seal.facingRight = nextPoint.column > seal.column;
+                }
+            } else {
+                seal.column += (deltaColumn / distance) * stepDistance;
+                seal.row += (deltaRow / distance) * stepDistance;
+                if (deltaColumn !== 0) seal.facingRight = deltaColumn > 0;
+            }
         }
-        if (blockMotion.path.length > 0) return;
-        if (blockMotion.clock < SETTINGS.blockSecondsPerTile) return;
-        const motion = blockMotion;
-        blockMotion = null;
-        if (motion.sink) {
-            const sinkColumn = motion.block.column;
-            const sinkRow = motion.block.row;
-            blocks = blocks.filter(function (entry) { return entry !== motion.block; });
-            bridges.push({ column: sinkColumn, row: sinkRow, natural: false });
-            spawnSplash(sinkColumn, sinkRow);
-            showStatus("BLOCK SUNK — BRIDGE BUILT");
+    }
+
+    /* Bring the second seal up at the route point farthest from Pip. */
+    function surfaceSecondSeal() {
+        secondSealSurfaced = true;
+        let chosenIndex = 0;
+        let chosenGap = -1;
+        for (let i = 0; i < SEAL_B_ROUTE.length; i++) {
+            const point = SEAL_B_ROUTE[i];
+            if (point.column === fishColumn && point.row === fishRow) continue;
+            if (point.column === playerColumn && point.row === playerRow) continue;
+            const gap = Math.abs(point.column - playerColumn) +
+                Math.abs(point.row - playerRow);
+            if (gap > chosenGap) {
+                chosenGap = gap;
+                chosenIndex = i;
+            }
+        }
+        const seal = makeSeal(SEAL_B_ROUTE, chosenIndex, sealBSpeed(), SEAL_B_COLORS);
+        seal.wakeClock = SETTINGS.sealWakeSeconds;
+        seals.push(seal);
+        spawnSplash(seal.column, seal.row);
+        showStatus("A SECOND SEAL SURFACES!");
+    }
+
+    /* Take a heart when a seal touches Pip, then knock him back one tile. */
+    function bumpPlayer(seal) {
+        heartsLeft = Math.max(0, heartsLeft - 1);
+        invulnerableClock = SETTINGS.sealHitSeconds;
+        waddleMotion = null;
+        dashMotion = null;
+        queuedDirection = "";
+        const knock = knockbackTile(seal);
+        playerColumn = knock.column;
+        playerRow = knock.row;
+        spawnSnowPuff(playerColumn, playerRow);
+        if (heartsLeft <= 0) {
+            showStatus("THE SEALS GOT YOU!");
+            finishRun("lose");
+            return;
+        }
+        showStatus("THE SEAL BUMPED PIP! " + heartsLeft + " HEARTS LEFT");
+    }
+
+    /* Pick the tile one step away from a seal, staying on safe ground. */
+    function knockbackTile(seal) {
+        const gapColumn = playerColumn - seal.column;
+        const gapRow = playerRow - seal.row;
+        let stepColumn = 0;
+        let stepRow = 0;
+        if (Math.abs(gapColumn) >= Math.abs(gapRow)) {
+            stepColumn = gapColumn >= 0 ? 1 : -1;
         } else {
-            showStatus("BLOCK SLID TO A STOP");
+            stepRow = gapRow >= 0 ? 1 : -1;
+        }
+        if (canPipEnter(playerColumn + stepColumn, playerRow + stepRow)) {
+            return { column: playerColumn + stepColumn, row: playerRow + stepRow };
+        }
+        if (stepColumn !== 0) {
+            const fallbackRow = gapRow >= 0 ? 1 : -1;
+            if (canPipEnter(playerColumn, playerRow + fallbackRow)) {
+                return { column: playerColumn, row: playerRow + fallbackRow };
+            }
+        } else {
+            const fallbackColumn = gapColumn >= 0 ? 1 : -1;
+            if (canPipEnter(playerColumn + fallbackColumn, playerRow)) {
+                return { column: playerColumn + fallbackColumn, row: playerRow };
+            }
+        }
+        return { column: playerColumn, row: playerRow };
+    }
+
+    /* True when any awake seal is close enough to touch Pip this frame. */
+    function checkSealHit() {
+        if (phase !== PHASE.PLAY) return false;
+        if (patrolOnly) return false;
+        if (invulnerableClock > 0) return false;
+        for (let i = 0; i < seals.length; i++) {
+            if (seals[i].wakeClock > 0) continue;
+            const gapColumn = seals[i].column - playerColumn;
+            const gapRow = seals[i].row - playerRow;
+            const distance = Math.sqrt(gapColumn * gapColumn + gapRow * gapRow);
+            if (distance <= SETTINGS.sealHitRadiusTiles) {
+                bumpPlayer(seals[i]);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /* ---------- fish and scoring ---------- */
+
+    /* Flood-fill the tiles Pip can walk to from where he stands. */
+    function collectReachableTiles() {
+        const reachable = [];
+        for (let row = 0; row < SETTINGS.gridRows; row++) {
+            const rowFlags = [];
+            for (let column = 0; column < SETTINGS.gridColumns; column++) {
+                rowFlags.push(false);
+            }
+            reachable.push(rowFlags);
+        }
+        const queue = [{ column: playerColumn, row: playerRow }];
+        reachable[playerRow][playerColumn] = true;
+        while (queue.length > 0) {
+            const cell = queue.shift();
+            for (let i = 0; i < DIRECTION_NAMES.length; i++) {
+                const step = DIRECTION_STEPS[DIRECTION_NAMES[i]];
+                const nextColumn = cell.column + step.stepX;
+                const nextRow = cell.row + step.stepY;
+                if (!canPipEnter(nextColumn, nextRow)) continue;
+                if (reachable[nextRow][nextColumn]) continue;
+                reachable[nextRow][nextColumn] = true;
+                queue.push({ column: nextColumn, row: nextRow });
+            }
+        }
+        return reachable;
+    }
+
+    /* Collect every tile a fish may safely appear on, at a chosen gap. */
+    function collectFishTiles(minimumPlayerGap) {
+        const options = [];
+        const reachable = collectReachableTiles();
+        for (let row = 0; row < SETTINGS.gridRows; row++) {
+            for (let column = 0; column < SETTINGS.gridColumns; column++) {
+                if (!canPipEnter(column, row)) continue;
+                if (!reachable[row][column]) continue;
+                if (column === playerColumn && row === playerRow) continue;
+                const playerGap = Math.abs(column - playerColumn) +
+                    Math.abs(row - playerRow);
+                if (playerGap < minimumPlayerGap) continue;
+                let safe = true;
+                for (let i = 0; i < seals.length; i++) {
+                    const sealGap = Math.abs(column - seals[i].column) +
+                        Math.abs(row - seals[i].row);
+                    if (sealGap < SETTINGS.spawnSafeTiles) safe = false;
+                }
+                if (safe) options.push({ column: column, row: row });
+            }
+        }
+        return options;
+    }
+
+    /* Put one fish on a fair tile, falling back to a looser player gap. */
+    function spawnFish() {
+        let options = collectFishTiles(SETTINGS.spawnPlayerGapTiles);
+        if (options.length === 0) options = collectFishTiles(1);
+        if (options.length === 0) return false;
+        const choice = options[Math.floor(Math.random() * options.length)];
+        fishColumn = choice.column;
+        fishRow = choice.row;
+        fishVisible = true;
+        return true;
+    }
+
+    /* Wait a beat, then place the next fish when the last one is gone. */
+    function advanceFishSpawn(dt) {
+        if (fishVisible) return;
+        fishSpawnClock -= dt;
+        if (fishSpawnClock > 0) return;
+        if (spawnFish()) {
+            fishSpawnClock = 0;
+        } else {
+            fishSpawnClock = SETTINGS.fishRetrySeconds;
         }
     }
 
-    /* Brake Pip at the next tile, spending one of the three brakes. */
-    function requestBrake() {
-        if (slidePath.length === 0) {
-            showStatus("PIP IS ALREADY STOPPED");
+    /* Eat the fish under Pip, then surface seal two or end on the sixth. */
+    function eatFishIfHere() {
+        if (!fishVisible) return;
+        if (playerColumn !== fishColumn || playerRow !== fishRow) return;
+        fishVisible = false;
+        fishEaten += 1;
+        spawnSparkles(fishColumn, fishRow);
+        fishSpawnClock = SETTINGS.fishSpawnDelaySeconds;
+        refreshSealSpeeds();
+        if (fishEaten >= SETTINGS.fishToWin) {
+            finishRun("win");
             return;
         }
-        if (brakesLeft <= 0) {
-            showStatus("NO BRAKES LEFT");
+        if (fishEaten >= SETTINGS.sealSecondFishIndex && !secondSealSurfaced) {
+            surfaceSecondSeal();
             return;
         }
-        if (brakeRequested) return;
-        brakeRequested = true;
-        showStatus("BRAKE READY");
+        showStatus("FISH " + fishEaten + " OF " + SETTINGS.fishToWin);
+    }
+
+    /* The score shown while playing: fish, hearts and a shrinking time bonus. */
+    function currentScore() {
+        const secondsLeft = Math.max(0, SETTINGS.timeBonusSeconds - runSeconds);
+        const timeBonus = Math.floor(secondsLeft * SETTINGS.timeBonusPointsPerSecond);
+        return fishEaten * SETTINGS.fishPoints +
+            heartsLeft * SETTINGS.heartPoints + timeBonus;
+    }
+
+    /* End the run on a win or on the last heart, and save a new best. */
+    function finishRun(reason) {
+        if (phase !== PHASE.PLAY) return;
+        phase = PHASE.OVER;
+        endReason = reason;
+        waddleMotion = null;
+        dashMotion = null;
+        queuedDirection = "";
+        clearHeld();
+        if (reason === "win") {
+            score = currentScore();
+            cheerClock = 0;
+        } else {
+            score = fishEaten * SETTINGS.fishPoints;
+        }
+        if (score > bestScore) {
+            bestScore = score;
+            saveBest(SETTINGS.gameName, bestScore);
+        }
+        syncChrome(true);
+    }
+
+    /* Start a fresh run with six fish to find and three hearts to keep. */
+    function beginRun() {
+        phase = PHASE.PLAY;
+        playerColumn = SETTINGS.startColumn;
+        playerRow = SETTINGS.startRow;
+        pipFacing = "down";
+        waddleMotion = null;
+        dashMotion = null;
+        queuedDirection = "";
+        holdClock = 0;
+        dashCooldown = 0;
+        heartsLeft = SETTINGS.heartsPerRun;
+        invulnerableClock = 0;
+        fishEaten = 0;
+        fishVisible = false;
+        fishSpawnClock = 0;
+        runSeconds = 0;
+        score = 0;
+        endReason = "";
+        cheerClock = 0;
+        bumpClock = 0;
+        secondSealSurfaced = false;
+        patrolOnly = false;
+        seals = [makeSeal(SEAL_A_ROUTE, 0, sealASpeed(), SEAL_A_COLORS)];
+        splashParticles = [];
+        snowPuffs = [];
+        sparkles = [];
+        statusMessage = "";
+        statusClock = 0;
+        clearHeld();
+        syncChrome(true);
     }
 
     /* ---------- small effects ---------- */
 
-    /* Throw a few water droplets up from a sinking block. */
+    /* Throw a few water droplets up where a seal breaks the surface. */
     function spawnSplash(column, row) {
         const centerX = cellCenterX(column);
         const feetY = cellFeetY(row);
@@ -11488,7 +11742,7 @@ syncSoundUI();
         }
     }
 
-    /* Puff a little snow where Pip bumps a tree or a block. */
+    /* Puff a little snow where Pip bumps the scenery or gets knocked back. */
     function spawnSnowPuff(column, row) {
         const centerX = cellCenterX(column);
         const feetY = cellFeetY(row);
@@ -11502,21 +11756,37 @@ syncSoundUI();
         }
     }
 
-    /* A small ring of snow when the brakes bite. */
-    function spawnBrakePuff() {
-        const feetX = cellCenterX(playerColumn);
-        const feetY = cellFeetY(playerRow);
-        for (let i = 0; i < 6; i++) {
+    /* A trail of snow kicked up behind the belly-slide dash. */
+    function spawnDashPuff(column, row) {
+        const centerX = cellCenterX(column);
+        const feetY = cellFeetY(row);
+        for (let i = 0; i < 4; i++) {
             snowPuffs.push({
-                x: feetX + (i - 3) * 2,
-                y: feetY,
-                velocityY: -6 - (i % 3) * 2,
+                x: centerX + (i - 2) * 4,
+                y: feetY - 1,
+                velocityY: -4 - i,
                 life: SETTINGS.snowPuffSeconds
             });
         }
     }
 
-    /* Let splashes fall and snow puffs fade, then drop the finished ones. */
+    /* A little burst of gold when Pip eats a fish. */
+    function spawnSparkles(column, row) {
+        const centerX = cellCenterX(column);
+        const feetY = cellFeetY(row);
+        for (let i = 0; i < 6; i++) {
+            sparkles.push({
+                x: centerX,
+                y: feetY - 4,
+                velocityX: (i - 3) * SETTINGS.sparkleSpreadPixels,
+                velocityY: -SETTINGS.sparkleLiftPixels -
+                    (i % 3) * SETTINGS.sparkleLiftStepPixels,
+                life: SETTINGS.sparkleSeconds
+            });
+        }
+    }
+
+    /* Let splashes, snow puffs and sparkles fade, then drop the finished ones. */
     function updateParticles(dt) {
         for (let i = splashParticles.length - 1; i >= 0; i--) {
             const particle = splashParticles[i];
@@ -11531,6 +11801,14 @@ syncSoundUI();
             puff.life -= dt;
             puff.y += puff.velocityY * dt;
             if (puff.life <= 0) snowPuffs.splice(i, 1);
+        }
+        for (let i = sparkles.length - 1; i >= 0; i--) {
+            const sparkle = sparkles[i];
+            sparkle.life -= dt;
+            sparkle.x += sparkle.velocityX * dt;
+            sparkle.y += sparkle.velocityY * dt;
+            sparkle.velocityY += SETTINGS.splashGravityPixels * dt;
+            if (sparkle.life <= 0) sparkles.splice(i, 1);
         }
     }
 
@@ -11595,20 +11873,21 @@ syncSoundUI();
         const left = cellLeft(column);
         const top = cellTop(row);
         const size = SETTINGS.cellSizePixels;
-        const phase = Math.floor(gameClock / SETTINGS.rippleSeconds) % 3;
+        const ripplePhase = Math.floor(gameClock / SETTINGS.rippleSeconds) % 3;
         ctx.fillStyle = PAL.water;
         ctx.fillRect(left, top, size, size);
         ctx.fillStyle = PAL.waterDark;
         ctx.fillRect(left, top + size - 1, size, 1);
         ctx.fillStyle = PAL.waterLight;
-        ctx.fillRect(left + 2 + ((column + phase) % 3), top + 2 + ((row * 2 + phase) % 6), 3, 1);
-        if ((row + column + phase) % 3 === 0) {
+        ctx.fillRect(left + 2 + ((column + ripplePhase) % 3),
+            top + 2 + ((row * 2 + ripplePhase) % 6), 3, 1);
+        if ((row + column + ripplePhase) % 3 === 0) {
             ctx.fillRect(left + size - 5, top + size - 4, 2, 1);
         }
     }
 
-    /* Paint a bridge deck over the water, one or two tiles long. */
-    function paintBridgeDeck(ctx, column, row, tileCount, natural) {
+    /* Paint a permanent bridge deck over the two river columns. */
+    function paintBridgeDeck(ctx, column, row, tileCount) {
         const left = cellLeft(column);
         const top = cellTop(row);
         const size = SETTINGS.cellSizePixels;
@@ -11617,7 +11896,7 @@ syncSoundUI();
         ctx.fillRect(left - 1, top, width + 2, size);
         ctx.fillStyle = PAL.iceShade;
         ctx.fillRect(left, top + 1, width, size - 2);
-        ctx.fillStyle = natural ? PAL.snow : PAL.iceLight;
+        ctx.fillStyle = PAL.snow;
         ctx.fillRect(left, top + 1, width, size - 3);
         ctx.fillStyle = PAL.ice;
         ctx.fillRect(left + 1, top + 3, width - 2, size - 6);
@@ -11626,12 +11905,10 @@ syncSoundUI();
         ctx.fillRect(left + 3, top + size - 3, 2, 1);
         ctx.fillStyle = PAL.iceShade;
         ctx.fillRect(left + 1, top + size - 2, width - 2, 1);
-        if (natural) {
-            ctx.fillStyle = PAL.pineLight;
-            ctx.fillRect(left + width - 4, top + 5, 1, 2);
-            ctx.fillStyle = PAL.snow;
-            ctx.fillRect(left + width - 5, top + 4, 1, 1);
-        }
+        ctx.fillStyle = PAL.pineLight;
+        ctx.fillRect(left + width - 4, top + 5, 1, 2);
+        ctx.fillStyle = PAL.snow;
+        ctx.fillRect(left + width - 5, top + 4, 1, 1);
     }
 
     /* Paint the animated foam line where the ice meets the river. */
@@ -11651,7 +11928,7 @@ syncSoundUI();
         }
     }
 
-    /* Paint every tile, then the bridges, then the foam banks. */
+    /* Paint every tile, then the two bridge decks, then the foam banks. */
     function paintBoard(ctx) {
         for (let row = 0; row < SETTINGS.gridRows; row++) {
             for (let column = 0; column < SETTINGS.gridColumns; column++) {
@@ -11662,15 +11939,9 @@ syncSoundUI();
                 }
             }
         }
-        for (let i = 0; i < bridges.length; i++) {
-            const bridge = bridges[i];
-            const partner = bridgeAt(bridge.column + 1, bridge.row);
-            const isFirstWaterColumn = bridge.column === SETTINGS.waterColumns[0];
-            if (isFirstWaterColumn && partner) {
-                paintBridgeDeck(ctx, bridge.column, bridge.row, 2, bridge.natural);
-            } else if (!bridgeAt(bridge.column - 1, bridge.row)) {
-                paintBridgeDeck(ctx, bridge.column, bridge.row, 1, bridge.natural);
-            }
+        for (let i = 0; i < SETTINGS.bridgeRows.length; i++) {
+            paintBridgeDeck(ctx, SETTINGS.waterColumns[0],
+                SETTINGS.bridgeRows[i], SETTINGS.waterColumns.length);
         }
         paintFoam(ctx);
     }
@@ -11683,31 +11954,51 @@ syncSoundUI();
         ctx.fillRect(centerX - halfWidth, feetY, halfWidth * 2, 1);
     }
 
+    /* The drawn feet point of a seal, from its fractional board position. */
+    function sealFeetPosition(seal) {
+        return {
+            x: SETTINGS.boardLeft + seal.column * SETTINGS.cellSizePixels +
+                SETTINGS.cellHalfPixels,
+            y: SETTINGS.boardTop + seal.row * SETTINGS.cellSizePixels +
+                SETTINGS.cellFeetPixels
+        };
+    }
+
     /* Paint every contact shadow first so they always sit on the ice. */
     function paintShadows(ctx) {
-        for (let i = 0; i < trees.length; i++) {
-            paintShadow(ctx, cellCenterX(trees[i].column), cellFeetY(trees[i].row), 4);
+        for (let i = 0; i < TREES.length; i++) {
+            paintShadow(ctx, cellCenterX(TREES[i].column), cellFeetY(TREES[i].row), 4);
         }
-        for (let i = 0; i < boulders.length; i++) {
-            paintShadow(ctx, cellCenterX(boulders[i].column), cellFeetY(boulders[i].row), 4);
+        for (let i = 0; i < BOULDERS.length; i++) {
+            paintShadow(ctx, cellCenterX(BOULDERS[i].column), cellFeetY(BOULDERS[i].row), 4);
         }
-        for (let i = 0; i < blocks.length; i++) {
-            const feet = blockFeetPosition(blocks[i]);
-            paintShadow(ctx, feet.x, feet.y, 5);
+        for (let i = 0; i < BLOCKS.length; i++) {
+            paintShadow(ctx, cellCenterX(BLOCKS[i].column), cellFeetY(BLOCKS[i].row), 5);
         }
-        paintShadow(ctx, cellCenterX(fishColumn), cellFeetY(fishRow), 4);
+        for (let i = 0; i < seals.length; i++) {
+            const sealFeet = sealFeetPosition(seals[i]);
+            paintShadow(ctx, sealFeet.x, sealFeet.y, SETTINGS.sealShadowHalfWidth);
+        }
+        if (fishVisible) {
+            paintShadow(ctx, cellCenterX(fishColumn), cellFeetY(fishRow), 4);
+        }
         paintShadow(ctx, pipFeetPosition().x, pipFeetPosition().y, 5);
     }
 
-    /* Pip's feet position in stage pixels, interpolated along a slide. */
+    /* Pip's feet position in stage pixels, interpolated along a move. */
     function pipFeetPosition() {
         let feetX = cellCenterX(playerColumn);
         let feetY = cellFeetY(playerRow);
-        if (slidePath.length > 0) {
-            const nextCell = slidePath[0];
-            const progress = Math.min(1, slideStepClock / SETTINGS.slideSecondsPerTile);
-            feetX += (cellCenterX(nextCell.column) - feetX) * progress;
-            feetY += (cellFeetY(nextCell.row) - feetY) * progress;
+        if (waddleMotion) {
+            const progress = Math.min(1,
+                waddleMotion.clock / SETTINGS.waddleSecondsPerTile);
+            feetX += (cellCenterX(waddleMotion.fromColumn) - feetX) * (1 - progress);
+            feetY += (cellFeetY(waddleMotion.fromRow) - feetY) * (1 - progress);
+        } else if (dashMotion && dashMotion.path.length > 0) {
+            const progress = Math.min(1,
+                dashMotion.clock / SETTINGS.dashSecondsPerTile);
+            feetX += (cellCenterX(dashMotion.fromColumn) - feetX) * (1 - progress);
+            feetY += (cellFeetY(dashMotion.fromRow) - feetY) * (1 - progress);
         }
         if (bumpClock > 0) {
             const step = DIRECTION_STEPS[bumpDirection];
@@ -11715,19 +12006,6 @@ syncSoundUI();
             const nudge = Math.sin(progress * Math.PI) * SETTINGS.bumpNudgePixels;
             feetX += step.stepX * nudge;
             feetY += step.stepY * nudge;
-        }
-        return { x: feetX, y: feetY };
-    }
-
-    /* A block's feet position, interpolated while it slides. */
-    function blockFeetPosition(block) {
-        let feetX = cellCenterX(block.column);
-        let feetY = cellFeetY(block.row);
-        if (blockMotion && blockMotion.block === block && blockMotion.path.length > 0) {
-            const nextCell = blockMotion.path[0];
-            const progress = Math.min(1, blockMotion.clock / SETTINGS.blockSecondsPerTile);
-            feetX += (cellCenterX(nextCell.column) - feetX) * progress;
-            feetY += (cellFeetY(nextCell.row) - feetY) * progress;
         }
         return { x: feetX, y: feetY };
     }
@@ -11748,18 +12026,21 @@ syncSoundUI();
 
     /* Paint one ice block, with a tiny glint that blinks now and then. */
     function paintBlock(ctx, block) {
-        const feet = blockFeetPosition(block);
-        paintPixels(ctx, BLOCK, BLOCK_COLORS, feet.x - 6,
-            feet.y - SETTINGS.blockFeetOffset, false, 1);
+        const centerX = cellCenterX(block.column);
+        const feetY = cellFeetY(block.row);
+        paintPixels(ctx, BLOCK, BLOCK_COLORS, centerX - 6,
+            feetY - SETTINGS.blockFeetOffset, false, 1);
         if (Math.floor(gameClock / SETTINGS.rippleSeconds) % 3 === 0) {
             ctx.fillStyle = PAL.snow;
-            ctx.fillRect(feet.x - 2, feet.y - SETTINGS.sparkleRisePixels, 1, 1);
+            ctx.fillRect(centerX - 2, feetY - SETTINGS.sparkleRisePixels, 1, 1);
         }
     }
 
     /* Paint the golden fish with a gentle bob and a blinking sparkle. */
     function paintFish(ctx) {
-        const bob = Math.round(Math.sin(gameClock * (Math.PI * 2) / SETTINGS.fishBobSeconds));
+        if (!fishVisible) return;
+        const bob = Math.round(Math.sin(gameClock * (Math.PI * 2) /
+            SETTINGS.fishBobSeconds));
         const centerX = cellCenterX(fishColumn);
         const feetY = cellFeetY(fishRow) + bob;
         paintPixels(ctx, FISH, FISH_COLORS, centerX - 6,
@@ -11771,10 +12052,28 @@ syncSoundUI();
         }
     }
 
-    /* Pick Pip's pose from his facing and whether he is sliding. */
+    /* Paint one seal, with a wake-up ring and a "!" while it surfaces. */
+    function paintSeal(ctx, seal) {
+        const feet = sealFeetPosition(seal);
+        const map = SEAL;
+        const halfWidth = Math.floor(map[0].length / 2);
+        const left = Math.round(feet.x) - halfWidth;
+        const top = Math.round(feet.y) - SETTINGS.sealFeetOffset;
+        const flip = !seal.facingRight;
+        if (seal.wakeClock > 0) {
+            ctx.fillStyle = PAL.iceLight;
+            ctx.fillRect(Math.round(feet.x) - SETTINGS.sealWakeRingPixels,
+                Math.round(feet.y) - 1, SETTINGS.sealWakeRingPixels * 2, 1);
+            paintPixelText(ctx, "!", Math.round(feet.x), top - 8,
+                PAL.gold, PAL.navy, 1);
+        }
+        paintPixels(ctx, map, seal.colors, left, top, flip, 1);
+    }
+
+    /* Pick Pip's pose from his facing and whether he is dashing. */
     function pipMap() {
         if (phase === PHASE.OVER && endReason === "win") return PIP_CHEER;
-        if (slidePath.length > 0) {
+        if (dashMotion) {
             if (pipFacing === "up") return PIP_SLIDE_UP;
             if (pipFacing === "down") return PIP_SLIDE_DOWN;
             return PIP_SLIDE_SIDE;
@@ -11784,14 +12083,18 @@ syncSoundUI();
         return PIP_FRONT;
     }
 
-    /* Paint Pip at his interpolated spot, with a hop on the win card. */
+    /* Paint Pip at his interpolated spot, blinking while he is safe. */
     function paintPip(ctx) {
+        if (invulnerableClock > 0 &&
+                Math.floor(gameClock / SETTINGS.blinkSeconds) % 2 === 0) {
+            return;
+        }
         const feet = pipFeetPosition();
         const map = pipMap();
         const flip = pipFacing === "right";
         let bob = 0;
-        if (slidePath.length > 0) {
-            bob = Math.floor(gameClock / SETTINGS.waddleSeconds) % 2;
+        if (waddleMotion) {
+            bob = Math.floor(gameClock / SETTINGS.waddleSecondsPerTile) % 2;
         }
         if (phase === PHASE.OVER && endReason === "win") {
             bob = Math.round(Math.abs(Math.sin(cheerClock * Math.PI * 2)) * 2);
@@ -11804,18 +12107,22 @@ syncSoundUI();
     /* Paint every standing thing in feet-depth order. */
     function paintEntities(ctx) {
         const entities = [];
-        for (let i = 0; i < trees.length; i++) {
-            entities.push({ kind: 0, feetY: cellFeetY(trees[i].row), item: trees[i] });
+        for (let i = 0; i < TREES.length; i++) {
+            entities.push({ kind: 0, feetY: cellFeetY(TREES[i].row), item: TREES[i] });
         }
-        for (let i = 0; i < boulders.length; i++) {
-            entities.push({ kind: 1, feetY: cellFeetY(boulders[i].row), item: boulders[i] });
+        for (let i = 0; i < BOULDERS.length; i++) {
+            entities.push({ kind: 1, feetY: cellFeetY(BOULDERS[i].row), item: BOULDERS[i] });
         }
-        for (let i = 0; i < blocks.length; i++) {
-            const feet = blockFeetPosition(blocks[i]);
-            entities.push({ kind: 2, feetY: feet.y, item: blocks[i] });
+        for (let i = 0; i < BLOCKS.length; i++) {
+            entities.push({ kind: 2, feetY: cellFeetY(BLOCKS[i].row), item: BLOCKS[i] });
         }
-        entities.push({ kind: 3, feetY: cellFeetY(fishRow), item: null });
-        entities.push({ kind: 4, feetY: pipFeetPosition().y, item: null });
+        for (let i = 0; i < seals.length; i++) {
+            entities.push({ kind: 4, feetY: sealFeetPosition(seals[i]).y, item: seals[i] });
+        }
+        if (fishVisible) {
+            entities.push({ kind: 3, feetY: cellFeetY(fishRow), item: null });
+        }
+        entities.push({ kind: 5, feetY: pipFeetPosition().y, item: null });
         entities.sort(function (first, second) {
             return first.feetY - second.feetY || first.kind - second.kind;
         });
@@ -11825,11 +12132,12 @@ syncSoundUI();
             else if (entity.kind === 1) paintBoulder(ctx, entity.item);
             else if (entity.kind === 2) paintBlock(ctx, entity.item);
             else if (entity.kind === 3) paintFish(ctx);
+            else if (entity.kind === 4) paintSeal(ctx, entity.item);
             else paintPip(ctx);
         }
     }
 
-    /* Paint splash droplets and snow puffs. */
+    /* Paint splash droplets, snow puffs and gold sparkles. */
     function paintParticles(ctx) {
         for (let i = 0; i < splashParticles.length; i++) {
             const particle = splashParticles[i];
@@ -11842,24 +12150,30 @@ syncSoundUI();
             ctx.fillStyle = PAL.snow;
             ctx.fillRect(Math.round(puff.x), Math.round(puff.y), 1, 1);
         }
+        for (let i = 0; i < sparkles.length; i++) {
+            const sparkle = sparkles[i];
+            ctx.fillStyle = PAL.goldLight;
+            ctx.fillRect(Math.round(sparkle.x), Math.round(sparkle.y), 1, 1);
+        }
     }
 
-    /* Paint the top band: the countdown, the BRAKE label and three pips. */
+    /* Paint the top band: fish count, three hearts and the dash chevron. */
     function paintHud(ctx) {
         ctx.fillStyle = PAL.hud;
         ctx.fillRect(0, 0, SETTINGS.stageSize, SETTINGS.hudHeight);
         ctx.fillStyle = PAL.hudLine;
         ctx.fillRect(0, SETTINGS.hudHeight - 1, SETTINGS.stageSize, 1);
-        paintPixelText(ctx, "TIME " + Math.ceil(timeLeft), SETTINGS.timerCenterX,
-            SETTINGS.hudTextY, PAL.snow, null, 1);
-        paintPixelText(ctx, "BRAKE", SETTINGS.brakeLabelCenterX,
-            SETTINGS.hudTextY, PAL.iceLight, null, 1);
-        for (let i = 0; i < SETTINGS.brakesPerRun; i++) {
-            const color = i < brakesLeft ? PAL.snow : PAL.hudDim;
-            paintPixels(ctx, BRAKE, { W: color, L: color },
-                SETTINGS.brakePipFirstX + i * SETTINGS.brakePipGapX,
-                SETTINGS.brakePipY, false, 1);
+        paintPixelText(ctx, "FISH " + fishEaten + "/" + SETTINGS.fishToWin,
+            SETTINGS.fishLabelCenterX, SETTINGS.hudTextY, PAL.snow, null, 1);
+        for (let i = 0; i < SETTINGS.heartsPerRun; i++) {
+            const colors = i < heartsLeft ? HEART_COLORS : HEART_DIM_COLORS;
+            paintPixels(ctx, HEART, colors,
+                SETTINGS.heartFirstX + i * SETTINGS.heartGapX,
+                SETTINGS.heartY, false, 1);
         }
+        const dashColors = dashCooldown <= 0 ? DASH_COLORS : DASH_DIM_COLORS;
+        paintPixels(ctx, DASH, dashColors, SETTINGS.dashIconX,
+            SETTINGS.dashIconY, false, 1);
     }
 
     /* ---------- cards ---------- */
@@ -11876,21 +12190,19 @@ syncSoundUI();
     function paintTitleCard(ctx) {
         paintCardPanel(ctx, SETTINGS.titleCardLeft, SETTINGS.titleCardTop,
             SETTINGS.titleCardWidth, SETTINGS.titleCardHeight);
-        paintPixelText(ctx, SETTINGS.gameName, 50, SETTINGS.titleNameY, PAL.gold, PAL.navy, 2);
-        paintPixelText(ctx, "SLIDE TO THE FISH", 50, SETTINGS.titleLineOneY,
-            PAL.snow, null, 1);
-        paintPixelText(ctx, "STOP BRAKES 3 TIMES", 50,
+        paintPixelText(ctx, SETTINGS.gameName, SETTINGS.stageCenterX,
+            SETTINGS.titleNameY, PAL.gold, PAL.navy, 2);
+        paintPixelText(ctx, "EAT 6 FISH TO WIN", SETTINGS.stageCenterX,
+            SETTINGS.titleLineOneY, PAL.snow, null, 1);
+        paintPixelText(ctx, "DODGE THE SEALS", SETTINGS.stageCenterX,
             SETTINGS.titleLineOneY + SETTINGS.titleLineGapY, PAL.iceLight, null, 1);
-        paintPixelText(ctx, "PUSH BLOCKS IN WATER", 50,
+        paintPixelText(ctx, "SPACE TO BELLY-SLIDE", SETTINGS.stageCenterX,
             SETTINGS.titleLineOneY + SETTINGS.titleLineGapY * 2, PAL.snow, null, 1);
-        paintPixelText(ctx, "TAP OR PRESS A KEY", 50,
+        paintPixelText(ctx, "TAP OR PRESS A KEY", SETTINGS.stageCenterX,
             SETTINGS.titleLineOneY + SETTINGS.titleLineGapY * 3, PAL.iceLight, null, 1);
-        if (Math.floor(gameClock / SETTINGS.titleBlinkSeconds) % 2 === 0) {
-            paintPixels(ctx, BRAKE, BRAKE_COLORS, 50 - SETTINGS.titleLineGapY,
-                SETTINGS.titleLineOneY + SETTINGS.titleLineGapY * 4, false, 1);
-            paintPixels(ctx, BRAKE, BRAKE_COLORS, 50 + SETTINGS.titleLineGapY,
-                SETTINGS.titleLineOneY + SETTINGS.titleLineGapY * 4, false, 1);
-        }
+        paintPixels(ctx, SEAL, SEAL_A_COLORS,
+            SETTINGS.stageCenterX - Math.floor(SEAL[0].length / 2),
+            SETTINGS.titleSealTopY, false, 1);
     }
 
     /* Paint a sprite with a one-pixel halo so it pops on a dark card. */
@@ -11902,7 +12214,7 @@ syncSoundUI();
         paintPixels(ctx, map, colors, left, top, false, 1);
     }
 
-    /* Paint Pip and the golden fish flanking the result card's title. */
+    /* Paint Pip and a fish or a seal flanking the result card's title. */
     function paintCardSprites(ctx, won) {
         const pipMap = won ? PIP_CHEER : PIP_FRONT;
         const bob = won ? Math.round(Math.abs(Math.sin(cheerClock * Math.PI * 2)) * 2) : 0;
@@ -11910,31 +12222,33 @@ syncSoundUI();
         paintHaloSprite(ctx, pipMap, PIP_COLORS,
             SETTINGS.overPipCenterX - pipHalfWidth,
             SETTINGS.overSpriteFeetY - SETTINGS.pipFeetOffset - bob);
-        const fishHalfWidth = Math.floor(FISH[0].length / 2);
-        paintHaloSprite(ctx, FISH, FISH_COLORS,
-            SETTINGS.overFishCenterX - fishHalfWidth,
-            SETTINGS.overSpriteFeetY - SETTINGS.fishFeetOffset);
+        if (won) {
+            const fishHalfWidth = Math.floor(FISH[0].length / 2);
+            paintHaloSprite(ctx, FISH, FISH_COLORS,
+                SETTINGS.overFishCenterX - fishHalfWidth,
+                SETTINGS.overSpriteFeetY - SETTINGS.fishFeetOffset);
+        } else {
+            const sealHalfWidth = Math.floor(SEAL[0].length / 2);
+            paintHaloSprite(ctx, SEAL, SEAL_A_COLORS,
+                SETTINGS.overSealCenterX - sealHalfWidth,
+                SETTINGS.overSpriteFeetY - SETTINGS.sealFeetOffset);
+        }
     }
 
-    /* Paint the result card: a warm win cheer or a gentle time-up. */
+    /* Paint the result card: a fish feast or a seal bump. */
     function paintOverCard(ctx) {
         const won = endReason === "win";
         paintCardPanel(ctx, SETTINGS.overCardLeft, SETTINGS.overCardTop,
             SETTINGS.overCardWidth, SETTINGS.overCardHeight);
         paintCardSprites(ctx, won);
-        paintPixelText(ctx, won ? "PIP MADE IT!" : "TIME IS UP!", 50,
-            SETTINGS.overTitleY, PAL.gold, PAL.navy, 1);
-        paintPixelText(ctx, "SCORE " + score, 50, SETTINGS.overScoreY, PAL.snow, null, 2);
-        paintPixelText(ctx, "BEST " + bestScore, 50, SETTINGS.overBestY,
-            PAL.iceLight, null, 1);
-        paintPixelText(ctx, "PRESS R OR TAP AGAIN", 50, SETTINGS.overPromptY,
-            PAL.snow, null, 1);
-        if (Math.floor(gameClock / SETTINGS.titleBlinkSeconds) % 2 === 0) {
-            paintPixels(ctx, BRAKE, BRAKE_COLORS, 50 - SETTINGS.titleLineGapY,
-                SETTINGS.overPromptY + 6, false, 1);
-            paintPixels(ctx, BRAKE, BRAKE_COLORS, 50 + SETTINGS.titleLineGapY,
-                SETTINGS.overPromptY + 6, false, 1);
-        }
+        paintPixelText(ctx, won ? "FISH FEAST!" : "THE SEALS GOT YOU!",
+            SETTINGS.stageCenterX, SETTINGS.overTitleY, PAL.gold, PAL.navy, 1);
+        paintPixelText(ctx, "SCORE " + score, SETTINGS.stageCenterX,
+            SETTINGS.overScoreY, PAL.snow, null, 2);
+        paintPixelText(ctx, "BEST " + bestScore, SETTINGS.stageCenterX,
+            SETTINGS.overBestY, PAL.iceLight, null, 1);
+        paintPixelText(ctx, "PRESS R OR TAP AGAIN", SETTINGS.stageCenterX,
+            SETTINGS.overPromptY, PAL.snow, null, 1);
     }
 
     /* ---------- shelf preview ---------- */
@@ -11953,10 +12267,8 @@ syncSoundUI();
         const originY = SETTINGS.previewBoardTop;
         const firstRow = SETTINGS.previewFirstRow;
         const scale = SETTINGS.previewSpriteScale;
-        const bridgeRow = firstRow + 2;
         const boardWidth = cell * SETTINGS.gridColumns;
         const boardHeight = cell * SETTINGS.previewRows;
-        const actorFeetY = originY + (3 - firstRow) * cell + cell - 3;
 
         ctx.clearRect(0, 0, SETTINGS.previewWidth, SETTINGS.previewHeight);
         ctx.fillStyle = PAL.night;
@@ -11971,16 +12283,15 @@ syncSoundUI();
             for (let column = 0; column < SETTINGS.gridColumns; column++) {
                 const left = originX + column * cell;
                 const top = originY + (row - firstRow) * cell;
-                if (isWaterColumn(column) && row !== bridgeRow) {
+                if (isWaterColumn(column)) {
                     ctx.fillStyle = PAL.water;
                     ctx.fillRect(left, top, cell, cell);
                     ctx.fillStyle = PAL.waterDark;
                     ctx.fillRect(left, top + cell - 2, cell, 2);
-                    ctx.fillStyle = PAL.waterLight;
-                    ctx.fillRect(left + 4, top + 6 + ((column + row) % 3) * 3, 8, 2);
-                } else if (isWaterColumn(column)) {
-                    ctx.fillStyle = PAL.water;
-                    ctx.fillRect(left, top, cell, cell);
+                    if (!isBridgeRow(row)) {
+                        ctx.fillStyle = PAL.waterLight;
+                        ctx.fillRect(left + 4, top + 6 + ((column + row) % 3) * 3, 8, 2);
+                    }
                 } else {
                     ctx.fillStyle = PAL.ice;
                     ctx.fillRect(left, top, cell, cell);
@@ -11999,18 +12310,22 @@ syncSoundUI();
         }
 
         const deckLeft = originX + SETTINGS.waterColumns[0] * cell;
-        const deckTop = originY + (bridgeRow - firstRow) * cell;
-        const deckWidth = cell * 2;
-        ctx.fillStyle = PAL.waterDark;
-        ctx.fillRect(deckLeft - 2, deckTop - 2, deckWidth + 4, cell + 4);
-        ctx.fillStyle = PAL.snow;
-        ctx.fillRect(deckLeft - 1, deckTop - 1, deckWidth + 2, cell + 2);
-        ctx.fillStyle = PAL.ice;
-        ctx.fillRect(deckLeft, deckTop, deckWidth, cell - 3);
-        ctx.fillStyle = PAL.iceLight;
-        ctx.fillRect(deckLeft + 2, deckTop + 2, deckWidth - 4, 2);
-        ctx.fillStyle = PAL.iceShade;
-        ctx.fillRect(deckLeft + 2, deckTop + cell - 4, deckWidth - 4, 1);
+        const deckWidth = cell * SETTINGS.waterColumns.length;
+        for (let i = 0; i < SETTINGS.bridgeRows.length; i++) {
+            const deckTop = originY + (SETTINGS.bridgeRows[i] - firstRow) * cell;
+            if (SETTINGS.bridgeRows[i] < firstRow ||
+                    SETTINGS.bridgeRows[i] >= firstRow + SETTINGS.previewRows) continue;
+            ctx.fillStyle = PAL.waterDark;
+            ctx.fillRect(deckLeft - 2, deckTop - 2, deckWidth + 4, cell + 4);
+            ctx.fillStyle = PAL.snow;
+            ctx.fillRect(deckLeft - 1, deckTop - 1, deckWidth + 2, cell + 2);
+            ctx.fillStyle = PAL.ice;
+            ctx.fillRect(deckLeft, deckTop, deckWidth, cell - 3);
+            ctx.fillStyle = PAL.iceLight;
+            ctx.fillRect(deckLeft + 2, deckTop + 2, deckWidth - 4, 2);
+            ctx.fillStyle = PAL.iceShade;
+            ctx.fillRect(deckLeft + 2, deckTop + cell - 4, deckWidth - 4, 1);
+        }
 
         const leftBank = originX + SETTINGS.waterColumns[0] * cell - 2;
         const rightBank = originX + (SETTINGS.waterColumns[1] + 1) * cell;
@@ -12022,9 +12337,20 @@ syncSoundUI();
             }
         }
 
-        const treeFeetY = originY + (2 - firstRow) * cell + cell - 3;
-        const treeOneX = originX + 1 * cell + cell / 2;
-        const treeTwoX = originX + 5 * cell + cell / 2;
+        const finX = originX + SETTINGS.previewFinColumn * cell + cell / 2;
+        const finY = originY + (SETTINGS.previewFinRow - firstRow) * cell +
+            cell - SETTINGS.previewFinDropPixels;
+        ctx.fillStyle = PAL.navy;
+        ctx.fillRect(finX - 4, finY + 4, 8, 2);
+        ctx.fillRect(finX - 2, finY + 2, 4, 2);
+        ctx.fillRect(finX - 1, finY, 2, 2);
+        ctx.fillStyle = PAL.rock;
+        ctx.fillRect(finX - 3, finY + 4, 6, 1);
+
+        const treeFeetY = originY + (SETTINGS.previewTreeRow - firstRow) * cell +
+            cell - SETTINGS.previewTreeFeetDropPixels;
+        const treeOneX = originX + SETTINGS.previewTreeOneColumn * cell + cell / 2;
+        const treeTwoX = originX + SETTINGS.previewTreeTwoColumn * cell + cell / 2;
         paintShadow(ctx, treeOneX, treeFeetY, 8);
         paintPreviewSprite(ctx, TREE, TREE_COLORS, treeOneX, treeFeetY,
             SETTINGS.treeFeetOffset, scale);
@@ -12032,30 +12358,37 @@ syncSoundUI();
         paintPreviewSprite(ctx, TREE, TREE_COLORS, treeTwoX, treeFeetY,
             SETTINGS.treeFeetOffset, scale);
 
-        const boulderX = originX + 6 * cell + cell / 2;
-        const boulderFeetY = originY + (2 - firstRow) * cell + cell - 4;
+        const boulderX = originX + SETTINGS.previewBoulderColumn * cell + cell / 2;
+        const boulderFeetY = originY + (SETTINGS.previewBoulderRow - firstRow) * cell +
+            cell - SETTINGS.previewBoulderFeetDropPixels;
         paintShadow(ctx, boulderX, boulderFeetY, 8);
         paintPreviewSprite(ctx, BOULDER, BOULDER_COLORS, boulderX, boulderFeetY,
             SETTINGS.boulderFeetOffset, scale);
 
-        const pipX = originX + 1 * cell + cell / 2;
-        paintShadow(ctx, pipX, actorFeetY, 8);
-        paintPreviewSprite(ctx, PIP_FRONT, PIP_COLORS, pipX, actorFeetY,
+        const sealX = originX + SETTINGS.previewSealColumn * cell + cell / 2;
+        const sealFeetY = originY + (SETTINGS.previewSealRow - firstRow) * cell +
+            cell - SETTINGS.previewTreeFeetDropPixels;
+        paintShadow(ctx, sealX, sealFeetY, 8);
+        paintPreviewSprite(ctx, SEAL, SEAL_A_COLORS, sealX, sealFeetY,
+            SETTINGS.sealFeetOffset, scale);
+
+        const pipX = originX + SETTINGS.previewPipColumn * cell + cell / 2;
+        const pipFeetY = originY + (SETTINGS.previewPipRow - firstRow) * cell +
+            cell - SETTINGS.previewTreeFeetDropPixels;
+        paintShadow(ctx, pipX, pipFeetY, 8);
+        paintPreviewSprite(ctx, PIP_FRONT, PIP_COLORS, pipX, pipFeetY,
             SETTINGS.pipFeetOffset, scale);
 
-        const blockX = originX + 2 * cell + cell / 2;
-        paintShadow(ctx, blockX, actorFeetY, 10);
-        paintPreviewSprite(ctx, BLOCK, BLOCK_COLORS, blockX, actorFeetY,
-            SETTINGS.blockFeetOffset, scale);
-
-        const fishX = originX + 6 * cell + cell / 2;
-        paintShadow(ctx, fishX, actorFeetY, 8);
-        paintPreviewSprite(ctx, FISH, FISH_COLORS, fishX, actorFeetY,
+        const fishX = originX + SETTINGS.previewFishColumn * cell + cell / 2;
+        const fishFeetY = originY + (SETTINGS.previewFishRow - firstRow) * cell +
+            cell - SETTINGS.previewTreeFeetDropPixels;
+        paintShadow(ctx, fishX, fishFeetY, 8);
+        paintPreviewSprite(ctx, FISH, FISH_COLORS, fishX, fishFeetY,
             SETTINGS.fishFeetOffset, scale);
 
         ctx.fillStyle = PAL.goldLight;
-        ctx.fillRect(fishX + 6, actorFeetY - SETTINGS.sparkleRisePixels * 2, 2, 2);
-        ctx.fillRect(fishX - 8, actorFeetY - 10, 2, 2);
+        ctx.fillRect(fishX + 6, fishFeetY - SETTINGS.previewSparkleLiftPixels * 2, 2, 2);
+        ctx.fillRect(fishX - 8, fishFeetY - SETTINGS.previewSparkleLiftPixels, 2, 2);
         ctx.fillStyle = PAL.snow;
         ctx.fillRect(6, 20, 2, 2);
         ctx.fillRect(SETTINGS.previewWidth - 8, 30, 2, 2);
@@ -12077,15 +12410,15 @@ syncSoundUI();
         }
         let message;
         if (phase === PHASE.TITLE) {
-            message = "slide pip to the golden fish — SPACE brakes at the next tile, three brakes a run";
+            message = "eat six fish while dodging the seals — SPACE belly-slides two tiles";
         } else if (phase === PHASE.OVER) {
             message = endReason === "win"
-                ? "pip made it with " + score + " seconds left — press R or tap to play again"
-                : "time is up — press R or tap to try again";
+                ? "fish feast! " + score + " points — press R or tap to play again"
+                : "the seals got you — press R or tap to try again";
         } else if (statusMessage) {
             message = statusMessage;
         } else {
-            message = "arrows or WASD slide pip — SPACE or tap brakes at the next tile";
+            message = "arrows or WASD waddle pip — SPACE or tap belly-slides";
         }
         if (force || shownMessage !== message) {
             shownMessage = message;
@@ -12095,36 +12428,56 @@ syncSoundUI();
 
     /* ---------- module contract ---------- */
 
-    /* Open on the how-to card with a freshly chosen layout. */
+    /* Open on the how-to card with one seal already patrolling. */
     function start() {
         bestScore = readBest(SETTINGS.gameName);
         phase = PHASE.TITLE;
         gameClock = 0;
         cheerClock = 0;
         score = 0;
-        timeLeft = SETTINGS.roundSeconds;
-        brakesLeft = SETTINGS.brakesPerRun;
-        layoutIndex = pickLayoutIndex();
-        loadLayout(layoutIndex);
+        fishEaten = 0;
+        fishVisible = true;
+        fishColumn = 6;
+        fishRow = 3;
+        heartsLeft = SETTINGS.heartsPerRun;
+        runSeconds = 0;
+        invulnerableClock = 0;
+        dashCooldown = 0;
+        secondSealSurfaced = false;
+        playerColumn = SETTINGS.startColumn;
+        playerRow = SETTINGS.startRow;
+        pipFacing = "down";
+        waddleMotion = null;
+        dashMotion = null;
+        queuedDirection = "";
+        holdClock = 0;
+        bumpClock = 0;
+        seals = [makeSeal(SEAL_A_ROUTE, 0, sealASpeed(), SEAL_A_COLORS)];
+        splashParticles = [];
+        snowPuffs = [];
+        sparkles = [];
+        statusMessage = "";
+        statusClock = 0;
         clearHeld();
         syncChrome(true);
     }
 
-    /* Stop the clock and every motion when the player leaves. */
+    /* Stop every motion when the player leaves the game. */
     function stop() {
-        slidePath = [];
-        blockMotion = null;
-        brakeRequested = false;
+        waddleMotion = null;
+        dashMotion = null;
+        queuedDirection = "";
+        holdClock = 0;
         bumpClock = 0;
         clearHeld();
     }
 
-    /* Restart the same layout with a fresh clock and three brakes. */
+    /* Restart a fresh run from the result card or the R key. */
     function restart() {
         beginRun();
     }
 
-    /* Handle a direction press: start the run from the card, else move. */
+    /* Handle a direction press: start from the card, else waddle. */
     function onDir(direction, pressed) {
         if (!(direction in heldDirections)) return;
         const wasHeld = heldDirections[direction];
@@ -12135,11 +12488,12 @@ syncSoundUI();
             return;
         }
         if (phase !== PHASE.PLAY) return;
-        if (isBusy()) return;
-        attemptMove(direction);
+        holdClock = 0;
+        pipFacing = direction;
+        attemptStep(direction);
     }
 
-    /* Handle the BRAKE button: start, brake, or play again. */
+    /* Handle the DASH button: start, dash, or play again. */
     function onAction() {
         if (phase === PHASE.TITLE) {
             beginRun();
@@ -12149,10 +12503,10 @@ syncSoundUI();
             beginRun();
             return;
         }
-        requestBrake();
+        requestDash();
     }
 
-    /* A tap on the stage does the same as the BRAKE button. */
+    /* A tap on the stage does the same as the DASH button. */
     function onStageTap() {
         onAction();
     }
@@ -12162,7 +12516,7 @@ syncSoundUI();
         if (phase === PHASE.TITLE) beginRun();
     }
 
-    /* Advance the clock, the slides, the effects and the shell chips. */
+    /* Advance the clock, Pip, the seals, the fish and the shell chips. */
     function update(rawDt) {
         const dt = Math.min(rawDt, 0.25);
         gameClock += dt;
@@ -12171,14 +12525,21 @@ syncSoundUI();
             statusClock -= dt;
             if (statusClock <= 0) statusMessage = "";
         }
-        if (phase === PHASE.PLAY) {
-            advanceSlide(dt);
-            advanceBlock(dt);
-            if (phase === PHASE.PLAY) {
-                timeLeft = Math.max(0, timeLeft - dt);
-                score = Math.ceil(timeLeft);
-                if (timeLeft <= 0) finishRun("time");
+        if (phase === PHASE.TITLE) {
+            advanceSeals(dt);
+        } else if (phase === PHASE.PLAY) {
+            runSeconds += dt;
+            if (dashCooldown > 0) dashCooldown = Math.max(0, dashCooldown - dt);
+            if (invulnerableClock > 0) {
+                invulnerableClock = Math.max(0, invulnerableClock - dt);
             }
+            handleHeldDirection(dt);
+            advanceWaddle(dt);
+            if (phase === PHASE.PLAY) advanceDash(dt);
+            if (phase === PHASE.PLAY) advanceSeals(dt);
+            if (phase === PHASE.PLAY) checkSealHit();
+            if (phase === PHASE.PLAY) advanceFishSpawn(dt);
+            if (phase === PHASE.PLAY) score = currentScore();
         } else if (phase === PHASE.OVER) {
             cheerClock += dt;
         }
@@ -12202,15 +12563,81 @@ syncSoundUI();
         }
     }
 
+    /* ---------- browser test hook ---------- */
+
+    /* Report the live run state, only when the page is opened with ?test=1. */
+    function testState() {
+        const sealStates = [];
+        for (let i = 0; i < seals.length; i++) {
+            sealStates.push({
+                column: seals[i].column,
+                row: seals[i].row,
+                wakeClock: seals[i].wakeClock
+            });
+        }
+        return {
+            phase: phase,
+            endReason: endReason,
+            playerColumn: playerColumn,
+            playerRow: playerRow,
+            fishColumn: fishColumn,
+            fishRow: fishRow,
+            fishVisible: fishVisible,
+            fishEaten: fishEaten,
+            heartsLeft: heartsLeft,
+            score: score,
+            bestScore: bestScore,
+            seals: sealStates
+        };
+    }
+
+    /* Jump straight to the win card so the browser check can photograph it. */
+    function testWin() {
+        beginRun();
+        fishEaten = SETTINGS.fishToWin;
+        finishRun("win");
+    }
+
+    /* Jump straight to the lose card so the browser check can photograph it. */
+    function testLose() {
+        beginRun();
+        fishEaten = 2;
+        heartsLeft = 0;
+        finishRun("lose");
+    }
+
+    /* Put both seals on patrol with no damage, for the fairness simulation. */
+    function testPatrol() {
+        beginRun();
+        fishEaten = SETTINGS.sealSecondFishIndex;
+        secondSealSurfaced = true;
+        seals = [
+            makeSeal(SEAL_A_ROUTE, 0, sealASpeed(), SEAL_A_COLORS),
+            makeSeal(SEAL_B_ROUTE, 0, sealBSpeed(), SEAL_B_COLORS)
+        ];
+        patrolOnly = true;
+    }
+
+    /* Expose the test hook only for a page opened with ?test=1. */
+    if (typeof window !== "undefined" && window.location &&
+            window.location.search.indexOf("test=1") !== -1) {
+        window.__PENGUIN_TEST__ = {
+            state: testState,
+            win: testWin,
+            lose: testLose,
+            patrol: testPatrol
+        };
+    }
+
     /* Register the rebuilt game with the shared shelf and runtime. */
     GAMES.push({
         id: SETTINGS.gameName,
         versionNumber: SETTINGS.versionNumber,
         name: "Penguin Slide",
-        tagline: "bridge the river and slide to the fish",
-        concept: "Pip the baby penguin slides across a seven by seven ice field. Push three ice blocks into the river to build bridges, brake with three snowflakes, and reach the golden fish before the clock runs out.",
-        actionLabel: "BRAKE",
-        hint: "arrows or WASD slide pip · SPACE or tap brakes · R restarts · ESC shelf",
+        tagline: "waddle, dash and dodge the seals",
+        concept: "Pip the baby penguin waddles across a seven by seven ice field, eating six golden fish while grumpy seals slide along the ice. Belly-slide with SPACE, dodge the seals and keep all three hearts.",
+        actionLabel: "DASH",
+        hint: "arrows or WASD waddle · SPACE or tap dashes · R restarts · ESC shelf",
         previewPaint: paintShelfPreview,
         start, stop, restart, update, paint, onDir, onAction, onStageTap, onAnyKey
     });
