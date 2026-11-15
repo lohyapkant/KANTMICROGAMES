@@ -124,6 +124,7 @@ What each model used on each build. This is a record, not an opinion, and not a 
 | 031 | GPT-6-Luna · OpenAI Codex CLI | built (effort High) | — | — | start reading: 133,712 total (118,604 input + 15,108 output, including 6,657 reasoning; 1,707,264 cached input shown separately); final reading not supplied, so build usage not recorded |
 | 032 | 2026-11-14 | P-32 | Gemini 3.8 Flash | Medium | Antigravity | build | ~25 min | not recorded — time only | not recorded | not recorded | not recorded | not recorded | not recorded | not recorded | PENGUINSLIDE v4 overhaul |
 | 033 | 2026-11-15 | P-33 | Gemini 3.8 Flash | Medium | Antigravity | build | ~20 min | not recorded — time only | not recorded | not recorded | not recorded | not recorded | not recorded | not recorded | PENGUINSLIDE v5 dual rivers & large sprites |
+| 034 | 2026-11-15 | P-34 | Gemini 3.8 Flash | Medium | Antigravity | build | ~25 min | not recorded — time only | not recorded | not recorded | not recorded | not recorded | not recorded | not recorded | PENGUINSLIDE v6 fish island & layered art |
 | 027 | DeepSeek V4.1 Flash Free · OpenCode | built (effort High) | ~6 min | 117,458 tokens processed | measured: 73,339 input + 25,499 output + 18,620 reasoning; 5,544,064 cache reads not counted; 44 steps; 46 tool calls; OpenCode stats delta, final reading after the swap and the live check (see the build record in plans/buildlog/027-20261114.md) |
 
 ### Totals that can honestly be added
@@ -566,6 +567,14 @@ Source: Owner's words (verbatim)
 Builds observed: `033-20261115`.
 
 The owner observed: “Nice - I love the game that now has more capabilties in it. Are you able to revise the graphics and size of the sprites as well as make the game a bit more challenging with say two rivers always blocking Pip at all times? Right now I finish the game with 60 seconds remaining, because the river does not reach the edges. Which bring back to the sprite redesign : My thoughts is that wihtin the 100x100 canvas, the border can be minimized (since we know that the blocks and pip cannot get past), this will allow the individual 'gird'/'squares' to be slightly bigger for more pixels for pip and the fish and the ice block and additional animation for the movement of pip.” Build 033 expands cells to 12px on an 8x8 grid with 10x10 sprites and two impassable wall-to-wall rivers requiring two ice block bridges to reach the fish.
+
+## 2026-11-15 — Owner observation — PENGUINSLIDE v6 fish island and layered sprites
+
+Source: Owner's words (verbatim)
+
+Builds observed: `034-20261115`.
+
+The owner observed: “Okay - much better. That said, I am faced with a situation in which the penguin pip is stuck as it has pushed the ice block into a dead end, and has no way to continue without restarting. I guess that is the game play challenge. However, I would still like to improve the graphics : If you are able to increase the size of a sprites a bit more to perhaps overlap the grid, that way Pip will look bigger and more animated. In fact, if you can increase the fluidity of the animation of pip in moving, it would be great. The same applies to the ice block. I am not sure if it makes sense to 'reduce' the size of the grid square to increase the number of squares to allow some varibility? Perhaps the fish is on a frozen island on it's own, with a river around it... the trees can be bigger and the sprite can leak out of the grid, while the tree is animated from waving gently in the cold wind, and should pip slide and hit the tree, perhaps the tree has the animation of snow falling from the tree. Obviously the tree sprite is supposed to be at a higher 'level' to the sprite of Pip, becuase if pip slides behind the tree, pip is 'behind' the tree if that makes sense.” Build 034 delivers oversized layered sprites with depth-sorting, swaying pine trees shedding snow, shiver-impact ice blocks, an animated prize fish on an interior moat island, and ambient snowfall.
 
 <!-- NEW ENTRIES ABOVE THIS LINE. Never edit existing entries. -->
 

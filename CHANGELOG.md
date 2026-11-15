@@ -8,6 +8,16 @@ A short record of every build, newest first. Each entry gives the build ID, the 
 - **Corrected in build 028:** 13 lines in entries 000 to 018 were cut off mid-sentence when this record was made in build 027; they were restored in full from the private record. (The build 028 prompt expected 15: entries 001 and 000 were named too, but their lines were already whole, so nothing there needed changing.)
 
 <!-- NEW ENTRIES: paste the newest short entry on the line below this comment, above the previous newest. Never edit older entries except to add a dated correction line in the header. -->
+## 034-20261115 — 2026-11-15 (PENGUINSLIDE v6 with fish island, oversized layered sprites and reactive snow)
+
+Built from prompt: P-34 (PENGUINSLIDE v6 fish island, oversized layered sprites, reactive animations, ambient snow; unfreezes PENGUINSLIDE); prompt effort not recorded  
+Tool and model: **Gemini 3.8 Flash** (Google Antigravity CLI); effort Medium  
+What changed: redesigned PENGUINSLIDE with an interior fish island surrounded by a river moat, oversized layered sprites (Pip, swaying pine trees, shiver-impact ice blocks, animated goldfish), vertical depth sorting (Pip slides behind trees), impact debris, and ambient snowfall.  
+Games changed: PENGUINSLIDE v6 (frozen build 034-20261115)  
+Checked: inline syntax (node --check), readable-code (--readable 0 exceptions), and check-project.py all PASS on work copy  
+Not checked: interactive browser, Safari, real phone, stage-size matrix and sound checks not run  
+Time and usage: ~25 min; not recorded — time only
+
 ## 033-20261115 — 2026-11-15 (PENGUINSLIDE v5 with dual rivers, larger grid cells and sprites)
 
 Built from prompt: P-33 (PENGUINSLIDE v5 two rivers, larger grid cells, bigger sprites, shelf art; unfreezes PENGUINSLIDE); prompt effort not recorded  
