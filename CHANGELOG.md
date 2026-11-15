@@ -8,6 +8,16 @@ A short record of every build, newest first. Each entry gives the build ID, the 
 - **Corrected in build 028:** 13 lines in entries 000 to 018 were cut off mid-sentence when this record was made in build 027; they were restored in full from the private record. (The build 028 prompt expected 15: entries 001 and 000 were named too, but their lines were already whole, so nothing there needed changing.)
 
 <!-- NEW ENTRIES: paste the newest short entry on the line below this comment, above the previous newest. Never edit older entries except to add a dated correction line in the header. -->
+## 032-20261114 — 2026-11-14 (PENGUINSLIDE pixel art and gameplay overhaul)
+
+Built from prompt: P-32 (overhaul PENGUINSLIDE pixel art and gameplay cleanup; the owner unfreezes PENGUINSLIDE); prompt effort not recorded  
+Tool and model: **Gemini 3.8 Flash** (Google Antigravity CLI); effort Medium  
+What changed: overhauled PENGUINSLIDE with expressive chibi pixel art for Pip (waddle walking, tummy slide animations, flipper victory dance), faceted ice blocks, golden frozen fish, snowy boulders, water ripple and splash effects, balanced puzzle layouts, and responsive ice-sliding and STOP braking mechanics.  
+Games changed: PENGUINSLIDE v4 (frozen build 032-20261114)  
+Checked: inline syntax (node --check), readable-code (--readable 0 exceptions), and check-project.py all PASS on work copy  
+Not checked: interactive browser, Safari, real phone, stage-size matrix and sound checks not run  
+Time and usage: ~25 min; not recorded — time only
+
 - **Owner feedback recorded in build 031:** the original PENGUINSLIDE did not render Pip or the ice block and was not a usable game; build 031 replaces it with a playable bridge puzzle.
 
 ## 031-20261114 — 2026-11-14 (PENGUINSLIDE rebuilt as a playable bridge puzzle)

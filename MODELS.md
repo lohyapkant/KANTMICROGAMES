@@ -122,6 +122,7 @@ What each model used on each build. This is a record, not an opinion, and not a 
 | 029 | Mistral Medium 3.5 High · Vibe CLI | built (effort High) | ~60+ min | ~96.3k tokens (96,334 total, 95,104 cached) | session-wide stats from Vibe CLI Agent Statistics; Last Turn reading (build prompt may have overwritten previous turn); Cost: ~$6.62; Model: Mistral Medium 3.5 via mistral provider |
 | 030 | GPT-6-Luna · OpenAI Codex CLI | built (effort High) | — | — | meter and duration not recorded; corrected in build 031 |
 | 031 | GPT-6-Luna · OpenAI Codex CLI | built (effort High) | — | — | start reading: 133,712 total (118,604 input + 15,108 output, including 6,657 reasoning; 1,707,264 cached input shown separately); final reading not supplied, so build usage not recorded |
+| 032 | 2026-11-14 | P-32 | Gemini 3.8 Flash | Medium | Antigravity | build | ~25 min | not recorded — time only | not recorded | not recorded | not recorded | not recorded | not recorded | not recorded | PENGUINSLIDE v4 overhaul |
 | 027 | DeepSeek V4.1 Flash Free · OpenCode | built (effort High) | ~6 min | 117,458 tokens processed | measured: 73,339 input + 25,499 output + 18,620 reasoning; 5,544,064 cache reads not counted; 44 steps; 46 tool calls; OpenCode stats delta, final reading after the swap and the live check (see the build record in plans/buildlog/027-20261114.md) |
 
 ### Totals that can honestly be added
@@ -548,6 +549,14 @@ Source: Owner's words (verbatim)
 Builds observed: `029-20261114`, `031-20261114`.
 
 The owner reported after trying the page: “And Now I see how bad the game was created by Mistral - there is no penguin or ice block. In fact, there is no game so to speak.” Build 031 replaces the PENGUINSLIDE module with a visible penguin, block, river bridge puzzle, and timed goal. This note records the owner's feedback on that build, not a general model ranking.
+
+## 2026-11-14 — Owner observation — PENGUINSLIDE art and play cleanup
+
+Source: Owner's words (verbatim)
+
+Builds observed: `032-20261114`.
+
+The owner observed: “I would like your help for a pixel art clean up for a build that was started by Vibe CLI Mistral Ministral Model which was very ugly and did not look cartoonish or cute as expected. Even the gameplay was very limited. It took OpenAI Codex CLI running GPT-6-Luna at 'High' effort to clean up and fix the errors done by Ministral, and also fix the game to loan properly. That then exposed the poor art quality and now GPT-6-Luna token is exhausted.” Build 032 overhauls PENGUINSLIDE with expressive chibi Pip pixel art, responsive ice-sliding and STOP braking mechanics, water ripple and splash effects, and balanced puzzle crossing stages.
 
 <!-- NEW ENTRIES ABOVE THIS LINE. Never edit existing entries. -->
 
