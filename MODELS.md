@@ -123,6 +123,7 @@ What each model used on each build. This is a record, not an opinion, and not a 
 | 030 | GPT-6-Luna · OpenAI Codex CLI | built (effort High) | — | — | meter and duration not recorded; corrected in build 031 |
 | 031 | GPT-6-Luna · OpenAI Codex CLI | built (effort High) | — | — | start reading: 133,712 total (118,604 input + 15,108 output, including 6,657 reasoning; 1,707,264 cached input shown separately); final reading not supplied, so build usage not recorded |
 | 032 | 2026-11-14 | P-32 | Gemini 3.8 Flash | Medium | Antigravity | build | ~25 min | not recorded — time only | not recorded | not recorded | not recorded | not recorded | not recorded | not recorded | PENGUINSLIDE v4 overhaul |
+| 033 | 2026-11-15 | P-33 | Gemini 3.8 Flash | Medium | Antigravity | build | ~20 min | not recorded — time only | not recorded | not recorded | not recorded | not recorded | not recorded | not recorded | PENGUINSLIDE v5 dual rivers & large sprites |
 | 027 | DeepSeek V4.1 Flash Free · OpenCode | built (effort High) | ~6 min | 117,458 tokens processed | measured: 73,339 input + 25,499 output + 18,620 reasoning; 5,544,064 cache reads not counted; 44 steps; 46 tool calls; OpenCode stats delta, final reading after the swap and the live check (see the build record in plans/buildlog/027-20261114.md) |
 
 ### Totals that can honestly be added
@@ -557,6 +558,14 @@ Source: Owner's words (verbatim)
 Builds observed: `032-20261114`.
 
 The owner observed: “I would like your help for a pixel art clean up for a build that was started by Vibe CLI Mistral Ministral Model which was very ugly and did not look cartoonish or cute as expected. Even the gameplay was very limited. It took OpenAI Codex CLI running GPT-6-Luna at 'High' effort to clean up and fix the errors done by Ministral, and also fix the game to loan properly. That then exposed the poor art quality and now GPT-6-Luna token is exhausted.” Build 032 overhauls PENGUINSLIDE with expressive chibi Pip pixel art, responsive ice-sliding and STOP braking mechanics, water ripple and splash effects, and balanced puzzle crossing stages.
+
+## 2026-11-15 — Owner observation — PENGUINSLIDE v5 dual rivers and large sprites
+
+Source: Owner's words (verbatim)
+
+Builds observed: `033-20261115`.
+
+The owner observed: “Nice - I love the game that now has more capabilties in it. Are you able to revise the graphics and size of the sprites as well as make the game a bit more challenging with say two rivers always blocking Pip at all times? Right now I finish the game with 60 seconds remaining, because the river does not reach the edges. Which bring back to the sprite redesign : My thoughts is that wihtin the 100x100 canvas, the border can be minimized (since we know that the blocks and pip cannot get past), this will allow the individual 'gird'/'squares' to be slightly bigger for more pixels for pip and the fish and the ice block and additional animation for the movement of pip.” Build 033 expands cells to 12px on an 8x8 grid with 10x10 sprites and two impassable wall-to-wall rivers requiring two ice block bridges to reach the fish.
 
 <!-- NEW ENTRIES ABOVE THIS LINE. Never edit existing entries. -->
 

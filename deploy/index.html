@@ -6,8 +6,8 @@
   Repository : https://github.com/lohyapkant/KANTMICROGAMES
   Play online: https://kantmicrogames.lohyapkant.workers.dev/
   Hosting    : Cloudflare Workers (https://workers.cloudflare.com/)
-  Current    : build 032-20261114 — PENGUINSLIDE overhaul with cute
-               chibi Pip, animated belly slides, splash effects and puzzles
+  Current    : build 033-20261115 — PENGUINSLIDE v5 with 12px cells,
+               two wall-to-wall rivers, large sprites and trees
   Names      : project and on-screen brand KANTMICROGAMES ·
                save keys and the console tag use the KANTMICROGAMES prefix
   Build log  : build 028-20261114, DeepSeek V4.1 Flash Free (OpenCode) — a short
@@ -1483,7 +1483,7 @@
 
 const APP = {
     name: "KANTMICROGAMES",
-    fileVersion: "032-20261114",       // build number of THIS one-file app
+    fileVersion: "033-20261115",       // build number of THIS one-file app
     savePrefix: "KANTMICROGAMES."      // best scores live at prefix + GAMEID + ".best"
 };
 
@@ -2119,7 +2119,7 @@ function paintPandaSnackPreview(ctx) {
    the module's own versionNumber, the build where its content last changed.
    Keep this table in step with plans/game-versions.txt; the check script,
    tests/check-project.py, compares them. */
-const GAME_REVISIONS = { PANDASNACK: { revision: 1, frozen: true }, BOOPEEK: { revision: 2, frozen: true }, DUCKLINE: { revision: 1, frozen: true }, SPROUTUP: { revision: 1, frozen: true }, SLIMEHOP: { revision: 1, frozen: true }, SNAILRACE: { revision: 1, frozen: true }, HUGPARADE: { revision: 2, frozen: true }, CATNAPCATCH: { revision: 2, frozen: true }, PENGUINSLIDE: { revision: 4, frozen: true } };
+const GAME_REVISIONS = { PANDASNACK: { revision: 1, frozen: true }, BOOPEEK: { revision: 2, frozen: true }, DUCKLINE: { revision: 1, frozen: true }, SPROUTUP: { revision: 1, frozen: true }, SLIMEHOP: { revision: 1, frozen: true }, SNAILRACE: { revision: 1, frozen: true }, HUGPARADE: { revision: 2, frozen: true }, CATNAPCATCH: { revision: 2, frozen: true }, PENGUINSLIDE: { revision: 5, frozen: true } };
 
 /* The identity line's sizes, named so the code below has no loose numbers.
    The height is only a fallback: the real height comes from the CSS. */
@@ -10501,16 +10501,17 @@ syncSoundUI();
 
 
 /* ==================================================================
-   PART 5-I — PENGUINSLIDE module (content 032-20261114)
+   PART 5-I — PENGUINSLIDE module (content 033-20261115)
    ================================================================
    HOW THIS GAME WORKS
-   - Pip the baby penguin slides across slippery ice to reach the fish.
-   - Hold an arrow to slide; Pip coasts on ice until hitting an obstacle.
-   - Push the ice block into the river to create a solid bridge.
-   - Press STOP (action button or SPACE) or tap the stage to brake.
-   - Reach the golden frozen fish within 60 seconds; score is time left.
-   - STATES: TITLE (how-to card), PLAY (sliding puzzle), OVER (score result).
-   - SETTINGS: grid, timing, layout positions, animations and colors.
+   - Pip the baby penguin slides across arctic ice to reach the fish.
+   - Two roaring rivers block the path; both must be bridged with ice blocks.
+   - Hold an arrow to slide; Pip glides on ice until hitting an obstacle.
+   - Push ice blocks into the rivers to create solid bridge crossings.
+   - Press STOP (action button or SPACE) or tap the stage to brake Pip.
+   - Reach the golden fish within 60 seconds; score is remaining time.
+   - STATES: TITLE (how-to card), PLAY (dual-river puzzle), OVER (score result).
+   - SETTINGS: grid layout, animations, tunable coordinates and palette.
    ================================================================ */
 (function () {
     "use strict";
@@ -10518,18 +10519,21 @@ syncSoundUI();
     /* Store all tunable coordinates, animation rates, layout options and colors. */
     const SETTINGS = {
         gameName: "PENGUINSLIDE",
-        versionNumber: "032-20261114",
+        versionNumber: "033-20261115",
         stageSize: 100,
         saveKey: "KANTMICROGAMES.PENGUINSLIDE.best",
-        gridSize: 10,
-        cellSizePixels: 10,
+        gridColumns: 8,
+        gridRows: 8,
+        cellSizePixels: 12,
+        stageMarginPixels: 2,
         roundTimeLimitSeconds: 60,
         slideIntervalSeconds: 0.11,
-        stepIntervalSeconds: 0.20,
         waterRipplePeriodSeconds: 0.35,
         waddleBobPeriodSeconds: 0.25,
         splashDurationSeconds: 0.35,
-        spriteInsetPixels: 1,
+        splashSpeedPixels: 16,
+        splashRisePixels: 8,
+        splashCount: 6,
         spriteScale: 1,
         previewSpriteScale: 2,
         previewCanvasWidth: 200,
@@ -10555,26 +10559,22 @@ syncSoundUI();
         endPromptY: 70,
         timerDisplayX: 50,
         timerDisplayY: 2,
-        previewIceY: 10,
-        previewIceHeight: 76,
-        previewRiverY: 44,
-        previewRiverHeight: 11,
-        previewPipX: 30,
-        previewPipY: 36,
-        previewBlockX: 86,
-        previewBlockY: 36,
-        previewFishX: 150,
-        previewFishY: 36,
-        previewLabelY: 80,
+        previewIceY: 8,
+        previewIceHeight: 80,
+        previewRiverOneY: 26,
+        previewRiverTwoY: 60,
+        previewRiverHeight: 10,
+        previewPipX: 24,
+        previewPipY: 34,
+        previewBlockX: 84,
+        previewBlockY: 34,
+        previewFishX: 146,
+        previewFishY: 34,
+        previewLabelY: 82,
         previewLabelScale: 2,
-        riverRow: 5,
-        splashCount: 6,
-        splashSpeedPixels: 16,
-        splashRisePixels: 8,
-        boulderCount: 2,
         palette: {
             snow: "#F4F9FD",
-            snowBank: "#E2F1F8",
+            arenaBorder: "#385269",
             ice: "#C5EDF8",
             iceLight: "#EAF8FD",
             iceShade: "#97D3E6",
@@ -10583,7 +10583,8 @@ syncSoundUI();
             waterDark: "#256691",
             rock: "#5E7285",
             rockLight: "#9DB2C3",
-            rockDark: "#3C4B59",
+            pineDark: "#264B38",
+            pineSnow: "#E8F5EE",
             ink: "#1F3142",
             plate: "rgba(244, 249, 253, 0.95)",
             penguinDark: "#1C2733",
@@ -10595,14 +10596,13 @@ syncSoundUI();
             blockShade: "#6EB9D4",
             fishOrange: "#FF6B4A",
             fishGold: "#FFBE3B",
-            bridgeIce: "#D5F4FD",
             splashColor: "#FFFFFF"
         }
     };
 
     const PAL = SETTINGS.palette;
     const STATE = { TITLE: "title", PLAY: "play", OVER: "over" };
-    const TILE = { ICE: 0, WATER: 1, ROCK: 2, BRIDGE: 3 };
+    const TILE = { ICE: 0, WATER: 1, BRIDGE: 2 };
 
     /* Color lookup table for drawing Pip using the shared pixel painter. */
     const PIP_COLORS = {
@@ -10628,164 +10628,211 @@ syncSoundUI();
         L: PAL.iceLight
     };
 
-    /* Color lookup table for drawing a snowy boulder obstacle. */
+    /* Color lookup table for drawing snowy pine tree obstacles. */
+    const TREE_COLORS = {
+        W: PAL.pineSnow,
+        D: PAL.pineDark,
+        B: PAL.penguinDark
+    };
+
+    /* Color lookup table for drawing snowy boulders. */
     const BOULDER_COLORS = {
         W: PAL.snow,
         D: PAL.rockLight,
         B: PAL.rock
     };
 
-    /* Pip standing and facing forward with big shiny eyes, blush, and beak. */
+    /* Pip standing and facing forward with big shiny eyes, blush, and beak. (10x10) */
     const PIP_STAND_MAP = [
-        "..BBBB..",
-        ".BBBBBB.",
-        ".BWBBWB.",
-        ".RWOOBWR",
-        ".BWWWWBB",
-        ".BWWWWBB",
-        "..WWWW..",
-        "..OOOO.."
+        "...BBBB...",
+        "..BBBBBB..",
+        ".BWBBWBBW.",
+        ".BWBBWBBW.",
+        ".RWOOBBWR.",
+        "BBWWWWWWBB",
+        "BBWWWWWWBB",
+        ".BWWWWWW..",
+        "..WWWWWW..",
+        "..OO..OO.."
     ];
 
-    /* Pip waddling with one flipper raised and feet tilted. */
+    /* Pip waddling with alternating raised flippers and tilted feet. (10x10) */
     const PIP_WADDLE_MAP = [
-        "..BBBB..",
-        ".BBBBBB.",
-        ".BWBBWB.",
-        ".RWOOBWR",
-        "BBWWWW..",
-        ".BWWWWBB",
-        "..WWWW..",
-        ".OO..OO."
+        "...BBBB...",
+        "..BBBBBB..",
+        ".BWBBWBBW.",
+        ".BWBBWBBW.",
+        ".RWOOBBWR.",
+        "BBBWWWWW..",
+        ".BBWWWWBBB",
+        "..WWWWWW..",
+        "..WWWWWW..",
+        ".OO....OO."
     ];
 
-    /* Pip sliding sideways on tummy with flippers back and head pointing ahead. */
+    /* Pip sliding sideways on tummy with flippers back and head diving forward. (10x10) */
     const PIP_SLIDE_HORIZ_MAP = [
-        "....BBBB",
-        "...BBOOB",
-        ".BBBWWRR",
-        "BBWWWWWW",
-        "BBWWWWWW",
-        ".BBWWWW.",
-        "..OOOO..",
-        "........"
+        "....BBBB..",
+        "...BBOOOB.",
+        ".BBBWWRRR.",
+        "BBWWWWWWWW",
+        "BBWWWWWWWW",
+        "BBWWWWWWWW",
+        ".BBWWWWWW.",
+        "..OOOOOO..",
+        "..........",
+        ".........."
     ];
 
-    /* Pip sliding downwards on tummy with head diving forward and feet trailing. */
+    /* Pip sliding downwards on tummy with head diving down and feet trailing. (10x10) */
     const PIP_SLIDE_DOWN_MAP = [
-        "..OOOO..",
-        "..WWWW..",
-        ".BWWWWBB",
-        ".BWWWWBB",
-        ".BBBBBB.",
-        ".BWBBWB.",
-        ".RWOOBWR",
-        "...OO..."
+        "..OOOOOO..",
+        "..WWWWWW..",
+        ".BWWWWWWBB",
+        "BBWWWWWWBB",
+        ".BBBBBBBB.",
+        ".BWBBWBBW.",
+        ".BWBBWBBW.",
+        ".RWOOBBWR.",
+        "...OOOO...",
+        ".........."
     ];
 
-    /* Pip sliding upwards on tummy with head diving up. */
+    /* Pip sliding upwards on tummy with head diving up. (10x10) */
     const PIP_SLIDE_UP_MAP = [
-        "...OO...",
-        ".RWOOBWR",
-        ".BWBBWB.",
-        ".BBBBBB.",
-        ".BWWWWBB",
-        ".BWWWWBB",
-        "..WWWW..",
-        "..OOOO.."
+        "...OOOO...",
+        ".RWOOBBWR.",
+        ".BWBBWBBW.",
+        ".BWBBWBBW.",
+        ".BBBBBBBB.",
+        "BBWWWWWWBB",
+        ".BWWWWWWBB",
+        "..WWWWWW..",
+        "..OOOOOO..",
+        ".........."
     ];
 
-    /* Pip raising both flippers up in victory when the fish is reached. */
+    /* Pip raising both flippers high in joyful victory. (10x10) */
     const PIP_CHEER_MAP = [
-        "B.BBBB.B",
-        "BBBBBBBB",
-        ".BWBBWB.",
-        ".RWOOBWR",
-        ".BWWWWBB",
-        "..WWWW..",
-        "..WWWW..",
-        "..OOOO.."
+        "B..BBBB..B",
+        "BBBBBBBBBB",
+        ".BWBBWBBW.",
+        ".BWBBWBBW.",
+        ".RWOOBBWR.",
+        ".BWWWWWWBB",
+        "..WWWWWW..",
+        "..WWWWWW..",
+        "..WWWWWW..",
+        "..OO..OO.."
     ];
 
-    /* Sparkling beveled ice block with crystal facets. */
+    /* Sparkling faceted ice block with crystalline beveling. (10x10) */
     const BLOCK_MAP = [
-        ".LLLLLL.",
-        "LMMMMMML",
-        "LMLLMMMD",
-        "LMMMMMMD",
-        "LMMMDMMD",
-        "LMDDDDMD",
-        "LDDDDDDD",
-        ".DDDDDD."
+        ".LLLLLLLL.",
+        "LMMMMMMMML",
+        "LMLLMMMMMD",
+        "LMLLMMMMMD",
+        "LMMMMMMMMD",
+        "LMMMDDMMMD",
+        "LMMDDDDMMD",
+        "LMDDDDDDMD",
+        "LDDDDDDDDD",
+        ".DDDDDDDD."
     ];
 
-    /* Round golden fish with sparkling ice glints and fin details. */
+    /* Golden prize fish encased in glittering ice facets. (10x10) */
     const FISH_MAP = [
-        "..LLLL..",
-        ".LRRRRLL",
-        "LYWWWRRY",
-        "LYBRRRRY",
-        ".LRRRRL.",
-        "..LYYYL.",
-        "...YY...",
-        "........"
+        "..LLLLLL..",
+        ".LRRRRRRLL",
+        "LYWWWWWRRY",
+        "LYBWWWWRRY",
+        "LYBRRRRRRY",
+        ".LRRRRRRL.",
+        ".LYYYYYYL.",
+        "..LYYYYL..",
+        "...YYYY...",
+        ".........."
     ];
 
-    /* Snowy boulder obstacle with a white snow cap. */
+    /* Snowy pine tree obstacle. (10x10) */
+    const TREE_MAP = [
+        "....WW....",
+        "...WWWW...",
+        "..WWDDWW..",
+        ".WWDDDDWW.",
+        "..WWDDWW..",
+        ".WWDDDDWW.",
+        "WWDDDDDDWW",
+        "WWDDDDDDWW",
+        "....BB....",
+        "....BB...."
+    ];
+
+    /* Snowy boulder obstacle with fluffy snow cap. (10x10) */
     const BOULDER_MAP = [
-        "..WWWW..",
-        ".WWWWWW.",
-        "WWDDDDWW",
-        "WDDDDDDD",
-        "DDDDDDDB",
-        "DDDDDDDB",
-        ".DDDDDB.",
-        "..BBBB.."
+        "..WWWWWW..",
+        ".WWWWWWWW.",
+        "WWDDDDDDWW",
+        "WDDDDDDDDD",
+        "DDDDDDDDDB",
+        "DDDDDDDDDB",
+        "DDDDDDDDDB",
+        ".DDDDDDDDB",
+        "..BBBBBB..",
+        ".........."
     ];
 
-    /* Ice bridge tile pattern placed in the river. */
+    /* Ice bridge tile pattern placed in the rivers. (10x10) */
     const BRIDGE_MAP = [
-        ".LLLLLL.",
-        "LMMMMMML",
-        "LMMMMMML",
-        "LMMMMMML",
-        "LMMMMMML",
-        "LMMMMMML",
-        "LDDDDDDL",
-        ".LLLLLL."
+        ".LLLLLLLL.",
+        "LMMMMMMMML",
+        "LMMMMMMMML",
+        "LMMMMMMMML",
+        "LMMMMMMMML",
+        "LMMMMMMMML",
+        "LMMMMMMMML",
+        "LMMMMMMMML",
+        "LDDDDDDDDL",
+        ".LLLLLLLL."
     ];
 
-    /* Handcrafted puzzle layouts to ensure balanced obstacles and fun solutions. */
-    const PUZZLE_LEVELS = [
+    /* Handcrafted 8x8 stage layouts featuring two impassable wall-to-wall rivers. */
+    const DUAL_RIVER_LEVELS = [
         {
             pipStartColumn: 2,
-            pipStartRow: 2,
-            blockStartColumn: 4,
-            blockStartRow: 3,
-            fishColumn: 6,
-            fishRow: 8,
-            riverColumns: [2, 3, 4, 5, 6, 7],
-            boulders: [{ column: 5, row: 2 }, { column: 3, row: 7 }]
-        },
-        {
-            pipStartColumn: 3,
-            pipStartRow: 2,
-            blockStartColumn: 5,
-            blockStartRow: 3,
-            fishColumn: 3,
-            fishRow: 8,
-            riverColumns: [1, 2, 3, 4, 5, 6, 7, 8],
-            boulders: [{ column: 6, row: 2 }, { column: 6, row: 7 }]
-        },
-        {
-            pipStartColumn: 2,
-            pipStartRow: 3,
-            blockStartColumn: 3,
-            blockStartRow: 4,
+            pipStartRow: 0,
+            blockOneStart: { column: 4, row: 1 },
+            blockTwoStart: { column: 2, row: 4 },
             fishColumn: 5,
             fishRow: 7,
-            riverColumns: [2, 3, 4, 5, 6, 7],
-            boulders: [{ column: 5, row: 1 }, { column: 2, row: 8 }]
+            riverOneRow: 2,
+            riverTwoRow: 5,
+            trees: [{ column: 5, row: 0 }, { column: 6, row: 4 }],
+            boulders: [{ column: 1, row: 1 }, { column: 1, row: 6 }, { column: 3, row: 7 }]
+        },
+        {
+            pipStartColumn: 1,
+            pipStartRow: 1,
+            blockOneStart: { column: 3, row: 0 },
+            blockTwoStart: { column: 5, row: 3 },
+            fishColumn: 2,
+            fishRow: 7,
+            riverOneRow: 2,
+            riverTwoRow: 5,
+            trees: [{ column: 6, row: 0 }, { column: 1, row: 4 }],
+            boulders: [{ column: 4, row: 1 }, { column: 4, row: 6 }, { column: 6, row: 7 }]
+        },
+        {
+            pipStartColumn: 5,
+            pipStartRow: 0,
+            blockOneStart: { column: 2, row: 1 },
+            blockTwoStart: { column: 4, row: 4 },
+            fishColumn: 4,
+            fishRow: 7,
+            riverOneRow: 2,
+            riverTwoRow: 5,
+            trees: [{ column: 0, row: 1 }, { column: 6, row: 3 }],
+            boulders: [{ column: 3, row: 0 }, { column: 1, row: 4 }, { column: 2, row: 6 }]
         }
     ];
 
@@ -10794,18 +10841,18 @@ syncSoundUI();
     let gameState = STATE.TITLE;
     let puzzleIndex = 0;
     let playerColumn = 2;
-    let playerRow = 2;
+    let playerRow = 0;
     let playerFacing = "down";
     let isSliding = false;
     let slideDirection = null;
     let slideTimer = 0;
-    let blockColumn = 4;
-    let blockRow = 3;
-    let blockInRiver = false;
-    let fishColumn = 6;
-    let fishRow = 8;
-    let riverLaneColumns = [2, 3, 4, 5, 6, 7];
+    let blocks = [];
+    let fishColumn = 5;
+    let fishRow = 7;
+    let riverOneRow = 2;
+    let riverTwoRow = 5;
     let levelTiles = [];
+    let treesList = [];
     let bouldersList = [];
     let splashParticles = [];
     let statusMessage = "";
@@ -10818,17 +10865,14 @@ syncSoundUI();
     let shownBest = null;
     let shownMessage = null;
 
-    /* Build the board grid and place rocks, river tiles, and boulders. */
+    /* Build the 8x8 board grid and set up the two wall-to-wall rivers. */
     function buildBoard() {
         levelTiles = [];
-        for (let rowIndex = 0; rowIndex < SETTINGS.gridSize; rowIndex++) {
+        for (let rowIndex = 0; rowIndex < SETTINGS.gridRows; rowIndex++) {
             const rowTiles = [];
-            for (let columnIndex = 0; columnIndex < SETTINGS.gridSize; columnIndex++) {
+            for (let columnIndex = 0; columnIndex < SETTINGS.gridColumns; columnIndex++) {
                 let tile = TILE.ICE;
-                if (rowIndex === 0 || columnIndex === 0 ||
-                    rowIndex === SETTINGS.gridSize - 1 || columnIndex === SETTINGS.gridSize - 1) {
-                    tile = TILE.ROCK;
-                } else if (rowIndex === SETTINGS.riverRow && riverLaneColumns.indexOf(columnIndex) >= 0) {
+                if (rowIndex === riverOneRow || rowIndex === riverTwoRow) {
                     tile = TILE.WATER;
                 }
                 rowTiles.push(tile);
@@ -10837,24 +10881,30 @@ syncSoundUI();
         }
     }
 
-    /* Load one puzzle layout and reset positions, particles and bridges. */
+    /* Load one dual-river puzzle layout and reset positions, blocks, and bridges. */
     function loadPuzzle(layoutIndex) {
-        const layout = PUZZLE_LEVELS[layoutIndex % PUZZLE_LEVELS.length];
+        const layout = DUAL_RIVER_LEVELS[layoutIndex % DUAL_RIVER_LEVELS.length];
+        riverOneRow = layout.riverOneRow;
+        riverTwoRow = layout.riverTwoRow;
+        buildBoard();
+
         playerColumn = layout.pipStartColumn;
         playerRow = layout.pipStartRow;
         playerFacing = "down";
-        blockColumn = layout.blockStartColumn;
-        blockRow = layout.blockStartRow;
-        blockInRiver = false;
+
+        blocks = [
+            { column: layout.blockOneStart.column, row: layout.blockOneStart.row, inRiver: false },
+            { column: layout.blockTwoStart.column, row: layout.blockTwoStart.row, inRiver: false }
+        ];
+
         fishColumn = layout.fishColumn;
         fishRow = layout.fishRow;
-        riverLaneColumns = layout.riverColumns;
+        treesList = layout.trees;
         bouldersList = layout.boulders;
         splashParticles = [];
         isSliding = false;
         slideDirection = null;
         slideTimer = 0;
-        buildBoard();
     }
 
     /* Clear keyboard direction flags so returning to the stage never slides Pip. */
@@ -10875,20 +10925,20 @@ syncSoundUI();
         }
     }
 
-    /* Start a new run with the next puzzle layout and a full 60-second timer. */
+    /* Start a new run with the next dual-river puzzle and full 60-second timer. */
     function startRun() {
-        puzzleIndex = Math.floor(Math.random() * PUZZLE_LEVELS.length);
+        puzzleIndex = Math.floor(Math.random() * DUAL_RIVER_LEVELS.length);
         loadPuzzle(puzzleIndex);
         runSeconds = 0;
         score = SETTINGS.roundTimeLimitSeconds;
         endMessage = "";
-        statusMessage = "ARROWS TO SLIDE · STOP BUTTON BRAKES";
+        statusMessage = "ARROWS SLIDE · STOP BUTTON BRAKES";
         gameState = STATE.PLAY;
         clearHeld();
         syncChrome(true);
     }
 
-    /* Finish the run when Pip reaches the fish or when the timer expires. */
+    /* Finish the run when Pip reaches the fish or when time expires. */
     function finishRun(won) {
         isSliding = false;
         slideDirection = null;
@@ -10910,15 +10960,25 @@ syncSoundUI();
         syncChrome(true);
     }
 
-    /* Read a tile from the board and treat any out-of-bounds cell as solid rock. */
+    /* Read a tile from the board and treat out-of-bounds cells as boundary blocks. */
     function tileAt(column, row) {
-        if (column < 0 || row < 0 || column >= SETTINGS.gridSize || row >= SETTINGS.gridSize) {
-            return TILE.ROCK;
+        if (column < 0 || row < 0 || column >= SETTINGS.gridColumns || row >= SETTINGS.gridRows) {
+            return null;
         }
         return levelTiles[row][column];
     }
 
-    /* Tell whether a boulder sits on a specific board tile. */
+    /* Tell whether a tree obstacle occupies a specific tile. */
+    function treeAt(column, row) {
+        for (let i = 0; i < treesList.length; i++) {
+            if (treesList[i].column === column && treesList[i].row === row) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /* Tell whether a boulder obstacle occupies a specific tile. */
     function boulderAt(column, row) {
         for (let i = 0; i < bouldersList.length; i++) {
             if (bouldersList[i].column === column && bouldersList[i].row === row) {
@@ -10928,13 +10988,18 @@ syncSoundUI();
         return false;
     }
 
-    /* Tell whether the ice block occupies a specific tile. */
+    /* Return the active ice block occupying a tile, or null if none. */
     function blockAt(column, row) {
-        if (blockInRiver) return false;
-        return blockColumn === column && blockRow === row;
+        for (let i = 0; i < blocks.length; i++) {
+            const block = blocks[i];
+            if (!block.inRiver && block.column === column && block.row === row) {
+                return block;
+            }
+        }
+        return null;
     }
 
-    /* Spawn tiny water splash particles when an ice block hits the river. */
+    /* Spawn tiny water splash droplets when an ice block lands in a river. */
     function spawnSplash(splashCenterX, splashCenterY) {
         splashParticles = [];
         for (let i = 0; i < SETTINGS.splashCount; i++) {
@@ -10949,14 +11014,17 @@ syncSoundUI();
         }
     }
 
-    /* Push the ice block in a direction until it hits an obstacle or the river. */
-    function pushBlock(direction) {
+    /* Push an ice block along the slide direction until hitting an obstacle or river. */
+    function pushBlock(block, direction) {
         const columnStep = direction === "left" ? -1 : direction === "right" ? 1 : 0;
         const rowStep = direction === "up" ? -1 : direction === "down" ? 1 : 0;
-        let targetColumn = blockColumn + columnStep;
-        let targetRow = blockRow + rowStep;
+        let targetColumn = block.column + columnStep;
+        let targetRow = block.row + rowStep;
 
-        if (tileAt(targetColumn, targetRow) === TILE.ROCK || boulderAt(targetColumn, targetRow)) {
+        if (targetColumn < 0 || targetColumn >= SETTINGS.gridColumns ||
+            targetRow < 0 || targetRow >= SETTINGS.gridRows ||
+            treeAt(targetColumn, targetRow) || boulderAt(targetColumn, targetRow) ||
+            blockAt(targetColumn, targetRow)) {
             return false;
         }
 
@@ -10964,9 +11032,9 @@ syncSoundUI();
             const currentTile = tileAt(targetColumn, targetRow);
             if (currentTile === TILE.WATER) {
                 levelTiles[targetRow][targetColumn] = TILE.BRIDGE;
-                blockInRiver = true;
-                const splashX = targetColumn * SETTINGS.cellSizePixels + 5;
-                const splashY = targetRow * SETTINGS.cellSizePixels + 5;
+                block.inRiver = true;
+                const splashX = SETTINGS.stageMarginPixels + targetColumn * SETTINGS.cellSizePixels + 6;
+                const splashY = SETTINGS.stageMarginPixels + targetRow * SETTINGS.cellSizePixels + 6;
                 spawnSplash(splashX, splashY);
                 showMessage("ICE BLOCK SUNK! BRIDGE BUILT");
                 return true;
@@ -10974,22 +11042,24 @@ syncSoundUI();
 
             const nextColumn = targetColumn + columnStep;
             const nextRow = targetRow + rowStep;
-            const nextTile = tileAt(nextColumn, nextRow);
 
-            if (nextTile === TILE.ROCK || boulderAt(nextColumn, nextRow)) {
+            if (nextColumn < 0 || nextColumn >= SETTINGS.gridColumns ||
+                nextRow < 0 || nextRow >= SETTINGS.gridRows ||
+                treeAt(nextColumn, nextRow) || boulderAt(nextColumn, nextRow) ||
+                blockAt(nextColumn, nextRow)) {
                 break;
             }
             targetColumn = nextColumn;
             targetRow = nextRow;
         }
 
-        blockColumn = targetColumn;
-        blockRow = targetRow;
+        block.column = targetColumn;
+        block.row = targetRow;
         showMessage("ICE BLOCK SLID TO A STOP");
         return true;
     }
 
-    /* Initiate sliding movement in the chosen direction. */
+    /* Initiate sliding movement across the ice in the chosen direction. */
     function startSlide(direction) {
         if (gameState !== STATE.PLAY) return;
         playerFacing = direction;
@@ -11007,8 +11077,17 @@ syncSoundUI();
         const nextColumn = playerColumn + columnStep;
         const nextRow = playerRow + rowStep;
 
-        if (blockAt(nextColumn, nextRow)) {
-            const pushed = pushBlock(slideDirection);
+        if (nextColumn < 0 || nextColumn >= SETTINGS.gridColumns ||
+            nextRow < 0 || nextRow >= SETTINGS.gridRows) {
+            isSliding = false;
+            slideDirection = null;
+            showMessage("PIP HIT THE ARENA WALL");
+            return;
+        }
+
+        const encounteredBlock = blockAt(nextColumn, nextRow);
+        if (encounteredBlock) {
+            const pushed = pushBlock(encounteredBlock, slideDirection);
             if (!pushed) {
                 isSliding = false;
                 slideDirection = null;
@@ -11017,18 +11096,18 @@ syncSoundUI();
             return;
         }
 
-        const nextTile = tileAt(nextColumn, nextRow);
-        if (nextTile === TILE.ROCK || boulderAt(nextColumn, nextRow)) {
+        if (treeAt(nextColumn, nextRow) || boulderAt(nextColumn, nextRow)) {
             isSliding = false;
             slideDirection = null;
             showMessage("PIP BUMPED AN OBSTACLE");
             return;
         }
 
+        const nextTile = tileAt(nextColumn, nextRow);
         if (nextTile === TILE.WATER) {
             isSliding = false;
             slideDirection = null;
-            showMessage("COLD WATER! BUILD A BRIDGE");
+            showMessage("COLD RIVER! PUSH A BLOCK TO CROSS");
             return;
         }
 
@@ -11088,15 +11167,16 @@ syncSoundUI();
 
     /* Paint the stage background, tiles, obstacles, characters and effects. */
     function paintBoard(ctx) {
-        for (let rowIndex = 0; rowIndex < SETTINGS.gridSize; rowIndex++) {
-            for (let columnIndex = 0; columnIndex < SETTINGS.gridSize; columnIndex++) {
-                const pixelX = columnIndex * SETTINGS.cellSizePixels;
-                const pixelY = rowIndex * SETTINGS.cellSizePixels;
+        ctx.fillStyle = PAL.arenaBorder;
+        ctx.fillRect(0, 0, SETTINGS.stageSize, SETTINGS.stageSize);
+
+        for (let rowIndex = 0; rowIndex < SETTINGS.gridRows; rowIndex++) {
+            for (let columnIndex = 0; columnIndex < SETTINGS.gridColumns; columnIndex++) {
+                const pixelX = SETTINGS.stageMarginPixels + columnIndex * SETTINGS.cellSizePixels;
+                const pixelY = SETTINGS.stageMarginPixels + rowIndex * SETTINGS.cellSizePixels;
                 const tile = tileAt(columnIndex, rowIndex);
                 if (tile === TILE.WATER) {
                     paintWaterTile(ctx, pixelX, pixelY, rowIndex, columnIndex);
-                } else if (tile === TILE.ROCK) {
-                    paintRockBorder(ctx, pixelX, pixelY);
                 } else if (tile === TILE.BRIDGE) {
                     paintBridgeTile(ctx, pixelX, pixelY);
                 } else {
@@ -11104,6 +11184,7 @@ syncSoundUI();
                 }
             }
         }
+        paintTrees(ctx);
         paintBoulders(ctx);
     }
 
@@ -11112,10 +11193,10 @@ syncSoundUI();
         ctx.fillStyle = PAL.ice;
         ctx.fillRect(pixelX, pixelY, SETTINGS.cellSizePixels, SETTINGS.cellSizePixels);
         ctx.fillStyle = PAL.iceLight;
-        ctx.fillRect(pixelX + 2, pixelY + 2, 2, 1);
-        if ((rowIndex * 3 + columnIndex * 5) % 6 === 0) {
+        ctx.fillRect(pixelX + 2, pixelY + 2, 3, 1);
+        if ((rowIndex * 3 + columnIndex * 5) % 4 === 0) {
             ctx.fillStyle = PAL.iceLight;
-            ctx.fillRect(pixelX + 6, pixelY + 6, 1, 1);
+            ctx.fillRect(pixelX + 8, pixelY + 8, 1, 1);
         }
     }
 
@@ -11126,41 +11207,43 @@ syncSoundUI();
         ctx.fillStyle = PAL.waterLight;
         const ripplePhase = Math.floor(gameClock / SETTINGS.waterRipplePeriodSeconds) % 2;
         const rippleX = pixelX + 2 + ripplePhase;
-        ctx.fillRect(rippleX, pixelY + 3, 3, 1);
+        ctx.fillRect(rippleX, pixelY + 4, 4, 1);
         if ((rowIndex + columnIndex) % 2 === 0) {
-            ctx.fillRect(pixelX + 5 - ripplePhase, pixelY + 6, 2, 1);
+            ctx.fillRect(pixelX + 6 - ripplePhase, pixelY + 8, 3, 1);
         }
     }
 
-    /* Paint a bridge tile made of the sunken ice block. */
+    /* Paint a bridge tile made of a sunken ice block in the river. */
     function paintBridgeTile(ctx, pixelX, pixelY) {
+        ctx.fillStyle = PAL.water;
+        ctx.fillRect(pixelX, pixelY, SETTINGS.cellSizePixels, SETTINGS.cellSizePixels);
         paintPixels(ctx, BRIDGE_MAP, BLOCK_COLORS, pixelX + 1, pixelY + 1, false, SETTINGS.spriteScale);
     }
 
-    /* Paint a border rock with a soft white snow crest. */
-    function paintRockBorder(ctx, pixelX, pixelY) {
-        ctx.fillStyle = PAL.rock;
-        ctx.fillRect(pixelX, pixelY, SETTINGS.cellSizePixels, SETTINGS.cellSizePixels);
-        ctx.fillStyle = PAL.rockLight;
-        ctx.fillRect(pixelX + 1, pixelY + 1, 8, 2);
-        ctx.fillStyle = PAL.snow;
-        ctx.fillRect(pixelX + 2, pixelY, 6, 1);
+    /* Paint snowy pine tree obstacles scattered across the islands. */
+    function paintTrees(ctx) {
+        for (let i = 0; i < treesList.length; i++) {
+            const tree = treesList[i];
+            const pixelX = SETTINGS.stageMarginPixels + tree.column * SETTINGS.cellSizePixels + 1;
+            const pixelY = SETTINGS.stageMarginPixels + tree.row * SETTINGS.cellSizePixels + 1;
+            paintPixels(ctx, TREE_MAP, TREE_COLORS, pixelX, pixelY, false, SETTINGS.spriteScale);
+        }
     }
 
     /* Paint snowy boulder obstacles scattered on the ice. */
     function paintBoulders(ctx) {
         for (let i = 0; i < bouldersList.length; i++) {
             const boulder = bouldersList[i];
-            const pixelX = boulder.column * SETTINGS.cellSizePixels + SETTINGS.spriteInsetPixels;
-            const pixelY = boulder.row * SETTINGS.cellSizePixels + SETTINGS.spriteInsetPixels;
+            const pixelX = SETTINGS.stageMarginPixels + boulder.column * SETTINGS.cellSizePixels + 1;
+            const pixelY = SETTINGS.stageMarginPixels + boulder.row * SETTINGS.cellSizePixels + 1;
             paintPixels(ctx, BOULDER_MAP, BOULDER_COLORS, pixelX, pixelY, false, SETTINGS.spriteScale);
         }
     }
 
     /* Paint Pip in the current stance: waddling, belly-sliding, or cheering. */
     function paintPenguin(ctx) {
-        const pixelX = playerColumn * SETTINGS.cellSizePixels + SETTINGS.spriteInsetPixels;
-        const pixelY = playerRow * SETTINGS.cellSizePixels + SETTINGS.spriteInsetPixels;
+        const pixelX = SETTINGS.stageMarginPixels + playerColumn * SETTINGS.cellSizePixels + 1;
+        const pixelY = SETTINGS.stageMarginPixels + playerRow * SETTINGS.cellSizePixels + 1;
         let map = PIP_STAND_MAP;
         let flipHorizontal = false;
 
@@ -11186,18 +11269,21 @@ syncSoundUI();
         paintPixels(ctx, map, PIP_COLORS, pixelX, pixelY, flipHorizontal, SETTINGS.spriteScale);
     }
 
-    /* Paint the ice block if it has not yet been pushed into the river. */
-    function paintBlock(ctx) {
-        if (blockInRiver) return;
-        const pixelX = blockColumn * SETTINGS.cellSizePixels + SETTINGS.spriteInsetPixels;
-        const pixelY = blockRow * SETTINGS.cellSizePixels + SETTINGS.spriteInsetPixels;
-        paintPixels(ctx, BLOCK_MAP, BLOCK_COLORS, pixelX, pixelY, false, SETTINGS.spriteScale);
+    /* Paint the ice blocks that have not yet been pushed into a river. */
+    function paintBlocks(ctx) {
+        for (let i = 0; i < blocks.length; i++) {
+            const block = blocks[i];
+            if (block.inRiver) continue;
+            const pixelX = SETTINGS.stageMarginPixels + block.column * SETTINGS.cellSizePixels + 1;
+            const pixelY = SETTINGS.stageMarginPixels + block.row * SETTINGS.cellSizePixels + 1;
+            paintPixels(ctx, BLOCK_MAP, BLOCK_COLORS, pixelX, pixelY, false, SETTINGS.spriteScale);
+        }
     }
 
     /* Paint the golden prize fish glistening on the southern ice bank. */
     function paintFish(ctx) {
-        const pixelX = fishColumn * SETTINGS.cellSizePixels + SETTINGS.spriteInsetPixels;
-        const pixelY = fishRow * SETTINGS.cellSizePixels + SETTINGS.spriteInsetPixels;
+        const pixelX = SETTINGS.stageMarginPixels + fishColumn * SETTINGS.cellSizePixels + 1;
+        const pixelY = SETTINGS.stageMarginPixels + fishRow * SETTINGS.cellSizePixels + 1;
         paintPixels(ctx, FISH_MAP, FISH_COLORS, pixelX, pixelY, false, SETTINGS.spriteScale);
     }
 
@@ -11216,15 +11302,15 @@ syncSoundUI();
             SETTINGS.titlePlateWidth, SETTINGS.titlePlateHeight, PAL.plate);
         paintPixelText(ctx, "PENGUINSLIDE", 50, SETTINGS.titleNameY, PAL.ink, null, 2);
         paintPixelText(ctx, "SLIDE ON THE ICE", 50, SETTINGS.titleLineOneY, PAL.ink, null, 1);
-        paintPixelText(ctx, "PUSH BLOCK TO RIVER", 50, SETTINGS.titleLineTwoY, PAL.ink, null, 1);
-        paintPixelText(ctx, "CROSS BRIDGE TO FISH", 50, SETTINGS.titleLineThreeY, PAL.ink, null, 1);
+        paintPixelText(ctx, "BRIDGE BOTH RIVERS", 50, SETTINGS.titleLineTwoY, PAL.ink, null, 1);
+        paintPixelText(ctx, "CROSS TO REACH FISH", 50, SETTINGS.titleLineThreeY, PAL.ink, null, 1);
         paintPixelText(ctx, "STOP BUTTON BRAKES", 50, SETTINGS.titleLineFourY, PAL.ink, null, 1);
         if (Math.floor(gameClock * 2) % 2 === 0) {
             paintPixelText(ctx, "TAP OR PRESS A KEY", 50, SETTINGS.titlePromptY, PAL.ink, null, 1);
         }
     }
 
-    /* Paint the final game over card showing the score and replay prompt. */
+    /* Paint the final game over card showing score and replay prompt. */
     function paintOver(ctx) {
         paintRoundBlob(ctx, SETTINGS.endPlateX, SETTINGS.endPlateY,
             SETTINGS.endPlateWidth, SETTINGS.endPlateHeight, PAL.plate);
@@ -11234,14 +11320,13 @@ syncSoundUI();
         paintPixelText(ctx, "PRESS R TO PLAY AGAIN", 50, SETTINGS.endPromptY, PAL.ink, null, 1);
     }
 
-    /* Paint a delightful shelf preview card with Pip, ice block, and fish. */
+    /* Paint a rich shelf preview card with Pip, dual rivers, block, and fish. */
     function paintPreview(ctx) {
-        ctx.fillStyle = PAL.water;
-        ctx.fillRect(0, 0, SETTINGS.previewCanvasWidth, SETTINGS.previewCanvasHeight);
         ctx.fillStyle = PAL.ice;
-        ctx.fillRect(0, SETTINGS.previewIceY, SETTINGS.previewCanvasWidth, SETTINGS.previewIceHeight);
+        ctx.fillRect(0, 0, SETTINGS.previewCanvasWidth, SETTINGS.previewCanvasHeight);
         ctx.fillStyle = PAL.water;
-        ctx.fillRect(0, SETTINGS.previewRiverY, SETTINGS.previewCanvasWidth, SETTINGS.previewRiverHeight);
+        ctx.fillRect(0, SETTINGS.previewRiverOneY, SETTINGS.previewCanvasWidth, SETTINGS.previewRiverHeight);
+        ctx.fillRect(0, SETTINGS.previewRiverTwoY, SETTINGS.previewCanvasWidth, SETTINGS.previewRiverHeight);
         paintPixels(ctx, PIP_STAND_MAP, PIP_COLORS,
             SETTINGS.previewPipX, SETTINGS.previewPipY, false, SETTINGS.previewSpriteScale);
         paintPixels(ctx, BLOCK_MAP, BLOCK_COLORS,
@@ -11263,7 +11348,7 @@ syncSoundUI();
             shownBest = bestNow;
             bestEl.textContent = String(bestNow);
         }
-        if (gameState === STATE.TITLE) showMessage("PUSH ICE BLOCK TO BUILD A BRIDGE");
+        if (gameState === STATE.TITLE) showMessage("PUSH ICE BLOCKS TO BRIDGE BOTH RIVERS");
         else if (gameState === STATE.PLAY && statusMessage) showMessage(statusMessage);
         else if (gameState === STATE.OVER) showMessage(endMessage + " — PRESS R TO TRY AGAIN");
         if (force) shownMessage = msgEl.textContent;
@@ -11288,7 +11373,7 @@ syncSoundUI();
         clearHeld();
     }
 
-    /* Restart into a fresh puzzle round with full time limit. */
+    /* Restart into a fresh dual-river puzzle round with full time limit. */
     function restart() {
         startRun();
     }
@@ -11341,11 +11426,9 @@ syncSoundUI();
 
     /* Draw the complete game frame, board, entities, and UI cards. */
     function paint(ctx) {
-        ctx.fillStyle = PAL.snow;
-        ctx.fillRect(0, 0, SETTINGS.stageSize, SETTINGS.stageSize);
         paintBoard(ctx);
         paintFish(ctx);
-        paintBlock(ctx);
+        paintBlocks(ctx);
         paintSplashParticles(ctx);
         paintPenguin(ctx);
 
@@ -11363,10 +11446,10 @@ syncSoundUI();
         id: SETTINGS.gameName,
         versionNumber: SETTINGS.versionNumber,
         name: "Penguin Slide",
-        tagline: "build Pip a bridge across the river",
-        concept: "Help Pip the baby penguin slide across arctic ice, push ice blocks into the river to build a bridge, and reach the golden fish.",
+        tagline: "bridge two rivers to reach the fish",
+        concept: "Help Pip the baby penguin slide across arctic ice, push ice blocks to bridge two roaring rivers, and reach the golden fish.",
         actionLabel: "STOP",
-        hint: "arrows slide on ice · STOP brakes · push ice block to bridge river · reach fish · R restarts",
+        hint: "arrows slide on ice · STOP brakes · bridge both rivers with blocks · reach fish · R restarts",
         previewPaint: paintPreview,
         start, stop, restart, update, paint, onDir, onAction, onStageTap, onAnyKey
     });
