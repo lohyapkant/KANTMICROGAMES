@@ -125,6 +125,7 @@ What each model used on each build. This is a record, not an opinion, and not a 
 | 032 | 2026-11-14 | P-32 | Gemini 3.8 Flash | Medium | Antigravity | build | ~25 min | not recorded — time only | not recorded | not recorded | not recorded | not recorded | not recorded | not recorded | PENGUINSLIDE v4 overhaul |
 | 033 | 2026-11-15 | P-33 | Gemini 3.8 Flash | Medium | Antigravity | build | ~20 min | not recorded — time only | not recorded | not recorded | not recorded | not recorded | not recorded | not recorded | PENGUINSLIDE v5 dual rivers & large sprites |
 | 034 | 2026-11-15 | P-34 | Gemini 3.8 Flash | Medium | Antigravity | build | ~25 min | not recorded — time only | not recorded | not recorded | not recorded | not recorded | not recorded | not recorded | PENGUINSLIDE v6 fish island & layered art |
+| 035 | 2026-11-15 | P-35 | Gemini 3.8 Flash | Medium | Antigravity | build | ~25 min | not recorded — time only | not recorded | not recorded | not recorded | not recorded | not recorded | not recorded | PENGUINSLIDE v7 pseudo-isometric view & Tuna |
 | 027 | DeepSeek V4.1 Flash Free · OpenCode | built (effort High) | ~6 min | 117,458 tokens processed | measured: 73,339 input + 25,499 output + 18,620 reasoning; 5,544,064 cache reads not counted; 44 steps; 46 tool calls; OpenCode stats delta, final reading after the swap and the live check (see the build record in plans/buildlog/027-20261114.md) |
 
 ### Totals that can honestly be added
@@ -575,6 +576,14 @@ Source: Owner's words (verbatim)
 Builds observed: `034-20261115`.
 
 The owner observed: “Okay - much better. That said, I am faced with a situation in which the penguin pip is stuck as it has pushed the ice block into a dead end, and has no way to continue without restarting. I guess that is the game play challenge. However, I would still like to improve the graphics : If you are able to increase the size of a sprites a bit more to perhaps overlap the grid, that way Pip will look bigger and more animated. In fact, if you can increase the fluidity of the animation of pip in moving, it would be great. The same applies to the ice block. I am not sure if it makes sense to 'reduce' the size of the grid square to increase the number of squares to allow some varibility? Perhaps the fish is on a frozen island on it's own, with a river around it... the trees can be bigger and the sprite can leak out of the grid, while the tree is animated from waving gently in the cold wind, and should pip slide and hit the tree, perhaps the tree has the animation of snow falling from the tree. Obviously the tree sprite is supposed to be at a higher 'level' to the sprite of Pip, becuase if pip slides behind the tree, pip is 'behind' the tree if that makes sense.” Build 034 delivers oversized layered sprites with depth-sorting, swaying pine trees shedding snow, shiver-impact ice blocks, an animated prize fish on an interior moat island, and ambient snowfall.
+
+## 2026-11-15 — Owner observation — PENGUINSLIDE v7 pseudo-isometric view and Bluefin Tuna
+
+Source: Owner's words (verbatim)
+
+Builds observed: `035-20261115`.
+
+The owner observed: “How would it look like for a 9x9 with the sprite in a pseudo isometric view from top down? Are you able to redo the sprites for Pip, the tree (with the top of the tree perhaps extending to the other grid to give it some form of massive heft) and also redo the stone boulder (to be massive) as well as the fish (perhaps change it to a tuna with a flapping tail and fin) - and increase the animation fluidity for all sprites. Also, for the river island, try to increase the water details if possible.” Build 035 delivers a pseudo-isometric 3/4 perspective on a 9x9 grid with center island (4, 4), massive 16x16 sprites, two-tile tall wind-swaying trees, and an animated flopping Bluefin Tuna.
 
 <!-- NEW ENTRIES ABOVE THIS LINE. Never edit existing entries. -->
 
