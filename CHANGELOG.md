@@ -8,6 +8,16 @@ A short record of every build, newest first. Each entry gives the build ID, the 
 - **Corrected in build 028:** 13 lines in entries 000 to 018 were cut off mid-sentence when this record was made in build 027; they were restored in full from the private record. (The build 028 prompt expected 15: entries 001 and 000 were named too, but their lines were already whole, so nothing there needed changing.)
 
 <!-- NEW ENTRIES: paste the newest short entry on the line below this comment, above the previous newest. Never edit older entries except to add a dated correction line in the header. -->
+## 036-20261115 — 2026-11-15 (PENGUINSLIDE v8 rebuilt from scratch: a warm top-down 3/4 ice puzzle)
+
+Built from prompt: P-36, authored by the owner and pasted verbatim in the session (rebuild PENGUINSLIDE from scratch as a cute, animated top-down 3/4 puzzle, redo its shelf card, and ship build 036); prompt effort not recorded  
+Tool and model: **DeepSeek V4.1 Flash Free** (OpenCode); effort not shown  
+What changed: rebuilt PENGUINSLIDE from scratch as a warm top-down 3/4 ice puzzle: a 7x7 field with a two-tile-wide river, three pushable ice blocks and two bridges per row; Pip slides until a wall, tree, boulder, block or water edge stops him, and a bump on a block arms a second press to push; blocks sink into open water and become bridges, and a block slides over an existing bridge into the next water tile. Three snowflake brakes stop Pip at the next tile (with a live HUD indicator), the clock is 60 seconds, and the score is the seconds left. No water death: the ice is gentle. Four hand-made layouts were proved solvable; R restarts the same layout with a fresh clock and brakes, and a new entry picks a different one. New 14x16 Pip with front, back, profile, slide and cheer poses, snowy pines, boulders, golden fish, animated water, snowfall, splashes and snow puffs, a new how-to card, a result card with Pip and the fish, and new shelf preview art.  
+Games changed: PENGUINSLIDE v8 (frozen build 036-20261115)  
+Checked: both inline scripts parse (`node --check`); readable-code counts are zero; `check-project.py` prints 12 of 12 PASS on the mirror with `--unfrozen PENGUINSLIDE`; headless Chrome ran for real: the stage is stable at all seven named viewports, the title, play and win screens were captured at 360x640@3 and 1280x800@1, the forced layout solved in 7 presses with 57 seconds left, and there were 0 console errors and 0 external requests.  
+Not checked: no Safari, real phone or sound test.  
+Time and usage: about 68 min; 485,529 tokens processed
+
 ## 035-20261115 — 2026-11-15 (PENGUINSLIDE v7 in pseudo-isometric view with Bluefin Tuna island)
 
 Built from prompt: P-35 (PENGUINSLIDE v7 9x9 pseudo-isometric view, massive layered sprites, fluid animations, flopping Bluefin Tuna; unfreezes PENGUINSLIDE); prompt effort not recorded  

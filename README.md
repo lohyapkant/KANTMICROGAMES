@@ -4,7 +4,7 @@ Nine tiny pixel-art games in one HTML file. Open it, pick a game, play a minute.
 
 Play online: <https://kantmicrogames.lohyapkant.workers.dev/>
 
-**Current build:** `035-20261115` — nine games, one file.
+**Current build:** `036-20261115` — nine games, one file.
 
 ## About this project
 
@@ -26,7 +26,7 @@ A short record of every build is in CHANGELOG.md; the long-form build records ar
 | SNAILRACE | Nibbles races two garden snails to a picnic strawberry; lettuce zooms, salt stings. |
 | HUGPARADE | Momo steps along hedge rails, gathers hearts, and hugs Bibi before the maze reshapes; each heart makes the hug worth more. |
 | CATNAPCATCH | Slide a paper pillow under a sleeping kitten and catch the falling noisemakers; three clangs wake the nap. |
-| PENGUINSLIDE | Help Pip slide an ice block onto an icy river, cross the bridge, and reach the fish before time runs out. |
+| PENGUINSLIDE | Slide Pip to the golden fish: push ice blocks into the river to build two bridges, and brake with three snowflakes. |
 
 ## How to play
 
