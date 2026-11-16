@@ -1,10 +1,10 @@
-<!-- Applies to: build 029-20261114 · nine games · changes to controls are recorded in CHANGELOG.md -->
+<!-- Applies to: build 038-20261115 · ten games · changes to controls are recorded in CHANGELOG.md -->
 # KANTMICROGAMES — Controls
 
 Which controls exist, how they behave on each kind of device, and why.
-This guide applies to all eight games, on every kind of device.
+This guide applies to all ten games, on every kind of device.
 
-## One table for all eight games
+## One table for all ten games
 
 | Game | Move | Action (`SPACE`, action button, stage tap) | Goal |
 |---|---|---|---|
@@ -17,6 +17,7 @@ This guide applies to all eight games, on every kind of device.
 | HUGPARADE | step cell to cell along the hedge rails with `W A S D` / arrows / the direction pad | **PEEK** — see the next hedges for 2 s, 6 s cooldown | gather up to three hearts, then hug Bibi: a hug scores 1 plus 1 per heart held; the maze redraws every 10 s |
 | CATNAPCATCH | slide the pillow left and right with `A` / `D`, ← → or the direction pad | **POUF** — widen the paper pillow for 1.4 s, 4.5 s cooldown | catch falling noisemakers for 45 s; three clangs wake Mochi |
 | PENGUINSLIDE | slide on ice with `W A S D` / arrows / the direction pad | **STOP** — halt sliding to think | push ice blocks to build a path to the fish within 60 s; score equals remaining seconds |
+| CHASEKILLKANT | strafe with `A` / `D`, ← → or the direction pad | **THROW** — toss the next piece of cutlery, 0.28 s apart | hit Kant five times in 60 s while dodging falling pots; crates restock one piece |
 
 The action button carries the game's own label (DASH / POKE / GO / REACH / STOMP / ZOOM / PEEK / POUF / STOP),
 so one button serves every game. SLIMEHOP is the one game where a direction press is a single
@@ -28,7 +29,8 @@ instead: every press carries Momo a whole cell, a release mid-step still finishe
 step at the next centre, a perpendicular press waits for the next junction, and only a
 hedge blocks a step. It never moves diagonally, so Momo cannot wedge between two hedges.
 CATNAPCATCH uses the horizontal axis only: left and right slide the paper pillow, and up
-and down do nothing.
+and down do nothing. CHASEKILLKANT also uses the horizontal axis only: left and right
+strafe along the hallway, up and down do nothing, and the action button throws.
 
 ## Settings
 
@@ -222,8 +224,9 @@ once the run is resumed.
 
 - The game screen shows no hint line. The shelf cards and chips explain the controls, and the frozen modules' original desktop hint strings are not shown. No game code had to change.
 - The title truncates with an ellipsis when the top row is tight, so SCORE and BEST
-  stay clear of the pinned pair. The full name is on the shelf card and in the
-  browser tab.
+  stay clear of the pinned pair. A long name (eleven letters or more) instead takes
+  its own line above them on a phone under 480 px wide. The full name is on the
+  shelf card and in the browser tab.
 - Below 360 px wide the pinned pair stacks vertically; the title, SCORE and BEST
   keep a readable row to its right.
 - The mascot animation and the shelf's hover lift are decorative only; they are

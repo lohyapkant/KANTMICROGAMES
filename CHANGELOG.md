@@ -8,6 +8,16 @@ A short record of every build, newest first. Each entry gives the build ID, the 
 - **Corrected in build 028:** 13 lines in entries 000 to 018 were cut off mid-sentence when this record was made in build 027; they were restored in full from the private record. (The build 028 prompt expected 15: entries 001 and 000 were named too, but their lines were already whole, so nothing there needed changing.)
 
 <!-- NEW ENTRIES: paste the newest short entry on the line below this comment, above the previous newest. Never edit older entries except to add a dated correction line in the header. -->
+## 038-20261115 — 2026-11-16 (CHASEKILLKANT: a hallway chase with thrown cutlery)
+
+Built from prompt: P-38, written by the owner with DeepSeek V4.1 Flash Free in OpenCode CLI and pasted verbatim after review (add a tenth game, CHASEKILLKANT, and sweep stale counts out of the current-state docs); prompt effort High  
+Tool and model: **DeepSeek V4.1 Flash Free** (OpenCode); effort High  
+What changed: added CHASEKILLKANT as the tenth game (v1, frozen build 038-20261115): a warm school hallway where a girl seen from behind strafes along the bottom and throws forks, knives and scissors at Kant, who runs at the top, ducks after a glance and must be hit five times in sixty seconds. Pots drift down and daze her for 1.5 s; crates drift down and add one piece of cutlery to a shared count. A gold hint marks every punish window, and the how-to, win (KANT DOWN!) and lose (KANT LAUGHS AT YOU!) cards live inside the stage. The same build corrected stale game counts in the handbook, the conventions, the new-game guide, the prompt template, CONTROLS, README and the app header; a long game name now takes its own line in the phone header instead of being cut short  
+Games changed: CHASEKILLKANT v1 (frozen build 038-20261115)  
+Checked: both inline scripts parse (`node --check`); readable-code counts are zero; a headless fairness harness proves the 17-member contract, the how-to card text and action gate, and rules F1-F7 over 40 seeds and runs four seeded skill profiles (perfect 100 percent, sharp 100 percent, regular 30 percent, rookie 12.5 percent); `check-project.py` prints 12 of 12 PASS on the mirror; headless Chrome is stable at all seven named viewports with 0 console errors and 0 external requests  
+Not checked: no Safari, real phone or sound test; the art check is a self-review, not an owner approval  
+Time and usage: about 70 min (two sittings); 1,052,704 tokens processed
+
 ## 037-20261115 — 2026-11-15 (PENGUINSLIDE v9: Seal Patrol, a belly-slide dash and six fish)
 
 Built from prompt: P-37, authored by the owner in the session (abandon the penguin-sliding puzzle for a mechanic where Pip moves, collects fish and faces a challenge; keep six fish to win as a start and add the second seal at fish three; then execute); the verbatim text was not preserved in the compressed session, so the prompt copy records the requirements and says so; prompt effort not recorded  

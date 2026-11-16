@@ -6,8 +6,8 @@
   Repository : https://github.com/lohyapkant/KANTMICROGAMES
   Play online: https://kantmicrogames.lohyapkant.workers.dev/
   Hosting    : Cloudflare Workers (https://workers.cloudflare.com/)
-  Current    : build 037-20261115 — PENGUINSLIDE v9 in warm top-down
-               3/4 view, seal patrol, belly-slide dash, six fish to win
+  Current    : build 038-20261115 — CHASEKILLKANT v1, a hallway chase
+               with thrown cutlery, five hits in sixty seconds
   Names      : project and on-screen brand KANTMICROGAMES ·
                save keys and the console tag use the KANTMICROGAMES prefix
   Build log  : build 028-20261114, DeepSeek V4.1 Flash Free (OpenCode) — a short
@@ -910,6 +910,15 @@
 
         .topRow .chip { flex: none; }
 
+        /* Build 038: a long game name gets its own line on a narrow phone
+           instead of truncating to "CH...". The row wraps, the title takes
+           the full width and the two chips sit under it. Wider screens never
+           use this row, because the name fits there already. */
+        @media (max-width: 479px) {
+            .topRow.longTitle { flex-wrap: wrap; max-height: none; }
+            .topRow.longTitle #gameTitle { flex: 1 1 100%; order: -1; }
+        }
+
         #gameTagline {
             font-size: 0.81rem;
             font-weight: 700;
@@ -1402,8 +1411,8 @@
 
 /* ==================================================================
    READ ME FIRST — BOUNDARIES BETWEEN THE SHELF, THE RUNTIME AND THE
-   EIGHT GAME MODULES (PANDASNACK, BOOPEEK, DUCKLINE, SPROUTUP, SLIMEHOP,
-   SNAILRACE, HUGPARADE, CATNAPCATCH).
+   TEN GAME MODULES (PANDASNACK, BOOPEEK, DUCKLINE, SPROUTUP, SLIMEHOP,
+   SNAILRACE, HUGPARADE, CATNAPCATCH, PENGUINSLIDE and CHASEKILLKANT).
 
    The shelf and the runtime are SHARED. The games are NOT shared.
    Each game is its own IIFE with its own SETTINGS, palette, sprite
@@ -1421,19 +1430,20 @@
       PANDASNACK -> panda / PAL / PANDA_*, BOOPEEK -> peek / boo / pip /
       BOO_ / PIP_*, DUCKLINE -> duck / mama / DUCK_*, SPROUTUP -> sprout /
       SPROUT_*, SLIMEHOP -> slime / SLIME_*, SNAILRACE -> race / RACE_*,
-      HUGPARADE -> hug / HUG_*, CATNAPCATCH -> cat / CAT_*.
+      HUGPARADE -> hug / HUG_*, CATNAPCATCH -> cat / CAT_*,
+      PENGUINSLIDE -> penguin / PENGUIN_*, CHASEKILLKANT -> kant / CHASE_*.
    4. Paint with the ctx passed into paint(ctx). Do not assume the
       shared stageCtx; that assumption is a PANDASNACK legacy only.
    5. Do not copy one game's character art into another game. Panda,
       mouse, mallard, seedling and slime shapes must stay visually
       distinct.
-   6. All nine games are FROZEN by owner request: PANDASNACK (content
+   6. All ten games are FROZEN by owner request: PANDASNACK (content
       007-20261101), BOOPEEK (content 006-20261101), DUCKLINE (content
       005-20261101), SPROUTUP (content 007-20261101), SLIMEHOP (content
       010-20261101), SNAILRACE (content 011-20261101), HUGPARADE (content
-      015-20261102), CATNAPCATCH (content 016-20261102) and PENGUINSLIDE (content
-      029-20261114). Do not restyle, rebalance or refactor them unless the owner
-      unfreezes one in the prompt. (Build 010 changed only their unused `saveKey` label
+      015-20261102), CATNAPCATCH (content 016-20261102), PENGUINSLIDE (content
+      037-20261115) and CHASEKILLKANT (content 038-20261115). Do not restyle,
+      rebalance or refactor them unless the owner unfreezes one in the prompt. (Build 010 changed only their unused `saveKey` label
       string when the storage prefix was renamed; art, tuning and
       behaviour are untouched. Build 016 left all six earlier games
       byte-identical. Build 017 changed the shared shell only. Build 026
@@ -1483,7 +1493,7 @@
 
 const APP = {
     name: "KANTMICROGAMES",
-    fileVersion: "037-20261115",       // build number of THIS one-file app
+    fileVersion: "038-20261115",       // build number of THIS one-file app
     savePrefix: "KANTMICROGAMES."      // best scores live at prefix + GAMEID + ".best"
 };
 
@@ -2119,7 +2129,7 @@ function paintPandaSnackPreview(ctx) {
    the module's own versionNumber, the build where its content last changed.
    Keep this table in step with plans/game-versions.txt; the check script,
    tests/check-project.py, compares them. */
-const GAME_REVISIONS = { PANDASNACK: { revision: 1, frozen: true }, BOOPEEK: { revision: 2, frozen: true }, DUCKLINE: { revision: 1, frozen: true }, SPROUTUP: { revision: 1, frozen: true }, SLIMEHOP: { revision: 1, frozen: true }, SNAILRACE: { revision: 1, frozen: true }, HUGPARADE: { revision: 2, frozen: true }, CATNAPCATCH: { revision: 2, frozen: true }, PENGUINSLIDE: { revision: 9, frozen: true } };
+const GAME_REVISIONS = { PANDASNACK: { revision: 1, frozen: true }, BOOPEEK: { revision: 2, frozen: true }, DUCKLINE: { revision: 1, frozen: true }, SPROUTUP: { revision: 1, frozen: true }, SLIMEHOP: { revision: 1, frozen: true }, SNAILRACE: { revision: 1, frozen: true }, HUGPARADE: { revision: 2, frozen: true }, CATNAPCATCH: { revision: 2, frozen: true }, PENGUINSLIDE: { revision: 9, frozen: true }, CHASEKILLKANT: { revision: 1, frozen: true } };
 
 /* The identity line's sizes, named so the code below has no loose numbers.
    The height is only a fallback: the real height comes from the CSS. */
@@ -2781,6 +2791,7 @@ const dirClusterEl = document.getElementById("dirCluster");
 const scoreEl = document.getElementById("scoreVal");
 const bestEl = document.getElementById("bestVal");
 const msgEl = document.getElementById("msg");
+const LONG_GAME_NAME_LETTERS = 11;      // at or above this, a phone wraps the title
 const gameTitleEl = document.getElementById("gameTitle");
 const gameTaglineEl = document.getElementById("gameTagline");
 const inputHintEl = document.getElementById("inputHint");
@@ -3313,6 +3324,8 @@ function openGame(gameId) {
     gameScreenEl.hidden = false;
     bodyEl.classList.add("playing");
     gameTitleEl.textContent = displayName(module2);
+    gameTitleEl.parentElement.classList.toggle("longTitle",
+        displayName(module2).length >= LONG_GAME_NAME_LETTERS);
     gameTaglineEl.textContent = module2.tagline;
     setActionLabel(module2.actionLabel);
     scoreEl.textContent = "0";
@@ -3834,6 +3847,12 @@ syncSoundUI();
      the owner, build 026. Mochi the kitten sleeps on a cushion while a
      paper pillow catches falling noisemakers. Three clangs end the nap;
      POUF widens the pillow.
+   * PENGUINSLIDE is FROZEN at content 037-20261115 — rebuilt as v9 in
+     build 037 at the owner's request: Pip belly-slides across a 7 by 7
+     ice field, two seals patrol the bridges, six fish to win.
+   * CHASEKILLKANT is FROZEN at content 038-20261115 — new in build 038:
+     a warm school hallway, five hits in sixty seconds, pots daze and
+     crates refill one piece of cutlery.
    ================================================================== */
 
 (function () {
@@ -12638,6 +12657,1379 @@ syncSoundUI();
         concept: "Pip the baby penguin waddles across a seven by seven ice field, eating six golden fish while grumpy seals slide along the ice. Belly-slide with SPACE, dodge the seals and keep all three hearts.",
         actionLabel: "DASH",
         hint: "arrows or WASD waddle · SPACE or tap dashes · R restarts · ESC shelf",
+        previewPaint: paintShelfPreview,
+        start, stop, restart, update, paint, onDir, onAction, onStageTap, onAnyKey
+    });
+})();
+
+
+/* ==================================================================
+   PART 5-J — CHASEKILLKANT module (content 038-20261115)
+   ================================================================
+   HOW THIS GAME WORKS
+   - Kant runs away down a warm school hallway, seen from behind at a
+     gentle three-quarter angle. You stand at the bottom of the screen,
+     seen from behind, with a handful of cutlery.
+   - Left and right strafe. SPACE, the action pad or a tap on the stage
+     throws a fork, a knife or a pair of scissors up the hallway. The
+     three share one ammo count and cycle for looks only.
+   - The throw travels for about 0.4 seconds, so you must lead him. Kant
+     is sharp from the first hit: he glances over his shoulder, then
+     ducks. A duck cannot be hit; the moment after a duck is your shot.
+   - Five hits in sixty seconds wins. Zero ammo is never a dead end: a
+     crate is pushed into the hallway at once.
+   - Plant pots drift down the hallway. Standing under one dazes you for
+     a moment: no moving, no throwing, and the clock keeps running.
+   - Crates drift down too; collect one for another piece of cutlery.
+   - STATES: TITLE (the how-to card), PLAY (the chase), OVER (a result
+     card that reads KANT DOWN! or KANT LAUGHS AT YOU!).
+   - CONTROLS: left and right strafe, SPACE or tap throws, R restarts,
+     ESC returns to the shelf. Up and down do nothing.
+   - SETTINGS groups: the HUD band, the hallway, the player, Kant and
+     his ladder, throwing, ammo and crates, pots, drifting hazards, the
+     round and its scoring, visual effects, the two cards, the shelf
+     preview, and the palette.
+   ================================================================ */
+(function () {
+    "use strict";
+
+    /* Every tunable number, coordinate and colour lives here, each with a
+       plain explanation of what changing it does. */
+    const SETTINGS = {
+        gameName: "CHASEKILLKANT",
+        versionNumber: "038-20261115",
+        stageSize: 100,
+        stageCenterX: 50,
+
+        /* The slim band at the top of the stage, which holds the clock,
+           the five hit pips and the cutlery count. */
+        hudHeight: 10,
+        hudTextY: 3,
+        hudClockLeft: 3,
+        hudClockTop: 2,
+        hudTimeCenterX: 15,
+        hudPipFirstLeft: 40,
+        hudPipGap: 4,
+        hudPipTop: 3,
+        hudPipWidth: 3,
+        hudPipHeight: 4,
+        hudAmmoIconLeft: 76,
+        hudAmmoIconTop: 2,
+        hudAmmoCenterX: 92,
+        hudWarningSeconds: 10,
+
+        /* The hallway: a cream wall with teal lockers above a wooden floor.
+           The floor lines scroll downward to sell the chase. */
+        wallTopY: 10,
+        wallBottomY: 28,
+        lockerTopY: 11,
+        lockerBottomY: 26,
+        lockerWidth: 11,
+        lockerSeamWidth: 1,
+        lockerVentTopY: 22,
+        lockerVentOffsetX: 4,
+        lockerVentWidth: 4,
+        lockerVentHeight: 1,
+        wallBaseHeight: 4,
+        floorTopY: 28,
+        floorLineCount: 4,
+        floorLineGapY: 16,
+        floorScrollSpeed: 18,
+        floorSeamWidth: 1,
+        floorSeamHeight: 4,
+
+        /* The player: a woman seen from behind on the bottom row. */
+        playerCentreY: 88,
+        playerFeetY: 96,
+        playerMinX: 14,
+        playerMaxX: 86,
+        playerHalfWidth: 5,
+        playerSpeed: 55,
+        playerShadowWidth: 6,
+        playerArmLeftOffset: 8,
+        playerArmTopOffset: 3,
+        playerArmWidth: 2,
+        playerArmHeight: 5,
+
+        /* Kant: pinned to his lane, faster and shyer after every hit. */
+        kantCentreY: 36,
+        kantFeetY: 42,
+        kantMinX: 24,
+        kantMaxX: 76,
+        kantHalfWidth: 4,
+        kantSpeedByHits: [32, 36, 40, 44, 48],
+        kantDuckChanceByHits: [0.3, 0.4, 0.5, 0.6, 0.7],
+        kantGlanceSeconds: 0.35,
+        kantDuckSeconds: 0.45,
+        kantRecoverSeconds: 0.35,
+        kantStaggerSeconds: 0.25,
+        kantMinDuckGapSeconds: 0.6,
+        kantDecisionSeconds: 0.45,
+        kantForcedRecoverSeconds: 2.5,
+        kantGlanceSpeedFactor: 0.6,
+        kantStaggerSpeedFactor: 0.5,
+        kantSprintSpeed: 70,
+        kantSprintSeconds: 0.4,
+        kantSprintEverySeconds: 4,
+        kantSprintFromHit: 4,
+        kantLensOffsetX: 2,
+        kantLensOffsetY: 2,
+        kantGlassesEyeWidth: 2,
+        kantGlassesArmWidth: 1,
+
+        /* Throwing: the cutlery leaves the hand at the bottom and travels
+           for 0.4 seconds, so the player has to lead the target. */
+        throwStartY: 84,
+        throwTopY: 30,
+        throwSpeed: 110,
+        throwCooldownSeconds: 0.28,
+        throwHitRadius: 6,
+        throwMaxInFlight: 6,
+        throwKinds: 3,
+        throwFlashSeconds: 0.12,
+        cutleryShadowOffsetY: 1,
+
+        /* Ammo and crates: one shared count, one more piece per crate. The
+           supply is deliberately tight, so five hits take good timing. */
+        ammoStart: 3,
+        ammoCap: 5,
+        crateAmmo: 1,
+        crateFirstSeconds: 1,
+        crateMinSeconds: 5,
+        crateMaxSeconds: 6,
+        crateForceSeconds: 0.3,
+        crateMaxTries: 4,
+
+        /* Pots: they arrive more often once half the clock is gone. */
+        potEarlyMinSeconds: 3.5,
+        potEarlyMaxSeconds: 5,
+        potLateMinSeconds: 3,
+        potLateMaxSeconds: 4,
+        potLateAfterSeconds: 30,
+        potDazeSeconds: 1.5,
+        potDazeStars: 3,
+        potDazeStarRadius: 6,
+        potDazeStarSize: 2,
+        potDazeStarSpin: 3,
+
+        /* Drifting hazards: both pots and crates share one language, a slow
+           drift from Kant's line down to the player's row. Pots keep coming
+           steadily; crates float down more slowly, so refills are earned. */
+        hazardSpawnY: 44,
+        hazardBottomY: 100,
+        potDriftSpeed: 26,
+        crateDriftSpeed: 20,
+        hazardMinX: 18,
+        hazardMaxX: 82,
+        hazardCollectY: 86,
+        hazardCollectHalfWidth: 7,
+        hazardAvoidHalfWidth: 12,
+        hazardAvoidAboveY: 70,
+        potThreatLookAheadY: 52,
+        hazardShadowWidth: 7,
+        hazardShadowHeight: 1,
+
+        /* The round and its scoring. */
+        roundSeconds: 60,
+        hitsToWin: 5,
+        pointsPerHit: 200,
+        pointsPerSecondLeft: 10,
+        freeReadSeconds: 3,
+        cardDebounceSeconds: 0.35,
+
+        /* Little bursts of pixels for hits, pot shards and crate sparkles. */
+        starSeconds: 0.5,
+        starCount: 5,
+        starSpreadPixels: 9,
+        shardSeconds: 0.45,
+        shardCount: 4,
+        shardSpreadPixels: 7,
+        shardDriftSpeed: 0.5,
+        sparkleSeconds: 0.45,
+        sparkleCount: 3,
+        effectRisePixels: 10,
+        effectLimit: 24,
+
+        /* The how-to card. The name is thirteen letters, so it is drawn at
+           scale 1 on a framed plate; at scale 2 it would be 102 pixels wide. */
+        titlePanelLeft: 2,
+        titlePanelTop: 9,
+        titlePanelWidth: 96,
+        titlePanelHeight: 72,
+        titleCrestY: 14,
+        titleNameY: 34,
+        titleRuleY: 42,
+        titleFirstLineY: 47,
+        titleLineGapY: 8,
+        titlePromptY: 73,
+        titleCrestGapX: 16,
+
+        /* The result cards. */
+        overPanelLeft: 4,
+        overPanelTop: 12,
+        overPanelWidth: 92,
+        overPanelHeight: 76,
+        overWinTitleY: 22,
+        overWinScoreY: 40,
+        overWinFooterFirstY: 52,
+        overWinFooterGapY: 8,
+        overWinPromptY: 80,
+        overLoseTitleY: 24,
+        overLoseSecondY: 37,
+        overLoseScoreY: 54,
+        overLoseDetailY: 62,
+        overLosePromptY: 78,
+        panelPad: 1,
+        panelEdgeStripHeight: 1,
+
+        /* The shelf preview: a 200 by 96 slice of the hallway. */
+        previewWidth: 200,
+        previewHeight: 96,
+        previewWallBottomY: 44,
+        previewLockerWidth: 22,
+        previewLockerTopY: 4,
+        previewLockerBottomY: 42,
+        previewFloorLineGapY: 18,
+        previewKantX: 132,
+        previewKantFeetY: 62,
+        previewPlayerX: 96,
+        previewPlayerFeetY: 92,
+        previewPotX: 42,
+        previewPotFeetY: 76,
+        previewForkX: 116,
+        previewForkY: 26,
+        previewScale: 2,
+
+        /* The palette: a warm family hallway with one cool pop, the
+           player's periwinkle hoodie. */
+        palette: {
+            wall: "#F3E7CE",
+            wallShade: "#E3D2B1",
+            locker: "#2F6F6A",
+            lockerDark: "#245754",
+            lockerLight: "#3E8A83",
+            floor: "#9A6A44",
+            floorBand: "#8B5E3C",
+            floorDark: "#7E5436",
+            floorLight: "#B48155",
+            hud: "#22343A",
+            hudLine: "#101D22",
+            cream: "#FFF6E2",
+            gold: "#F3C969",
+            pink: "#E86A9A",
+            pinkShade: "#C4537F",
+            hairDark: "#3B2B2A",
+            skin: "#E8B48C",
+            lanyard: "#E3A93C",
+            navy: "#2B3A55",
+            shoe: "#241F22",
+            lens: "#FBE9D0",
+            hoodie: "#8C86CC",
+            hoodieShade: "#6E68AE",
+            jeans: "#33406B",
+            sneaker: "#F2EFE6",
+            auburn: "#6E3B2A",
+            terracotta: "#C4653F",
+            terracottaDark: "#9B4A2C",
+            leaf: "#5E9B57",
+            leafDark: "#42713D",
+            crate: "#B98A52",
+            crateDark: "#8A6238",
+            crateLight: "#CFA06A",
+            cutlery: "#D9DEE4",
+            cutleryDark: "#9AA4B0",
+            panel: "#22343A",
+            panelEdge: "#101D22",
+            shadow: "rgba(43,31,24,0.22)",
+            warn: "#F08A5D",
+            star: "#F7E08A"
+        }
+    };
+
+    const PAL = SETTINGS.palette;
+    const STAGE = SETTINGS.stageSize;
+    const STATE = { title: "title", play: "play", over: "over" };
+    const STEP_SECONDS = 1 / 60;
+    const PHASE = {
+        run: "run",
+        glance: "glance",
+        duck: "duck",
+        recover: "recover",
+        stagger: "stagger",
+        stumble: "stumble"
+    };
+
+    /* ---------- Kant's costumes, drawn as pixel maps ---------- */
+
+    /* Kant from behind: crop, lanyard band, pink tee, navy trousers. */
+    const KANT_BACK = [
+        "...KKK...",
+        "..KKKKK..",
+        "..KKKKK..",
+        "..KLLLK..",
+        "..SSSSS..",
+        ".PPPPPPP.",
+        "PPPPPPPPP",
+        "PPPPPPPPP",
+        "PPPPPPPPP",
+        ".ppppppp.",
+        "..NNNNN..",
+        "..NN.NN..",
+        "..NN.NN..",
+        "..BB.BB.."
+    ];
+
+    /* Kant crouched: the duck pose, four rows shorter. */
+    const KANT_DUCK = [
+        "...KKK...",
+        "..KKKKK..",
+        "..KLLLK..",
+        "..SSSSS..",
+        ".PPPPPPP.",
+        "PPPPPPPPP",
+        ".ppppppp.",
+        "..NNNNN..",
+        "..NN.NN..",
+        ".BB...BB."
+    ];
+
+    const KANT_COLOURS = {
+        K: PAL.hairDark,
+        S: PAL.skin,
+        L: PAL.lanyard,
+        P: PAL.pink,
+        p: PAL.pinkShade,
+        N: PAL.navy,
+        B: PAL.shoe
+    };
+
+    /* The player from behind: auburn bob, periwinkle hoodie, white sneakers. */
+    const PLAYER_BACK = [
+        "..HHHHHH..",
+        ".HHHHHHHH.",
+        ".HHHHHHHH.",
+        ".HHHHHHHH.",
+        ".HHHHHHHH.",
+        "..HHHHHH..",
+        "..DDDDDD..",
+        ".DDDDDDDD.",
+        "DDDDDDDDDD",
+        "DDDDDDDDDD",
+        "DDDDDDDDDD",
+        "DDDDDDDDDD",
+        ".dddddddd.",
+        "..JJJJJJ..",
+        "..JJJJJJ..",
+        ".WWW..WWW."
+    ];
+
+    const PLAYER_COLOURS = {
+        H: PAL.auburn,
+        D: PAL.hoodie,
+        d: PAL.hoodieShade,
+        J: PAL.jeans,
+        W: PAL.sneaker
+    };
+
+    /* The three pieces of cutlery: same ammo, three looks. */
+    const FORK = [
+        "#.#",
+        "#.#",
+        "###",
+        ".#.",
+        ".#.",
+        ".#.",
+        ".#."
+    ];
+
+    const KNIFE = [
+        "..#",
+        "..#",
+        ".##",
+        ".##",
+        ".#.",
+        ".#.",
+        "###"
+    ];
+
+    const SCISSORS = [
+        "#.#",
+        "#.#",
+        ".#.",
+        ".#.",
+        ".#.",
+        "#.#",
+        "#.#"
+    ];
+
+    const CUTLERY_COLOURS = { "#": PAL.cutlery };
+    const CUTLERY_MAPS = [FORK, KNIFE, SCISSORS];
+    const CUTLERY_DARK_COLOURS = { "#": PAL.cutleryDark };
+
+    /* A terracotta pot with a leafy tuft. */
+    const POT = [
+        "....G....",
+        "...GGG...",
+        "..G.G.G..",
+        ".........",
+        ".RRRRRRR.",
+        "RRRRRRRRR",
+        ".TTTTTTT.",
+        "..TTTTT..",
+        "...TTT..."
+    ];
+
+    const POT_COLOURS = { G: PAL.leaf, R: PAL.terracottaDark, T: PAL.terracotta };
+
+    /* A slatted wooden crate, the ammo refill. */
+    const CRATE = [
+        "CCCCCCCCC",
+        "CdddddddC",
+        "CcccccccC",
+        "CdddddddC",
+        "CcccccccC",
+        "CdddddddC",
+        "CCCCCCCCC"
+    ];
+
+    const CRATE_COLOURS = { C: PAL.crate, d: PAL.crateDark, c: PAL.crateLight };
+
+    /* A tiny clock face for the HUD. */
+    const CLOCK_ICON = [
+        ".###.",
+        "#...#",
+        "#.##.",
+        "#...#",
+        ".###."
+    ];
+
+    const CLOCK_COLOURS = { "#": PAL.cream };
+
+    /* A small gold flash above Kant's head while he is off balance after a
+       duck: the player's clear signal that this is the moment to throw. */
+    const RECOVER_HINT = ["###"];
+    const RECOVER_HINT_COLOURS = { "#": PAL.gold };
+
+    /* ---------- private state ---------- */
+
+    let state = STATE.title;
+    let stateT = 0;
+    let score = 0;
+    let best = 0;
+    let clockLeft = SETTINGS.roundSeconds;
+    let hits = 0;
+    let ammo = SETTINGS.ammoStart;
+    let playerX = SETTINGS.stageCenterX;
+    let kantX = SETTINGS.stageCenterX;
+    let kantDirection = 1;
+    let kantPhase = PHASE.run;
+    let phaseTimer = 0;
+    let pendingTurn = false;
+    let sprintTimer = 0;
+    let sprintCooldown = SETTINGS.kantSprintEverySeconds;
+    let duckDecisionTimer = 0;
+    let secondsSinceDuckEnd = SETTINGS.kantMinDuckGapSeconds;
+    let secondsSinceRecovery = 0;
+    let throwCooldown = 0;
+    let throwFlash = 0;
+    let dazeTimer = 0;
+    let nextPotSeconds = SETTINGS.potEarlyMinSeconds;
+    let nextCrateSeconds = SETTINGS.crateFirstSeconds;
+    let scrollDistance = 0;
+    let cutleryKind = 0;
+    let endWon = false;
+    let projectiles = [];
+    let hazards = [];
+    let effects = [];
+    let accumulator = 0;
+    let shownScore = null;
+    let shownBest = null;
+    let shownMessage = null;
+    const held = { left: false, right: false };
+
+    /* ---------- run setup ---------- */
+
+    /* Forget any direction that was held when the screen changed. */
+    function clearHeld() {
+        held.left = false;
+        held.right = false;
+    }
+
+    /* Start a fresh sixty-second run with a clean hallway. */
+    function resetRun() {
+        score = 0;
+        clockLeft = SETTINGS.roundSeconds;
+        hits = 0;
+        ammo = SETTINGS.ammoStart;
+        playerX = SETTINGS.stageCenterX;
+        kantX = SETTINGS.stageCenterX;
+        kantDirection = 1;
+        kantPhase = PHASE.run;
+        phaseTimer = 0;
+        pendingTurn = false;
+        sprintTimer = 0;
+        sprintCooldown = SETTINGS.kantSprintEverySeconds;
+        duckDecisionTimer = 0;
+        secondsSinceDuckEnd = SETTINGS.kantMinDuckGapSeconds;
+        secondsSinceRecovery = 0;
+        throwCooldown = 0;
+        throwFlash = 0;
+        dazeTimer = 0;
+        nextPotSeconds = SETTINGS.potEarlyMinSeconds;
+        nextCrateSeconds = SETTINGS.crateFirstSeconds;
+        scrollDistance = 0;
+        cutleryKind = 0;
+        endWon = false;
+        projectiles = [];
+        hazards = [];
+        effects = [];
+        accumulator = 0;
+        state = STATE.play;
+        stateT = 0;
+        syncChrome(true);
+    }
+
+    /* End the run: score it, remember a new best, and show a card. */
+    function finishRun(won) {
+        const secondsLeft = Math.max(0, Math.ceil(clockLeft));
+        if (won) {
+            score = hits * SETTINGS.pointsPerHit + secondsLeft * SETTINGS.pointsPerSecondLeft;
+        } else {
+            score = hits * SETTINGS.pointsPerHit;
+        }
+        if (score > best) {
+            best = score;
+            saveBest(SETTINGS.gameName, score);
+        }
+        endWon = won;
+        state = STATE.over;
+        stateT = 0;
+        syncChrome(true);
+    }
+
+    /* ---------- small helpers ---------- */
+
+    /* A random number between two limits, written out for plain reading. */
+    function randomBetween(lowLimit, highLimit) {
+        return lowLimit + Math.random() * (highLimit - lowLimit);
+    }
+
+    /* The current speed for Kant, chosen by how many hits he has taken. */
+    function kantBaseSpeed() {
+        const index = Math.min(hits, SETTINGS.kantSpeedByHits.length - 1);
+        return SETTINGS.kantSpeedByHits[index];
+    }
+
+    /* The current duck chance for Kant, chosen by hits taken. */
+    function kantDuckChance() {
+        const index = Math.min(hits, SETTINGS.kantDuckChanceByHits.length - 1);
+        return SETTINGS.kantDuckChanceByHits[index];
+    }
+
+    /* True while a pot is close enough to the player's column to land soon;
+       Kant is not allowed to duck then, so two punishments never stack. */
+    function isPotThreatening() {
+        for (let i = 0; i < hazards.length; i++) {
+            const hazard = hazards[i];
+            if (hazard.kind !== "pot") continue;
+            if (hazard.y < SETTINGS.potThreatLookAheadY) continue;
+            if (Math.abs(hazard.x - playerX) < SETTINGS.hazardAvoidHalfWidth) return true;
+        }
+        return false;
+    }
+
+    /* ---------- Kant's phases ---------- */
+
+    /* Start the over-the-shoulder glance that always comes before a duck
+       or a turn. The turn itself happens when the glance ends. */
+    function enterGlance(turnAtEnd) {
+        kantPhase = PHASE.glance;
+        phaseTimer = 0;
+        pendingTurn = turnAtEnd;
+    }
+
+    /* Start a duck. He cannot be hit until it ends. */
+    function enterDuck() {
+        kantPhase = PHASE.duck;
+        phaseTimer = 0;
+        pendingTurn = false;
+    }
+
+    /* The short no-dodge window after a duck: the player's shot. */
+    function enterRecover() {
+        kantPhase = PHASE.recover;
+        phaseTimer = 0;
+        secondsSinceDuckEnd = 0;
+        secondsSinceRecovery = 0;
+    }
+
+    /* Kant stumbles, which restores a punish window if too long has passed. */
+    function enterStumble() {
+        kantPhase = PHASE.stumble;
+        phaseTimer = 0;
+        secondsSinceRecovery = 0;
+    }
+
+    /* Kant is hit: he staggers, loses the duck and cannot dodge for a moment.
+       A hit counts as a punish window too, so the hint resets here. */
+    function enterStagger() {
+        kantPhase = PHASE.stagger;
+        phaseTimer = 0;
+        pendingTurn = false;
+        secondsSinceRecovery = 0;
+    }
+
+    /* Decide whether a duck begins now, respecting every fairness rule. */
+    function rollDuck() {
+        const elapsedSeconds = SETTINGS.roundSeconds - clockLeft;
+        if (elapsedSeconds < SETTINGS.freeReadSeconds) return;
+        if (secondsSinceDuckEnd < SETTINGS.kantMinDuckGapSeconds) return;
+        if (isPotThreatening()) return;
+        if (dazeTimer > 0) return;
+        if (Math.random() < kantDuckChance()) enterGlance(false);
+    }
+
+    /* Move Kant along his lane, bounce at the walls and run his phases. */
+    function updateKant(dt) {
+        phaseTimer += dt;
+        secondsSinceDuckEnd += dt;
+        secondsSinceRecovery += dt;
+
+        /* The guaranteed punish window: if too long has passed without one,
+           he trips, whatever he was about to do. */
+        if (kantPhase !== PHASE.recover && kantPhase !== PHASE.stumble &&
+                secondsSinceRecovery >= SETTINGS.kantForcedRecoverSeconds) {
+            enterStumble();
+            return;
+        }
+
+        if (kantPhase === PHASE.duck) {
+            if (phaseTimer >= SETTINGS.kantDuckSeconds) enterRecover();
+            return;
+        }
+        if (kantPhase === PHASE.glance) {
+            if (phaseTimer >= SETTINGS.kantGlanceSeconds) {
+                if (pendingTurn) {
+                    kantDirection = -kantDirection;
+                    pendingTurn = false;
+                    kantPhase = PHASE.run;
+                } else if (isPotThreatening()) {
+                    kantPhase = PHASE.run;
+                } else {
+                    enterDuck();
+                }
+                phaseTimer = 0;
+            }
+            moveKant(dt, SETTINGS.kantGlanceSpeedFactor);
+            return;
+        }
+        if (kantPhase === PHASE.recover || kantPhase === PHASE.stumble) {
+            if (phaseTimer >= SETTINGS.kantRecoverSeconds) {
+                kantPhase = PHASE.run;
+                phaseTimer = 0;
+            }
+            moveKant(dt, 1);
+            return;
+        }
+        if (kantPhase === PHASE.stagger) {
+            if (phaseTimer >= SETTINGS.kantStaggerSeconds) {
+                kantPhase = PHASE.run;
+                phaseTimer = 0;
+            }
+            moveKant(dt, SETTINGS.kantStaggerSpeedFactor);
+            return;
+        }
+
+        /* Running: sprint windows appear after the fourth hit. */
+        if (hits >= SETTINGS.kantSprintFromHit) {
+            sprintCooldown -= dt;
+            if (sprintTimer > 0) {
+                sprintTimer -= dt;
+            } else if (sprintCooldown <= 0) {
+                sprintTimer = SETTINGS.kantSprintSeconds;
+                sprintCooldown = SETTINGS.kantSprintEverySeconds;
+            }
+        }
+        moveKant(dt, 1);
+        if (kantPhase !== PHASE.run) return;
+
+        duckDecisionTimer += dt;
+        if (duckDecisionTimer >= SETTINGS.kantDecisionSeconds) {
+            duckDecisionTimer = 0;
+            rollDuck();
+        }
+    }
+
+    /* Advance Kant by one step, turning at the walls with a glance first. */
+    function moveKant(dt, speedFactor) {
+        let speed = kantBaseSpeed() * speedFactor;
+        if (sprintTimer > 0) speed = SETTINGS.kantSprintSpeed * speedFactor;
+        kantX += kantDirection * speed * dt;
+        if (kantX <= SETTINGS.kantMinX) {
+            kantX = SETTINGS.kantMinX;
+            if (kantPhase === PHASE.run) enterGlance(true);
+        }
+        if (kantX >= SETTINGS.kantMaxX) {
+            kantX = SETTINGS.kantMaxX;
+            if (kantPhase === PHASE.run) enterGlance(true);
+        }
+    }
+
+    /* ---------- the player and the throw ---------- */
+
+    /* Strafe left or right, unless a pot has left her dazed. */
+    function updatePlayer(dt) {
+        if (throwCooldown > 0) throwCooldown -= dt;
+        if (throwFlash > 0) throwFlash -= dt;
+        if (dazeTimer > 0) {
+            dazeTimer -= dt;
+            return;
+        }
+        const direction = (held.right ? 1 : 0) - (held.left ? 1 : 0);
+        playerX += direction * SETTINGS.playerSpeed * dt;
+        playerX = Math.max(SETTINGS.playerMinX, Math.min(SETTINGS.playerMaxX, playerX));
+    }
+
+    /* Throw one piece of cutlery if a hand is free and there is ammo. */
+    function throwCutlery() {
+        if (state !== STATE.play) return;
+        if (dazeTimer > 0) return;
+        if (throwCooldown > 0) return;
+        if (ammo <= 0) return;
+        if (projectiles.length >= SETTINGS.throwMaxInFlight) return;
+        ammo -= 1;
+        throwCooldown = SETTINGS.throwCooldownSeconds;
+        throwFlash = SETTINGS.throwFlashSeconds;
+        projectiles.push({ x: playerX, y: SETTINGS.throwStartY, kind: cutleryKind });
+        cutleryKind = (cutleryKind + 1) % SETTINGS.throwKinds;
+    }
+
+    /* Fly the cutlery upward and test it against Kant's body. */
+    function updateProjectiles(dt) {
+        const survivors = [];
+        for (let i = 0; i < projectiles.length; i++) {
+            const shot = projectiles[i];
+            shot.y -= SETTINGS.throwSpeed * dt;
+            if (shot.y < SETTINGS.throwTopY) continue;
+            const gapX = shot.x - kantX;
+            const gapY = shot.y - SETTINGS.kantCentreY;
+            const reach = SETTINGS.throwHitRadius;
+            const canHit = kantPhase !== PHASE.duck;
+            if (canHit && gapX * gapX + gapY * gapY <= reach * reach) {
+                scoreHit(shot);
+                continue;
+            }
+            survivors.push(shot);
+        }
+        projectiles = survivors;
+    }
+
+    /* Count a hit, burst some stars and end the run at five. */
+    function scoreHit(shot) {
+        hits += 1;
+        score = hits * SETTINGS.pointsPerHit;
+        addStars(shot.x, SETTINGS.kantCentreY, PAL.star);
+        enterStagger();
+        syncChrome(true);
+        if (hits >= SETTINGS.hitsToWin) finishRun(true);
+    }
+
+    /* ---------- pots, crates and their drift ---------- */
+
+    /* Pick a column for a new hazard, trying to stay clear of another one. */
+    function pickHazardX() {
+        let chosenX = randomBetween(SETTINGS.hazardMinX, SETTINGS.hazardMaxX);
+        for (let attempt = 0; attempt < SETTINGS.crateMaxTries; attempt++) {
+            let clear = true;
+            for (let i = 0; i < hazards.length; i++) {
+                const other = hazards[i];
+                if (other.y > SETTINGS.hazardAvoidAboveY) continue;
+                if (Math.abs(other.x - chosenX) < SETTINGS.hazardAvoidHalfWidth) clear = false;
+            }
+            if (clear) break;
+            chosenX = randomBetween(SETTINGS.hazardMinX, SETTINGS.hazardMaxX);
+        }
+        return chosenX;
+    }
+
+    /* Push a pot into the hallway. */
+    function spawnPot() {
+        hazards.push({ kind: "pot", x: pickHazardX(), y: SETTINGS.hazardSpawnY });
+    }
+
+    /* Push a crate into the hallway; a forced one arrives at once. */
+    function spawnCrate(forced) {
+        hazards.push({ kind: "crate", x: pickHazardX(), y: SETTINGS.hazardSpawnY, forced: forced });
+    }
+
+    /* Keep the hallway stocked and drift every hazard toward the player. */
+    function updateHazards(dt) {
+        nextPotSeconds -= dt;
+        nextCrateSeconds -= dt;
+        if (nextPotSeconds <= 0) {
+            spawnPot();
+            if (clockLeft > SETTINGS.potLateAfterSeconds) {
+                nextPotSeconds = randomBetween(SETTINGS.potEarlyMinSeconds, SETTINGS.potEarlyMaxSeconds);
+            } else {
+                nextPotSeconds = randomBetween(SETTINGS.potLateMinSeconds, SETTINGS.potLateMaxSeconds);
+            }
+        }
+        if (nextCrateSeconds <= 0) {
+            spawnCrate(false);
+            nextCrateSeconds = randomBetween(SETTINGS.crateMinSeconds, SETTINGS.crateMaxSeconds);
+        }
+        if (ammo <= 0 && !hasCrateInFlight() && nextCrateSeconds > SETTINGS.crateForceSeconds) {
+            spawnCrate(true);
+            nextCrateSeconds = randomBetween(SETTINGS.crateMinSeconds, SETTINGS.crateMaxSeconds);
+        }
+
+        const survivors = [];
+        for (let i = 0; i < hazards.length; i++) {
+            const hazard = hazards[i];
+            const drift = hazard.kind === "pot" ? SETTINGS.potDriftSpeed : SETTINGS.crateDriftSpeed;
+            hazard.y += drift * dt;
+            if (hazard.y >= SETTINGS.hazardCollectY && hazard.y < SETTINGS.hazardBottomY) {
+                const closeEnough = Math.abs(hazard.x - playerX) <= SETTINGS.hazardCollectHalfWidth;
+                if (closeEnough) {
+                    collectHazard(hazard);
+                    continue;
+                }
+            }
+            if (hazard.y >= SETTINGS.hazardBottomY) continue;
+            survivors.push(hazard);
+        }
+        hazards = survivors;
+    }
+
+    /* True while a crate is on its way, so no duplicate is forced. */
+    function hasCrateInFlight() {
+        for (let i = 0; i < hazards.length; i++) {
+            if (hazards[i].kind === "crate") return true;
+        }
+        return false;
+    }
+
+    /* A crate tops up the ammo by one; a pot dazes and breaks into shards. */
+    function collectHazard(hazard) {
+        if (hazard.kind === "crate") {
+            ammo = Math.min(SETTINGS.ammoCap, ammo + SETTINGS.crateAmmo);
+            addSparkle(hazard.x, hazard.y, PAL.gold);
+            syncChrome(true);
+            return;
+        }
+        dazeTimer = SETTINGS.potDazeSeconds;
+        addShards(hazard.x, hazard.y);
+    }
+
+    /* ---------- pixel effects ---------- */
+
+    /* Record one short-lived pixel so the paint step can animate it. */
+    function addEffect(x, y, driftX, driftY, colour, lifespan) {
+        effects.push({ x: x, y: y, driftX: driftX, driftY: driftY, colour: colour, life: lifespan, total: lifespan });
+        if (effects.length > SETTINGS.effectLimit) effects.shift();
+    }
+
+    /* A ring of little stars where the cutlery landed. */
+    function addStars(x, y, colour) {
+        for (let i = 0; i < SETTINGS.starCount; i++) {
+            const angle = (i / SETTINGS.starCount) * Math.PI * 2;
+            addEffect(x + Math.cos(angle) * SETTINGS.starSpreadPixels,
+                y + Math.sin(angle) * SETTINGS.starSpreadPixels,
+                Math.cos(angle), Math.sin(angle), colour, SETTINGS.starSeconds);
+        }
+    }
+
+    /* Four terracotta shards when a pot breaks on the player. */
+    function addShards(x, y) {
+        for (let i = 0; i < SETTINGS.shardCount; i++) {
+            const angle = (i / SETTINGS.shardCount) * Math.PI * 2;
+            addEffect(x + Math.cos(angle) * SETTINGS.shardSpreadPixels,
+                y + Math.sin(angle) * SETTINGS.shardSpreadPixels,
+                Math.cos(angle) * SETTINGS.shardDriftSpeed,
+                -SETTINGS.shardDriftSpeed, PAL.terracotta, SETTINGS.shardSeconds);
+        }
+    }
+
+    /* Three gold pixels when a crate is collected. */
+    function addSparkle(x, y, colour) {
+        for (let i = 0; i < SETTINGS.sparkleCount; i++) {
+            addEffect(x + i - SETTINGS.sparkleCount, y, 0, -1, colour, SETTINGS.sparkleSeconds);
+        }
+    }
+
+    /* Drift and fade every effect, then drop the finished ones. */
+    function updateEffects(dt) {
+        const survivors = [];
+        for (let i = 0; i < effects.length; i++) {
+            const effect = effects[i];
+            effect.life -= dt;
+            if (effect.life <= 0) continue;
+            effect.x += effect.driftX * SETTINGS.effectRisePixels * dt;
+            effect.y += effect.driftY * SETTINGS.effectRisePixels * dt;
+            survivors.push(effect);
+        }
+        effects = survivors;
+    }
+
+    /* ---------- the world step ---------- */
+
+    /* Advance one fixed tick of the game. */
+    function stepWorld(dt) {
+        stateT += dt;
+        scrollDistance += SETTINGS.floorScrollSpeed * dt;
+        updateEffects(dt);
+        if (state !== STATE.play) return;
+
+        clockLeft -= dt;
+        if (clockLeft <= 0) {
+            clockLeft = 0;
+            finishRun(false);
+            return;
+        }
+        updatePlayer(dt);
+        updateKant(dt);
+        updateHazards(dt);
+        updateProjectiles(dt);
+        syncChrome(false);
+    }
+
+    /* ---------- painting: the hallway ---------- */
+
+    /* Paint the wall, the teal lockers and the scrolling wooden floor. */
+    function paintCorridor(ctx) {
+        ctx.fillStyle = PAL.wall;
+        ctx.fillRect(0, 0, STAGE, SETTINGS.floorTopY);
+        ctx.fillStyle = PAL.wallShade;
+        ctx.fillRect(0, SETTINGS.wallBottomY - SETTINGS.wallBaseHeight, STAGE, SETTINGS.wallBaseHeight);
+
+        const lockerCount = Math.ceil(STAGE / SETTINGS.lockerWidth) + 1;
+        for (let i = 0; i < lockerCount; i++) {
+            const left = i * SETTINGS.lockerWidth;
+            ctx.fillStyle = PAL.locker;
+            ctx.fillRect(left, SETTINGS.lockerTopY, SETTINGS.lockerWidth - SETTINGS.lockerSeamWidth,
+                SETTINGS.lockerBottomY - SETTINGS.lockerTopY);
+            ctx.fillStyle = PAL.lockerDark;
+            ctx.fillRect(left, SETTINGS.lockerTopY, SETTINGS.lockerSeamWidth,
+                SETTINGS.lockerBottomY - SETTINGS.lockerTopY);
+            ctx.fillStyle = PAL.lockerLight;
+            ctx.fillRect(left + SETTINGS.lockerSeamWidth, SETTINGS.lockerBottomY - SETTINGS.floorSeamHeight,
+                SETTINGS.lockerWidth - SETTINGS.lockerSeamWidth, SETTINGS.floorSeamHeight);
+            ctx.fillStyle = PAL.lockerDark;
+            ctx.fillRect(left + SETTINGS.lockerVentOffsetX, SETTINGS.lockerVentTopY,
+                SETTINGS.lockerVentWidth, SETTINGS.lockerVentHeight);
+        }
+
+        ctx.fillStyle = PAL.floor;
+        ctx.fillRect(0, SETTINGS.floorTopY, STAGE, STAGE - SETTINGS.floorTopY);
+
+        /* Alternating floorboard bands. They scroll with the same offset as
+           the seam lines, so every seam falls on a band edge and the floor
+           reads as boards running away from the player, not one flat field. */
+        const bandPeriod = SETTINGS.floorLineGapY * 2;
+        const bandOffset = Math.floor(scrollDistance) % bandPeriod;
+        for (let top = SETTINGS.floorTopY - bandPeriod + bandOffset; top < STAGE; top += bandPeriod) {
+            const bandTop = Math.max(top, SETTINGS.floorTopY);
+            const bandBottom = Math.min(top + SETTINGS.floorLineGapY, STAGE);
+            if (bandBottom <= bandTop) continue;
+            ctx.fillStyle = PAL.floorBand;
+            ctx.fillRect(0, bandTop, STAGE, bandBottom - bandTop);
+        }
+
+        const phase = Math.floor(scrollDistance) % SETTINGS.floorLineGapY;
+        for (let i = 0; i < SETTINGS.floorLineCount; i++) {
+            const lineY = SETTINGS.floorTopY + phase + i * SETTINGS.floorLineGapY;
+            if (lineY >= STAGE) continue;
+            ctx.fillStyle = PAL.floorDark;
+            ctx.fillRect(0, lineY, STAGE, SETTINGS.floorSeamWidth);
+            ctx.fillStyle = PAL.floorLight;
+            ctx.fillRect(0, lineY + SETTINGS.floorSeamWidth, STAGE, SETTINGS.floorSeamWidth);
+        }
+    }
+
+    /* ---------- painting: hazards ---------- */
+
+    /* Paint pots and crates with a soft floor shadow under each one. */
+    function paintHazards(ctx) {
+        for (let i = 0; i < hazards.length; i++) {
+            const hazard = hazards[i];
+            const map = hazard.kind === "pot" ? POT : CRATE;
+            const colours = hazard.kind === "pot" ? POT_COLOURS : CRATE_COLOURS;
+            const left = Math.round(hazard.x) - Math.floor(map[0].length / 2);
+            const top = Math.round(hazard.y) - map.length + 1;
+            ctx.fillStyle = PAL.shadow;
+            ctx.fillRect(Math.round(hazard.x) - Math.floor(map[0].length / 2),
+                Math.round(hazard.y), map[0].length, SETTINGS.hazardShadowHeight);
+            paintPixels(ctx, map, colours, left, top, false, 1);
+        }
+    }
+
+    /* ---------- painting: Kant ---------- */
+
+    /* Paint Kant in his current pose, plus glasses when he glances back. */
+    function paintKant(ctx) {
+        const ducking = kantPhase === PHASE.duck;
+        const map = ducking ? KANT_DUCK : KANT_BACK;
+        const left = Math.round(kantX) - SETTINGS.kantHalfWidth;
+        const top = SETTINGS.kantFeetY - map.length + 1;
+        ctx.fillStyle = PAL.shadow;
+        ctx.fillRect(left + SETTINGS.lockerSeamWidth, SETTINGS.kantFeetY,
+            map[0].length - SETTINGS.lockerSeamWidth * 2, SETTINGS.hazardShadowHeight);
+        paintPixels(ctx, map, KANT_COLOURS, left, top, kantDirection < 0, 1);
+        if (kantPhase === PHASE.recover || kantPhase === PHASE.stumble ||
+                kantPhase === PHASE.stagger) {
+            paintPixels(ctx, RECOVER_HINT, RECOVER_HINT_COLOURS,
+                Math.round(kantX) - SETTINGS.lockerSeamWidth, top - SETTINGS.playerArmTopOffset, false, 1);
+        }
+        if (kantPhase === PHASE.glance || kantPhase === PHASE.duck) {
+            const lensLeft = left + SETTINGS.kantLensOffsetX;
+            const lensTop = top + SETTINGS.kantLensOffsetY;
+            ctx.fillStyle = PAL.lens;
+            ctx.fillRect(lensLeft, lensTop, SETTINGS.kantGlassesEyeWidth, SETTINGS.kantGlassesEyeWidth);
+            ctx.fillStyle = PAL.hairDark;
+            ctx.fillRect(lensLeft + SETTINGS.kantGlassesEyeWidth, lensTop,
+                SETTINGS.kantGlassesArmWidth, SETTINGS.kantGlassesArmWidth);
+        }
+    }
+
+    /* ---------- painting: the player ---------- */
+
+    /* Paint the player from behind, arm raised for a moment after a throw. */
+    function paintPlayer(ctx) {
+        const left = Math.round(playerX) - Math.floor(PLAYER_BACK[0].length / 2);
+        const top = SETTINGS.playerFeetY - PLAYER_BACK.length + 1;
+        ctx.fillStyle = PAL.shadow;
+        ctx.fillRect(left + SETTINGS.playerShadowWidth, SETTINGS.playerFeetY,
+            PLAYER_BACK[0].length - SETTINGS.playerShadowWidth, SETTINGS.hazardShadowHeight);
+        paintPixels(ctx, PLAYER_BACK, PLAYER_COLOURS, left, top, false, 1);
+        if (throwFlash > 0) {
+            ctx.fillStyle = PAL.hoodieShade;
+            ctx.fillRect(left + SETTINGS.playerArmLeftOffset, top + SETTINGS.playerArmTopOffset,
+                SETTINGS.playerArmWidth, SETTINGS.playerArmHeight);
+            ctx.fillStyle = PAL.skin;
+            ctx.fillRect(left + SETTINGS.playerArmLeftOffset, top + SETTINGS.playerArmTopOffset - SETTINGS.playerArmWidth,
+                SETTINGS.playerArmWidth, SETTINGS.playerArmWidth);
+        }
+        if (dazeTimer > 0) paintDazeStars(ctx, left, top);
+    }
+
+    /* Three little stars circling the player's head while she is dazed. */
+    function paintDazeStars(ctx, left, top) {
+        for (let i = 0; i < SETTINGS.potDazeStars; i++) {
+            const angle = dazeTimer * SETTINGS.potDazeStarSpin + (i / SETTINGS.potDazeStars) * Math.PI * 2;
+            const starX = Math.round(playerX + Math.cos(angle) * SETTINGS.potDazeStarRadius);
+            const starY = Math.round(top - SETTINGS.potDazeStarRadius + Math.sin(angle) * SETTINGS.potDazeStarSize);
+            ctx.fillStyle = PAL.star;
+            ctx.fillRect(starX, starY, SETTINGS.potDazeStarSize, SETTINGS.potDazeStarSize);
+            ctx.fillRect(starX - SETTINGS.potDazeStarSize, starY, SETTINGS.potDazeStarSize, SETTINGS.potDazeStarSize);
+        }
+    }
+
+    /* ---------- painting: cutlery in flight ---------- */
+
+    /* Paint every fork, knife and pair of scissors in the air. */
+    function paintProjectiles(ctx) {
+        for (let i = 0; i < projectiles.length; i++) {
+            const shot = projectiles[i];
+            const map = CUTLERY_MAPS[shot.kind];
+            const left = Math.round(shot.x) - Math.floor(map[0].length / 2);
+            const top = Math.round(shot.y) - Math.floor(map.length / 2);
+            paintPixels(ctx, map, CUTLERY_DARK_COLOURS, left, top + SETTINGS.cutleryShadowOffsetY, false, 1);
+            paintPixels(ctx, map, CUTLERY_COLOURS, left, top, false, 1);
+        }
+    }
+
+    /* ---------- painting: effects ---------- */
+
+    /* Paint the short-lived pixel bursts as single squares. */
+    function paintEffects(ctx) {
+        for (let i = 0; i < effects.length; i++) {
+            const effect = effects[i];
+            const size = effect.life > effect.total / 2 ? SETTINGS.potDazeStarSize : SETTINGS.lockerSeamWidth;
+            ctx.fillStyle = effect.colour;
+            ctx.fillRect(Math.round(effect.x), Math.round(effect.y), size, size);
+        }
+    }
+
+    /* ---------- painting: the HUD ---------- */
+
+    /* Paint the clock, the five hit pips and the cutlery count. */
+    function paintHud(ctx) {
+        ctx.fillStyle = PAL.hud;
+        ctx.fillRect(0, 0, STAGE, SETTINGS.hudHeight);
+        ctx.fillStyle = PAL.hudLine;
+        ctx.fillRect(0, SETTINGS.hudHeight - SETTINGS.floorSeamWidth, STAGE, SETTINGS.floorSeamWidth);
+
+        const secondsLeft = Math.max(0, Math.ceil(clockLeft));
+        const timeColour = secondsLeft <= SETTINGS.hudWarningSeconds ? PAL.warn : PAL.cream;
+        paintPixels(ctx, CLOCK_ICON, CLOCK_COLOURS, SETTINGS.hudClockLeft, SETTINGS.hudClockTop, false, 1);
+        paintPixelText(ctx, String(secondsLeft), SETTINGS.hudTimeCenterX, SETTINGS.hudTextY, timeColour, null, 1);
+
+        for (let i = 0; i < SETTINGS.hitsToWin; i++) {
+            ctx.fillStyle = i < hits ? PAL.gold : PAL.lockerDark;
+            ctx.fillRect(SETTINGS.hudPipFirstLeft + i * SETTINGS.hudPipGap, SETTINGS.hudPipTop,
+                SETTINGS.hudPipWidth, SETTINGS.hudPipHeight);
+        }
+
+        paintPixels(ctx, FORK, CUTLERY_COLOURS, SETTINGS.hudAmmoIconLeft, SETTINGS.hudAmmoIconTop, false, 1);
+        paintPixelText(ctx, "x" + ammo, SETTINGS.hudAmmoCenterX, SETTINGS.hudTextY, PAL.cream, null, 1);
+    }
+
+    /* ---------- painting: the cards ---------- */
+
+    /* A rounded panel from the shared helper, framed for a dark card. */
+    function paintPanel(ctx, left, top, width, height) {
+        paintRoundBlob(ctx, left - SETTINGS.panelPad, top - SETTINGS.panelPad,
+            width + SETTINGS.panelPad * 2, height + SETTINGS.panelPad * 2, PAL.panelEdge);
+        paintRoundBlob(ctx, left, top, width, height, PAL.panel);
+        ctx.fillStyle = PAL.panelEdge;
+        ctx.fillRect(left + SETTINGS.playerArmWidth, top + SETTINGS.panelPad,
+            width - SETTINGS.playerArmWidth * 2, SETTINGS.panelEdgeStripHeight);
+    }
+
+    /* Paint the how-to card: the name at scale 1, then four short lines. */
+    function paintTitleCard(ctx) {
+        paintPanel(ctx, SETTINGS.titlePanelLeft, SETTINGS.titlePanelTop,
+            SETTINGS.titlePanelWidth, SETTINGS.titlePanelHeight);
+        for (let i = 0; i < SETTINGS.throwKinds; i++) {
+            const map = CUTLERY_MAPS[i];
+            const centreX = SETTINGS.stageCenterX + (i - 1) * SETTINGS.titleCrestGapX;
+            paintPixels(ctx, map, CUTLERY_COLOURS, centreX - Math.floor(map[0].length / 2),
+                SETTINGS.titleCrestY, false, 1);
+        }
+        paintPixelText(ctx, SETTINGS.gameName, SETTINGS.stageCenterX, SETTINGS.titleNameY, PAL.gold, null, 1);
+        ctx.fillStyle = PAL.lockerDark;
+        ctx.fillRect(SETTINGS.stageCenterX - SETTINGS.titleCrestGapX * 2, SETTINGS.titleRuleY,
+            SETTINGS.titleCrestGapX * 4, SETTINGS.lockerSeamWidth);
+        paintPixelText(ctx, "THROW AT KANT", SETTINGS.stageCenterX, SETTINGS.titleFirstLineY, PAL.cream, null, 1);
+        paintPixelText(ctx, "FIVE HITS TO WIN", SETTINGS.stageCenterX,
+            SETTINGS.titleFirstLineY + SETTINGS.titleLineGapY, PAL.cream, null, 1);
+        paintPixelText(ctx, "DODGE THE POTS", SETTINGS.stageCenterX,
+            SETTINGS.titleFirstLineY + SETTINGS.titleLineGapY * 2, PAL.cream, null, 1);
+        paintPixelText(ctx, "TAP TO START", SETTINGS.stageCenterX,
+            SETTINGS.titleFirstLineY + SETTINGS.titleLineGapY * 3, PAL.gold, null, 1);
+    }
+
+    /* Paint the win card: KANT DOWN!, the score and the friendly footer. */
+    function paintWinCard(ctx) {
+        paintPanel(ctx, SETTINGS.overPanelLeft, SETTINGS.overPanelTop,
+            SETTINGS.overPanelWidth, SETTINGS.overPanelHeight);
+        paintPixelText(ctx, "KANT DOWN!", SETTINGS.stageCenterX, SETTINGS.overWinTitleY, PAL.gold, PAL.panelEdge, 2);
+        paintPixelText(ctx, "SCORE " + score, SETTINGS.stageCenterX, SETTINGS.overWinScoreY, PAL.cream, null, 1);
+        paintPixelText(ctx, "YOU KILLED KANT", SETTINGS.stageCenterX, SETTINGS.overWinFooterFirstY, PAL.cream, null, 1);
+        paintPixelText(ctx, "AND PUNISHED HIM", SETTINGS.stageCenterX,
+            SETTINGS.overWinFooterFirstY + SETTINGS.overWinFooterGapY, PAL.cream, null, 1);
+        paintPixelText(ctx, "HE DESERVED IT!", SETTINGS.stageCenterX,
+            SETTINGS.overWinFooterFirstY + SETTINGS.overWinFooterGapY * 2, PAL.gold, null, 1);
+        paintPixelText(ctx, "TAP TO PLAY AGAIN", SETTINGS.stageCenterX, SETTINGS.overWinPromptY, PAL.cream, null, 1);
+    }
+
+    /* Paint the lose card: the two-line taunt, the score and the hits. */
+    function paintLoseCard(ctx) {
+        paintPanel(ctx, SETTINGS.overPanelLeft, SETTINGS.overPanelTop,
+            SETTINGS.overPanelWidth, SETTINGS.overPanelHeight);
+        paintPixelText(ctx, "KANT LAUGHS", SETTINGS.stageCenterX, SETTINGS.overLoseTitleY, PAL.gold, PAL.panelEdge, 2);
+        paintPixelText(ctx, "AT YOU!", SETTINGS.stageCenterX, SETTINGS.overLoseSecondY, PAL.gold, PAL.panelEdge, 2);
+        paintPixelText(ctx, "SCORE " + score, SETTINGS.stageCenterX, SETTINGS.overLoseScoreY, PAL.cream, null, 1);
+        paintPixelText(ctx, "HITS " + hits + "/" + SETTINGS.hitsToWin, SETTINGS.stageCenterX,
+            SETTINGS.overLoseDetailY, PAL.cream, null, 1);
+        paintPixelText(ctx, "TAP TO PLAY AGAIN", SETTINGS.stageCenterX, SETTINGS.overLosePromptY, PAL.cream, null, 1);
+    }
+
+    /* ---------- the frame ---------- */
+
+    /* Paint one frame of the hallway, then whatever card is on top. */
+    function paint(ctx) {
+        paintCorridor(ctx);
+        paintHazards(ctx);
+        paintKant(ctx);
+        paintProjectiles(ctx);
+        paintPlayer(ctx);
+        paintEffects(ctx);
+        paintHud(ctx);
+        if (state === STATE.title) paintTitleCard(ctx);
+        if (state === STATE.over) {
+            if (endWon) paintWinCard(ctx);
+            else paintLoseCard(ctx);
+        }
+    }
+
+    /* ---------- the shelf card ---------- */
+
+    /* Paint a still slice of the hallway for the shelf's 200 by 96 card. */
+    function paintShelfPreview(ctx) {
+        const scale = SETTINGS.previewScale;
+        ctx.fillStyle = PAL.wall;
+        ctx.fillRect(0, 0, SETTINGS.previewWidth, SETTINGS.previewWallBottomY);
+        const lockerCount = Math.ceil(SETTINGS.previewWidth / SETTINGS.previewLockerWidth) + 1;
+        for (let i = 0; i < lockerCount; i++) {
+            const left = i * SETTINGS.previewLockerWidth;
+            ctx.fillStyle = PAL.locker;
+            ctx.fillRect(left, SETTINGS.previewLockerTopY, SETTINGS.previewLockerWidth - SETTINGS.lockerSeamWidth,
+                SETTINGS.previewLockerBottomY - SETTINGS.previewLockerTopY);
+            ctx.fillStyle = PAL.lockerDark;
+            ctx.fillRect(left, SETTINGS.previewLockerTopY, SETTINGS.lockerSeamWidth,
+                SETTINGS.previewLockerBottomY - SETTINGS.previewLockerTopY);
+        }
+        ctx.fillStyle = PAL.floor;
+        ctx.fillRect(0, SETTINGS.previewWallBottomY, SETTINGS.previewWidth,
+            SETTINGS.previewHeight - SETTINGS.previewWallBottomY);
+        for (let lineY = SETTINGS.previewWallBottomY; lineY < SETTINGS.previewHeight; lineY += SETTINGS.previewFloorLineGapY) {
+            ctx.fillStyle = PAL.floorDark;
+            ctx.fillRect(0, lineY, SETTINGS.previewWidth, SETTINGS.floorSeamWidth);
+        }
+
+        const potLeft = SETTINGS.previewPotX - Math.floor(POT[0].length * scale / 2);
+        paintPixels(ctx, POT, POT_COLOURS, potLeft,
+            SETTINGS.previewPotFeetY - POT.length * scale + 1, false, scale);
+        const kantLeft = SETTINGS.previewKantX - Math.floor(KANT_BACK[0].length * scale / 2);
+        paintPixels(ctx, KANT_BACK, KANT_COLOURS, kantLeft,
+            SETTINGS.previewKantFeetY - KANT_BACK.length * scale + 1, false, scale);
+        const playerLeft = SETTINGS.previewPlayerX - Math.floor(PLAYER_BACK[0].length * scale / 2);
+        paintPixels(ctx, PLAYER_BACK, PLAYER_COLOURS, playerLeft,
+            SETTINGS.previewPlayerFeetY - PLAYER_BACK.length * scale + 1, false, scale);
+        paintPixels(ctx, FORK, CUTLERY_COLOURS, SETTINGS.previewForkX, SETTINGS.previewForkY, false, scale);
+    }
+
+    /* ---------- chrome ---------- */
+
+    /* Write the score, best and message chips, and remember what was written. */
+    function syncChrome(force) {
+        const bestNow = Math.max(best, score);
+        if (force || shownScore !== score) {
+            shownScore = score;
+            scoreEl.textContent = String(score);
+        }
+        if (force || shownBest !== bestNow) {
+            shownBest = bestNow;
+            bestEl.textContent = String(bestNow);
+        }
+        let message = "hits " + hits + "/" + SETTINGS.hitsToWin + " - ammo x" + ammo;
+        if (state === STATE.title) message = "throw cutlery at Kant - five hits in sixty seconds";
+        if (state === STATE.over) {
+            message = endWon
+                ? "kant is down! " + score + " - press R to go again"
+                : "kant laughs at you! " + score + " - press R to go again";
+        }
+        if (dazeTimer > 0) message = "dazed! the clock keeps running";
+        if (force || shownMessage !== message) {
+            shownMessage = message;
+            msgEl.textContent = message;
+        }
+    }
+
+    /* ---------- the module contract ---------- */
+
+    /* Open the game on its how-to card and read the saved best. */
+    function start() {
+        best = readBest(SETTINGS.gameName);
+        score = 0;
+        clockLeft = SETTINGS.roundSeconds;
+        hits = 0;
+        ammo = SETTINGS.ammoStart;
+        playerX = SETTINGS.stageCenterX;
+        kantX = SETTINGS.stageCenterX;
+        kantPhase = PHASE.run;
+        phaseTimer = 0;
+        kantDirection = 1;
+        dazeTimer = 0;
+        throwCooldown = 0;
+        throwFlash = 0;
+        scrollDistance = 0;
+        cutleryKind = 0;
+        projectiles = [];
+        hazards = [];
+        effects = [];
+        state = STATE.title;
+        stateT = 0;
+        clearHeld();
+        syncChrome(true);
+    }
+
+    /* Release held directions when the shelf takes the screen back. */
+    function stop() {
+        clearHeld();
+    }
+
+    /* Start a new run immediately. */
+    function restart() {
+        clearHeld();
+        resetRun();
+    }
+
+    /* A direction press starts a run from a card and strafes while playing. */
+    function onDir(dir, pressed) {
+        if (dir === "left" || dir === "right") held[dir] = pressed;
+        if (pressed && state !== STATE.play && stateT > SETTINGS.cardDebounceSeconds) resetRun();
+    }
+
+    /* The action button: throw while playing, start from a card. */
+    function onAction() {
+        if (state === STATE.play) {
+            throwCutlery();
+            return;
+        }
+        if (stateT > SETTINGS.cardDebounceSeconds) resetRun();
+    }
+
+    /* A tap on the stage does what the action button does. */
+    function onStageTap() {
+        onAction();
+    }
+
+    /* Any other key does what the action button does. */
+    function onAnyKey() {
+        onAction();
+    }
+
+    /* Run the game on a clamped clock, in fixed steps for steady fairness. */
+    function update(rawDt) {
+        const dt = rawDt > 0.25 ? 0.25 : rawDt;
+        accumulator += dt;
+        let steps = 0;
+        while (accumulator >= STEP_SECONDS && steps < 4) {
+            stepWorld(STEP_SECONDS);
+            accumulator -= STEP_SECONDS;
+            steps += 1;
+        }
+        if (steps === 4) accumulator = 0;
+        syncChrome(false);
+    }
+
+    /* Expose a small fixture only for a page opened with ?test=1, so a
+       browser check can photograph the two result cards without playing. */
+    if (typeof window !== "undefined" && window.location &&
+            window.location.search.indexOf("test=1") !== -1) {
+        window.__CHASE_TEST__ = {
+            /* Land the last hit at once, so the win card paints. */
+            win: function () {
+                hits = SETTINGS.hitsToWin - 1;
+                scoreHit({ x: kantX, y: SETTINGS.kantCentreY });
+            },
+            /* Run the clock out at once, so the lose card paints. */
+            lose: function () {
+                clockLeft = 0;
+                finishRun(false);
+            },
+            /* Daze the player, so the stars and the frozen run show. */
+            daze: function () {
+                dazeTimer = SETTINGS.potDazeSeconds;
+            },
+            /* Float a fresh crate above the player, so the pickup shows. */
+            crate: function () {
+                spawnCrate(false);
+            }
+        };
+    }
+
+    /* Register the game with the shared shelf and runtime. */
+    GAMES.push({
+        id: SETTINGS.gameName,
+        versionNumber: SETTINGS.versionNumber,
+        name: "Chase Kill Kant",
+        tagline: "five hits, sixty seconds",
+        concept: "Throw forks, knives and scissors down a warm school hallway and land five hits on Kant in sixty seconds. He ducks, he glances, he runs; plant pots daze you and crates refill your cutlery.",
+        actionLabel: "THROW",
+        hint: "left and right strafe · SPACE or tap throws · R restarts · ESC shelf",
         previewPaint: paintShelfPreview,
         start, stop, restart, update, paint, onDir, onAction, onStageTap, onAnyKey
     });
