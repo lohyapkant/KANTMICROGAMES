@@ -1,4 +1,4 @@
-<!-- Applies to: build 038-20261115 · ten games · changes to controls are recorded in CHANGELOG.md -->
+<!-- Applies to: build 039-20261116 · ten games · changes to controls are recorded in CHANGELOG.md -->
 # KANTMICROGAMES — Controls
 
 Which controls exist, how they behave on each kind of device, and why.

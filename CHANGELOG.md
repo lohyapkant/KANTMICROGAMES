@@ -8,6 +8,16 @@ A short record of every build, newest first. Each entry gives the build ID, the 
 - **Corrected in build 028:** 13 lines in entries 000 to 018 were cut off mid-sentence when this record was made in build 027; they were restored in full from the private record. (The build 028 prompt expected 15: entries 001 and 000 were named too, but their lines were already whole, so nothing there needed changing.)
 
 <!-- NEW ENTRIES: paste the newest short entry on the line below this comment, above the previous newest. Never edit older entries except to add a dated correction line in the header. -->
+## 039-20261116 — 2026-11-16 (CHASEKILLKANT v2: a clearer hallway and a five-line card)
+
+Built from prompt: P-39, written by the owner with DeepSeek V4.1 Flash Free in OpenCode CLI and pasted verbatim after review (an art-and-teaching pass on the hallway: replace the blue-barrier read and teach crate from pot, with no gameplay change); prompt effort High  
+Tool and model: **DeepSeek V4.1 Flash Free** (OpenCode); effort High  
+What changed: CHASEKILLKANT v2 (frozen build 039-20261116), an art-and-teaching pass with zero gameplay change: the teal locker wall became two short runs of sage lockers with a wooden door between them, a skirting board, a warmer six-band floor whose boards widen toward the camera, two wall props (a NO RUNNING sign and a noticeboard with a pot poster and a crate poster), a dark pot rim, a gold-lidded crate and a blinking gold outline on the crate that arrives when the ammo runs out; the how-to card now teaches crate from pot in five lines (THROW AT KANT / FIVE HITS TO WIN / CATCH CRATES / DODGE THE POTS / TAP TO START); the shelf preview and the module banner match. The status bar, the shell and the other nine games are byte-identical; the play, the clock, the scoring and the difficulty are unchanged  
+Games changed: CHASEKILLKANT v2 (frozen build 039-20261116)  
+Checked: the fairness harness prints 1699 of 1699 assertions with the four skill bands unchanged to the digit (perfect and sharp 100 percent, regular 30 percent, rookie 12.5 percent); both inline scripts parse; readable-code counts are zero; the stage is identical at all seven named viewports; the hallway's worst saturation is 0.283 in both wall windows (limit 0.363); the pot rim is 71.6 percent darker than the floor and 86.1 percent darker than the wall; all nine other module hashes are unchanged; headless Chrome reports 0 console errors and 0 external requests; `check-project.py` prints 12 of 12 PASS on the mirror  
+Not checked: no Safari, real phone or sound test; the art check is a self-review, not an owner approval; the rookie and regular difficulty gap stays open and reported  
+Time and usage: about 31 min; 0.45 M tokens processed
+
 ## 038-20261115 — 2026-11-16 (CHASEKILLKANT: a hallway chase with thrown cutlery)
 
 Built from prompt: P-38, written by the owner with DeepSeek V4.1 Flash Free in OpenCode CLI and pasted verbatim after review (add a tenth game, CHASEKILLKANT, and sweep stale counts out of the current-state docs); prompt effort High  
