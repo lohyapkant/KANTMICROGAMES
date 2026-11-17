@@ -6,8 +6,8 @@
   Repository : https://github.com/lohyapkant/KANTMICROGAMES
   Play online: https://kantmicrogames.lohyapkant.workers.dev/
   Hosting    : Cloudflare Workers (https://workers.cloudflare.com/)
-  Current    : build 039-20261116 — CHASEKILLKANT v2, the same hallway
-               chase with a clearer room and a card that teaches crate from pot
+  Current    : build 040-20261117 — CHASEKILLKANT v3, the same chase in a
+               still office corridor with a carpet floor and a gold rim
   Names      : project and on-screen brand KANTMICROGAMES ·
                save keys and the console tag use the KANTMICROGAMES prefix
   Build log  : build 028-20261114, DeepSeek V4.1 Flash Free (OpenCode) — a short
@@ -1442,7 +1442,7 @@
       005-20261101), SPROUTUP (content 007-20261101), SLIMEHOP (content
       010-20261101), SNAILRACE (content 011-20261101), HUGPARADE (content
       015-20261102), CATNAPCATCH (content 016-20261102), PENGUINSLIDE (content
-      037-20261115) and CHASEKILLKANT (content 039-20261116). Do not restyle,
+      037-20261115) and CHASEKILLKANT (content 040-20261117). Do not restyle,
       rebalance or refactor them unless the owner unfreezes one in the prompt. (Build 010 changed only their unused `saveKey` label
       string when the storage prefix was renamed; art, tuning and
       behaviour are untouched. Build 016 left all six earlier games
@@ -1493,7 +1493,7 @@
 
 const APP = {
     name: "KANTMICROGAMES",
-    fileVersion: "039-20261116",       // build number of THIS one-file app
+    fileVersion: "040-20261117",       // build number of THIS one-file app
     savePrefix: "KANTMICROGAMES."      // best scores live at prefix + GAMEID + ".best"
 };
 
@@ -2129,7 +2129,7 @@ function paintPandaSnackPreview(ctx) {
    the module's own versionNumber, the build where its content last changed.
    Keep this table in step with plans/game-versions.txt; the check script,
    tests/check-project.py, compares them. */
-const GAME_REVISIONS = { PANDASNACK: { revision: 1, frozen: true }, BOOPEEK: { revision: 2, frozen: true }, DUCKLINE: { revision: 1, frozen: true }, SPROUTUP: { revision: 1, frozen: true }, SLIMEHOP: { revision: 1, frozen: true }, SNAILRACE: { revision: 1, frozen: true }, HUGPARADE: { revision: 2, frozen: true }, CATNAPCATCH: { revision: 2, frozen: true }, PENGUINSLIDE: { revision: 9, frozen: true }, CHASEKILLKANT: { revision: 2, frozen: true } };
+const GAME_REVISIONS = { PANDASNACK: { revision: 1, frozen: true }, BOOPEEK: { revision: 2, frozen: true }, DUCKLINE: { revision: 1, frozen: true }, SPROUTUP: { revision: 1, frozen: true }, SLIMEHOP: { revision: 1, frozen: true }, SNAILRACE: { revision: 1, frozen: true }, HUGPARADE: { revision: 2, frozen: true }, CATNAPCATCH: { revision: 2, frozen: true }, PENGUINSLIDE: { revision: 9, frozen: true }, CHASEKILLKANT: { revision: 3, frozen: true } };
 
 /* The identity line's sizes, named so the code below has no loose numbers.
    The height is only a fallback: the real height comes from the CSS. */
@@ -3850,10 +3850,10 @@ syncSoundUI();
    * PENGUINSLIDE is FROZEN at content 037-20261115 — rebuilt as v9 in
      build 037 at the owner's request: Pip belly-slides across a 7 by 7
      ice field, two seals patrol the bridges, six fish to win.
-   * CHASEKILLKANT is FROZEN at content 039-20261116 — new in build 038
-     and given a clearer hallway and a five-line how-to card in build 039:
-     five hits in sixty seconds, pots daze, crates refill one piece of
-     cutlery. The play itself is unchanged from v1.
+   * CHASEKILLKANT is FROZEN at content 040-20261117 — new in build 038,
+     restyled in build 039 and moved to a still office corridor in build
+     040: five hits in sixty seconds, pots daze, crates refill one piece
+     of cutlery. The play itself is unchanged from v1.
    ================================================================== */
 
 (function () {
@@ -12665,35 +12665,37 @@ syncSoundUI();
 
 
 /* ==================================================================
-   PART 5-J — CHASEKILLKANT module (content 039-20261116)
+   PART 5-J — CHASEKILLKANT module (content 040-20261117)
    ================================================================
    HOW THIS GAME WORKS
-   - Kant runs away down a warm school hallway, seen from behind at a
+   - Kant runs away down a warm office corridor, seen from behind at a
      gentle three-quarter angle. You stand at the bottom of the screen,
      seen from behind, with a handful of cutlery.
    - Left and right strafe. SPACE, the action pad or a tap on the stage
-     throws a fork, a knife or a pair of scissors up the hallway. The
+     throws a fork, a knife or a pair of scissors up the corridor. The
      three share one ammo count and cycle for looks only.
    - The throw travels for about 0.4 seconds, so you must lead him. Kant
      is sharp from the first hit: he glances over his shoulder, then
      ducks. A duck cannot be hit; the moment after a duck is your shot.
+   - While Kant is off balance after a duck, a stumble or a hit, a steady
+     one-pixel gold rim around him marks the opening.
    - Five hits in sixty seconds wins. Zero ammo is never a dead end: a
-     crate is pushed into the hallway at once, and it blinks a gold
+     crate is pushed into the corridor at once, and it blinks a gold
      outline so you can see where the refill is.
-   - Plant pots drift down the hallway. Standing under one dazes you for
+   - Plant pots drift down the corridor. Standing under one dazes you for
      a moment: no moving, no throwing, and the clock keeps running.
    - Crates drift down too; collect one for another piece of cutlery.
-     A crate carries a gold lid and a pot a dark rim, so the two read
-     apart at a glance.
-   - The room: cream wall and sage lockers in two short runs with a
-     doorway between them, a skirting board, and floorboards whose bands
-     widen toward the camera. Two wall props teach crate from pot: a NO
-     RUNNING sign and a noticeboard with a pot poster and a crate poster.
+     A crate is a cardboard archive box with a gold tape strip and a pot
+     a dark rim, so the two read apart at a glance.
+   - The room: a cream upper wall over a sage dado with a wood rail, a
+     sage fire door with a frosted panel, a cork noticeboard, a skirting
+     board, and a still grey carpet floor whose tiles widen toward the
+     camera. The noticeboard teaches crate from pot at a glance.
    - STATES: TITLE (the how-to card), PLAY (the chase), OVER (a result
      card that reads KANT DOWN! or KANT LAUGHS AT YOU!).
    - CONTROLS: left and right strafe, SPACE or tap throws, R restarts,
      ESC returns to the shelf. Up and down do nothing.
-   - SETTINGS groups: the HUD band, the hallway, the player, Kant and
+   - SETTINGS groups: the HUD band, the corridor, the player, Kant and
      his ladder, throwing, ammo and crates, pots, drifting hazards, the
      round and its scoring, visual effects, the two cards, the shelf
      preview, and the palette.
@@ -12705,7 +12707,7 @@ syncSoundUI();
        plain explanation of what changing it does. */
     const SETTINGS = {
         gameName: "CHASEKILLKANT",
-        versionNumber: "039-20261116",
+        versionNumber: "040-20261117",
         stageSize: 100,
         stageCenterX: 50,
 
@@ -12726,52 +12728,33 @@ syncSoundUI();
         hudAmmoCenterX: 92,
         hudWarningSeconds: 10,
 
-        /* The hallway: a cream wall with two short runs of sage lockers and a
-           doorway between them, a skirting board, and a wooden floor whose
-           bands are tight at the horizon and wide at the camera. The bands
-           scroll downward at a steady speed to sell the chase. */
-        wallTopY: 10,
-        wallBottomY: 26,
-        lockerTopY: 11,
-        lockerBottomY: 22,
-        lockerWidth: 11,
-        lockerSeamWidth: 1,
-        lockerVentTopY: 17,
-        lockerVentOffsetX: 4,
-        lockerVentWidth: 4,
-        lockerVentHeight: 1,
-        lockerRunStarts: [[0, 33], [60, 100]],
-        lockerRunTopOffsets: [0, 1],
+        /* The corridor: a cream upper wall over a sage dado with a wood rail,
+           a sage fire door, a cork noticeboard, a skirting board and a still
+           grey carpet floor whose tiles widen toward the camera. */
+        dadoTopY: 19,
+        railY: 18,
+        railHeight: 1,
+        skirtingTopY: 26,
+        skirtingHeight: 2,
+        floorTopY: 28,
+        carpetRowGaps: [7, 9, 11, 13, 15, 17],
+        carpetTileBaseWidth: 11,
+        carpetTileDepthGrowth: 0.2,
+        floorSeamWidth: 1,
         doorwayLeft: 44,
         doorwayRight: 56,
         doorwayTopY: 11,
         doorwayBottomY: 24,
-        doorKnobInsetX: 3,
-        doorKnobInsetY: 7,
-        wallBaseHeight: 4,
-        skirtingTopY: 26,
-        skirtingHeight: 2,
-        floorTopY: 28,
-        floorBandGaps: [4, 6, 9, 13, 18, 24],
-        floorSeamHighlightBelowY: 50,
-        floorScrollSpeed: 18,
-        floorSeamWidth: 1,
-        wedgeWidth: 9,
-        wedgeBottomY: 44,
+        doorPanelLeft: 47,
+        doorPanelTop: 14,
+        doorPanelWidth: 6,
+        doorPanelHeight: 5,
+        doorHandleX: 53,
+        doorHandleY: 20,
 
-        /* Two wall props, both above Kant's head: a NO RUNNING sign and a
-           noticeboard with one pot poster and one crate poster, so crate and
-           pot are taught at a glance. They never move. */
-        signLeft: 9,
-        signTop: 12,
-        signWidth: 13,
-        signHeight: 9,
-        signSlashLeft: 3,
-        signSlashTop: 6,
-        signSlashSteps: 5,
-        signSlashStepX: 2,
-        signSlashStepY: 1,
-        signSlashWidth: 2,
+        /* One cork noticeboard above Kant's head with a pot poster and a
+           crate poster, so crate and pot are taught at a glance. It never
+           moves. */
         boardLeft: 72,
         boardTop: 12,
         boardWidth: 20,
@@ -12933,18 +12916,34 @@ syncSoundUI();
         panelPad: 1,
         panelEdgeStripHeight: 1,
 
-        /* The shelf preview: a 200 by 96 slice of the hallway. */
+        /* The shelf preview: a 200 by 96 slice of the corridor. */
         previewWidth: 200,
         previewHeight: 96,
         previewWallBottomY: 44,
-        previewLockerWidth: 22,
-        previewLockerTopY: 4,
-        previewLockerBottomY: 36,
-        previewLockerRuns: [[0, 66], [120, 200]],
+        previewSkirtingTopY: 40,
+        previewDadoTopY: 30,
+        previewRailY: 28,
+        previewRailHeight: 2,
         previewDoorwayLeft: 88,
         previewDoorwayRight: 112,
-        previewSkirtingTopY: 40,
-        previewFloorBandGaps: [10, 16, 24],
+        previewDoorwayTopY: 4,
+        previewDoorwayBottomY: 36,
+        previewDoorPanelLeft: 98,
+        previewDoorPanelTop: 14,
+        previewDoorPanelWidth: 8,
+        previewDoorPanelHeight: 8,
+        previewDoorHandleX: 104,
+        previewDoorHandleY: 26,
+        previewBoardLeft: 20,
+        previewBoardTop: 6,
+        previewBoardWidth: 40,
+        previewBoardHeight: 22,
+        previewBoardPosterFirstLeft: 6,
+        previewBoardPosterSecondLeft: 24,
+        previewBoardPosterTop: 7,
+        previewCarpetRowGaps: [10, 10, 10, 11, 11],
+        previewCarpetTileBase: 22,
+        previewCarpetTileGrowth: 1.4,
         previewKantX: 132,
         previewKantFeetY: 62,
         previewPlayerX: 96,
@@ -12954,25 +12953,26 @@ syncSoundUI();
         previewCrateX: 178,
         previewCrateFeetY: 78,
         previewForkX: 116,
-        previewForkY: 26,
+        previewForkY: 50,
         previewScale: 2,
 
-        /* The palette: a warm family hallway with one cool pop, the
-           player's periwinkle hoodie. */
+        /* The palette: a warm two-tone office corridor with one cool pop,
+           the player's periwinkle hoodie. */
         palette: {
             wall: "#F3E7CE",
-            wallShade: "#E3D2B1",
-            locker: "#7C8A6B",
-            lockerDark: "#5F6A4F",
-            lockerLight: "#98A483",
+            wallDado: "#7C8A6B",
+            doorFace: "#8E9C7C",
+            doorFrame: "#5F6A4F",
+            frost: "#CFD8D4",
             woodwork: "#8A7A63",
             skirtingShadow: "#6E5F4C",
-            floorSideWall: "#6B5C4A",
+            cork: "#B48155",
+            carpet: "#8C8B86",
+            carpetAlt: "#898883",
+            carpetSeam: "#868580",
+            carpetShadow: "#6F6E69",
+            carpetEdgeShadow: "rgba(43,31,24,0.14)",
             hudPip: "#245754",
-            floor: "#9A6A44",
-            floorBand: "#8B5E3C",
-            floorDark: "#7E5436",
-            floorLight: "#B48155",
             hud: "#22343A",
             hudLine: "#101D22",
             cream: "#FFF6E2",
@@ -12994,9 +12994,9 @@ syncSoundUI();
             terracottaDark: "#9B4A2C",
             leaf: "#5E9B57",
             leafDark: "#42713D",
-            crate: "#B98A52",
-            crateDark: "#8A6238",
-            crateLight: "#CFA06A",
+            card: "#C89A63",
+            cardDark: "#A87B48",
+            cardLight: "#D9B27C",
             cutlery: "#D9DEE4",
             cutleryDark: "#9AA4B0",
             panel: "#22343A",
@@ -13143,20 +13143,21 @@ syncSoundUI();
 
     const POT_COLOURS = { G: PAL.leaf, K: PAL.shoe, R: PAL.terracottaDark, T: PAL.terracotta };
 
-    /* A slatted wooden crate with a gold lid: the ammo refill. Gold is
-       already this game's word for "yours", from the hit pips to the hint. */
+    /* A sealed cardboard archive box with a gold tape strip down the middle:
+       the ammo refill. Gold is already this game's word for "yours", from the
+       hit pips to the hint. */
     const CRATE = [
-        "ggggggggg",
-        "CddddddwC",
-        "CcccccccC",
-        "CdddddddC",
-        "CcccccccC",
-        "CdddddddC",
+        "CdddgdddC",
+        "CcccgcccC",
+        "CdddgdddC",
+        "CcccgcccC",
+        "CdddgdddC",
+        "CcccgcccC",
         "CCCCCCCCC"
     ];
 
     const CRATE_COLOURS = {
-        C: PAL.crate, d: PAL.crateDark, c: PAL.crateLight, g: PAL.gold, w: PAL.cream
+        C: PAL.cardDark, d: PAL.card, c: PAL.cardLight, g: PAL.gold
     };
 
     /* A tiny clock face for the HUD. */
@@ -13169,11 +13170,6 @@ syncSoundUI();
     ];
 
     const CLOCK_COLOURS = { "#": PAL.cream };
-
-    /* A small gold flash above Kant's head while he is off balance after a
-       duck: the player's clear signal that this is the moment to throw. */
-    const RECOVER_HINT = ["###"];
-    const RECOVER_HINT_COLOURS = { "#": PAL.gold };
 
     /* ---------- private state ---------- */
 
@@ -13200,7 +13196,6 @@ syncSoundUI();
     let dazeTimer = 0;
     let nextPotSeconds = SETTINGS.potEarlyMinSeconds;
     let nextCrateSeconds = SETTINGS.crateFirstSeconds;
-    let scrollDistance = 0;
     let cutleryKind = 0;
     let endWon = false;
     let projectiles = [];
@@ -13220,7 +13215,7 @@ syncSoundUI();
         held.right = false;
     }
 
-    /* Start a fresh sixty-second run with a clean hallway. */
+    /* Start a fresh sixty-second run with a clean corridor. */
     function resetRun() {
         score = 0;
         clockLeft = SETTINGS.roundSeconds;
@@ -13242,7 +13237,6 @@ syncSoundUI();
         dazeTimer = 0;
         nextPotSeconds = SETTINGS.potEarlyMinSeconds;
         nextCrateSeconds = SETTINGS.crateFirstSeconds;
-        scrollDistance = 0;
         cutleryKind = 0;
         endWon = false;
         projectiles = [];
@@ -13517,12 +13511,12 @@ syncSoundUI();
         return chosenX;
     }
 
-    /* Push a pot into the hallway. */
+    /* Push a pot into the corridor. */
     function spawnPot() {
         hazards.push({ kind: "pot", x: pickHazardX(), y: SETTINGS.hazardSpawnY });
     }
 
-    /* Push a crate into the hallway; a forced one arrives at once and blinks
+    /* Push a crate into the corridor; a forced one arrives at once and blinks
        its gold outline for a moment so the player sees the refill. */
     function spawnCrate(forced) {
         hazards.push({
@@ -13534,7 +13528,7 @@ syncSoundUI();
         });
     }
 
-    /* Keep the hallway stocked and drift every hazard toward the player. */
+    /* Keep the corridor stocked and drift every hazard toward the player. */
     function updateHazards(dt) {
         nextPotSeconds -= dt;
         nextCrateSeconds -= dt;
@@ -13649,7 +13643,6 @@ syncSoundUI();
     /* Advance one fixed tick of the game. */
     function stepWorld(dt) {
         stateT += dt;
-        scrollDistance += SETTINGS.floorScrollSpeed * dt;
         updateEffects(dt);
         if (state !== STATE.play) return;
 
@@ -13666,192 +13659,124 @@ syncSoundUI();
         syncChrome(false);
     }
 
-    /* ---------- painting: the hallway ---------- */
+    /* ---------- painting: the corridor ---------- */
 
-    /* Paint the wall, the teal lockers and the scrolling wooden floor. */
-    /* Paint the wall, the sage lockers, the two wall props, the skirting and
-       the wooden floor. The floor bands are tight at the horizon and wide at
-       the camera, so the hallway reads as distance, not a moving belt. */
+    /* Paint the office corridor: the cream upper wall, the sage dado, the wood
+       rail, the fire door, the cork board, the skirting and the still carpet. */
     function paintCorridor(ctx) {
         ctx.fillStyle = PAL.wall;
-        ctx.fillRect(0, 0, STAGE, SETTINGS.floorTopY);
-        ctx.fillStyle = PAL.wallShade;
-        ctx.fillRect(0, SETTINGS.wallBottomY - SETTINGS.wallBaseHeight, STAGE, SETTINGS.wallBaseHeight);
+        ctx.fillRect(0, 0, STAGE, SETTINGS.dadoTopY);
+        ctx.fillStyle = PAL.wallDado;
+        ctx.fillRect(0, SETTINGS.dadoTopY, STAGE, SETTINGS.skirtingTopY - SETTINGS.dadoTopY);
+        ctx.fillStyle = PAL.woodwork;
+        ctx.fillRect(0, SETTINGS.railY, STAGE, SETTINGS.railHeight);
 
-        paintLockerRuns(ctx);
-        paintDoorway(ctx);
+        paintFireDoor(ctx);
         paintWallProps(ctx);
 
         ctx.fillStyle = PAL.woodwork;
         ctx.fillRect(0, SETTINGS.skirtingTopY, STAGE, SETTINGS.skirtingHeight);
-        ctx.fillStyle = PAL.skirtingShadow;
-        ctx.fillRect(0, SETTINGS.skirtingTopY + SETTINGS.skirtingHeight,
-            STAGE, SETTINGS.floorSeamWidth);
 
-        ctx.fillStyle = PAL.floor;
-        ctx.fillRect(0, SETTINGS.floorTopY, STAGE, STAGE - SETTINGS.floorTopY);
-        paintFloorBands(ctx);
-        paintFloorWedges(ctx);
+        paintCarpet(ctx);
     }
 
-    /* Paint the two short runs of sage lockers: a light cap along the top,
-       a dark seam on the left and a vent near the bottom of each door. The
-       right run sits one pixel lower, so the rank is not mechanical. */
-    function paintLockerRuns(ctx) {
-        const runs = SETTINGS.lockerRunStarts;
-        for (let run = 0; run < runs.length; run++) {
-            const top = SETTINGS.lockerTopY + SETTINGS.lockerRunTopOffsets[run];
-            for (let left = runs[run][0]; left < runs[run][1]; left += SETTINGS.lockerWidth) {
-                const width = Math.min(SETTINGS.lockerWidth - SETTINGS.lockerSeamWidth,
-                    runs[run][1] - left);
-                ctx.fillStyle = PAL.locker;
-                ctx.fillRect(left, top, width, SETTINGS.lockerBottomY - top);
-                ctx.fillStyle = PAL.lockerLight;
-                ctx.fillRect(left, top, width, SETTINGS.floorSeamWidth);
-                ctx.fillStyle = PAL.lockerDark;
-                ctx.fillRect(left, top, SETTINGS.lockerSeamWidth,
-                    SETTINGS.lockerBottomY - top);
-                ctx.fillRect(left + SETTINGS.lockerVentOffsetX, SETTINGS.lockerVentTopY,
-                    SETTINGS.lockerVentWidth, SETTINGS.lockerVentHeight);
-            }
-        }
-    }
-
-    /* Paint the doorway that breaks the rank of lockers in two: a wooden
-       frame, a warm closed door and a small gold handle. */
-    function paintDoorway(ctx) {
+    /* Paint the sage fire door: a dark frame, a sage face, a frosted vision
+       panel and a small gold handle. */
+    function paintFireDoor(ctx) {
         const left = SETTINGS.doorwayLeft;
         const width = SETTINGS.doorwayRight - left;
         const height = SETTINGS.doorwayBottomY - SETTINGS.doorwayTopY;
-        ctx.fillStyle = PAL.woodwork;
+        ctx.fillStyle = PAL.doorFrame;
         ctx.fillRect(left, SETTINGS.doorwayTopY, width, height);
-        ctx.fillStyle = PAL.floorBand;
-        ctx.fillRect(left + SETTINGS.floorSeamWidth, SETTINGS.doorwayTopY + SETTINGS.floorSeamWidth,
+        ctx.fillStyle = PAL.doorFace;
+        ctx.fillRect(left + SETTINGS.floorSeamWidth,
+            SETTINGS.doorwayTopY + SETTINGS.floorSeamWidth,
             width - SETTINGS.floorSeamWidth * 2, height - SETTINGS.floorSeamWidth * 2);
+        ctx.fillStyle = PAL.frost;
+        ctx.fillRect(SETTINGS.doorPanelLeft, SETTINGS.doorPanelTop,
+            SETTINGS.doorPanelWidth, SETTINGS.doorPanelHeight);
         ctx.fillStyle = PAL.gold;
-        ctx.fillRect(left + width - SETTINGS.doorKnobInsetX,
-            SETTINGS.doorwayTopY + SETTINGS.doorKnobInsetY,
+        ctx.fillRect(SETTINGS.doorHandleX, SETTINGS.doorHandleY,
             SETTINGS.floorSeamWidth, SETTINGS.floorSeamWidth);
     }
 
-    /* Paint the two wall props: a NO RUNNING sign and a noticeboard with one
-       pot poster and one crate poster. Both sit above Kant's head. */
+    /* Paint the cork noticeboard with one pot poster and one crate poster.
+       It sits above Kant's head. */
     function paintWallProps(ctx) {
-        const signLeft = SETTINGS.signLeft;
-        const signTop = SETTINGS.signTop;
-        ctx.fillStyle = PAL.woodwork;
-        ctx.fillRect(signLeft, signTop, SETTINGS.signWidth, SETTINGS.signHeight);
-        ctx.fillStyle = PAL.cream;
-        ctx.fillRect(signLeft + SETTINGS.floorSeamWidth, signTop + SETTINGS.floorSeamWidth,
-            SETTINGS.signWidth - SETTINGS.floorSeamWidth * 2,
-            SETTINGS.signHeight - SETTINGS.floorSeamWidth * 2);
-
-        /* A small stick figure with a diagonal bar across it: no running,
-           which Kant cheerfully ignores. */
-        ctx.fillStyle = PAL.panelEdge;
-        ctx.fillRect(signLeft + 4, signTop + 2, 1, 1);
-        ctx.fillRect(signLeft + 3, signTop + 3, 3, 1);
-        ctx.fillRect(signLeft + 4, signTop + 4, 1, 2);
-        ctx.fillRect(signLeft + 3, signTop + 6, 1, 1);
-        ctx.fillRect(signLeft + 5, signTop + 6, 1, 1);
-        ctx.fillStyle = PAL.pinkShade;
-        for (let step = 0; step < SETTINGS.signSlashSteps; step++) {
-            ctx.fillRect(signLeft + SETTINGS.signSlashLeft + step * SETTINGS.signSlashStepX,
-                signTop + SETTINGS.signSlashTop - step * SETTINGS.signSlashStepY,
-                SETTINGS.signSlashWidth, SETTINGS.signSlashStepY);
-        }
-
         const boardLeft = SETTINGS.boardLeft;
         const boardTop = SETTINGS.boardTop;
         ctx.fillStyle = PAL.skirtingShadow;
         ctx.fillRect(boardLeft, boardTop, SETTINGS.boardWidth, SETTINGS.boardHeight);
-        ctx.fillStyle = PAL.floorLight;
+        ctx.fillStyle = PAL.cork;
         ctx.fillRect(boardLeft + SETTINGS.floorSeamWidth, boardTop + SETTINGS.floorSeamWidth,
             SETTINGS.boardWidth - SETTINGS.floorSeamWidth * 2,
             SETTINGS.boardHeight - SETTINGS.floorSeamWidth * 2);
         paintBoardPoster(ctx, boardLeft + SETTINGS.boardPosterFirstLeft,
-            boardTop + SETTINGS.boardPosterTop, true);
+            boardTop + SETTINGS.boardPosterTop, true, 1);
         paintBoardPoster(ctx, boardLeft + SETTINGS.boardPosterSecondLeft,
-            boardTop + SETTINGS.boardPosterTop, false);
+            boardTop + SETTINGS.boardPosterTop, false, 1);
     }
 
     /* Paint one noticeboard poster: a pot with a red bar across it, or a
-       crate with a gold plus. Five pixels cannot draw much, so it suggests. */
-    function paintBoardPoster(ctx, left, top, isPot) {
-        const size = SETTINGS.boardPosterSize;
+       crate with a gold plus. Five pixels cannot draw much, so it suggests.
+       The optional scale blows the same drawing up for the shelf preview. */
+    function paintBoardPoster(ctx, left, top, isPot, scale) {
+        const size = SETTINGS.boardPosterSize * scale;
         ctx.fillStyle = PAL.cream;
         ctx.fillRect(left, top, size, size);
         if (isPot) {
             ctx.fillStyle = PAL.terracotta;
-            ctx.fillRect(left + 1, top + 2, 3, 1);
-            ctx.fillRect(left + 1, top + 3, 2, 1);
+            ctx.fillRect(left + scale, top + scale * 2, scale * 3, scale);
+            ctx.fillRect(left + scale, top + scale * 3, scale * 2, scale);
             ctx.fillStyle = PAL.leaf;
-            ctx.fillRect(left + 2, top + 1, 1, 1);
+            ctx.fillRect(left + scale * 2, top + scale, scale, scale);
             ctx.fillStyle = PAL.pinkShade;
             for (let step = 0; step < size - 1; step++) {
-                ctx.fillRect(left + step, top + size - 1 - step, 1, 1);
+                ctx.fillRect(left + step, top + size - scale - step, scale, scale);
             }
             return;
         }
-        ctx.fillStyle = PAL.crate;
-        ctx.fillRect(left + 1, top + 2, 3, 3);
+        ctx.fillStyle = PAL.card;
+        ctx.fillRect(left + scale, top + scale * 2, scale * 3, scale * 3);
         ctx.fillStyle = PAL.gold;
-        ctx.fillRect(left + 2, top + 1, 1, 3);
-        ctx.fillRect(left + 1, top + 2, 3, 1);
+        ctx.fillRect(left + scale * 2, top + scale, scale, scale * 3);
+        ctx.fillRect(left + scale, top + scale * 2, scale * 3, scale);
     }
 
-    /* Paint the floorboard bands. Six fixed gaps make one tall tile: tight at
-       the horizon and wide at the camera, so the floor reads as distance. The
-       tile slides toward the player at the hallway's scroll speed. */
-    function paintFloorBands(ctx) {
-        const gaps = SETTINGS.floorBandGaps;
-        let tileHeight = 0;
-        for (let i = 0; i < gaps.length; i++) tileHeight += gaps[i];
-        const offset = Math.floor(scrollDistance) % tileHeight;
+    /* Paint the still carpet floor: six widening rows of tiles with a faint
+       two-tone checker, soft one-pixel seams, and a two-pixel shadow where
+       the carpet meets the skirting. Nothing scrolls. */
+    function paintCarpet(ctx) {
+        const gaps = SETTINGS.carpetRowGaps;
+        ctx.fillStyle = PAL.carpet;
+        ctx.fillRect(0, SETTINGS.floorTopY, STAGE, STAGE - SETTINGS.floorTopY);
 
-        let top = SETTINGS.floorTopY - tileHeight + offset;
-        let band = 0;
-        while (top < STAGE) {
-            const height = gaps[band % gaps.length];
-            const bandTop = Math.max(top, SETTINGS.floorTopY);
-            const bandBottom = Math.min(top + height, STAGE);
-            if (bandBottom > bandTop && band % 2 === 1) {
-                ctx.fillStyle = PAL.floorBand;
-                ctx.fillRect(0, bandTop, STAGE, bandBottom - bandTop);
+        let top = SETTINGS.floorTopY;
+        for (let row = 0; row < gaps.length; row++) {
+            const height = Math.min(gaps[row], STAGE - top);
+            const tileWidth = Math.round(SETTINGS.carpetTileBaseWidth
+                + (top - SETTINGS.floorTopY) * SETTINGS.carpetTileDepthGrowth);
+            for (let column = 0; column < STAGE; column += tileWidth) {
+                const alternate = (row + Math.floor(column / tileWidth)) % 2 === 1;
+                ctx.fillStyle = alternate ? PAL.carpetAlt : PAL.carpet;
+                ctx.fillRect(column, top, tileWidth, height);
             }
-            top += height;
-            band += 1;
-        }
-
-        /* The seam at each band edge. The top two keep the dark line only,
-           so the floor's contrast falls away toward the far wall. */
-        top = SETTINGS.floorTopY - tileHeight + offset;
-        band = 0;
-        while (top < STAGE) {
-            if (top >= SETTINGS.floorTopY) {
-                ctx.fillStyle = PAL.floorDark;
+            for (let column = tileWidth; column < STAGE; column += tileWidth) {
+                ctx.fillStyle = PAL.carpetSeam;
+                ctx.fillRect(column, top, SETTINGS.floorSeamWidth, height);
+            }
+            if (row > 0) {
+                ctx.fillStyle = PAL.carpetSeam;
                 ctx.fillRect(0, top, STAGE, SETTINGS.floorSeamWidth);
-                if (top > SETTINGS.floorSeamHighlightBelowY) {
-                    ctx.fillStyle = PAL.floorLight;
-                    ctx.fillRect(0, top + SETTINGS.floorSeamWidth, STAGE, SETTINGS.floorSeamWidth);
-                }
             }
-            top += gaps[band % gaps.length];
-            band += 1;
+            top += gaps[row];
         }
-    }
 
-    /* Paint the two short side walls at the top corners of the floor. They
-       widen toward the camera and stop above the player's row. */
-    function paintFloorWedges(ctx) {
-        const height = SETTINGS.wedgeBottomY - SETTINGS.floorTopY;
-        ctx.fillStyle = PAL.floorSideWall;
-        for (let row = 0; row < height; row++) {
-            const width = Math.round(row * SETTINGS.wedgeWidth / height);
-            if (width <= 0) continue;
-            ctx.fillRect(0, SETTINGS.floorTopY + row, width, 1);
-            ctx.fillRect(STAGE - width, SETTINGS.floorTopY + row, width, 1);
-        }
+        ctx.fillStyle = PAL.carpetShadow;
+        ctx.fillRect(0, SETTINGS.floorTopY, STAGE, SETTINGS.floorSeamWidth);
+        ctx.fillStyle = PAL.carpetEdgeShadow;
+        ctx.fillRect(0, SETTINGS.floorTopY + SETTINGS.floorSeamWidth, STAGE,
+            SETTINGS.floorSeamWidth);
     }
 
     /* ---------- painting: hazards ---------- */
@@ -13888,20 +13813,20 @@ syncSoundUI();
 
     /* ---------- painting: Kant ---------- */
 
-    /* Paint Kant in his current pose, plus glasses when he glances back. */
+    /* Paint Kant in his current pose, plus glasses when he glances back and
+       the gold rim when he is off balance. */
     function paintKant(ctx) {
         const ducking = kantPhase === PHASE.duck;
         const map = ducking ? KANT_DUCK : KANT_BACK;
         const left = Math.round(kantX) - SETTINGS.kantHalfWidth;
         const top = SETTINGS.kantFeetY - map.length + 1;
         ctx.fillStyle = PAL.shadow;
-        ctx.fillRect(left + SETTINGS.lockerSeamWidth, SETTINGS.kantFeetY,
-            map[0].length - SETTINGS.lockerSeamWidth * 2, SETTINGS.kantShadowHeight);
+        ctx.fillRect(left + SETTINGS.floorSeamWidth, SETTINGS.kantFeetY,
+            map[0].length - SETTINGS.floorSeamWidth * 2, SETTINGS.kantShadowHeight);
         paintPixels(ctx, map, KANT_COLOURS, left, top, kantDirection < 0, 1);
         if (kantPhase === PHASE.recover || kantPhase === PHASE.stumble ||
                 kantPhase === PHASE.stagger) {
-            paintPixels(ctx, RECOVER_HINT, RECOVER_HINT_COLOURS,
-                Math.round(kantX) - SETTINGS.lockerSeamWidth, top - SETTINGS.playerArmTopOffset, false, 1);
+            paintKantRim(ctx, left, top, map);
         }
         if (kantPhase === PHASE.glance || kantPhase === PHASE.duck) {
             const lensLeft = left + SETTINGS.kantLensOffsetX;
@@ -13912,6 +13837,32 @@ syncSoundUI();
             ctx.fillRect(lensLeft + SETTINGS.kantGlassesEyeWidth, lensTop,
                 SETTINGS.kantGlassesArmWidth, SETTINGS.kantGlassesArmWidth);
         }
+    }
+
+    /* A steady one-pixel gold rim around Kant while he is off balance: the
+       clear signal that this is the moment to throw. It is drawn only on
+       empty cells that touch his body, so it follows the pose exactly. */
+    function paintKantRim(ctx, left, top, map) {
+        ctx.fillStyle = PAL.gold;
+        for (let row = -1; row <= map.length; row++) {
+            for (let column = -1; column <= map[0].length; column++) {
+                if (kantPixelFilled(map, column, row)) continue;
+                if (kantPixelFilled(map, column - 1, row) ||
+                        kantPixelFilled(map, column + 1, row) ||
+                        kantPixelFilled(map, column, row - 1) ||
+                        kantPixelFilled(map, column, row + 1)) {
+                    ctx.fillRect(left + column, top + row,
+                        SETTINGS.floorSeamWidth, SETTINGS.floorSeamWidth);
+                }
+            }
+        }
+    }
+
+    /* True when a cell of Kant's pixel map is inside it and not transparent. */
+    function kantPixelFilled(map, column, row) {
+        if (row < 0 || row >= map.length) return false;
+        if (column < 0 || column >= map[0].length) return false;
+        return map[row][column] !== ".";
     }
 
     /* ---------- painting: the player ---------- */
@@ -13967,7 +13918,7 @@ syncSoundUI();
     function paintEffects(ctx) {
         for (let i = 0; i < effects.length; i++) {
             const effect = effects[i];
-            const size = effect.life > effect.total / 2 ? SETTINGS.potDazeStarSize : SETTINGS.lockerSeamWidth;
+            const size = effect.life > effect.total / 2 ? SETTINGS.potDazeStarSize : SETTINGS.floorSeamWidth;
             ctx.fillStyle = effect.colour;
             ctx.fillRect(Math.round(effect.x), Math.round(effect.y), size, size);
         }
@@ -14021,9 +13972,9 @@ syncSoundUI();
                 SETTINGS.titleCrestY, false, 1);
         }
         paintPixelText(ctx, SETTINGS.gameName, SETTINGS.stageCenterX, SETTINGS.titleNameY, PAL.gold, null, 1);
-        ctx.fillStyle = PAL.lockerDark;
+        ctx.fillStyle = PAL.doorFrame;
         ctx.fillRect(SETTINGS.stageCenterX - SETTINGS.titleCrestGapX * 2, SETTINGS.titleRuleY,
-            SETTINGS.titleCrestGapX * 4, SETTINGS.lockerSeamWidth);
+            SETTINGS.titleCrestGapX * 4, SETTINGS.floorSeamWidth);
         paintPixelText(ctx, "THROW AT KANT", SETTINGS.stageCenterX, SETTINGS.titleFirstLineY, PAL.cream, null, 1);
         paintPixelText(ctx, "FIVE HITS TO WIN", SETTINGS.stageCenterX,
             SETTINGS.titleFirstLineY + SETTINGS.titleLineGapY, PAL.cream, null, 1);
@@ -14062,7 +14013,7 @@ syncSoundUI();
 
     /* ---------- the frame ---------- */
 
-    /* Paint one frame of the hallway, then whatever card is on top. */
+    /* Paint one frame of the corridor, then whatever card is on top. */
     function paint(ctx) {
         paintCorridor(ctx);
         paintHazards(ctx);
@@ -14080,59 +14031,27 @@ syncSoundUI();
 
     /* ---------- the shelf card ---------- */
 
-    /* Paint a still slice of the hallway for the shelf's 200 by 96 card: the
-       sage lockers in two runs with a doorway between, the skirting, the
-       widening floorboards, and one pot and one gold-lidded crate. */
+    /* Paint a still slice of the office corridor for the shelf's 200 by 96
+       card: cream over sage with a rail, the fire door, the cork board, the
+       skirting, the grey carpet, and one pot and one cardboard crate. */
     function paintShelfPreview(ctx) {
         const scale = SETTINGS.previewScale;
         ctx.fillStyle = PAL.wall;
-        ctx.fillRect(0, 0, SETTINGS.previewWidth, SETTINGS.previewWallBottomY);
-
-        const runs = SETTINGS.previewLockerRuns;
-        for (let run = 0; run < runs.length; run++) {
-            for (let left = runs[run][0]; left < runs[run][1]; left += SETTINGS.previewLockerWidth) {
-                const width = Math.min(SETTINGS.previewLockerWidth - SETTINGS.lockerSeamWidth,
-                    runs[run][1] - left);
-                ctx.fillStyle = PAL.locker;
-                ctx.fillRect(left, SETTINGS.previewLockerTopY, width,
-                    SETTINGS.previewLockerBottomY - SETTINGS.previewLockerTopY);
-                ctx.fillStyle = PAL.lockerLight;
-                ctx.fillRect(left, SETTINGS.previewLockerTopY, width, SETTINGS.floorSeamWidth);
-                ctx.fillStyle = PAL.lockerDark;
-                ctx.fillRect(left, SETTINGS.previewLockerTopY, SETTINGS.lockerSeamWidth,
-                    SETTINGS.previewLockerBottomY - SETTINGS.previewLockerTopY);
-            }
-        }
-
+        ctx.fillRect(0, 0, SETTINGS.previewWidth, SETTINGS.previewDadoTopY);
+        ctx.fillStyle = PAL.wallDado;
+        ctx.fillRect(0, SETTINGS.previewDadoTopY, SETTINGS.previewWidth,
+            SETTINGS.previewSkirtingTopY - SETTINGS.previewDadoTopY);
         ctx.fillStyle = PAL.woodwork;
-        ctx.fillRect(SETTINGS.previewDoorwayLeft, SETTINGS.previewLockerTopY,
-            SETTINGS.previewDoorwayRight - SETTINGS.previewDoorwayLeft,
-            SETTINGS.previewLockerBottomY - SETTINGS.previewLockerTopY);
-        ctx.fillStyle = PAL.floorBand;
-        ctx.fillRect(SETTINGS.previewDoorwayLeft + SETTINGS.floorSeamWidth,
-            SETTINGS.previewLockerTopY + SETTINGS.floorSeamWidth,
-            SETTINGS.previewDoorwayRight - SETTINGS.previewDoorwayLeft - SETTINGS.floorSeamWidth * 2,
-            SETTINGS.previewLockerBottomY - SETTINGS.previewLockerTopY - SETTINGS.floorSeamWidth * 2);
-        ctx.fillStyle = PAL.gold;
-        ctx.fillRect(SETTINGS.previewDoorwayRight - SETTINGS.doorKnobInsetX,
-            SETTINGS.previewLockerTopY + SETTINGS.doorKnobInsetY * scale,
-            SETTINGS.floorSeamWidth * scale, SETTINGS.floorSeamWidth * scale);
+        ctx.fillRect(0, SETTINGS.previewRailY, SETTINGS.previewWidth, SETTINGS.previewRailHeight);
+
+        paintPreviewDoor(ctx);
+        paintPreviewBoard(ctx);
+
         ctx.fillStyle = PAL.woodwork;
         ctx.fillRect(0, SETTINGS.previewSkirtingTopY, SETTINGS.previewWidth,
             SETTINGS.previewWallBottomY - SETTINGS.previewSkirtingTopY);
 
-        ctx.fillStyle = PAL.floor;
-        ctx.fillRect(0, SETTINGS.previewWallBottomY, SETTINGS.previewWidth,
-            SETTINGS.previewHeight - SETTINGS.previewWallBottomY);
-        const gaps = SETTINGS.previewFloorBandGaps;
-        let seamY = SETTINGS.previewWallBottomY;
-        let band = 0;
-        while (seamY < SETTINGS.previewHeight) {
-            ctx.fillStyle = PAL.floorDark;
-            ctx.fillRect(0, seamY, SETTINGS.previewWidth, SETTINGS.floorSeamWidth);
-            seamY += gaps[band % gaps.length];
-            band += 1;
-        }
+        paintPreviewCarpet(ctx);
 
         const potLeft = SETTINGS.previewPotX - Math.floor(POT[0].length * scale / 2);
         paintPixels(ctx, POT, POT_COLOURS, potLeft,
@@ -14147,6 +14066,76 @@ syncSoundUI();
         paintPixels(ctx, PLAYER_BACK, PLAYER_COLOURS, playerLeft,
             SETTINGS.previewPlayerFeetY - PLAYER_BACK.length * scale + 1, false, scale);
         paintPixels(ctx, FORK, CUTLERY_COLOURS, SETTINGS.previewForkX, SETTINGS.previewForkY, false, scale);
+    }
+
+    /* Paint the shelf preview's fire door, with the same frosted panel and
+       gold handle as the stage door. */
+    function paintPreviewDoor(ctx) {
+        const left = SETTINGS.previewDoorwayLeft;
+        const width = SETTINGS.previewDoorwayRight - left;
+        const height = SETTINGS.previewDoorwayBottomY - SETTINGS.previewDoorwayTopY;
+        ctx.fillStyle = PAL.doorFrame;
+        ctx.fillRect(left, SETTINGS.previewDoorwayTopY, width, height);
+        ctx.fillStyle = PAL.doorFace;
+        ctx.fillRect(left + SETTINGS.floorSeamWidth,
+            SETTINGS.previewDoorwayTopY + SETTINGS.floorSeamWidth,
+            width - SETTINGS.floorSeamWidth * 2, height - SETTINGS.floorSeamWidth * 2);
+        ctx.fillStyle = PAL.frost;
+        ctx.fillRect(SETTINGS.previewDoorPanelLeft, SETTINGS.previewDoorPanelTop,
+            SETTINGS.previewDoorPanelWidth, SETTINGS.previewDoorPanelHeight);
+        ctx.fillStyle = PAL.gold;
+        ctx.fillRect(SETTINGS.previewDoorHandleX, SETTINGS.previewDoorHandleY,
+            SETTINGS.previewScale, SETTINGS.previewScale);
+    }
+
+    /* Paint the shelf preview's cork board with the same two posters. */
+    function paintPreviewBoard(ctx) {
+        const left = SETTINGS.previewBoardLeft;
+        const top = SETTINGS.previewBoardTop;
+        ctx.fillStyle = PAL.skirtingShadow;
+        ctx.fillRect(left, top, SETTINGS.previewBoardWidth, SETTINGS.previewBoardHeight);
+        ctx.fillStyle = PAL.cork;
+        ctx.fillRect(left + SETTINGS.floorSeamWidth, top + SETTINGS.floorSeamWidth,
+            SETTINGS.previewBoardWidth - SETTINGS.floorSeamWidth * 2,
+            SETTINGS.previewBoardHeight - SETTINGS.floorSeamWidth * 2);
+        paintBoardPoster(ctx, left + SETTINGS.previewBoardPosterFirstLeft,
+            top + SETTINGS.previewBoardPosterTop, true, SETTINGS.previewScale);
+        paintBoardPoster(ctx, left + SETTINGS.previewBoardPosterSecondLeft,
+            top + SETTINGS.previewBoardPosterTop, false, SETTINGS.previewScale);
+    }
+
+    /* Paint the shelf preview's still carpet with the same widening rows and
+       quiet seams as the stage floor. */
+    function paintPreviewCarpet(ctx) {
+        const gaps = SETTINGS.previewCarpetRowGaps;
+        ctx.fillStyle = PAL.carpet;
+        ctx.fillRect(0, SETTINGS.previewWallBottomY, SETTINGS.previewWidth,
+            SETTINGS.previewHeight - SETTINGS.previewWallBottomY);
+
+        let top = SETTINGS.previewWallBottomY;
+        for (let row = 0; row < gaps.length; row++) {
+            const height = Math.min(gaps[row], SETTINGS.previewHeight - top);
+            const tileWidth = Math.round(SETTINGS.previewCarpetTileBase
+                + (top - SETTINGS.previewWallBottomY) * SETTINGS.previewCarpetTileGrowth);
+            for (let column = 0; column < SETTINGS.previewWidth; column += tileWidth) {
+                const alternate = (row + Math.floor(column / tileWidth)) % 2 === 1;
+                ctx.fillStyle = alternate ? PAL.carpetAlt : PAL.carpet;
+                ctx.fillRect(column, top, tileWidth, height);
+            }
+            for (let column = tileWidth; column < SETTINGS.previewWidth; column += tileWidth) {
+                ctx.fillStyle = PAL.carpetSeam;
+                ctx.fillRect(column, top, SETTINGS.floorSeamWidth, height);
+            }
+            if (row > 0) {
+                ctx.fillStyle = PAL.carpetSeam;
+                ctx.fillRect(0, top, SETTINGS.previewWidth, SETTINGS.floorSeamWidth);
+            }
+            top += gaps[row];
+        }
+
+        ctx.fillStyle = PAL.carpetShadow;
+        ctx.fillRect(0, SETTINGS.previewWallBottomY, SETTINGS.previewWidth,
+            SETTINGS.floorSeamWidth);
     }
 
     /* ---------- chrome ---------- */
@@ -14193,7 +14182,6 @@ syncSoundUI();
         dazeTimer = 0;
         throwCooldown = 0;
         throwFlash = 0;
-        scrollDistance = 0;
         cutleryKind = 0;
         projectiles = [];
         hazards = [];
@@ -14289,6 +14277,11 @@ syncSoundUI();
                pickup and the blinking outline show in one photograph. */
             crate: function () {
                 spawnCrate(true);
+            },
+            /* Show the steady gold rim on demand, so the art check can
+               photograph it without waiting for a duck. */
+            rim: function () {
+                enterStumble();
             }
         };
     }
@@ -14299,7 +14292,7 @@ syncSoundUI();
         versionNumber: SETTINGS.versionNumber,
         name: "Chase Kill Kant",
         tagline: "five hits, sixty seconds",
-        concept: "Throw forks, knives and scissors down a warm school hallway and land five hits on Kant in sixty seconds. He ducks, he glances, he runs; plant pots daze you and crates refill your cutlery.",
+        concept: "Throw forks, knives and scissors down a warm office corridor and land five hits on Kant in sixty seconds. He ducks, he glances, he runs; plant pots daze you and crates refill your cutlery.",
         actionLabel: "THROW",
         hint: "left and right strafe · SPACE or tap throws · R restarts · ESC shelf",
         previewPaint: paintShelfPreview,
