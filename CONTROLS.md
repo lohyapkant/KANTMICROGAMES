@@ -1,4 +1,4 @@
-<!-- Applies to: build 040-20261117 · ten games · changes to controls are recorded in CHANGELOG.md -->
+<!-- Applies to: build 041-20261118 · ten games · changes to controls are recorded in CHANGELOG.md -->
 # KANTMICROGAMES — Controls
 
 Which controls exist, how they behave on each kind of device, and why.
@@ -17,7 +17,7 @@ This guide applies to all ten games, on every kind of device.
 | HUGPARADE | step cell to cell along the hedge rails with `W A S D` / arrows / the direction pad | **PEEK** — see the next hedges for 2 s, 6 s cooldown | gather up to three hearts, then hug Bibi: a hug scores 1 plus 1 per heart held; the maze redraws every 10 s |
 | CATNAPCATCH | slide the pillow left and right with `A` / `D`, ← → or the direction pad | **POUF** — widen the paper pillow for 1.4 s, 4.5 s cooldown | catch falling noisemakers for 45 s; three clangs wake Mochi |
 | PENGUINSLIDE | slide on ice with `W A S D` / arrows / the direction pad | **STOP** — halt sliding to think | push ice blocks to build a path to the fish within 60 s; score equals remaining seconds |
-| CHASEKILLKANT | strafe with `A` / `D`, ← → or the direction pad | **THROW** — toss the next piece of cutlery, 0.28 s apart | hit Kant five times in 60 s while dodging falling pots; crates restock one piece |
+| CHASEKILLKANT | strafe with `A` / `D`, ← → or the direction pad | **THROW** — toss the next piece of cutlery, 0.28 s apart | hit Kant five times in 60 s while dodging falling cacti; delivery boxes restock one piece |
 
 The action button carries the game's own label (DASH / POKE / GO / REACH / STOMP / ZOOM / PEEK / POUF / STOP),
 so one button serves every game. SLIMEHOP is the one game where a direction press is a single
