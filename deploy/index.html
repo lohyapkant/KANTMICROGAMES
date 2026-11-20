@@ -6,8 +6,8 @@
   Repository : https://github.com/lohyapkant/KANTMICROGAMES
   Play online: https://kantmicrogames.lohyapkant.workers.dev/
   Hosting    : Cloudflare Workers (https://workers.cloudflare.com/)
-  Current    : build 041-20261118 — CHASEKILLKANT v4, the same chase in a
-               still office corridor with a box, a cactus and a callout
+  Current    : build 042-20261119 — HESHETHEYIT, the eleventh game, where
+               the last petal answers and the shelf keeps that answer
   Names      : project and on-screen brand KANTMICROGAMES ·
                save keys and the console tag use the KANTMICROGAMES prefix
   Build log  : build 028-20261114, DeepSeek V4.1 Flash Free (OpenCode) — a short
@@ -512,6 +512,8 @@
         .card .concept { margin-top: 6px; font-size: 13px; font-weight: 600; line-height: 1.45; color: var(--ink-soft); }
         .card .best { margin-top: auto; padding-top: 11px; font-size: 12px; font-weight: 800; }
         .card .best::before { content: "★ "; color: #E9A93D; }
+        /* Build 042: a "last: ..." answer on the shelf line carries no star. */
+        .card .best.resultLine::before { content: none; }
 
         .card.soon { border: 2px dashed #D9C7B2; background: rgba(255, 253, 248, 0.65); box-shadow: none; cursor: default; }
         .card.soon:hover { transform: none; }
@@ -909,6 +911,10 @@
         }
 
         .topRow .chip { flex: none; }
+
+        /* Build 042: a game without a score hides both in-game chips; its
+           title stays exactly where it was. */
+        .topRow.chipsHidden .chip { display: none; }
 
         /* Build 038: a long game name gets its own line on a narrow phone
            instead of truncating to "CH...". The row wraps, the title takes
@@ -1411,8 +1417,9 @@
 
 /* ==================================================================
    READ ME FIRST — BOUNDARIES BETWEEN THE SHELF, THE RUNTIME AND THE
-   TEN GAME MODULES (PANDASNACK, BOOPEEK, DUCKLINE, SPROUTUP, SLIMEHOP,
-   SNAILRACE, HUGPARADE, CATNAPCATCH, PENGUINSLIDE and CHASEKILLKANT).
+   ELEVEN GAME MODULES (PANDASNACK, BOOPEEK, DUCKLINE, SPROUTUP, SLIMEHOP,
+   SNAILRACE, HUGPARADE, CATNAPCATCH, PENGUINSLIDE, CHASEKILLKANT and
+   HESHETHEYIT).
 
    The shelf and the runtime are SHARED. The games are NOT shared.
    Each game is its own IIFE with its own SETTINGS, palette, sprite
@@ -1431,18 +1438,20 @@
       BOO_ / PIP_*, DUCKLINE -> duck / mama / DUCK_*, SPROUTUP -> sprout /
       SPROUT_*, SLIMEHOP -> slime / SLIME_*, SNAILRACE -> race / RACE_*,
       HUGPARADE -> hug / HUG_*, CATNAPCATCH -> cat / CAT_*,
-      PENGUINSLIDE -> penguin / PENGUIN_*, CHASEKILLKANT -> kant / CHASE_*.
+      PENGUINSLIDE -> penguin / PENGUIN_*, CHASEKILLKANT -> kant / CHASE_*,
+      HESHETHEYIT -> petal / PAL / FLOWER_* / SKY_*.
    4. Paint with the ctx passed into paint(ctx). Do not assume the
       shared stageCtx; that assumption is a PANDASNACK legacy only.
    5. Do not copy one game's character art into another game. Panda,
       mouse, mallard, seedling and slime shapes must stay visually
       distinct.
-   6. All ten games are FROZEN by owner request: PANDASNACK (content
+   6. All eleven games are FROZEN by owner request: PANDASNACK (content
       007-20261101), BOOPEEK (content 006-20261101), DUCKLINE (content
       005-20261101), SPROUTUP (content 007-20261101), SLIMEHOP (content
       010-20261101), SNAILRACE (content 011-20261101), HUGPARADE (content
       015-20261102), CATNAPCATCH (content 016-20261102), PENGUINSLIDE (content
-      037-20261115) and CHASEKILLKANT (content 041-20261118). Do not restyle,
+      037-20261115), CHASEKILLKANT (content 041-20261118) and HESHETHEYIT
+      (content 042-20261119). Do not restyle,
       rebalance or refactor them unless the owner unfreezes one in the prompt. (Build 010 changed only their unused `saveKey` label
       string when the storage prefix was renamed; art, tuning and
       behaviour are untouched. Build 016 left all six earlier games
@@ -1493,7 +1502,7 @@
 
 const APP = {
     name: "KANTMICROGAMES",
-    fileVersion: "041-20261118",       // build number of THIS one-file app
+    fileVersion: "042-20261119",       // build number of THIS one-file app
     savePrefix: "KANTMICROGAMES."      // best scores live at prefix + GAMEID + ".best"
 };
 
@@ -1513,6 +1522,31 @@ function saveBest(gameId, value) {
     } catch (error) {
         /* saving quietly refused; the run itself is unaffected */
     }
+}
+
+/* Build 042: the last answer a game wrote, for a game that has no score.
+   The shelf prints it in place of a best score. Same try/catch pattern. */
+function readLastResult(gameId) {
+    try {
+        const value = window.localStorage.getItem(APP.savePrefix + gameId + ".last");
+        return value === null ? "" : value;
+    } catch (error) {
+        return "";    // private browsing: the shelf falls back to the old line
+    }
+}
+
+function saveLastResult(gameId, text) {
+    try {
+        window.localStorage.setItem(APP.savePrefix + gameId + ".last", String(text));
+    } catch (error) {
+        /* saving quietly refused; the answer still shows this run */
+    }
+}
+
+/* Build 042: the device hour, 0 to 23, for a game whose sky follows the
+   clock. The game calls this, so its module never touches Date itself. */
+function readDeviceHour() {
+    return new Date().getHours();
 }
 
 /* Build 023: how many times a game was opened on this device. One count per
@@ -1540,8 +1574,11 @@ function opensText(count) {
     return count === 1 ? "opened 1 time" : "opened " + count + " times";
 }
 
-/* One line under every card: best score and opens, or "not played yet". */
+/* One line under every card: the last answer, or best score and opens, or
+   "not played yet". */
 function cardBestText(gameId) {
+    const lastResult = readLastResult(gameId);
+    if (lastResult !== "") return "last: " + lastResult;
     const best = readBest(gameId);
     const opens = readOpens(gameId);
     if (best <= 0 && opens === 0) return "not played yet";
@@ -2129,7 +2166,7 @@ function paintPandaSnackPreview(ctx) {
    the module's own versionNumber, the build where its content last changed.
    Keep this table in step with plans/game-versions.txt; the check script,
    tests/check-project.py, compares them. */
-const GAME_REVISIONS = { PANDASNACK: { revision: 1, frozen: true }, BOOPEEK: { revision: 2, frozen: true }, DUCKLINE: { revision: 1, frozen: true }, SPROUTUP: { revision: 1, frozen: true }, SLIMEHOP: { revision: 1, frozen: true }, SNAILRACE: { revision: 1, frozen: true }, HUGPARADE: { revision: 2, frozen: true }, CATNAPCATCH: { revision: 2, frozen: true }, PENGUINSLIDE: { revision: 9, frozen: true }, CHASEKILLKANT: { revision: 4, frozen: true } };
+const GAME_REVISIONS = { PANDASNACK: { revision: 1, frozen: true }, BOOPEEK: { revision: 2, frozen: true }, DUCKLINE: { revision: 1, frozen: true }, SPROUTUP: { revision: 1, frozen: true }, SLIMEHOP: { revision: 1, frozen: true }, SNAILRACE: { revision: 1, frozen: true }, HUGPARADE: { revision: 2, frozen: true }, CATNAPCATCH: { revision: 2, frozen: true }, PENGUINSLIDE: { revision: 9, frozen: true }, CHASEKILLKANT: { revision: 4, frozen: true }, HESHETHEYIT: { revision: 1, frozen: true } };
 
 /* The identity line's sizes, named so the code below has no loose numbers.
    The height is only a fallback: the real height comes from the CSS. */
@@ -2216,7 +2253,11 @@ function buildCard(game) {
 
     const best = document.createElement("div");
     best.className = "best";
-    best.textContent = cardBestText(game.id);
+    const bestText = cardBestText(game.id);
+    best.textContent = bestText;
+    /* Build 042: a "last: ..." line is an answer, not a score, so it keeps
+       the plain card text and drops the gold star. */
+    if (bestText.indexOf("last: ") === 0) best.classList.add("resultLine");
     card.appendChild(best);
 
     return card;
@@ -3328,6 +3369,7 @@ function openGame(gameId) {
         displayName(module2).length >= LONG_GAME_NAME_LETTERS);
     gameTaglineEl.textContent = module2.tagline;
     setActionLabel(module2.actionLabel);
+    setScoreChipsHidden(false);
     scoreEl.textContent = "0";
     bestEl.textContent = String(readBest(gameId));
     setupScoreObservers();
@@ -3359,6 +3401,7 @@ function openShelf() {
     bodyEl.removeAttribute("data-layout");
     gameIdentityEl.hidden = true;
     buildShelf();                     // fresh best-score lines on the cards
+    setScoreChipsHidden(false);
     removeScoreObservers();
     setHash("");
     lastScreenSwap = performance.now();
@@ -3662,6 +3705,12 @@ function setActionLabel(text) {
     actionLabelText = text || "DASH";
     drawPixelLabel(document.getElementById("dashLabel"), actionLabelText, "--action-label");
     dashBtnEl.setAttribute("aria-label", actionLabelText + " (action)");
+}
+
+/* Build 042: a game with no score asks for both in-game chips to step
+   aside. The row is the title's parent, so the name never moves. */
+function setScoreChipsHidden(hidden) {
+    gameTitleEl.parentElement.classList.toggle("chipsHidden", hidden === true);
 }
 
 function refreshPixelLabels() {
@@ -14549,6 +14598,1328 @@ syncSoundUI();
         previewPaint: paintShelfPreview,
         start, stop, restart, update, paint, onDir, onAction, onStageTap, onAnyKey
     });
+})();
+
+
+/* ==================================================================
+   PART 5-K — HESHETHEYIT module (content 042-20261119)
+   PRIVATE to HESHETHEYIT. Shared: the contract, the PART 1 pixel
+   helpers, readBest / saveBest, readLastResult / saveLastResult,
+   readDeviceHour, setActionLabel, setScoreChipsHidden and msgEl.
+   Paint through paint(ctx) only.
+   ================================================================
+   HOW THIS GAME WORKS
+   - A flower grows in a sky that matches the device clock. The player
+     asks it who they are asking about: HE, SHE, THEY or IT.
+   - Each press of the action button pulls one petal. The first pull
+     reads LOVES ME, the next LOVES ME NOT, and so on. The last petal
+     decides the answer, and the answer ends with an exclamation mark.
+   - The shelf has no score for this game. It remembers the last answer
+     and prints it as "last: SHE LOVES ME!" instead.
+   - States: HOW_TO (the in-canvas how-to card), PICK (choose who you
+     ask), PULL (pull one petal per press), RESULT (the answer; AGAIN
+     asks about someone new with a new flower and a new sky).
+   - Controls: left and right choose, the action button or a stage tap
+     picks and pulls, R starts a new reading, ESC returns to the shelf.
+   - SETTINGS tunes the flower size, the petal counts and widths, the
+     sway, the falling-petal motion, the clock borders and the sky
+     animation. FLOWER_PALETTES, PETAL_SHAPES and SKY_LOOKS hold the
+     curated looks; LAYOUT holds every on-stage coordinate.
+   ================================================================== */
+(function () {
+    "use strict";
+
+    /* ---------- HESHETHEYIT settings (private) ---------- */
+    const SETTINGS = {
+        gameName: "HESHETHEYIT",
+        versionNumber: "042-20261119",
+        stageSize: 100,
+        saveKey: "KANTMICROGAMES.HESHETHEYIT.best",   // a label; the shell owns the real key
+
+        /* The flower. Five to eight petals stay countable at 100 x 100. */
+        petalCountMinimum: 5,
+        petalCountMaximum: 8,
+        flowerHeadRadius: 15,          // longer makes a bigger, showier bloom
+        petalWidthRatio: 0.26,         // wider petals read as rounder
+        petalWidthFactorMinimum: 0.9,
+        petalWidthFactorMaximum: 1.15,
+        petalOutlinePixels: 1,
+        petalLightStart: 0.18,         // where the pale streak starts on a petal
+        petalLightEnd: 0.75,           // and where it fades out
+        petalLightInner: 0.24,         // the streak sits this far off the middle
+        petalLightOuter: 0.52,
+        petalNotchStart: 0.72,         // a notched petal loses its tip from here
+        petalNotchWidth: 0.24,
+        loosePetalLength: 5,           // the small petal that falls and rests
+        loosePetalHalfWidth: 1.8,
+        flowerLeanMaximum: 4,          // how far the stem foot may lean sideways
+        leafCountMinimum: 1,
+        leafCountMaximum: 2,
+        thornChance: 0.42,             // the rest get leaves instead of thorns
+        leafLengthPixels: 7,
+        leafWidthPixels: 2.6,
+        leafAnchorOne: 0.32,           // where the first leaf or thorn grows
+        leafAnchorTwo: 0.62,
+        stemDarkening: 1,              // a one-pixel darker side on the stem
+
+        /* The gentle sway, in pixels and radians per second. */
+        swayAmplitudePixels: 1.5,
+        swaySpeed: 0.9,
+
+        /* A pulled petal falls, rests and fades. */
+        fallingSpeedPixels: 60,
+        fallingDriftPixels: 7,
+        fallingSwayPixels: 2.4,
+        fallingSwaySpeed: 3.4,
+        fallingSpinSpeed: 2.6,
+        fallingRestPixels: 84,         // it settles on the grass here
+        fallingRestSeconds: 0.35,
+        fallenPetalLifetimeSeconds: 0.55,
+
+        /* The how-to card's blinking prompt. */
+        blinkSeconds: 0.55,
+
+        /* Device-clock borders: dawn 05-08, day 08-17, dusk 17-20. */
+        dawnStartHour: 5,
+        dayStartHour: 8,
+        duskStartHour: 17,
+        nightStartHour: 20,
+
+        /* Sky life. Times are seconds; speeds are pixels per second. */
+        cloudDriftSpeed: 1.6,
+        cloudSecondDriftSpeed: 1.1,
+        beeOrbitSpeed: 0.9,
+        beeBobSpeed: 1.3,
+        birdSpeed: 6,
+        birdFlapSpeed: 4,
+        fireflyBlinkSpeed: 1.7,
+        fireflyPhaseStep: 1.3,
+        fireflyOrbitSpeed: 0.7,
+        fireflyBobSpeed: 0.9,
+        starTwinkleSpeed: 2,
+        starHeightFraction: 0.55,
+        witchCrossSeconds: 20,
+        witchBobSpeed: 1.4,
+        witchBobPixels: 2,
+        howToSeed: 7,
+        previewSeed: 7,
+        previewPetalCount: 7,
+        groundBladeCount: 6,
+        groundBladeFirst: 0.08,
+        groundBladeStep: 0.17,
+
+        /* A deterministic little generator, so a saved seed makes one flower. */
+        randomIncrement: 0x6D2B79F5,
+        randomShiftA: 15,
+        randomShiftB: 7,
+        randomShiftC: 14,
+        randomMix: 61,
+        randomMask: 1,
+        randomDivisor: 4294967296,
+        seedLimit: 1000000000
+    };
+
+    const STAGE = SETTINGS.stageSize;
+    const PAL = {
+        ink: "#4A3B32",
+        cream: "#FFF6E2",
+        creamDark: "#E8D3AE",
+        rose: "#C4537F",
+        roseLight: "#F27D98",
+        gold: "#F3C969",
+        grassDark: "#4F8A4B",
+        grass: "#6FAE5E",
+        grassLight: "#8CC976",
+        grassShadow: "#3F7440",
+        skyFallback: "#A5D6EF"
+    };
+
+    /* Every on-stage coordinate lives here, named, so the painters read
+       like a description of the picture. */
+    const LAYOUT = {
+        topRibbonLeft: 4,
+        topRibbonTop: 3,
+        topRibbonWidth: 92,
+        topRibbonHeight: 14,
+
+        howToPanelLeft: 4,
+        howToPanelTop: 3,
+        howToPanelWidth: 92,
+        howToPanelHeight: 94,
+        howToNameTop: 8,
+        howToLineTop: 24,
+        howToLineGap: 8,
+        howToIconCentreX: 50,
+        howToIconCentreY: 65,
+        howToIconRadius: 3,            // gap between the icon centre and its petals
+        howToStartLeft: 20,
+        howToStartTop: 84,
+        howToStartWidth: 60,
+        howToStartHeight: 11,
+
+        pickTitleLeft: 4,
+        pickTitleTop: 6,
+        pickTitleWidth: 92,
+        pickTitleHeight: 20,
+        pickTitleLineTop: 9,
+        pickSubtitleLineTop: 18,
+        chipTop: 42,
+        chipHeight: 13,
+        chipGap: 4,
+        chipPad: 8,
+        chipHeartTopOffset: 8,
+        pickHintLeft: 8,
+        pickHintTop: 64,
+        pickHintWidth: 84,
+        pickHintHeight: 11,
+
+        resultRibbonHeight: 18,
+        resultRibbonTop: 4,
+        resultHintLeft: 20,
+        resultHintTop: 86,
+        resultHintWidth: 60,
+        resultHintHeight: 10,
+
+        groundTop: 82,
+        groundDeepRows: 4,
+        groundMidRows: 6,
+        groundLightTop: 92,
+        stemFootY: 89,
+        stemTopOffset: 4,
+        flowerCentreX: 50,
+        flowerCentreY: 39,
+        shadowWidth: 22,
+        shadowHeight: 2,
+
+        previewWidth: 200,
+        previewHeight: 96,
+        previewGroundTop: 76,
+        previewGroundLightTop: 88,
+        previewCentreX: 104,
+        previewCentreY: 38,
+        previewRadius: 18,
+        previewStemFootY: 86,
+        previewFallingX: 142,
+        previewFallingY: 62,
+        previewFallingAngle: 0.8,
+
+        skyFirstSeam: 0.34,
+        skySecondSeam: 0.70,
+        sunRadius: 4.5,
+        sunRayInner: 6,
+        sunRayOuter: 8,
+        sunRayCount: 8,
+        moonRadius: 4.8,
+        moonInnerRadius: 4,
+        starCount: 24,
+        starBigEvery: 6,
+        cloudWidth: 13,
+        cloudHeight: 6,
+        cloudOneFractionX: 0.12,
+        cloudTwoFractionX: 0.62,
+        cloudOneFractionY: 0.13,
+        cloudTwoFractionY: 0.27,
+        cloudWrapPixels: 40,
+        cloudOffPixels: 20,
+        birdCount: 2,
+        birdFirstFractionX: 0.30,
+        birdSpacing: 22,
+        birdWrapPixels: 20,
+        birdOffPixels: 10,
+        birdFractionY: 0.22,
+        birdSpacingY: 7,
+        beeCount: 2,
+        beeFirstFractionX: 0.22,
+        beeSpacing: 0.18,
+        beeFractionY: 0.30,
+        beeSpacingY: 0.06,
+        beeSwayX: 8,
+        beeSwayY: 4,
+        fireflyCount: 4,
+        fireflyFirstFractionX: 0.18,
+        fireflySpacingX: 0.18,
+        fireflyFractionY: 0.56,
+        fireflySecondRow: 0.10,
+        fireflySwayX: 5,
+        fireflySwayY: 3,
+        fireflySecondRowModulo: 2,
+        witchFractionY: 0.12,
+        witchWidth: 9,
+        witchHeight: 7
+    };
+
+    /* Six curated palettes; each reading picks one at random. */
+    const FLOWER_PALETTES = [
+        { name: "blush", petal: "#F27D98", light: "#FFB3C4", dark: "#C4537F", centre: "#F3C969", centreDark: "#C99A3C", outline: "#5A2E3E", stem: "#4F8A4B", stemLight: "#7DB56E", leaf: "#5E9B57", leafLight: "#84BE74" },
+        { name: "lilac", petal: "#B48AD6", light: "#DCC6F2", dark: "#7E5AA8", centre: "#F3C969", centreDark: "#C99A3C", outline: "#4A3564", stem: "#4F8A4B", stemLight: "#7DB56E", leaf: "#5E9B57", leafLight: "#84BE74" },
+        { name: "buttercup", petal: "#F2C14E", light: "#FFE08A", dark: "#C99A3C", centre: "#E07E97", centreDark: "#B05E6E", outline: "#6A4A20", stem: "#4F8A4B", stemLight: "#7DB56E", leaf: "#5E9B57", leafLight: "#84BE74" },
+        { name: "coral", petal: "#F08A6A", light: "#FFC0A8", dark: "#C2543F", centre: "#F3C969", centreDark: "#C99A3C", outline: "#5A2E24", stem: "#4F8A4B", stemLight: "#7DB56E", leaf: "#5E9B57", leafLight: "#84BE74" },
+        { name: "periwinkle", petal: "#8FA8E8", light: "#C3D2F7", dark: "#5E74B8", centre: "#FFF0B8", centreDark: "#C9B46A", outline: "#2E3A5E", stem: "#4F8A4B", stemLight: "#7DB56E", leaf: "#5E9B57", leafLight: "#84BE74" },
+        { name: "berry", petal: "#C45A8E", light: "#E89ABF", dark: "#8E3A66", centre: "#F3C969", centreDark: "#C99A3C", outline: "#4A2340", stem: "#4F8A4B", stemLight: "#7DB56E", leaf: "#5E9B57", leafLight: "#84BE74" }
+    ];
+
+    /* The taper power shapes the petal: a low power is round, a high one
+       is pointed. A notched petal loses a little wedge at its tip. */
+    const PETAL_SHAPES = [
+        { name: "round", taperPower: 0.72, notched: false },
+        { name: "pointed", taperPower: 1.35, notched: false },
+        { name: "notched", taperPower: 0.72, notched: true },
+        { name: "wide", taperPower: 0.55, notched: false }
+    ];
+
+    /* Four centre patterns, drawn as pixels over the centre disc. */
+    const CENTRE_DOTS = [
+        { x: -1, y: -1 }, { x: 1, y: 0 }, { x: 0, y: 1 }
+    ];
+    const CENTRE_RING = [
+        { x: -2, y: 0 }, { x: 0, y: -2 }, { x: 1, y: 1 }, { x: 2, y: 0 }
+    ];
+    const CENTRE_STAR = [
+        { x: 0, y: -2 }, { x: -1, y: 0 }, { x: 1, y: 0 }, { x: 0, y: 2 }
+    ];
+
+    const HEART_MAP = [
+        "01010",
+        "11111",
+        "11111",
+        "01110",
+        "00100"
+    ];
+    const HEART_COLOURS = { "1": PAL.roseLight };
+
+    const CLOUD_MAP = [
+        "..CC....CC..",
+        ".CCCC..CCCC.",
+        "CCCCCCCCCCCC",
+        "CCCCCCCCCCCC",
+        ".SSSSSSSSSS.",
+        "..SSSSSSSS.."
+    ];
+    const CLOUD_COLOURS = { C: "#FFFFFF", S: "#D9ECF5" };
+
+    const BEE_MAP = [
+        "W...W",
+        ".OOO.",
+        "OYOYO"
+    ];
+    const BEE_COLOURS = { W: "#FFF9E8", O: "#3B2B2A", Y: "#F3C969" };
+
+    const BIRD_UP_MAP = [
+        ".C.C.",
+        "C.C.C"
+    ];
+    const BIRD_DOWN_MAP = [
+        "C...C",
+        ".CCC."
+    ];
+    const BIRD_COLOURS = { C: "#6E5A55" };
+
+    const FIREFLY_MAP = [
+        ".G.",
+        "GYG",
+        ".G."
+    ];
+    const FIREFLY_COLOURS = { G: "#8A7440", Y: "#F3C969" };
+
+    const WITCH_MAP = [
+        "...O...",
+        "..OOO..",
+        ".OOOOO.",
+        "...O...",
+        "..OOO..",
+        ".O.O.O.",
+        "OOOOOOO"
+    ];
+    const WITCH_COLOURS = { O: "#4C5E8C" };
+    const WITCH_RIM = [
+        { x: 3, y: 0, colour: "#8FA8E8" },
+        { x: 2, y: 2, colour: "#8FA8E8" },
+        { x: 4, y: 2, colour: "#8FA8E8" },
+        { x: 3, y: 3, colour: "#F3C969" },
+        { x: 7, y: 6, colour: "#C9A86A" },
+        { x: 8, y: 6, colour: "#C9A86A" }
+    ];
+
+    const PRONOUNS = [
+        { label: "HE", subject: "HE", verb: "LOVES" },
+        { label: "SHE", subject: "SHE", verb: "LOVES" },
+        { label: "THEY", subject: "THEY", verb: "LOVE" },
+        { label: "IT", subject: "IT", verb: "LOVES" }
+    ];
+
+    /* Four skies, each with three bands, a light and a life. */
+    const SKY_LOOKS = {
+        dawn: {
+            bands: ["#F5B98F", "#F7D0AE", "#FBE7CF"],
+            seamOne: "#F7D0AE", seamTwo: "#FBE7CF",
+            ink: "#6E5A55", sun: "#F6B45E", sunLight: "#FFD79A",
+            cloud: "#FFF3E2", cloudShade: "#F2D8BE",
+            sunX: 0.20, sunY: 0.38
+        },
+        day: {
+            bands: ["#79BDE5", "#A5D6EF", "#D6EEF8"],
+            seamOne: "#A5D6EF", seamTwo: "#D6EEF8",
+            ink: "#3B2B2A", sun: "#F6C445", sunLight: "#FFE08A",
+            cloud: "#FFFFFF", cloudShade: "#D9ECF5",
+            sunX: 0.85, sunY: 0.26
+        },
+        dusk: {
+            bands: ["#6E5A8E", "#C97A8E", "#F2A46E"],
+            seamOne: "#C97A8E", seamTwo: "#F2A46E",
+            ink: "#4A2E3E", sun: "#F08A5A", sunLight: "#FFC08A",
+            cloud: "#E8B7B0", cloudShade: "#C98F8A",
+            sunX: 0.82, sunY: 0.38
+        },
+        night: {
+            bands: ["#1E2A4A", "#2B3A5E", "#3C4E72"],
+            seamOne: "#2B3A5E", seamTwo: "#3C4E72",
+            ink: "#DDE6F5", sun: "#FFF3D0", sunLight: "#FFF9E8",
+            cloud: "#2A3654", cloudShade: "#222C46",
+            sunX: 0.74, sunY: 0.17
+        }
+    };
+
+    /* ---------- HESHETHEYIT private state ---------- */
+    const STATE = {
+        HOW_TO: "how_to",
+        PICK: "pick",
+        PULL: "pull",
+        RESULT: "result"
+    };
+    const LAST_PETAL_PULL = 1;
+
+    let state = STATE.HOW_TO;
+    let worldClock = 0;
+    let selectedIndex = 1;               // SHE is the first suggestion
+    let flower = null;
+    let petalsLeft = 0;
+    let phrase = "";
+    let answer = "";
+    let falling = { active: false };
+    let fallenPetals = [];
+    let resultPending = false;
+    let best = 0;
+    let shownMessage = "";
+    let currentActionLabel = "START";
+    let forcedSkyPhase = "";
+
+    /* ---------- HESHETHEYIT small pixel helpers (private) ---------- */
+
+    /* Paint one art pixel at a whole-number position. */
+    function paintPixel(ctx, x, y, colour) {
+        ctx.fillStyle = colour;
+        ctx.fillRect(Math.round(x), Math.round(y), 1, 1);
+    }
+
+    /* Paint a solid rectangle of art pixels, rounded to the grid. */
+    function paintBox(ctx, left, top, width, height, colour) {
+        ctx.fillStyle = colour;
+        ctx.fillRect(Math.round(left), Math.round(top), Math.round(width), Math.round(height));
+    }
+
+    /* Paint a filled pixel circle, used for the sun, the moon and centres. */
+    function paintDisc(ctx, centreX, centreY, radius, colour) {
+        ctx.fillStyle = colour;
+        for (let y = -radius; y <= radius; y++) {
+            for (let x = -radius; x <= radius; x++) {
+                if ((x * x) + (y * y) > (radius * radius)) continue;
+                ctx.fillRect(Math.round(centreX + x), Math.round(centreY + y), 1, 1);
+            }
+        }
+    }
+
+    /* Paint a one-pixel line between two points with a whole-number step. */
+    function paintLine(ctx, fromX, fromY, toX, toY, colour) {
+        const steps = Math.max(Math.abs(toX - fromX), Math.abs(toY - fromY));
+        ctx.fillStyle = colour;
+        for (let step = 0; step <= steps; step++) {
+            const fraction = steps === 0 ? 0 : step / steps;
+            ctx.fillRect(Math.round(fromX + (toX - fromX) * fraction), Math.round(fromY + (toY - fromY) * fraction), 1, 1);
+        }
+    }
+
+    /* A 3 x 5 pixel word is this wide at the requested scale. */
+    function measureText(text, scale) {
+        return (text.length * 4 * scale) - scale;
+    }
+
+    /* Draw a word centred on the stage with the shared pixel font. */
+    function paintCentredText(ctx, text, centreX, topY, colour, scale) {
+        paintPixelText(ctx, text, centreX, topY, colour, null, scale);
+    }
+
+    /* A cute 5 x 5 heart, used on the pick card and the bare flower. */
+    function paintHeart(ctx, left, top, colour) {
+        paintPixels(ctx, HEART_MAP, { "1": colour }, left, top, false, 1);
+    }
+
+    /* ---------- HESHETHEYIT random and clock helpers ---------- */
+
+    /* A small seeded generator so one seed always grows the same flower. */
+    function makeRandom(seed) {
+        let generatorState = seed >>> 0;
+        return function () {
+            generatorState += SETTINGS.randomIncrement;
+            let value = generatorState;
+            value = Math.imul(value ^ (value >>> SETTINGS.randomShiftA), value | SETTINGS.randomMask);
+            value ^= value + Math.imul(value ^ (value >>> SETTINGS.randomShiftB), SETTINGS.randomMix);
+            return ((value ^ (value >>> SETTINGS.randomShiftC)) >>> 0) / SETTINGS.randomDivisor;
+        };
+    }
+
+    /* Turn the device hour into one of the four sky names. */
+    function skyPhaseForHour(hour) {
+        if (hour >= SETTINGS.dawnStartHour && hour < SETTINGS.dayStartHour) return "dawn";
+        if (hour >= SETTINGS.dayStartHour && hour < SETTINGS.duskStartHour) return "day";
+        if (hour >= SETTINGS.duskStartHour && hour < SETTINGS.nightStartHour) return "dusk";
+        return "night";
+    }
+
+    /* Pick a seed for the next flower, or reuse the test hook's seed. */
+    function nextSeed() {
+        return Math.floor(Math.random() * SETTINGS.seedLimit);
+    }
+
+    /* Build the still pieces of a sky: the stars a night needs, and nothing
+       random on the other skies, so the life can move without flickering. */
+    function makeSky(phase, seed) {
+        const random = makeRandom(seed);
+        const stars = [];
+        for (let index = 0; index < LAYOUT.starCount; index++) {
+            stars.push({
+                fractionX: random(),
+                fractionY: random() * SETTINGS.starHeightFraction,
+                phase: random() * Math.PI * 2,
+                big: index % LAYOUT.starBigEvery === 0
+            });
+        }
+        return { phase: phase, look: SKY_LOOKS[phase] || SKY_LOOKS.day, stars: stars };
+    }
+
+    /* ---------- HESHETHEYIT flower generation (private) ---------- */
+
+    /* How wide a petal is at this distance from the centre; zero at both ends. */
+    function petalHalfWidth(fraction, halfWidth, taperPower) {
+        return halfWidth * Math.sin(Math.PI * Math.pow(fraction, taperPower));
+    }
+
+    /* Add one petal's pixels to a list; the pale streak and the dark outline
+       are chosen per pixel so a petal is painted in one pass. */
+    function collectPetalPixels(target, palette, centreX, centreY, angle, length, halfWidth, taperPower, notched) {
+        const directionX = Math.cos(angle);
+        const directionY = Math.sin(angle);
+        const sideX = -directionY;
+        const sideY = directionX;
+        const outlineLength = length + SETTINGS.petalOutlinePixels;
+        for (let along = 0; along <= outlineLength; along++) {
+            const fraction = Math.min(1, along / length);
+            const innerLimit = petalHalfWidth(fraction, halfWidth, taperPower);
+            const outerLimit = innerLimit + SETTINGS.petalOutlinePixels;
+            const acrossLimit = Math.ceil(outerLimit);
+            for (let across = -acrossLimit; across <= acrossLimit; across++) {
+                const distance = Math.abs(across);
+                if (distance > outerLimit) continue;
+                const insidePetal = along <= length;
+                if (insidePetal && distance <= innerLimit) {
+                    const lightInner = halfWidth * SETTINGS.petalLightInner;
+                    const lightOuter = halfWidth * SETTINGS.petalLightOuter;
+                    const inStreak = across > lightInner && across < lightOuter &&
+                        fraction > SETTINGS.petalLightStart && fraction < SETTINGS.petalLightEnd;
+                    const cutNotch = notched && fraction > SETTINGS.petalNotchStart &&
+                        distance < halfWidth * SETTINGS.petalNotchWidth;
+                    if (cutNotch) continue;
+                    target.push({
+                        x: Math.round(centreX + directionX * along + sideX * across),
+                        y: Math.round(centreY + directionY * along + sideY * across),
+                        colour: inStreak ? palette.light : palette.petal
+                    });
+                } else {
+                    target.push({
+                        x: Math.round(centreX + directionX * along + sideX * across),
+                        y: Math.round(centreY + directionY * along + sideY * across),
+                        colour: palette.outline
+                    });
+                }
+            }
+        }
+    }
+
+    /* Add the centre disc and its little pattern to a list of pixels. */
+    function collectCentrePixels(target, flower) {
+        const palette = flower.palette;
+        const outlineRadius = 4;
+        const innerRadius = 3;
+        for (let y = -outlineRadius; y <= outlineRadius; y++) {
+            for (let x = -outlineRadius; x <= outlineRadius; x++) {
+                if ((x * x) + (y * y) > (outlineRadius * outlineRadius)) continue;
+                target.push({ x: x, y: y, colour: palette.outline });
+            }
+        }
+        for (let y = -innerRadius; y <= innerRadius; y++) {
+            for (let x = -innerRadius; x <= innerRadius; x++) {
+                if ((x * x) + (y * y) > (innerRadius * innerRadius)) continue;
+                target.push({ x: x, y: y, colour: palette.centre });
+            }
+        }
+        const pattern = flower.centreIndex === 0 ? CENTRE_DOTS
+            : flower.centreIndex === 1 ? CENTRE_RING
+            : flower.centreIndex === 2 ? CENTRE_STAR : [];
+        for (let index = 0; index < pattern.length; index++) {
+            target.push({ x: pattern[index].x, y: pattern[index].y, colour: palette.centreDark });
+        }
+    }
+
+    /* Build every petal and the centre once; a frame only copies the pixels
+       that are still on the flower, so the sway stays cheap. */
+    function buildFlowerHead(flowerToBuild) {
+        flowerToBuild.petalPixels = [];
+        flowerToBuild.removed = [];
+        const palette = flowerToBuild.palette;
+        const shape = flowerToBuild.shape;
+        const halfWidth = flowerToBuild.headRadius * SETTINGS.petalWidthRatio * flowerToBuild.widthFactor;
+        for (let index = 0; index < flowerToBuild.petalCount; index++) {
+            const pixels = [];
+            const angle = -Math.PI / 2 + index * (Math.PI * 2 / flowerToBuild.petalCount);
+            collectPetalPixels(pixels, palette, 0, 0, angle,
+                flowerToBuild.headRadius, halfWidth, shape.taperPower, shape.notched);
+            flowerToBuild.petalPixels.push(pixels);
+            flowerToBuild.removed.push(false);
+        }
+        flowerToBuild.centrePixels = [];
+        collectCentrePixels(flowerToBuild.centrePixels, flowerToBuild);
+    }
+
+    /* Grow one new flower: a curated palette, shape, centre, leaf-or-thorn
+       choice, lean and a sky fixed to the device clock when it was grown. */
+    function makeFlower(seed, options) {
+        const choices = options || {};
+        const random = makeRandom(seed);
+        const paletteIndex = choices.paletteIndex !== undefined
+            ? choices.paletteIndex : Math.floor(random() * FLOWER_PALETTES.length);
+        const shapeIndex = choices.shapeIndex !== undefined
+            ? choices.shapeIndex : Math.floor(random() * PETAL_SHAPES.length);
+        const centreIndex = choices.centreIndex !== undefined
+            ? choices.centreIndex : Math.floor(random() * 3);
+        const petalCount = choices.petalCount !== undefined
+            ? choices.petalCount
+            : SETTINGS.petalCountMinimum + Math.floor(random() * (SETTINGS.petalCountMaximum - SETTINGS.petalCountMinimum + 1));
+        const leafCount = SETTINGS.leafCountMinimum +
+            Math.floor(random() * (SETTINGS.leafCountMaximum - SETTINGS.leafCountMinimum + 1));
+        const phase = choices.phase || forcedSkyPhase || skyPhaseForHour(readDeviceHour());
+        const result = {
+            seed: seed,
+            palette: FLOWER_PALETTES[paletteIndex],
+            paletteIndex: paletteIndex,
+            shape: PETAL_SHAPES[shapeIndex],
+            shapeIndex: shapeIndex,
+            centreIndex: centreIndex,
+            petalCount: petalCount,
+            headRadius: choices.headRadius || SETTINGS.flowerHeadRadius,
+            widthFactor: SETTINGS.petalWidthFactorMinimum +
+                random() * (SETTINGS.petalWidthFactorMaximum - SETTINGS.petalWidthFactorMinimum),
+            lean: Math.round((random() * 2 - 1) * SETTINGS.flowerLeanMaximum),
+            leafCount: leafCount,
+            thorns: choices.thorns !== undefined ? choices.thorns : random() < SETTINGS.thornChance,
+            sky: makeSky(phase, seed)
+        };
+        buildFlowerHead(result);
+        return result;
+    }
+
+    /* ---------- HESHETHEYIT painting: sky (private) ---------- */
+
+    /* Three pixel bands with a dotted seam, so the sky is not flat stripes. */
+    function paintSkyBands(ctx, sky, width, height) {
+        const firstSeam = Math.round(height * LAYOUT.skyFirstSeam);
+        const secondSeam = Math.round(height * LAYOUT.skySecondSeam);
+        paintBox(ctx, 0, 0, width, firstSeam, sky.look.bands[0]);
+        paintBox(ctx, 0, firstSeam, width, secondSeam - firstSeam, sky.look.bands[1]);
+        paintBox(ctx, 0, secondSeam, width, height - secondSeam, sky.look.bands[2]);
+        for (let x = 0; x < width; x += 2) {
+            paintPixel(ctx, x, firstSeam, sky.look.seamOne);
+            paintPixel(ctx, x, secondSeam, sky.look.seamTwo);
+        }
+    }
+
+    /* A small pixel cloud with a soft underside. */
+    function paintCloud(ctx, x, y, look, scale) {
+        paintPixels(ctx, CLOUD_MAP, { "C": look.cloud, "S": look.cloudShade },
+            Math.round(x), Math.round(y), false, scale);
+    }
+
+    /* The sun: a pale halo, a warm disc and eight short rays. */
+    function paintSun(ctx, x, y, look, scale) {
+        paintDisc(ctx, x, y, LAYOUT.sunRadius * scale, look.sunLight);
+        paintDisc(ctx, x, y, (LAYOUT.sunRadius - 1) * scale, look.sun);
+        for (let ray = 0; ray < LAYOUT.sunRayCount; ray++) {
+            const angle = ray * (Math.PI * 2 / LAYOUT.sunRayCount);
+            paintLine(ctx,
+                x + Math.cos(angle) * LAYOUT.sunRayInner * scale,
+                y + Math.sin(angle) * LAYOUT.sunRayInner * scale,
+                x + Math.cos(angle) * LAYOUT.sunRayOuter * scale,
+                y + Math.sin(angle) * LAYOUT.sunRayOuter * scale,
+                look.sunLight);
+        }
+    }
+
+    /* The moon: a cream disc with four quiet craters. */
+    function paintMoon(ctx, x, y, look, scale) {
+        paintDisc(ctx, x, y, LAYOUT.moonRadius * scale, look.sunLight);
+        paintDisc(ctx, x, y, LAYOUT.moonInnerRadius * scale, look.sun);
+        paintPixel(ctx, x - 1, y - 1, "#D9CBA8");
+        paintPixel(ctx, x + 1, y - 2, "#D9CBA8");
+        paintPixel(ctx, x + 2, y + 1, "#D9CBA8");
+        paintPixel(ctx, x - 2, y + 2, "#D9CBA8");
+    }
+
+    /* One star, twinkling between a single pixel and a small cross. */
+    function paintStar(ctx, star, width, height, clock) {
+        const x = Math.round(star.fractionX * width);
+        const y = Math.round(star.fractionY * height);
+        const bright = Math.sin(clock * SETTINGS.starTwinkleSpeed + star.phase) > 0;
+        const colour = bright ? "#FFF9E8" : "#B8C6E8";
+        paintPixel(ctx, x, y, colour);
+        if (star.big && bright) {
+            paintPixel(ctx, x - 1, y, "#8FA8E8");
+            paintPixel(ctx, x + 1, y, "#8FA8E8");
+            paintPixel(ctx, x, y - 1, "#8FA8E8");
+        }
+    }
+
+    /* The witch on a broom: a distant silhouette with a moonlit rim. */
+    function paintWitch(ctx, x, y, scale) {
+        paintPixels(ctx, WITCH_MAP, WITCH_COLOURS, Math.round(x), Math.round(y), false, scale);
+        for (let index = 0; index < WITCH_RIM.length; index++) {
+            const rim = WITCH_RIM[index];
+            paintPixel(ctx, x + rim.x * scale, y + rim.y * scale, rim.colour);
+        }
+    }
+
+    /* A bee: two wings, a dark body and a gold stripe. */
+    function paintBee(ctx, x, y, scale) {
+        paintPixels(ctx, BEE_MAP, BEE_COLOURS, Math.round(x), Math.round(y), false, scale);
+    }
+
+    /* A bird: two small wings, flapping between an up and a down shape. */
+    function paintBird(ctx, x, y, look, clock, phase, scale) {
+        const map = Math.sin(clock * SETTINGS.birdFlapSpeed + phase) > 0 ? BIRD_UP_MAP : BIRD_DOWN_MAP;
+        paintPixels(ctx, map, { "C": look.ink }, Math.round(x), Math.round(y), false, scale);
+    }
+
+    /* A firefly: a gold body with a faint warm halo, blinking gently. */
+    function paintFirefly(ctx, x, y, clock, phase, scale) {
+        const glow = Math.sin(clock * SETTINGS.fireflyBlinkSpeed + phase) > 0;
+        paintPixels(ctx, FIREFLY_MAP, FIREFLY_COLOURS, Math.round(x), Math.round(y), false, scale);
+        if (glow) paintPixel(ctx, x, y + scale, "#FFF0B8");
+    }
+
+    /* The moving life of the sky: birds, bees, fireflies, stars and the
+       witch. The clock makes it drift without any stored animation state. */
+    function paintSkyLife(ctx, sky, width, height, clock) {
+        const look = sky.look;
+        const scale = Math.max(1, Math.round(width / STAGE));
+        if (sky.phase === "night") {
+            for (let index = 0; index < sky.stars.length; index++) {
+                paintStar(ctx, sky.stars[index], width, height, clock);
+            }
+            paintMoon(ctx, width * look.sunX, height * look.sunY, look, scale);
+            const witchPeriod = clock % SETTINGS.witchCrossSeconds;
+            const witchX = -LAYOUT.witchWidth +
+                (witchPeriod / SETTINGS.witchCrossSeconds) * (width + LAYOUT.witchWidth * 2);
+            const witchY = height * LAYOUT.witchFractionY +
+                Math.sin(clock * SETTINGS.witchBobSpeed) * SETTINGS.witchBobPixels;
+            paintWitch(ctx, witchX, witchY, scale);
+            return;
+        }
+        paintSun(ctx, width * look.sunX, height * look.sunY, look, scale);
+        const cloudOneX = ((width * LAYOUT.cloudOneFractionX) + clock * SETTINGS.cloudDriftSpeed) %
+            (width + LAYOUT.cloudWrapPixels) - LAYOUT.cloudOffPixels;
+        const cloudTwoX = ((width * LAYOUT.cloudTwoFractionX) + clock * SETTINGS.cloudSecondDriftSpeed) %
+            (width + LAYOUT.cloudWrapPixels) - LAYOUT.cloudOffPixels;
+        paintCloud(ctx, cloudOneX, height * LAYOUT.cloudOneFractionY, look, scale);
+        paintCloud(ctx, cloudTwoX, height * LAYOUT.cloudTwoFractionY, look, scale);
+        if (sky.phase === "dawn") {
+            for (let index = 0; index < LAYOUT.birdCount; index++) {
+                const birdX = ((width * LAYOUT.birdFirstFractionX) + (index * LAYOUT.birdSpacing) +
+                    clock * SETTINGS.birdSpeed) % (width + LAYOUT.birdWrapPixels) - LAYOUT.birdOffPixels;
+                paintBird(ctx, birdX, height * LAYOUT.birdFractionY + index * LAYOUT.birdSpacingY,
+                    look, clock, index * 2, scale);
+            }
+            return;
+        }
+        if (sky.phase === "dusk") {
+            for (let index = 0; index < LAYOUT.fireflyCount; index++) {
+                const fireflyX = width * (LAYOUT.fireflyFirstFractionX + index * LAYOUT.fireflySpacingX) +
+                    Math.sin(clock * SETTINGS.fireflyOrbitSpeed + index) * LAYOUT.fireflySwayX;
+                const fireflyY = height * (LAYOUT.fireflyFractionY +
+                    (index % LAYOUT.fireflySecondRowModulo) * LAYOUT.fireflySecondRow) +
+                    Math.cos(clock * SETTINGS.fireflyBobSpeed + index) * LAYOUT.fireflySwayY;
+                paintFirefly(ctx, fireflyX, fireflyY, clock,
+                    index * SETTINGS.fireflyPhaseStep, scale);
+            }
+            return;
+        }
+        for (let index = 0; index < LAYOUT.beeCount; index++) {
+            const beeX = width * (LAYOUT.beeFirstFractionX + index * LAYOUT.beeSpacing) +
+                Math.sin(clock * SETTINGS.beeOrbitSpeed + index) * LAYOUT.beeSwayX;
+            const beeY = height * (LAYOUT.beeFractionY + index * LAYOUT.beeSpacingY) +
+                Math.cos(clock * SETTINGS.beeBobSpeed + index) * LAYOUT.beeSwayY;
+            paintBee(ctx, beeX, beeY, scale);
+        }
+    }
+
+    /* ---------- HESHETHEYIT painting: ground and flower (private) ---------- */
+
+    /* Three grass bands with a dotted seam and a handful of blades. */
+    function paintGround(ctx, width, height) {
+        paintBox(ctx, 0, LAYOUT.groundTop, width, LAYOUT.groundDeepRows, PAL.grassDark);
+        paintBox(ctx, 0, LAYOUT.groundTop + LAYOUT.groundDeepRows, width,
+            LAYOUT.groundLightTop - (LAYOUT.groundTop + LAYOUT.groundDeepRows), PAL.grass);
+        paintBox(ctx, 0, LAYOUT.groundLightTop, width, height - LAYOUT.groundLightTop, PAL.grassLight);
+        for (let x = 0; x < width; x += 2) {
+            paintPixel(ctx, x, LAYOUT.groundTop, PAL.grass);
+            paintPixel(ctx, x, LAYOUT.groundLightTop, PAL.grassLight);
+        }
+        for (let blade = 0; blade < SETTINGS.groundBladeCount; blade++) {
+            const bladeX = Math.round(width * (SETTINGS.groundBladeFirst + blade * SETTINGS.groundBladeStep));
+            const bladeY = LAYOUT.groundLightTop + 2;
+            paintPixel(ctx, bladeX, bladeY, PAL.grassDark);
+            paintPixel(ctx, bladeX, bladeY - 1, PAL.grassDark);
+            paintPixel(ctx, bladeX + 1, bladeY, PAL.grassDark);
+            paintPixel(ctx, bladeX + 1, bladeY - 2, PAL.grassLight);
+        }
+    }
+
+    /* The dark contact patch under the stem, so the flower sits on the grass. */
+    function paintGroundShadow(ctx, centreX, footY) {
+        paintBox(ctx, centreX - LAYOUT.shadowWidth / 2, footY - LAYOUT.shadowHeight,
+            LAYOUT.shadowWidth, LAYOUT.shadowHeight, PAL.grassShadow);
+    }
+
+    /* A small leaf growing off the stem at an angle. */
+    function paintLeaf(ctx, x, y, direction, palette) {
+        for (let along = 0; along <= SETTINGS.leafLengthPixels; along++) {
+            const fraction = along / SETTINGS.leafLengthPixels;
+            const limit = SETTINGS.leafWidthPixels * Math.sin(Math.PI * fraction);
+            for (let across = -Math.ceil(limit); across <= Math.ceil(limit); across++) {
+                if (Math.abs(across) > limit) continue;
+                paintPixel(ctx, x + direction * along, y + across - Math.round(fraction * 2), palette.leaf);
+            }
+        }
+        paintPixel(ctx, x, y, palette.leafLight);
+    }
+
+    /* A two-pixel thorn, leaning away from the stem. */
+    function paintThorn(ctx, x, y, direction, palette) {
+        paintPixel(ctx, x, y, palette.outline);
+        paintPixel(ctx, x + direction * 2, y - 1, palette.outline);
+        paintPixel(ctx, x + direction, y, palette.leaf);
+    }
+
+    /* The stem curves gently from the head down to the grass and carries
+       either leaves or thorns, never both. */
+    function paintStem(ctx, flower, headX, headY, baseY, thickness) {
+        const baseX = flower.stemFootX;
+        const topY = headY + LAYOUT.stemTopOffset;
+        for (let y = topY; y <= baseY; y++) {
+            const fraction = (y - topY) / (baseY - topY);
+            const x = headX + (baseX - headX) * fraction;
+            paintBox(ctx, x, y, thickness, 1, flower.palette.stem);
+            paintBox(ctx, x + thickness, y, SETTINGS.stemDarkening, 1, flower.palette.stemLight);
+        }
+        const anchors = [SETTINGS.leafAnchorOne, SETTINGS.leafAnchorTwo];
+        for (let index = 0; index < flower.leafCount && index < anchors.length; index++) {
+            const anchorY = topY + (baseY - topY) * anchors[index];
+            const anchorX = headX + (baseX - headX) * anchors[index];
+            const side = index === 0 ? -1 : 1;
+            if (flower.thorns) paintThorn(ctx, Math.round(anchorX + thickness), Math.round(anchorY), side, flower.palette);
+            else paintLeaf(ctx, Math.round(anchorX + thickness), Math.round(anchorY), side, flower.palette);
+        }
+        paintGroundShadow(ctx, flower.stemFootX, baseY + 1);
+    }
+
+    /* Paint the remaining petals and the centre at the swaying head position. */
+    function paintFlowerHead(ctx, flower, headX, headY, bare) {
+        for (let index = 0; index < flower.petalPixels.length; index++) {
+            if (flower.removed[index]) continue;
+            const pixels = flower.petalPixels[index];
+            for (let pixel = 0; pixel < pixels.length; pixel++) {
+                paintPixel(ctx, headX + pixels[pixel].x, headY + pixels[pixel].y, pixels[pixel].colour);
+            }
+        }
+        for (let pixel = 0; pixel < flower.centrePixels.length; pixel++) {
+            paintPixel(ctx, headX + flower.centrePixels[pixel].x,
+                headY + flower.centrePixels[pixel].y, flower.centrePixels[pixel].colour);
+        }
+        if (bare) paintHeart(ctx, Math.round(headX) - 2, Math.round(headY) - 2, PAL.rose);
+    }
+
+    /* One small petal painted in place, used by the falling and resting petals. */
+    function paintLoosePetal(ctx, palette, x, y, angle, taperPower, notched) {
+        const pixels = [];
+        collectPetalPixels(pixels, palette, Math.round(x), Math.round(y), angle,
+            SETTINGS.loosePetalLength, SETTINGS.loosePetalHalfWidth, taperPower, notched);
+        for (let index = 0; index < pixels.length; index++) {
+            paintPixel(ctx, pixels[index].x, pixels[index].y, pixels[index].colour);
+        }
+    }
+
+    /* The little flower on the how-to card: five short petals around a centre.
+       It is built from the same loose petal as the falling ones, so it stays
+       small enough to sit between the last line and the prompt. */
+    function paintFlowerIcon(ctx, centreX, centreY, palette) {
+        const petals = 5;
+        for (let petal = 0; petal < petals; petal++) {
+            const angle = petal * (Math.PI * 2 / petals) - Math.PI / 2;
+            paintLoosePetal(ctx, palette,
+                centreX + Math.cos(angle) * LAYOUT.howToIconRadius,
+                centreY + Math.sin(angle) * LAYOUT.howToIconRadius,
+                angle, 1, false);
+        }
+        paintDisc(ctx, centreX, centreY, 2, palette.centre);
+        paintPixel(ctx, Math.round(centreX), Math.round(centreY) + 1, palette.centreDark);
+    }
+
+    /* ---------- HESHETHEYIT painting: cards and ribbons (private) ---------- */
+
+    /* A cream plaque with a dark one-pixel frame, for text over any sky. */
+    function paintPlaque(ctx, left, top, width, height) {
+        paintBox(ctx, left, top, width, height, PAL.ink);
+        paintBox(ctx, left + 1, top + 1, width - 2, height - 2, PAL.cream);
+        paintBox(ctx, left + 1, top + height - 2, width - 2, 1, PAL.creamDark);
+    }
+
+    /* The top ribbon that shows the current pull's phrase or the answer. */
+    function paintTopRibbon(ctx, text, top, height) {
+        paintPlaque(ctx, LAYOUT.topRibbonLeft, top, LAYOUT.topRibbonWidth, height);
+        paintCentredText(ctx, text, STAGE / 2, top + 4, PAL.ink, 1);
+    }
+
+    /* The in-canvas how-to card: the name, four short lines, a flower icon
+       and a blinking prompt. It waits for the action button, a tap or a key. */
+    function paintHowTo(ctx) {
+        const sky = makeSky("day", SETTINGS.howToSeed);
+        paintSkyBands(ctx, sky, STAGE, STAGE);
+        paintSkyLife(ctx, sky, STAGE, STAGE, worldClock);
+        paintPlaque(ctx, LAYOUT.howToPanelLeft, LAYOUT.howToPanelTop,
+            LAYOUT.howToPanelWidth, LAYOUT.howToPanelHeight);
+        paintCentredText(ctx, "HESHETHEYIT", STAGE / 2, LAYOUT.howToNameTop, PAL.ink, 2);
+        paintCentredText(ctx, "FIND OUT WHO LOVES YOU", STAGE / 2, LAYOUT.howToLineTop, PAL.ink, 1);
+        paintCentredText(ctx, "PICK HE SHE THEY IT", STAGE / 2, LAYOUT.howToLineTop + LAYOUT.howToLineGap, PAL.ink, 1);
+        paintCentredText(ctx, "PULL ONE PETAL PER TAP", STAGE / 2, LAYOUT.howToLineTop + LAYOUT.howToLineGap * 2, PAL.ink, 1);
+        paintCentredText(ctx, "THE LAST PETAL ANSWERS", STAGE / 2, LAYOUT.howToLineTop + LAYOUT.howToLineGap * 3, PAL.ink, 1);
+        const icon = FLOWER_PALETTES[0];
+        paintFlowerIcon(ctx, LAYOUT.howToIconCentreX, LAYOUT.howToIconCentreY, icon);
+        if (Math.floor(worldClock / SETTINGS.blinkSeconds) % 2 === 0) {
+            paintPlaque(ctx, LAYOUT.howToStartLeft, LAYOUT.howToStartTop,
+                LAYOUT.howToStartWidth, LAYOUT.howToStartHeight);
+            paintCentredText(ctx, "TAP TO START", STAGE / 2, LAYOUT.howToStartTop + 3, PAL.ink, 1);
+        }
+    }
+
+    /* The pick card: who do you ask? Four chips, a heart over the chosen one. */
+    function paintPickCard(ctx) {
+        paintPlaque(ctx, LAYOUT.pickTitleLeft, LAYOUT.pickTitleTop,
+            LAYOUT.pickTitleWidth, LAYOUT.pickTitleHeight);
+        paintCentredText(ctx, "ASK THE FLOWER", STAGE / 2, LAYOUT.pickTitleLineTop, PAL.ink, 1);
+        paintCentredText(ctx, "WHO DO YOU ASK", STAGE / 2, LAYOUT.pickSubtitleLineTop, PAL.rose, 1);
+        const widths = [];
+        let total = LAYOUT.chipGap * (PRONOUNS.length - 1);
+        for (let index = 0; index < PRONOUNS.length; index++) {
+            widths.push(measureText(PRONOUNS[index].label, 1) + LAYOUT.chipPad);
+            total += widths[index];
+        }
+        let left = Math.round((STAGE - total) / 2);
+        for (let index = 0; index < PRONOUNS.length; index++) {
+            const chosen = index === selectedIndex;
+            paintPlaque(ctx, left, LAYOUT.chipTop, widths[index], LAYOUT.chipHeight);
+            if (chosen) paintBox(ctx, left + 1, LAYOUT.chipTop + 1, widths[index] - 2, LAYOUT.chipHeight - 2, PAL.ink);
+            paintCentredText(ctx, PRONOUNS[index].label, left + widths[index] / 2,
+                LAYOUT.chipTop + 4, chosen ? PAL.cream : PAL.ink, 1);
+            if (chosen) paintHeart(ctx, left + Math.round(widths[index] / 2) - 2,
+                LAYOUT.chipTop - LAYOUT.chipHeartTopOffset, PAL.roseLight);
+            left += widths[index] + LAYOUT.chipGap;
+        }
+        paintPlaque(ctx, LAYOUT.pickHintLeft, LAYOUT.pickHintTop,
+            LAYOUT.pickHintWidth, LAYOUT.pickHintHeight);
+        paintCentredText(ctx, "LEFT RIGHT THEN PICK", STAGE / 2, LAYOUT.pickHintTop + 3, PAL.ink, 1);
+    }
+
+    /* The result card: the answer in the top ribbon and a prompt at the foot. */
+    function paintResultCard(ctx) {
+        paintTopRibbon(ctx, answer, LAYOUT.resultRibbonTop, LAYOUT.resultRibbonHeight);
+        paintPlaque(ctx, LAYOUT.resultHintLeft, LAYOUT.resultHintTop,
+            LAYOUT.resultHintWidth, LAYOUT.resultHintHeight);
+        paintCentredText(ctx, "TAP AGAIN", STAGE / 2, LAYOUT.resultHintTop + 3, PAL.ink, 1);
+    }
+
+    /* ---------- HESHETHEYIT painting: the stage (private) ---------- */
+
+    /* Draw the sky, the ground, the flower, its fallen petals and the one
+       petal in the air. The head sways by a pixel or two around the stem. */
+    function paintGrowingFlower(ctx, flowerToPaint) {
+        paintSkyBands(ctx, flowerToPaint.sky, STAGE, STAGE);
+        paintSkyLife(ctx, flowerToPaint.sky, STAGE, STAGE, worldClock);
+        paintGround(ctx, STAGE, STAGE);
+        const headX = LAYOUT.flowerCentreX +
+            Math.round(Math.sin(worldClock * SETTINGS.swaySpeed) * SETTINGS.swayAmplitudePixels);
+        const headY = LAYOUT.flowerCentreY;
+        flowerToPaint.stemFootX = LAYOUT.flowerCentreX + flowerToPaint.lean;
+        paintStem(ctx, flowerToPaint, headX, headY, LAYOUT.stemFootY, 1);
+        const bare = petalsLeft === 0;
+        paintFlowerHead(ctx, flowerToPaint, headX, headY, bare);
+        for (let index = 0; index < fallenPetals.length; index++) {
+            const petal = fallenPetals[index];
+            paintLoosePetal(ctx, flowerToPaint.palette, petal.x, petal.y, petal.angle,
+                flowerToPaint.shape.taperPower, flowerToPaint.shape.notched);
+        }
+        if (falling.active) {
+            const fade = falling.landed && falling.rest > SETTINGS.fallenPetalLifetimeSeconds;
+            if (!fade) {
+                paintLoosePetal(ctx, flowerToPaint.palette, falling.x, falling.y, falling.spin,
+                    flowerToPaint.shape.taperPower, flowerToPaint.shape.notched);
+            }
+        }
+    }
+
+    /* One frame of the game; the state chooses which card or scene is drawn. */
+    function paint(ctx) {
+        if (state === STATE.HOW_TO) {
+            paintHowTo(ctx);
+            return;
+        }
+        if (flower === null) {
+            paintBox(ctx, 0, 0, STAGE, STAGE, PAL.skyFallback);
+            return;
+        }
+        paintGrowingFlower(ctx, flower);
+        if (state === STATE.PICK) {
+            paintPickCard(ctx);
+        } else if (state === STATE.PULL) {
+            if (phrase !== "") paintTopRibbon(ctx, phrase, LAYOUT.topRibbonTop, LAYOUT.topRibbonHeight);
+        } else if (state === STATE.RESULT) {
+            paintResultCard(ctx);
+        }
+    }
+
+    /* ---------- HESHETHEYIT shelf card preview (private) ---------- */
+
+    /* A still 200 x 96 slice of the game for the shelf: a day sky, a bee,
+       a bloom in the grass and one petal on its way down. */
+    function paintShelfPreview(ctx) {
+        const sky = makeSky("day", SETTINGS.previewSeed);
+        paintSkyBands(ctx, sky, LAYOUT.previewWidth, LAYOUT.previewHeight);
+        paintSkyLife(ctx, sky, LAYOUT.previewWidth, LAYOUT.previewHeight, 0);
+        paintBox(ctx, 0, LAYOUT.previewGroundTop, LAYOUT.previewWidth,
+            LAYOUT.previewHeight - LAYOUT.previewGroundTop, PAL.grass);
+        paintBox(ctx, 0, LAYOUT.previewGroundLightTop, LAYOUT.previewWidth,
+            LAYOUT.previewHeight - LAYOUT.previewGroundLightTop, PAL.grassLight);
+        const previewFlower = makeFlower(SETTINGS.previewSeed, {
+            petalCount: SETTINGS.previewPetalCount, paletteIndex: 0, shapeIndex: 0, centreIndex: 0,
+            phase: "day", headRadius: LAYOUT.previewRadius
+        });
+        previewFlower.stemFootX = LAYOUT.previewCentreX + previewFlower.lean;
+        paintStem(ctx, previewFlower, LAYOUT.previewCentreX, LAYOUT.previewCentreY,
+            LAYOUT.previewStemFootY, 2);
+        paintFlowerHead(ctx, previewFlower, LAYOUT.previewCentreX, LAYOUT.previewCentreY, false);
+        paintLoosePetal(ctx, previewFlower.palette, LAYOUT.previewFallingX, LAYOUT.previewFallingY,
+            LAYOUT.previewFallingAngle, previewFlower.shape.taperPower, previewFlower.shape.notched);
+    }
+
+    /* ---------- HESHETHEYIT messages and action label (private) ---------- */
+
+    /* Write the one-line message under the stage, only when it changes. */
+    function writeMessage(text) {
+        if (text === shownMessage) return;
+        shownMessage = text;
+        msgEl.textContent = text;
+    }
+
+    /* Change the action pad's word, and remember it for the test snapshot. */
+    function setAction(text) {
+        currentActionLabel = text;
+        setActionLabel(text);
+    }
+
+    /* ---------- HESHETHEYIT run flow (private) ---------- */
+
+    /* Make the phrase this pull would say, with the right verb for THEY. */
+    function makePhrase(lovesMe) {
+        const pronoun = PRONOUNS[selectedIndex];
+        return pronoun.subject + " " + pronoun.verb + " ME" + (lovesMe ? "" : " NOT");
+    }
+
+    /* Remember a landed petal on the grass, so the pulls leave a little trail. */
+    function keepFallenPetal() {
+        if (!falling.active || !falling.landed) return;
+        fallenPetals.push({ x: falling.x, y: falling.y, angle: falling.spin });
+        if (fallenPetals.length > PRONOUNS.length * 2) fallenPetals.shift();
+    }
+
+    /* Start the one petal that falls from the flower after a pull. */
+    function startFallingPetal(flowerToPull, petalIndex) {
+        const angle = -Math.PI / 2 + petalIndex * (Math.PI * 2 / flowerToPull.petalCount);
+        const headX = LAYOUT.flowerCentreX +
+            Math.round(Math.sin(worldClock * SETTINGS.swaySpeed) * SETTINGS.swayAmplitudePixels);
+        const startX = headX + Math.cos(angle) * (flowerToPull.headRadius - 2);
+        const startY = LAYOUT.flowerCentreY + Math.sin(angle) * (flowerToPull.headRadius - 2);
+        falling = {
+            active: true,
+            landed: false,
+            x: startX,
+            y: startY,
+            startX: startX,
+            angle: angle,
+            spin: angle,
+            age: 0,
+            rest: 0
+        };
+    }
+
+    /* Move the falling petal; once it rests, the next pull is allowed. */
+    function updateFallingPetal(dt) {
+        if (!falling.active) return;
+        falling.age += dt;
+        if (!falling.landed) {
+            falling.y += SETTINGS.fallingSpeedPixels * dt;
+            falling.x = falling.startX + Math.sin(falling.age * SETTINGS.fallingSwaySpeed) * SETTINGS.fallingSwayPixels +
+                SETTINGS.fallingDriftPixels * falling.age;
+            falling.spin = falling.angle + falling.age * SETTINGS.fallingSpinSpeed;
+            if (falling.y >= SETTINGS.fallingRestPixels) {
+                falling.y = SETTINGS.fallingRestPixels;
+                falling.landed = true;
+                falling.rest = 0;
+            }
+            return;
+        }
+        falling.rest += dt;
+        if (falling.rest > SETTINGS.fallingRestSeconds) {
+            falling.active = false;
+            if (resultPending) finishReading();
+        }
+    }
+
+    /* Pull one petal. A second tap waits until the previous petal has landed,
+       and the last petal is always the one that answers. */
+    function pullNextPetal() {
+        if (state !== STATE.PULL || petalsLeft <= 0 || resultPending) return;
+        if (falling.active && !falling.landed) return;
+        keepFallenPetal();
+        falling = { active: false };
+        const petalIndex = flower.petalCount - petalsLeft;
+        flower.removed[petalIndex] = true;
+        petalsLeft -= 1;
+        const pullsSoFar = flower.petalCount - petalsLeft;
+        const lovesMe = pullsSoFar % 2 === LAST_PETAL_PULL;
+        phrase = makePhrase(lovesMe);
+        startFallingPetal(flower, petalIndex);
+        if (petalsLeft === 0) {
+            answer = phrase + "!";
+            resultPending = true;
+            writeMessage("the last petal is falling...");
+        } else {
+            writeMessage("pull one petal per tap");
+        }
+    }
+
+    /* Show the answer, save it for the shelf, and offer AGAIN. */
+    function finishReading() {
+        if (answer === "") return;
+        state = STATE.RESULT;
+        resultPending = false;
+        writeMessage("the last petal answered - AGAIN to ask another");
+        setAction("AGAIN");
+        saveLastResult(SETTINGS.gameName, answer);
+        if (best < 1) {
+            best = 1;
+            saveBest(SETTINGS.gameName, best);
+        }
+    }
+
+    /* Ask about someone: a fresh flower and a fresh sky, then the pick card. */
+    function beginPick() {
+        flower = makeFlower(nextSeed(), {});
+        petalsLeft = flower.petalCount;
+        phrase = "";
+        answer = "";
+        falling = { active: false };
+        fallenPetals = [];
+        resultPending = false;
+        state = STATE.PICK;
+        setScoreChipsHidden(true);
+        setAction("PICK");
+        writeMessage("left and right choose - PICK to ask");
+    }
+
+    /* Leave the pick card and show the flower, ready for the first pull. */
+    function beginPull() {
+        if (flower === null) beginPick();
+        petalsLeft = flower.petalCount;
+        for (let index = 0; index < flower.removed.length; index++) flower.removed[index] = false;
+        phrase = "";
+        answer = "";
+        falling = { active: false };
+        fallenPetals = [];
+        resultPending = false;
+        state = STATE.PULL;
+        setScoreChipsHidden(true);
+        setAction("PULL");
+        writeMessage("pull one petal per tap");
+    }
+
+    /* ---------- HESHETHEYIT module contract ---------- */
+
+    /* Open on the how-to card with a fresh clock and SHE suggested. */
+    function start() {
+        best = readBest(SETTINGS.gameName);
+        worldClock = 0;
+        selectedIndex = 1;
+        flower = makeFlower(SETTINGS.howToSeed, {
+            petalCount: 5, paletteIndex: 0, shapeIndex: 0, centreIndex: 0, phase: "day"
+        });
+        petalsLeft = flower.petalCount;
+        phrase = "";
+        answer = "";
+        falling = { active: false };
+        fallenPetals = [];
+        resultPending = false;
+        state = STATE.HOW_TO;
+        setScoreChipsHidden(true);
+        setAction("START");
+        writeMessage("pick who you ask - tap to start");
+    }
+
+    /* There is nothing held down, so stopping has no cleanup to do. */
+    function stop() {
+        /* the shell owns the loop and the directions; nothing is held here */
+    }
+
+    /* R skips the how-to card and starts a new reading with a new flower. */
+    function restart() {
+        beginPick();
+    }
+
+    /* Left and right choose a pronoun; any direction starts the how-to card. */
+    function onDir(dir, pressed) {
+        if (!pressed) return;
+        if (state === STATE.HOW_TO) {
+            beginPick();
+            return;
+        }
+        if (state !== STATE.PICK) return;
+        if (dir === "left") selectedIndex = (selectedIndex + PRONOUNS.length - 1) % PRONOUNS.length;
+        if (dir === "right") selectedIndex = (selectedIndex + 1) % PRONOUNS.length;
+    }
+
+    /* The action button walks the game forward: START, PICK, PULL, AGAIN. */
+    function onAction() {
+        if (state === STATE.HOW_TO) beginPick();
+        else if (state === STATE.PICK) beginPull();
+        else if (state === STATE.PULL) pullNextPetal();
+        else if (state === STATE.RESULT) beginPick();
+    }
+
+    /* A tap on the stage is the same as the action button. */
+    function onStageTap() {
+        onAction();
+    }
+
+    /* Any other key starts the how-to card or asks again; it never pulls. */
+    function onAnyKey() {
+        if (state === STATE.HOW_TO || state === STATE.RESULT) onAction();
+    }
+
+    /* Advance the clock and the one falling petal; nothing else moves. */
+    function update(rawDt) {
+        const dt = rawDt > 0.25 ? 0.25 : rawDt;
+        worldClock += dt;
+        updateFallingPetal(dt);
+        if (resultPending && !falling.active) finishReading();
+    }
+
+    /* Register the game with the shared shelf and runtime. */
+    GAMES.push({
+        id: SETTINGS.gameName,
+        versionNumber: SETTINGS.versionNumber,
+        name: "Heshetheyit",
+        tagline: "one petal at a time",
+        concept: "The last petal answers. (Inspired by Yuan Ning)",
+        actionLabel: "START",
+        hint: "left and right pick HE SHE THEY IT · SPACE or tap pulls a petal · R restarts · ESC shelf",
+        previewPaint: paintShelfPreview,
+        start, stop, restart, update, paint, onDir, onAction, onStageTap, onAnyKey
+    });
+
+    /* ---------- HESHETHEYIT test hook (private, only with ?test=1) ---------- */
+
+    /* A small test window: the browser and logic checks use it to set up a
+       flower or an answer without waiting through a whole reading. It is
+       never installed in a normal visit. */
+    if (window.location && window.location.search.indexOf("test=1") >= 0) {
+        window.__HESHETHEYIT_TEST__ = {
+            /* Read the current state without touching it. */
+            snapshot: function () {
+                return {
+                    state: state,
+                    actionLabel: currentActionLabel,
+                    selectedIndex: selectedIndex,
+                    selectedLabel: PRONOUNS[selectedIndex].label,
+                    petalCount: flower ? flower.petalCount : 0,
+                    petalsLeft: petalsLeft,
+                    phrase: phrase,
+                    answer: answer,
+                    skyPhase: flower ? flower.sky.phase : "",
+                    paletteName: flower ? flower.palette.name : "",
+                    shapeName: flower ? flower.shape.name : "",
+                    centreIndex: flower ? flower.centreIndex : 0,
+                    thorns: flower ? flower.thorns : false,
+                    fallingActive: falling.active,
+                    fallingX: falling.active ? Math.round(falling.x) : 0,
+                    fallingY: falling.active ? Math.round(falling.y) : 0,
+                    fallenCount: fallenPetals.length
+                };
+            },
+            /* Put a chosen flower on stage, ready for the first pull. */
+            forceFlower: function (options) {
+                const choices = options || {};
+                flower = makeFlower(choices.seed !== undefined ? choices.seed : nextSeed(), choices);
+                beginPull();
+            },
+            /* Choose a pronoun and show the pick card with that choice. */
+            showPick: function (index) {
+                beginPick();
+                selectedIndex = index;
+            },
+            /* Start one petal falling without landing it, for the art check. */
+            pullStart: function () {
+                pullNextPetal();
+            },
+            /* Pull one petal and let it land immediately for a harness. */
+            pullInstant: function () {
+                pullNextPetal();
+                if (falling.active) {
+                    falling.y = SETTINGS.fallingRestPixels;
+                    falling.landed = true;
+                    falling.rest = SETTINGS.fallingRestSeconds;
+                }
+                updateFallingPetal(0);
+            },
+            /* Ask and answer in one call, for a result card photograph. */
+            showResult: function (index, options) {
+                const choices = options || {};
+                selectedIndex = index;
+                const count = choices.petalCount !== undefined ? choices.petalCount : 5;
+                flower = makeFlower(choices.seed !== undefined ? choices.seed : nextSeed(),
+                    Object.assign({}, choices, { petalCount: count }));
+                beginPull();
+                for (let pull = 0; pull < count; pull++) {
+                    pullNextPetal();
+                    falling = { active: false, landed: true };
+                }
+                finishReading();
+            }
+        };
+    }
 })();
 
 

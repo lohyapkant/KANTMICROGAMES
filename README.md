@@ -1,10 +1,10 @@
 # KANTMICROGAMES
 
-Ten tiny pixel-art games in one HTML file. Open it, pick a game, play a minute.
+Eleven tiny pixel-art games in one HTML file. Open it, pick a game, play a minute.
 
 Play online: <https://kantmicrogames.lohyapkant.workers.dev/>
 
-**Current build:** `041-20261118` — ten games, one file.
+**Current build:** `042-20261119` — eleven games, one file.
 
 ## About this project
 
@@ -28,6 +28,7 @@ A short record of every build is in CHANGELOG.md; the long-form build records ar
 | CATNAPCATCH | Slide a paper pillow under a sleeping kitten and catch the falling noisemakers; three clangs wake the nap. |
 | PENGUINSLIDE | Waddle Pip across the ice, belly-slide with SPACE, and eat six golden fish while dodging two grumpy seals. |
 | CHASEKILLKANT | Chase Kant down a warm office corridor and hit him five times with thrown cutlery in sixty seconds, while dodging falling cacti and grabbing delivery boxes. |
+| HESHETHEYIT | Pick HE, SHE, THEY or IT, then pull a petal per tap; the last petal answers. |
 
 ## How to play
 
@@ -37,7 +38,7 @@ A short record of every build is in CHANGELOG.md; the long-form build records ar
 - The on-screen pads are always shown: directions on the left, the action on the right.
 - Sound effects are on by default; switch them off under SETTINGS on the shelf.
 - The shelf offers a pick of the day and can sort the games by name, best score, unplayed or most opened.
-- Badges reward what you try, from your first game to scoring in all ten; see them under BADGES on the shelf.
+- Badges reward what you try, from your first game to scoring in all eleven; see them under BADGES on the shelf.
 - The background colour changes each visit; pick your own under SETTINGS on the shelf.
 - SETTINGS can erase your scores, counts and badges on this device.
 - Switching tabs or apps pauses the run. Page zoom is allowed.
@@ -61,7 +62,7 @@ Keyboard, touch and device details are in CONTROLS.md.
 <!-- BEGIN:models-table  (add or edit rows only) -->
 | Model | Developer | Used via | Builds | How it went (owner notes, 2026-11-01) |
 |---|---|---|---|---|
-| DeepSeek V4.1 Flash Free | [DeepSeek](https://www.deepseek.com/) | OpenCode | 000, 001, 005, 006, 017, 018, 019, 020, 021, 022, 023, 024, 025, 026, 027, 028, 036, 037, 038, 039, 040, 041 | Clear pixel art and clean code (owner: "amazing"). |
+| DeepSeek V4.1 Flash Free | [DeepSeek](https://www.deepseek.com/) | OpenCode | 000, 001, 005, 006, 017, 018, 019, 020, 021, 022, 023, 024, 025, 026, 027, 028, 036, 037, 038, 039, 040, 041, 042 | Clear pixel art and clean code (owner: "amazing"). |
 | Mistral Medium 3.5 High | [Mistral AI](https://mistral.ai/) | Vibe CLI | 029 | Initial PENGUINSLIDE version; rebuilt in build 031 after the owner found the character art and puzzle were not usable. |
 | GPT-6-Luna | [OpenAI](https://openai.com/) | OpenAI Codex CLI | 030, 031 | Owner feedback led to a complete PENGUINSLIDE rebuild in build 031. |
 | GLM-5.3 Flash Free | [Z.ai (Zhipu AI)](https://z.ai/) | OpenCode | 002, 003 | Worked mechanically; one game needed a full rework. |
