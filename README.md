@@ -1,10 +1,10 @@
 # KANTMICROGAMES
 
-Eleven tiny pixel-art games in one HTML file. Open it, pick a game, play a minute.
+Twelve tiny pixel-art games in one HTML file. Open it, pick a game, play a minute.
 
 Play online: <https://kantmicrogames.lohyapkant.workers.dev/>
 
-**Current build:** `045-20261121` — eleven games, one file.
+**Current build:** `046-20261121` — twelve games, one file.
 
 ## About this project
 
@@ -29,6 +29,7 @@ A short record of every build is in CHANGELOG.md; the long-form build records ar
 | PENGUINSLIDE | Waddle Pip across the ice, belly-slide with SPACE, and eat six golden fish while dodging two grumpy seals. |
 | CHASEKILLKANT | Chase Kant down a warm office corridor and hit him five times with thrown cutlery in sixty seconds, while dodging falling cacti and grabbing delivery boxes. |
 | HESHETHEYIT | Pick HE, SHE, THEY or IT, choose a sky with up/down, then pull a petal per tap; the last petal answers. |
+| SIMONENUTS | Sweep a mallet across an oak table and smash incoming acorns, cracking walnuts and grabbing Simone's secret love nuts while avoiding poison ones. |
 
 ## How to play
 
@@ -38,7 +39,7 @@ A short record of every build is in CHANGELOG.md; the long-form build records ar
 - The on-screen pads are always shown: directions on the left, the action on the right.
 - Sound effects are on by default; switch them off under SETTINGS on the shelf.
 - The shelf offers a pick of the day and can sort the games by name, best score, unplayed or most opened.
-- Badges reward what you try, from your first game to scoring in all eleven; see them under BADGES on the shelf.
+- Badges reward what you try, from your first game to scoring in all twelve; see them under BADGES on the shelf.
 - The background colour changes each visit; pick your own under SETTINGS on the shelf.
 - SETTINGS can erase your scores, counts and badges on this device.
 - Switching tabs or apps pauses the run. Page zoom is allowed.
@@ -67,7 +68,7 @@ Keyboard, touch and device details are in CONTROLS.md.
 | GPT-6-Luna | [OpenAI](https://openai.com/) | OpenAI Codex CLI | 030, 031, 043, 045 | Owner feedback led to a complete PENGUINSLIDE rebuild in build 031; completed HESHETHEYIT v2 and polished the About page. |
 | GLM-5.3 Flash Free | [Z.ai (Zhipu AI)](https://z.ai/) | OpenCode | 002, 003 | Worked mechanically; one game needed a full rework. |
 | Flint 40B Free | [Recursive](https://recursive.com/) | OpenCode | 004 | A working module, but its art had to be rebuilt. |
-| Gemini 3.8 Flash | [Google](https://gemini.google.com/) | Antigravity | 006, 007, 022 (started, halted), 032, 033, 034, 035, 044 | Delivered SPROUTUP; overhauled PENGUINSLIDE to pseudo-isometric view with Tuna. Owner's Build 045 note: strong HTML5 coding, less detailed pixel art than OpenCode DeepSeek V4.1. |
+| Gemini 3.8 Flash | [Google](https://gemini.google.com/) | Antigravity | 006, 007, 022 (started, halted), 032, 033, 034, 035, 044, 046 | Delivered SPROUTUP; overhauled PENGUINSLIDE to pseudo-isometric view with Tuna. Owner's Build 045 note: strong HTML5 coding, less detailed pixel art than OpenCode DeepSeek V4.1; added SIMONENUTS in build 046. |
 | GPT-OSS 120B Medium | [OpenAI](https://openai.com/index/introducing-gpt-oss/) | Antigravity | 008 (attempt) | Abandoned: it deleted sections of the docs instead of editing them. |
 | Claude Opus 4.6 Thinking | [Anthropic](https://www.anthropic.com/) | Antigravity | 008, 044 (prompt) | Did most of the docs work, then halted mid-round. |
 | Qwen3.8-Flash | [Alibaba Qwen](https://qwen.ai/) | Qoder CLI | 008 (finish), 009, 010, 011, 012, 013, 014, 015, 016, 017 | Delivered the responsive shell and four new games, corrected HUGPARADE's movement and scoring in 015, then delivered CATNAPCATCH in 016; older games stayed unchanged. |

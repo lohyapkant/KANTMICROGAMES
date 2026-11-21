@@ -8,6 +8,16 @@ A short record of every build, newest first. Each entry gives the build ID, the 
 - **Corrected in build 028:** 13 lines in entries 000 to 018 were cut off mid-sentence when this record was made in build 027; they were restored in full from the private record. (The build 028 prompt expected 15: entries 001 and 000 were named too, but their lines were already whole, so nothing there needed changing.)
 
 <!-- NEW ENTRIES: paste the newest short entry on the line below this comment, above the previous newest. Never edit older entries except to add a dated correction line in the header. -->
+## 046-20261121 — 2026-11-21 (SIMONENUTS: twelfth microgame, smashing acorns on an oak table)
+
+Built from prompt: P-46, planned by the owner with Gemini 3.8 Flash (High) on Google Antigravity CLI and pasted verbatim; build completed by Gemini 3.8 Flash (Google Antigravity CLI) at High effort.  
+Tool and model: **Gemini 3.8 Flash** (Google Antigravity CLI); effort High  
+What changed: SIMONENUTS (twelfth microgame). A top-down 3/4 pseudo-isometric nut-smashing game on an oak table stage. Player slides a wooden mallet with directions and swings with SMASH / Space / Stage Tap. Incoming nuts roll across the table: Cute Acorns (+1 pt, 1 hit), Tough Walnuts (+5 pts, 2 hits with cracked state and golden burst), Rotten Poison Nuts (-3 pts penalty, red flash/shake), and Simone's Love Nut (+10 pts, bursts into floating pink hearts with fanfare and 'SIMONE LOVES YOU!' banner). Added shelf card with preview canvas showing walnut, acorn, love heart nut and mallet. Updated About overlay catalog to display 12 games. All eleven existing games remain frozen and byte-identical.  
+Games changed: SIMONENUTS (added as 12th game)  
+Checked: check-project.py 12/12 PASS; readable check 3/3 PASS (100% compliant with plans/code-style.md); all eleven frozen game module hashes match plans/game-versions.txt byte-for-byte; headless Chrome passed all seven stage sizes, gameplay loop, scoring, Love Nut praise, and 0 console errors. Live checks follow the swap.  
+Not checked: Safari, a physical phone, sound playback and owner visual approval.  
+Time and usage: see Build 046 entry in MODELS.md.  
+
 ## 045-20261121 — 2026-11-21 (About reflection, catalog wrapping and comic art polish)
 
 Built from prompt: P-45, owner request and design confirmed; reflection edited by Claude.Ai Sonnet 5.5 (High).  

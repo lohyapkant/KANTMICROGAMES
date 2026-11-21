@@ -1,10 +1,10 @@
-<!-- Applies to: build 043-20261121 · eleven games · changes to controls are recorded in CHANGELOG.md -->
+<!-- Applies to: build 046-20261121 · twelve games · changes to controls are recorded in CHANGELOG.md -->
 # KANTMICROGAMES — Controls
 
 Which controls exist, how they behave on each kind of device, and why.
-This guide applies to all eleven games, on every kind of device.
+This guide applies to all twelve games, on every kind of device.
 
-## One table for all eleven games
+## One table for all twelve games
 
 | Game | Move | Action (`SPACE`, action button, stage tap) | Goal |
 |---|---|---|---|
@@ -19,8 +19,9 @@ This guide applies to all eleven games, on every kind of device.
 | PENGUINSLIDE | slide on ice with `W A S D` / arrows / the direction pad | **STOP** — halt sliding to think | push ice blocks to build a path to the fish within 60 s; score equals remaining seconds |
 | CHASEKILLKANT | strafe with `A` / `D`, ← → or the direction pad | **THROW** — toss the next piece of cutlery, 0.28 s apart | hit Kant five times in 60 s while dodging falling cacti; delivery boxes restock one piece |
 | HESHETHEYIT | choose HE/SHE/THEY/IT with `A` / `D`, ← → or the direction pad; choose the sky with `W` / `S`, ↑ ↓ or the direction pad on PICK | **START / PICK / PULL / AGAIN** — one petal per press | pull every petal; the last one answers who loves you |
+| SIMONENUTS | glide the mallet with `W A S D` / arrows / the direction pad | **SMASH** — swing the wooden mallet | smash acorns and crack walnuts on the oak table in 45 s; avoid poison nuts |
 
-The action button carries the game's own label (DASH / POKE / GO / REACH / STOMP / ZOOM / PEEK / POUF / STOP / THROW / START / PICK / PULL / AGAIN),
+The action button carries the game's own label (DASH / POKE / GO / REACH / STOMP / ZOOM / PEEK / POUF / STOP / THROW / START / PICK / PULL / AGAIN / SMASH),
 so one button serves every game. SLIMEHOP is the one game where a direction press is a single
 **discrete hop** rather than a continuous walk: holding a direction does not repeat, and
 each new press hops one pad (or bonks harmlessly at the pond edge). SNAILRACE steers
@@ -37,6 +38,8 @@ up and down cycle dawn, day, dusk and night; the device clock marks its suggeste
 The choice stays through the reading and AGAIN, and resets to the device sky when the
 game is reopened. The action button picks and pulls one petal per press. It has no
 score; the shelf line shows the last answer.
+
+SIMONENUTS glides the wooden mallet smoothly on both axes across the table, clamped within table margins; pressing the action button or tapping swings the mallet to smash incoming rolling nuts.
 
 ## Settings
 

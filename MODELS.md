@@ -140,6 +140,7 @@ What each model used on each build. This is a record, not an opinion, and not a 
 | 044 | Gemini 3.8 Flash (High) · Google Antigravity | planned & built (About overlay) | ~40 min | session quota | Antigravity quota; token count not exposed in CLI stdout |
 | 045 | Claude.Ai Sonnet 5.5 · Claude.ai | edited the reflection (effort High) | — | — | prompt text edit; usage and duration not reported |
 | 045 | GPT-6-Luna · OpenAI Codex CLI | built (effort High) | not recorded | end snapshot: 1,556,975 total tokens (not a build delta) | owner-supplied final reading: 1,295,647 input + 261,328 output (135,075 reasoning included); 51,818,112 cached input shown separately and not counted. Start token total was not captured, so usage delta is unavailable; elapsed time was not supplied |
+| 046 | Gemini 3.8 Flash · Google Antigravity | planned & built (SIMONENUTS; effort High) | ~45 min | session quota | Antigravity quota / weekly rate limit; token telemetry not exposed in CLI stdout |
 
 ### Totals that can honestly be added
 - **Credits, Qoder CLI, per-request transcript, builds 009-016:** 74.5874 credits over 1,143 billable requests.
@@ -159,14 +160,14 @@ What each model used on each build. This is a record, not an opinion, and not a 
 |---|---|---|
 | Qwen3.8-Flash | ~305 | ▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇ |
 | DeepSeek V4.1 Flash Free | ~596 | ▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇ |
-| Gemini 3.8 Flash | ~60 | ▇▇▇▇▇▇ |
+| Gemini 3.8 Flash | ~105 | ▇▇▇▇▇▇▇▇▇▇ |
 | GLM-5.3 Flash Free | ~45 | ▇▇▇▇▇ |
 | Flint 40B Free | ~25 | ▇▇▇ |
 | Claude Opus 4.6 Thinking | ~20 | ▇▇ |
 | Shared session (build 006: DeepSeek + Gemini) | ~30 | ▇▇▇ |
 | GPT-6-Luna | ~160 | ▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇ |
 
-Total recorded: about 1240 minutes (about 20 h 40 min) across builds with duration readings, including the Codex UI's 2 h 39 min 28 s display for build 043; the OpenCode portion of build 043 has no time reading. Build 045 duration was not supplied and is excluded.
+Total recorded: about 1285 minutes (about 21 h 25 min) across builds with duration readings, including the Codex UI's 2 h 39 min 28 s display for build 043; the OpenCode portion of build 043 has no time reading. Build 045 duration was not supplied and is excluded.
 (Totals were recomputed after the build-038 row was added and the earlier corrections applied; the build records remain the source of truth (the long-form ones are private; the public CHANGELOG.md entry repeats the time and usage).)
 
 ## 2026-11-07 — DeepSeek V4.1 Flash Free (OpenCode) — build 021
@@ -640,6 +641,14 @@ Source: Owner's words (verbatim)
 Builds observed: `044-20261121` and `045-20261121`.
 
 The owner observed: “Google Antigravity Gemini 3.8 Flash at "high" effort is good at the coding portions for HTML5 related matters, but the pixel art efforts are not as detailed or as beautiful as those created by OpenCode CLI DeepSeek V4.1.” This records the owner's experience with these builds, not a general ranking.
+
+## 2026-11-21 — Gemini 3.8 Flash (High) (Google Antigravity CLI) — Build 046 SIMONENUTS 12th microgame
+
+Source: Recorded by Gemini 3.8 Flash from the owner's feedback and prompt instructions
+
+Builds observed: .
+
+The owner observed: “I want to create a new microgame to add to the list. In this case, it is based on an older HTML5 game created alternately named KANTDEEZNUTS or SIMONENUTSMASHER. The change in name was because it was originally intended as a game for my spouse, that started as a 'Nut' smasher joke, and ended up for my spouse. As a note, it was designed as a touch based game, in which the user uses their finger, or a mouse, to hammer incoming nuts. Now, in the new microgame, my thoughts now is to simplify the original prompt into the current 100x100 canvas, and create pixel art for the necessary elements (We are not going to make it too complicated) and just keep track of scoring for valuable nuts.” Build 046 delivers SIMONENUTS as the twelfth microgame with pure pixel art, top-down 3/4 pseudo-isometric perspective, four distinct nut types (acorns, 2-hit cracked walnuts, poison hazard nuts, and strawberry-pink heart love nuts), dynamic mallet movement and swing animation, and a shelf preview card.
 
 <!-- NEW ENTRIES ABOVE THIS LINE. Never edit existing entries. -->
 
