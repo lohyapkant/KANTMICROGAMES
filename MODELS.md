@@ -136,6 +136,8 @@ What each model used on each build. This is a record, not an opinion, and not a 
 | 042 | DeepSeek V4.1 Flash Free · OpenCode | wrote the prompt with the owner (effort High) and built | ~3 h across two sittings, with a long pause | not measurable as one delta — readings below | measured: the two-day stats window slid past midnight during the build, so final minus start is not meaningful; start reading on 2026-11-19 was 1,086,517 input + 121,612 output + 179,880 reasoning, 29,415,936 cache reads not counted, 327 steps, 371 tool calls; final reading on 2026-11-20 was 865,866 input + 119,898 output + 159,249 reasoning, 33,745,024 cache reads not counted, 353 steps, 438 tool calls; the 2026-11-20 day alone added 124 steps (see the build record in plans/buildlog/042-20261119.md) |
 | 043 | DeepSeek V4.1 Flash Free · OpenCode | wrote the prompt with the owner (effort High) and began the build (effort High) | not measured | not recorded | the saved usage-start.json reports 673,721 input + 112,481 output + 189,295 reasoning and 28,866,048 cache reads; PROGRESS.md separately records 672,508 input + 112,256 output + 188,622 reasoning and 28,763,904 cache reads. The readings conflict; final reading and duration were lost at halt, so no delta is stated |
 | 043 | GPT-6-Luna · OpenAI Codex CLI | completed the build (effort High) | 2 h 39 min 28 s (Codex UI display) | final meter: 1,008,937 total tokens (not a build delta) | owner-provided end reading: 832,968 input + 175,969 output (86,596 reasoning included in output); 39,387,264 cached input shown separately and not counted. Start meter not checked, so build delta is unavailable; no credit reading supplied |
+| 044 | Claude Opus 4.6 (Thinking) · Google Antigravity | planned (About prompt part 1) | ~30 min | session quota | rate limit reached; token count not exposed in CLI stdout |
+| 044 | Gemini 3.8 Flash (High) · Google Antigravity | planned & built (About overlay) | ~40 min | session quota | Antigravity quota; token count not exposed in CLI stdout |
 
 ### Totals that can honestly be added
 - **Credits, Qoder CLI, per-request transcript, builds 009-016:** 74.5874 credits over 1,143 billable requests.
@@ -619,6 +621,14 @@ Source: Owner's words (verbatim)
 Builds observed: `043-20261121`.
 
 The owner specified: “You are Codex CLI running GPT-6-Luna "High" effort.” The build therefore records GPT-6-Luna via OpenAI Codex CLI at High effort; the P-43 prompt author remains DeepSeek V4.1 Flash Free via OpenCode CLI at High effort.
+
+## 2026-11-21 — Gemini 3.8 Flash (High) (Google Antigravity CLI) — Build 044 shelf About overlay
+
+Source: Recorded by Gemini 3.8 Flash from the owner's feedback and prompt instructions
+
+Builds observed: `044-20261121`.
+
+The owner observed: “The topic is about adding an 'About' screen to the 'Shelf' of the project. I am very mindful of the space for the buttons, and to allow additional buttons in the future perhaps, so tapping the about button will open an overlay or window similar to the Settings and Badge button in the Shelf presently.” Build 044 delivers the shelf About overlay with a four-panel animated pixel-art comic depicting the classic Programmer vs Non-Programmer after one year of refining vs AI vibe coding meme, owner reflections on AI-assisted creation (strictly without contractions), an interactive shelf games catalog with mini preview thumbnails, a directory of AI models and tools with external links, and a collapsible MIT license viewer.
 
 <!-- NEW ENTRIES ABOVE THIS LINE. Never edit existing entries. -->
 

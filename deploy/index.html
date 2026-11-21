@@ -6,8 +6,8 @@
   Repository : https://github.com/lohyapkant/KANTMICROGAMES
   Play online: https://kantmicrogames.lohyapkant.workers.dev/
   Hosting    : Cloudflare Workers (https://workers.cloudflare.com/)
-  Current    : build 043-20261121 — HESHETHEYIT v2: solid petals, a sky
-               chooser on the pick card and a little night saucer
+  Current    : build 044-20261121 — Shelf About overlay, 4-panel
+               animated comic, reflections, games catalog, credits and license
   Names      : project and on-screen brand KANTMICROGAMES ·
                save keys and the console tag use the KANTMICROGAMES prefix
   Build log  : build 028-20261114, DeepSeek V4.1 Flash Free (OpenCode) — a short
@@ -774,6 +774,269 @@
             image-rendering: pixelated;
         }
 
+        /* =============== about dialog (build 044, shelf only) =============== */
+
+        #aboutScrim {
+            position: fixed;
+            inset: 0;
+            z-index: 62;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            background: rgba(74, 59, 50, 0.38);
+        }
+
+        #aboutDialog {
+            width: min(560px, 100%);
+            max-height: calc(100dvh - 32px);
+            display: flex;
+            flex-direction: column;
+            padding: 16px;
+            border-radius: 20px;
+            border: 2px solid var(--outline);
+            background: var(--panel);
+            box-shadow: 0 18px 44px rgba(74, 59, 50, 0.28);
+            text-align: center;
+        }
+
+        #aboutDialog > canvas {
+            display: block;
+            margin: 0 auto 4px;
+            image-rendering: crisp-edges;
+            image-rendering: pixelated;
+        }
+
+        .aboutSubtitle {
+            margin: 0 0 10px;
+            font-size: 0.74rem;
+            color: var(--ink-soft);
+            font-weight: 600;
+        }
+
+        #aboutBody {
+            flex: 1 1 auto;
+            min-height: 0;
+            overflow-y: auto;
+            text-align: left;
+            padding: 4px 6px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        #comicContainer {
+            text-align: center;
+        }
+
+        #comicGrid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 8px;
+            margin: 4px auto 6px;
+            max-width: 440px;
+        }
+
+        .comicPanel {
+            position: relative;
+            border-radius: 12px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 6px rgba(74, 59, 50, 0.08);
+        }
+
+        .comicPanel canvas {
+            display: block;
+            width: 100%;
+            height: auto;
+            aspect-ratio: 1/1;
+            image-rendering: crisp-edges;
+            image-rendering: pixelated;
+        }
+
+        .comicPanel.panel1, .comicPanel.panel3 {
+            border: 1px solid var(--outline);
+            background: #f4eedb;
+            padding: 3px;
+        }
+
+        .comicPanel.panel2 {
+            border: 2px solid #4a7bb0;
+            background: #87ceeb;
+            padding: 2px;
+            box-shadow: 0 0 0 1px #ffffff, 0 4px 10px rgba(74, 123, 176, 0.25);
+        }
+
+        .comicPanel.panel4 {
+            border: 2px dashed #e06c1b;
+            background: #0d091a;
+            padding: 2px;
+            box-shadow: inset 0 0 8px rgba(224, 108, 27, 0.3);
+        }
+
+        .comicCaption {
+            margin: 4px 0 0;
+            font-size: 0.68rem;
+            font-style: italic;
+            color: var(--ink-soft);
+        }
+
+        .aboutSection {
+            border-top: 1px solid rgba(74, 59, 50, 0.12);
+            padding-top: 12px;
+        }
+
+        .aboutHeading {
+            margin: 0 0 6px;
+            font-size: 0.78rem;
+            font-weight: 800;
+            letter-spacing: 0.06em;
+            color: var(--ink);
+            text-transform: uppercase;
+        }
+
+        .aboutSubtext {
+            margin: 0 0 8px;
+            font-size: 0.72rem;
+            color: var(--ink-soft);
+            line-height: 1.3;
+        }
+
+        .aboutSection p {
+            margin: 0 0 8px;
+            font-size: 0.76rem;
+            line-height: 1.45;
+            color: var(--ink);
+        }
+
+        #aboutGamesList {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 6px;
+        }
+
+        .aboutGameRow {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 6px 8px;
+            border-radius: 10px;
+            border: 1px solid var(--outline);
+            background: var(--cream);
+        }
+
+        .aboutGameThumb {
+            width: 50px;
+            height: 24px;
+            flex-shrink: 0;
+            border-radius: 4px;
+            border: 1px solid var(--outline);
+            image-rendering: crisp-edges;
+            image-rendering: pixelated;
+        }
+
+        .aboutGameMeta {
+            flex: 1 1 auto;
+            min-width: 0;
+            font-size: 0.72rem;
+        }
+
+        .aboutGameTitle {
+            font-weight: 800;
+            color: var(--ink);
+        }
+
+        .aboutGameConcept {
+            color: var(--ink-soft);
+            font-size: 0.68rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .creditsGroup h4 {
+            margin: 8px 0 4px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: var(--ink);
+        }
+
+        .creditsGroup ul {
+            margin: 0 0 8px 16px;
+            padding: 0;
+            font-size: 0.72rem;
+            line-height: 1.4;
+            color: var(--ink);
+        }
+
+        .creditsGroup a {
+            color: var(--ink);
+            text-decoration: underline;
+            text-underline-offset: 2px;
+        }
+
+        .licenseBox {
+            margin: 8px 0 0;
+            padding: 10px;
+            max-height: 140px;
+            overflow-y: auto;
+            background: var(--cream);
+            border: 1px solid var(--outline);
+            border-radius: 10px;
+            font-family: monospace;
+            font-size: 0.66rem;
+            line-height: 1.35;
+            color: var(--ink);
+            white-space: pre-wrap;
+        }
+
+        .aboutFooter {
+            border-top: 1px solid rgba(74, 59, 50, 0.12);
+            padding-top: 8px;
+            text-align: center;
+        }
+
+        #aboutBuildLine {
+            margin: 0;
+            font-size: 0.70rem;
+            color: var(--ink-soft);
+            font-weight: 700;
+        }
+
+        #aboutClose {
+            flex: none;
+            align-self: center;
+            min-width: 120px;
+            min-height: 48px;
+            padding: 0 16px;
+            margin-top: 8px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 14px;
+            border: 1px solid var(--outline);
+            background: var(--panel);
+            box-shadow: 0 4px 0 rgba(74, 59, 50, 0.12);
+            cursor: pointer;
+            touch-action: manipulation;
+            flex-shrink: 0;
+        }
+
+        #aboutClose:active {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 rgba(74, 59, 50, 0.12);
+        }
+
+        #aboutClose canvas {
+            display: block;
+            image-rendering: crisp-edges;
+            image-rendering: pixelated;
+        }
+
         #badgeToast {
             position: fixed;
             left: 50%;
@@ -1259,6 +1522,9 @@
         </nav>
 
         <div id="shelfBar">
+            <button type="button" id="btnAbout" class="shelfBtn" aria-label="ABOUT" aria-haspopup="dialog">
+                <canvas data-label="ABOUT" data-scale="--corner-label" width="1" height="5" aria-hidden="true"></canvas>
+            </button>
             <button type="button" id="btnBadges" class="shelfBtn" aria-label="Badges: 0 of 8 earned" aria-haspopup="dialog">
                 <canvas data-label="BADGES 0/8" data-scale="--corner-label" width="1" height="5" aria-hidden="true"></canvas>
             </button>
@@ -1334,6 +1600,97 @@
                 <canvas id="badgesEarnedLine" data-scale="--opt-label" width="1" height="5" aria-hidden="true"></canvas>
                 <div id="badgeList" tabindex="0" role="region" aria-label="Badge list"></div>
                 <button type="button" id="badgesClose" aria-label="CLOSE">
+                    <canvas data-label="CLOSE" data-scale="--corner-label" width="1" height="5" aria-hidden="true"></canvas>
+                </button>
+            </div>
+        </div>
+
+        <div id="aboutScrim" hidden>
+            <div id="aboutDialog" role="dialog" aria-modal="true" aria-label="About KANTMICROGAMES">
+                <canvas id="aboutHeaderLabel" data-label="ABOUT" data-scale="--corner-label" width="1" height="5" aria-hidden="true"></canvas>
+                <p class="aboutSubtitle">KANTMICROGAMES &middot; 11 tiny offline pixel-art games</p>
+
+                <div id="aboutBody" tabindex="0" role="region" aria-label="About contents">
+                    <!-- Section 1: 4-Panel Comic -->
+                    <div id="comicContainer">
+                        <div id="comicGrid">
+                            <div class="comicPanel panel1">
+                                <canvas id="comicCanvas1" width="100" height="100" aria-label="Panel 1: Programmer starting project with paper plane"></canvas>
+                            </div>
+                            <div class="comicPanel panel2">
+                                <canvas id="comicCanvas2" width="100" height="100" aria-label="Panel 2: Modern supersonic jet after 1 year of refining"></canvas>
+                            </div>
+                            <div class="comicPanel panel3">
+                                <canvas id="comicCanvas3" width="100" height="100" aria-label="Panel 3: Non-programmer starting project with paper plane"></canvas>
+                            </div>
+                            <div class="comicPanel panel4">
+                                <canvas id="comicCanvas4" width="100" height="100" aria-label="Panel 4: Frankenplane in space after 1 year of AI vibe coding"></canvas>
+                            </div>
+                        </div>
+                        <p class="comicCaption">Homage to a classic meme remembered from r/ProgrammerHumor.</p>
+                    </div>
+
+                    <!-- Section 2: Reflections -->
+                    <section class="aboutSection">
+                        <h3 class="aboutHeading">REFLECTIONS</h3>
+                        <p>I have experienced a deep ambivalence throughout the creation of this project. On one hand, there is genuine apprehension that people who have dedicated years to studying and mastering computer science and software development may find their hard work displaced by code generated by artificial intelligence. That disruption to livelihoods and craft is real and should not be overlooked.</p>
+                        <p>On the other hand, this technology has been truly transformative for someone like me. Although I earned a diploma in computer science twenty years ago, I remained an inadequate programmer and never possessed the time or technical confidence to construct interactive games or complete software independently. For two decades, I held creative desires that I simply could not bring to life.</p>
+                        <p>Working with modern language models changed that entirely. It is comparable to collaborating with a tireless collective of programmers, pixel artists, and technical testers at any hour of the night. It allows rapid ideation and experimentation. Yet, as the illustration above demonstrates, guiding artificial intelligence toward a coherent and unified vision is fraught with eccentricities. The machine will assemble whatever parts it can find. The resulting craft may have propellers on the wings, rockets on the tail, and cockpits in unexpected places, but it defies gravity and it flies.</p>
+                        <p>KANTMICROGAMES is the realization of twenty years of unfulfilled ambition, brought into existence through persistence, curiosity, and the eccentric power of machine collaboration.</p>
+                    </section>
+
+                    <!-- Section 3: Games Catalog -->
+                    <section class="aboutSection">
+                        <h3 class="aboutHeading">GAMES IN THIS SHELF</h3>
+                        <div id="aboutGamesList"></div>
+                    </section>
+
+                    <!-- Section 4: Models & Tools -->
+                    <section class="aboutSection">
+                        <h3 class="aboutHeading">MODELS AND TOOLS</h3>
+                        <p class="aboutSubtext">This project is built intentionally using free tiers, community trials, and rate-limited developer accounts to discover what can be created without a development budget.</p>
+                        <div class="creditsGroup">
+                            <h4>Language Models &amp; AI</h4>
+                            <ul>
+                                <li><a href="https://www.deepseek.com/" target="_blank" rel="noopener noreferrer">DeepSeek</a> (DeepSeek V4.1 Flash Free)</li>
+                                <li><a href="https://www.anthropic.com/" target="_blank" rel="noopener noreferrer">Anthropic</a> (Claude Opus 4.6, Claude 3.5 Sonnet)</li>
+                                <li><a href="https://gemini.google.com/" target="_blank" rel="noopener noreferrer">Google</a> (Gemini 3.8 Flash, Gemini 2.5 Flash/Pro)</li>
+                                <li><a href="https://openai.com/" target="_blank" rel="noopener noreferrer">OpenAI</a> (GPT-6-Luna, Codex CLI models)</li>
+                                <li><a href="https://chatglm.cn/" target="_blank" rel="noopener noreferrer">Zhipu AI</a> (GLM-5.3 Flash Free)</li>
+                                <li><a href="https://mistral.ai/" target="_blank" rel="noopener noreferrer">Mistral AI</a> (Ministral, Mistral Medium 3.5)</li>
+                                <li><a href="https://www.zyphra.com/" target="_blank" rel="noopener noreferrer">Zyphra</a> (Flint 40B)</li>
+                            </ul>
+                            <h4>Harnesses &amp; Command Line Tools</h4>
+                            <ul>
+                                <li><a href="https://opencode.ai/" target="_blank" rel="noopener noreferrer">OpenCode CLI</a></li>
+                                <li><a href="https://antigravity.google/" target="_blank" rel="noopener noreferrer">Google Antigravity CLI</a></li>
+                                <li><a href="https://qoder.com/" target="_blank" rel="noopener noreferrer">Qoder CLI</a></li>
+                                <li><a href="https://mistral.ai/" target="_blank" rel="noopener noreferrer">Mistral Vibe CLI</a></li>
+                            </ul>
+                            <h4>Platform &amp; Repository</h4>
+                            <ul>
+                                <li><a href="https://github.com/lohyapkant/KANTMICROGAMES" target="_blank" rel="noopener noreferrer">GitHub Repository</a></li>
+                                <li><a href="https://workers.cloudflare.com/" target="_blank" rel="noopener noreferrer">Cloudflare Workers</a></li>
+                            </ul>
+                        </div>
+                    </section>
+
+                    <!-- Section 5: License -->
+                    <section class="aboutSection">
+                        <h3 class="aboutHeading">PROJECT LICENSE</h3>
+                        <p>KANTMICROGAMES is released under the permissive MIT License.</p>
+                        <button type="button" id="btnToggleLicense" class="dataBtn" aria-expanded="false" aria-controls="aboutLicenseText">
+                            <canvas id="toggleLicenseLabel" data-label="SHOW MIT LICENSE" data-scale="--opt-label" width="1" height="5" aria-hidden="true"></canvas>
+                        </button>
+                        <pre id="aboutLicenseText" class="licenseBox" hidden></pre>
+                    </section>
+
+                    <footer class="aboutFooter">
+                        <p id="aboutBuildLine"></p>
+                    </footer>
+                </div>
+
+                <button type="button" id="aboutClose" aria-label="CLOSE">
                     <canvas data-label="CLOSE" data-scale="--corner-label" width="1" height="5" aria-hidden="true"></canvas>
                 </button>
             </div>
@@ -1502,7 +1859,7 @@
 
 const APP = {
     name: "KANTMICROGAMES",
-    fileVersion: "043-20261121",       // build number of THIS one-file app
+    fileVersion: "044-20261121",       // build number of THIS one-file app
     savePrefix: "KANTMICROGAMES."      // best scores live at prefix + GAMEID + ".best"
 };
 
@@ -3279,6 +3636,402 @@ badgesDialogEl.addEventListener("keydown", function (event) {
     } else if (!event.shiftKey && document.activeElement === last) {
         event.preventDefault();
         first.focus();
+    }
+});
+/* ==================================================================
+   ABOUT DIALOG (build 044, shelf only)
+   Modal dialog on the shelf presenting project reflections, a four-panel
+   animated comic, the shelf microgames catalog, credits and the MIT license.
+   ================================================================== */
+
+const ABOUT_SETTINGS = {
+    canvasSizePixels: 100,
+    textLineOneYPixels: 4,
+    textLineTwoYPixels: 11,
+    paperPlaneOriginX: 38,
+    paperPlaneOriginY: 46,
+    paperPlaneBobSpeedMultiplier: 0.003,
+    paperPlaneBobRangePixels: 2,
+    jetOriginX: 34,
+    jetOriginY: 44,
+    jetBobSpeedMultiplier: 0.002,
+    jetBobRangePixels: 1,
+    cloudOneBaseX: 130,
+    cloudTwoBaseX: 80,
+    cloudSpeedOne: 0.035,
+    cloudSpeedTwo: 0.020,
+    frankenplaneOriginX: 32,
+    frankenplaneOriginY: 42,
+    frankenplaneBobSpeedMultiplier: 0.005,
+    frankenplaneBobRangePixels: 2,
+    animationFrameIntervalMilliseconds: 90,
+    starTwinkleIntervalMilliseconds: 800,
+    starTwinkleHalfIntervalMilliseconds: 400
+};
+
+const COMIC_PALETTES = {
+    paperPlane: {
+        W: "#ffffff",
+        G: "#dcd6cd",
+        D: "#a89f91",
+        O: "#4a3b32"
+    },
+    jet: {
+        W: "#ffffff",
+        G: "#cbd5e1",
+        D: "#64748b",
+        C: "#38bdf8",
+        S: "#e0f2fe",
+        F: "#00d2d3",
+        Y: "#facc15",
+        O: "#1e293b"
+    },
+    cloud: {
+        W: "#ffffff",
+        S: "#cce4f7"
+    },
+    franken: {
+        B: "#8395a7",
+        D: "#576574",
+        G: "#2ed573",
+        E: "#10ac84",
+        R: "#ff4757",
+        Y: "#ffa502",
+        P: "#f6b93b",
+        H: "#747d8c",
+        M: "#c8d6e5",
+        C: "#00d2d3",
+        O: "#222f3e",
+        W: "#ffffff"
+    }
+};
+
+const PAPER_PLANE_PIXELS = [
+    "..................OO",
+    "................OO.W",
+    "..............OO.WW.",
+    "............OO.WW...",
+    "..........OO.WW.GG..",
+    "........OO.WW.GG....",
+    "......OO.WW.GG..DD..",
+    "....OO.WW.GG..DD....",
+    "..OO.WW.GG..DD....O.",
+    "OOOOOOOOOOOOOOOOOO.."
+];
+
+const SUPERSONIC_JET_PIXELS = [
+    "..........................OO..",
+    ".......................OOOWWWO",
+    "....................OOOWWWWWWO",
+    ".................OOOWWWWWWCCCC",
+    "..............OOOWWWWWWWWWSSSS",
+    "............OOOWWWWWWWWWWWWWWW",
+    "....FF....OOOWWWWWWWWWWWWWWWWW",
+    "FFYYYY..OOWWWWWWWWWWWWWWWWWWWW",
+    "....FF....OOOWWWWWWWWWWWWWWWWW",
+    "............OOOWWWWWWWWWWWWWWW",
+    "..............OOOWWWWWWWWWWWWW",
+    ".................OOOWWWWWWWWWW",
+    "....................OOOWWWWWWO",
+    ".......................OOOWWWO"
+];
+
+const CLOUD_PIXELS = [
+    "......WWWW..........",
+    "....WWWWWWWW..WWWW..",
+    "..WWWWWWWWWWWWWWWWWW",
+    "WWWWWWWWWWWWWWWWWWWW",
+    "WWWWWWWWWWWWWWWWWWWW",
+    "WWWWWWWWWWWWWWWWWWWW",
+    "..SSSSSSSSSSSSSSSSSS",
+    "....SSSSSSSSSSSS...."
+];
+
+const FRANKEN_PIXELS_A = [
+    "...........MMMMMMMMMMMM.........",
+    ".................H..............",
+    "..........OOOOOOOOOOOO..........",
+    "........OOBBBBBBBBBBBBOO........",
+    ".......OBBBBBBBBBBBBBBBBO.......",
+    ".......OBBBBBBBBBBBBBBBBO.......",
+    "........OODDDDDDDDDDDDOO........",
+    "..........OOOOOOOOOOOO..........",
+    "...........O........O...........",
+    "....RRRR...O.CCCCCCCC.O...PP....",
+    "..RRYYYY.OOGGGGGGGGGGGGOOOPP....",
+    "YYYYWWWW.OGGGGGGGGGGGGGGOPP.....",
+    "..RRYYYY.OOGGGGGGGGGGGGOOOPP....",
+    "....RRRR...O.CCCCCCCC.O...PP....",
+    "...........O........O...........",
+    "........OOOOOOOOOOOOOOOO........",
+    ".......OGGGGGGGGGGGGGGGGO.......",
+    ".......OEEEEEEEEEEEEEEEEO.......",
+    "........OOOOOOOOOOOOOOOO........",
+    "................................"
+];
+
+const FRANKEN_PIXELS_B = [
+    "........MMMM.........MMMM.......",
+    ".................H..............",
+    "..........OOOOOOOOOOOO..........",
+    "........OOBBBBBBBBBBBBOO........",
+    ".......OBBBBBBBBBBBBBBBBO.......",
+    ".......OBBBBBBBBBBBBBBBBO.......",
+    "........OODDDDDDDDDDDDOO........",
+    "..........OOOOOOOOOOOO..........",
+    "...........O........O...........",
+    "....RRRR...O.CCCCCCCC.O.........",
+    ".RRRYYYYYOOGGGGGGGGGGGGOOOPPPP..",
+    "YYWWWWWW.OGGGGGGGGGGGGGGOPPPP...",
+    ".RRRYYYYYOOGGGGGGGGGGGGOOOPPPP..",
+    "....RRRR...O.CCCCCCCC.O.........",
+    "...........O........O...........",
+    "........OOOOOOOOOOOOOOOO........",
+    ".......OGGGGGGGGGGGGGGGGO.......",
+    ".......OEEEEEEEEEEEEEEEEO.......",
+    "........OOOOOOOOOOOOOOOO........",
+    "................................"
+];
+
+const COMIC_STAR_COORDINATES = [
+    [12, 28], [20, 76], [30, 20], [50, 80], [60, 20], [80, 72], [96, 30],
+    [8, 86], [50, 96], [80, 86], [20, 50], [86, 50], [60, 80], [80, 30]
+];
+
+const MIT_LICENSE_TEXT = "MIT License\n\nCopyright (c) 2026 Loh Yap Kant\n\nPermission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the \"Software\"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.";
+
+const aboutBtnEl = document.getElementById("btnAbout");
+const aboutScrimEl = document.getElementById("aboutScrim");
+const aboutDialogEl = document.getElementById("aboutDialog");
+const aboutBodyEl = document.getElementById("aboutBody");
+const aboutCloseEl = document.getElementById("aboutClose");
+const aboutGamesListEl = document.getElementById("aboutGamesList");
+const btnToggleLicenseEl = document.getElementById("btnToggleLicense");
+const toggleLicenseLabelEl = document.getElementById("toggleLicenseLabel");
+const aboutLicenseTextEl = document.getElementById("aboutLicenseText");
+const aboutBuildLineEl = document.getElementById("aboutBuildLine");
+
+const comicCanvasOneEl = document.getElementById("comicCanvas1");
+const comicCanvasTwoEl = document.getElementById("comicCanvas2");
+const comicCanvasThreeEl = document.getElementById("comicCanvas3");
+const comicCanvasFourEl = document.getElementById("comicCanvas4");
+
+let aboutReturnFocus = null;
+let aboutAnimationHandle = 0;
+
+// Draw a line of 3x5 pixel font text left-aligned on a comic canvas context.
+function paintComicTextLine(canvasContext, textString, leftXPixels, topYPixels, colorHex) {
+    for (let charIndex = 0; charIndex < textString.length; charIndex++) {
+        const characterGlyph = PIXEL_FONT[textString[charIndex]] || PIXEL_FONT[textString[charIndex].toUpperCase()] || PIXEL_FONT[" "];
+        for (let glyphRow = 0; glyphRow < 5; glyphRow++) {
+            for (let glyphCol = 0; glyphCol < 3; glyphCol++) {
+                if (characterGlyph[glyphRow][glyphCol] !== "1") continue;
+                canvasContext.fillStyle = colorHex;
+                canvasContext.fillRect(leftXPixels + charIndex * 4 + glyphCol, topYPixels + glyphRow, 1, 1);
+            }
+        }
+    }
+}
+
+// Draw the simple folded paper plane shared between Panel 1 and Panel 3.
+function paintPaperAirplane(canvasContext, originXPixels, originYPixels) {
+    paintPixels(canvasContext, PAPER_PLANE_PIXELS, COMIC_PALETTES.paperPlane, originXPixels, originYPixels);
+}
+
+// Draw Panel 1: Programmer starting project with paper plane on cream background.
+function paintComicPanelOne(timestampMilliseconds) {
+    const context = comicCanvasOneEl.getContext("2d");
+    context.fillStyle = "#f4eedb";
+    context.fillRect(0, 0, ABOUT_SETTINGS.canvasSizePixels, ABOUT_SETTINGS.canvasSizePixels);
+
+    paintComicTextLine(context, "PROGRAMMER", 4, ABOUT_SETTINGS.textLineOneYPixels, "#4a3b32");
+    paintComicTextLine(context, "STARTING PROJECT", 4, ABOUT_SETTINGS.textLineTwoYPixels, "#7c6a59");
+
+    const verticalBobOffset = Math.sin(timestampMilliseconds * ABOUT_SETTINGS.paperPlaneBobSpeedMultiplier) * ABOUT_SETTINGS.paperPlaneBobRangePixels;
+    paintPaperAirplane(context, ABOUT_SETTINGS.paperPlaneOriginX, ABOUT_SETTINGS.paperPlaneOriginY + verticalBobOffset);
+}
+
+// Draw Panel 2: Modern supersonic jet after 1 year of refining flying through sky.
+function paintComicPanelTwo(timestampMilliseconds) {
+    const context = comicCanvasTwoEl.getContext("2d");
+    context.fillStyle = "#87ceeb";
+    context.fillRect(0, 0, ABOUT_SETTINGS.canvasSizePixels, ABOUT_SETTINGS.canvasSizePixels);
+
+    const firstCloudX = Math.round((ABOUT_SETTINGS.cloudOneBaseX - timestampMilliseconds * ABOUT_SETTINGS.cloudSpeedOne) % 150 - 30);
+    paintPixels(context, CLOUD_PIXELS, COMIC_PALETTES.cloud, firstCloudX, 20);
+
+    const secondCloudX = Math.round((ABOUT_SETTINGS.cloudTwoBaseX - timestampMilliseconds * ABOUT_SETTINGS.cloudSpeedTwo) % 150 - 30);
+    paintPixels(context, CLOUD_PIXELS, COMIC_PALETTES.cloud, secondCloudX, 60);
+
+    paintComicTextLine(context, "AFTER 1 YEAR", 4, ABOUT_SETTINGS.textLineOneYPixels, "#1a3450");
+    paintComicTextLine(context, "OF REFINING", 4, ABOUT_SETTINGS.textLineTwoYPixels, "#274d75");
+
+    const verticalBobOffset = Math.sin(timestampMilliseconds * ABOUT_SETTINGS.jetBobSpeedMultiplier) * ABOUT_SETTINGS.jetBobRangePixels;
+    paintPixels(context, SUPERSONIC_JET_PIXELS, COMIC_PALETTES.jet, ABOUT_SETTINGS.jetOriginX, ABOUT_SETTINGS.jetOriginY + verticalBobOffset);
+}
+
+// Draw Panel 3: Non-programmer starting project with identical paper plane.
+function paintComicPanelThree(timestampMilliseconds) {
+    const context = comicCanvasThreeEl.getContext("2d");
+    context.fillStyle = "#f4eedb";
+    context.fillRect(0, 0, ABOUT_SETTINGS.canvasSizePixels, ABOUT_SETTINGS.canvasSizePixels);
+
+    paintComicTextLine(context, "NON-PROGRAMMER", 4, ABOUT_SETTINGS.textLineOneYPixels, "#4a3b32");
+    paintComicTextLine(context, "STARTING PROJECT", 4, ABOUT_SETTINGS.textLineTwoYPixels, "#7c6a59");
+
+    const verticalBobOffset = Math.sin(timestampMilliseconds * ABOUT_SETTINGS.paperPlaneBobSpeedMultiplier) * ABOUT_SETTINGS.paperPlaneBobRangePixels;
+    paintPaperAirplane(context, ABOUT_SETTINGS.paperPlaneOriginX, ABOUT_SETTINGS.paperPlaneOriginY + verticalBobOffset);
+}
+
+// Draw Panel 4: The comic Frankenplane in space after 1 year of AI vibe coding.
+function paintComicPanelFour(timestampMilliseconds) {
+    const context = comicCanvasFourEl.getContext("2d");
+    context.fillStyle = "#0d091a";
+    context.fillRect(0, 0, ABOUT_SETTINGS.canvasSizePixels, ABOUT_SETTINGS.canvasSizePixels);
+
+    for (let starIndex = 0; starIndex < COMIC_STAR_COORDINATES.length; starIndex++) {
+        const starCoords = COMIC_STAR_COORDINATES[starIndex];
+        const isTwinkling = ((timestampMilliseconds + starIndex * 150) % ABOUT_SETTINGS.starTwinkleIntervalMilliseconds) < ABOUT_SETTINGS.starTwinkleHalfIntervalMilliseconds;
+        context.fillStyle = isTwinkling ? "#ffffff" : "#6c5ce7";
+        context.fillRect(starCoords[0], starCoords[1], 1, 1);
+    }
+
+    paintComicTextLine(context, "AFTER 1 YEAR OF", 4, ABOUT_SETTINGS.textLineOneYPixels, "#f39c12");
+    paintComicTextLine(context, "AI VIBE CODING", 4, ABOUT_SETTINGS.textLineTwoYPixels, "#e67e22");
+
+    const verticalBobOffset = Math.sin(timestampMilliseconds * ABOUT_SETTINGS.frankenplaneBobSpeedMultiplier) * ABOUT_SETTINGS.frankenplaneBobRangePixels;
+    const animationFrameIndex = Math.floor(timestampMilliseconds / ABOUT_SETTINGS.animationFrameIntervalMilliseconds) % 2;
+    const frankenMap = animationFrameIndex === 0 ? FRANKEN_PIXELS_A : FRANKEN_PIXELS_B;
+    paintPixels(context, frankenMap, COMIC_PALETTES.franken, ABOUT_SETTINGS.frankenplaneOriginX, ABOUT_SETTINGS.frankenplaneOriginY + verticalBobOffset);
+}
+
+// Loop callback animating the four comic panels while the About overlay is visible.
+function animateAboutComicLoop(timestampMilliseconds) {
+    if (aboutScrimEl.hidden) {
+        aboutAnimationHandle = 0;
+        return;
+    }
+    paintComicPanelOne(timestampMilliseconds);
+    paintComicPanelTwo(timestampMilliseconds);
+    paintComicPanelThree(timestampMilliseconds);
+    paintComicPanelFour(timestampMilliseconds);
+    aboutAnimationHandle = window.requestAnimationFrame(animateAboutComicLoop);
+}
+
+// Build the list of games shown in the About dialog shelf catalog.
+function buildAboutGamesList() {
+    if (aboutGamesListEl.children.length > 0) return;
+    GAMES.forEach(function (gameItem) {
+        const gameRowElement = document.createElement("div");
+        gameRowElement.className = "aboutGameRow";
+
+        const thumbnailCanvas = document.createElement("canvas");
+        thumbnailCanvas.className = "aboutGameThumb";
+        thumbnailCanvas.width = 200;
+        thumbnailCanvas.height = 96;
+        thumbnailCanvas.setAttribute("aria-hidden", "true");
+        if (typeof gameItem.previewPaint === "function") {
+            gameItem.previewPaint(thumbnailCanvas.getContext("2d"));
+        }
+        gameRowElement.appendChild(thumbnailCanvas);
+
+        const metaContainer = document.createElement("div");
+        metaContainer.className = "aboutGameMeta";
+
+        const titleElement = document.createElement("div");
+        titleElement.className = "aboutGameTitle";
+        const revisionEntry = GAME_REVISIONS[gameItem.id] || { revision: 1 };
+        titleElement.textContent = displayName(gameItem) + " v" + revisionEntry.revision + " (build " + gameItem.versionNumber + ")";
+        metaContainer.appendChild(titleElement);
+
+        const conceptElement = document.createElement("div");
+        conceptElement.className = "aboutGameConcept";
+        conceptElement.textContent = gameItem.concept;
+        metaContainer.appendChild(conceptElement);
+
+        gameRowElement.appendChild(metaContainer);
+        aboutGamesListEl.appendChild(gameRowElement);
+    });
+}
+
+// Toggle the display of the full MIT license text in the About dialog.
+function toggleAboutLicense() {
+    cueTick();
+    const isCurrentlyHidden = aboutLicenseTextEl.hidden;
+    aboutLicenseTextEl.hidden = !isCurrentlyHidden;
+    btnToggleLicenseEl.setAttribute("aria-expanded", isCurrentlyHidden ? "true" : "false");
+    const newButtonLabel = isCurrentlyHidden ? "HIDE MIT LICENSE" : "SHOW MIT LICENSE";
+    drawPixelLabel(toggleLicenseLabelEl, newButtonLabel, "--opt-label");
+}
+
+// Open the About overlay dialog and start its animation loop.
+function openAbout() {
+    aboutReturnFocus = aboutBtnEl;
+    buildAboutGamesList();
+    aboutBuildLineEl.textContent = APP.name + " build " + APP.fileVersion;
+    aboutLicenseTextEl.textContent = MIT_LICENSE_TEXT;
+    aboutScrimEl.hidden = false;
+    if (!aboutAnimationHandle) {
+        aboutAnimationHandle = window.requestAnimationFrame(animateAboutComicLoop);
+    }
+    aboutBodyEl.focus();
+}
+
+// Close the About overlay dialog and stop its animation loop.
+function closeAbout() {
+    if (aboutScrimEl.hidden) return;
+    cueTick();
+    aboutScrimEl.hidden = true;
+    lastScreenSwap = performance.now();
+    if (aboutAnimationHandle) {
+        window.cancelAnimationFrame(aboutAnimationHandle);
+        aboutAnimationHandle = 0;
+    }
+    if (aboutReturnFocus && typeof aboutReturnFocus.focus === "function") {
+        aboutReturnFocus.focus();
+    }
+}
+
+aboutBtnEl.addEventListener("click", function (event) {
+    event.stopPropagation();
+    cueTick();
+    openAbout();
+});
+
+aboutCloseEl.addEventListener("click", function () {
+    closeAbout();
+});
+
+aboutScrimEl.addEventListener("click", function (event) {
+    if (event.target === aboutScrimEl) closeAbout();
+});
+
+btnToggleLicenseEl.addEventListener("click", function () {
+    toggleAboutLicense();
+});
+
+aboutDialogEl.addEventListener("keydown", function (event) {
+    if (event.key === "Escape") {
+        event.preventDefault();
+        event.stopPropagation();
+        closeAbout();
+        return;
+    }
+    if (event.key !== "Tab") return;
+    const focusables = Array.prototype.slice.call(
+        aboutDialogEl.querySelectorAll("button, [tabindex=\"0\"], a, pre")
+    ).filter(function (element) {
+        return !element.disabled && element.offsetParent !== null;
+    });
+    if (!focusables.length) return;
+    const firstElement = focusables[0];
+    const lastElement = focusables[focusables.length - 1];
+    if (event.shiftKey && document.activeElement === firstElement) {
+        event.preventDefault();
+        lastElement.focus();
+    } else if (!event.shiftKey && document.activeElement === lastElement) {
+        event.preventDefault();
+        firstElement.focus();
     }
 });
 

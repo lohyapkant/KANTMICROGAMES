@@ -8,6 +8,14 @@ A short record of every build, newest first. Each entry gives the build ID, the 
 - **Corrected in build 028:** 13 lines in entries 000 to 018 were cut off mid-sentence when this record was made in build 027; they were restored in full from the private record. (The build 028 prompt expected 15: entries 001 and 000 were named too, but their lines were already whole, so nothing there needed changing.)
 
 <!-- NEW ENTRIES: paste the newest short entry on the line below this comment, above the previous newest. Never edit older entries except to add a dated correction line in the header. -->
+## 044-20261121 — 2026-11-21 (Shelf About overlay: animated 4-panel comic, reflections, games catalog, credits and license)
+
+Built from prompt: P-44, planned by the owner with Claude Opus 4.6 (Thinking) and Gemini 3.8 Flash (High) on Google Antigravity CLI and pasted verbatim; build completed by Gemini 3.8 Flash (Google Antigravity CLI) at High effort.  
+What changed: Shell About overlay on the shelf. Added an ABOUT button on the shelf bar; opens an accessible modal dialog featuring an animated 2x2 pixel-art comic depicting the "Programmer vs Non-Programmer after 1 year of refining vs AI vibe coding" meme with custom themed borders; owner reflections on AI-assisted development (written strictly without contractions); a live dynamic shelf catalog listing all eleven games with mini preview thumbnails rendered via game.previewPaint; a directory of all models, harnesses, and platforms used with external links; and an interactive collapsible MIT License viewer with copyright to Loh Yap Kant. All eleven game modules are frozen and byte-identical.  
+Checked: logic and readable checks PASS (100% compliant with plans/code-style.md); check-project.py 12/12 PASS; all eleven frozen game module hashes match plans/game-versions.txt byte-for-byte; stage rectangle and shelf layout stable across all seven named viewports; zero console errors.  
+Not checked: Safari, a physical phone, sound or owner visual approval.  
+Time and usage: see the Build 044 rows in MODELS.md.  
+
 ## 043-20261121 — 2026-11-21 (HESHETHEYIT v2: solid petals, a chosen sky and a night saucer)
 
 Built from prompt: P-43, written by the owner with DeepSeek V4.1 Flash Free (OpenCode CLI) at High effort and pasted verbatim after review; build completed by GPT-6-Luna (OpenAI Codex CLI) at High effort.  
