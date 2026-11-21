@@ -6,8 +6,8 @@
   Repository : https://github.com/lohyapkant/KANTMICROGAMES
   Play online: https://kantmicrogames.lohyapkant.workers.dev/
   Hosting    : Cloudflare Workers (https://workers.cloudflare.com/)
-  Current    : build 042-20261119 — HESHETHEYIT, the eleventh game, where
-               the last petal answers and the shelf keeps that answer
+  Current    : build 043-20261121 — HESHETHEYIT v2: solid petals, a sky
+               chooser on the pick card and a little night saucer
   Names      : project and on-screen brand KANTMICROGAMES ·
                save keys and the console tag use the KANTMICROGAMES prefix
   Build log  : build 028-20261114, DeepSeek V4.1 Flash Free (OpenCode) — a short
@@ -1451,7 +1451,7 @@
       010-20261101), SNAILRACE (content 011-20261101), HUGPARADE (content
       015-20261102), CATNAPCATCH (content 016-20261102), PENGUINSLIDE (content
       037-20261115), CHASEKILLKANT (content 041-20261118) and HESHETHEYIT
-      (content 042-20261119). Do not restyle,
+      (content 043-20261121). Do not restyle,
       rebalance or refactor them unless the owner unfreezes one in the prompt. (Build 010 changed only their unused `saveKey` label
       string when the storage prefix was renamed; art, tuning and
       behaviour are untouched. Build 016 left all six earlier games
@@ -1502,7 +1502,7 @@
 
 const APP = {
     name: "KANTMICROGAMES",
-    fileVersion: "042-20261119",       // build number of THIS one-file app
+    fileVersion: "043-20261121",       // build number of THIS one-file app
     savePrefix: "KANTMICROGAMES."      // best scores live at prefix + GAMEID + ".best"
 };
 
@@ -2166,7 +2166,7 @@ function paintPandaSnackPreview(ctx) {
    the module's own versionNumber, the build where its content last changed.
    Keep this table in step with plans/game-versions.txt; the check script,
    tests/check-project.py, compares them. */
-const GAME_REVISIONS = { PANDASNACK: { revision: 1, frozen: true }, BOOPEEK: { revision: 2, frozen: true }, DUCKLINE: { revision: 1, frozen: true }, SPROUTUP: { revision: 1, frozen: true }, SLIMEHOP: { revision: 1, frozen: true }, SNAILRACE: { revision: 1, frozen: true }, HUGPARADE: { revision: 2, frozen: true }, CATNAPCATCH: { revision: 2, frozen: true }, PENGUINSLIDE: { revision: 9, frozen: true }, CHASEKILLKANT: { revision: 4, frozen: true }, HESHETHEYIT: { revision: 1, frozen: true } };
+const GAME_REVISIONS = { PANDASNACK: { revision: 1, frozen: true }, BOOPEEK: { revision: 2, frozen: true }, DUCKLINE: { revision: 1, frozen: true }, SPROUTUP: { revision: 1, frozen: true }, SLIMEHOP: { revision: 1, frozen: true }, SNAILRACE: { revision: 1, frozen: true }, HUGPARADE: { revision: 2, frozen: true }, CATNAPCATCH: { revision: 2, frozen: true }, PENGUINSLIDE: { revision: 9, frozen: true }, CHASEKILLKANT: { revision: 4, frozen: true }, HESHETHEYIT: { revision: 2, frozen: true } };
 
 /* The identity line's sizes, named so the code below has no loose numbers.
    The height is only a fallback: the real height comes from the CSS. */
@@ -14602,29 +14602,35 @@ syncSoundUI();
 
 
 /* ==================================================================
-   PART 5-K — HESHETHEYIT module (content 042-20261119)
+   PART 5-K — HESHETHEYIT module (content 043-20261121)
    PRIVATE to HESHETHEYIT. Shared: the contract, the PART 1 pixel
    helpers, readBest / saveBest, readLastResult / saveLastResult,
    readDeviceHour, setActionLabel, setScoreChipsHidden and msgEl.
    Paint through paint(ctx) only.
    ================================================================
    HOW THIS GAME WORKS
-   - A flower grows in a sky that matches the device clock. The player
-     asks it who they are asking about: HE, SHE, THEY or IT.
+   - A flower grows under a sky. The player asks it who they are asking
+     about: HE, SHE, THEY or IT, and can also choose the sky themselves.
+   - The device clock picks the first sky: dawn 05-08, day 08-17, dusk
+     17-20, night otherwise. Up and down change the sky on the pick card;
+     the choice lasts for the visit and resets when the game is reopened.
    - Each press of the action button pulls one petal. The first pull
      reads LOVES ME, the next LOVES ME NOT, and so on. The last petal
      decides the answer, and the answer ends with an exclamation mark.
    - The shelf has no score for this game. It remembers the last answer
      and prints it as "last: SHE LOVES ME!" instead.
    - States: HOW_TO (the in-canvas how-to card), PICK (choose who you
-     ask), PULL (pull one petal per press), RESULT (the answer; AGAIN
-     asks about someone new with a new flower and a new sky).
-   - Controls: left and right choose, the action button or a stage tap
-     picks and pulls, R starts a new reading, ESC returns to the shelf.
+     ask and which sky), PULL (pull one petal per press), RESULT (the
+     answer; AGAIN asks about someone new with a new flower).
+   - Controls: left and right choose the pronoun, up and down choose the
+     sky, the action button or a stage tap picks and pulls, R starts a
+     new reading, ESC returns to the shelf.
+   - The night sky carries a little saucer: a glass dome, a two-tone
+     hull, five neon-green lights in a chase and a red scanner dot.
    - SETTINGS tunes the flower size, the petal counts and widths, the
-     sway, the falling-petal motion, the clock borders and the sky
-     animation. FLOWER_PALETTES, PETAL_SHAPES and SKY_LOOKS hold the
-     curated looks; LAYOUT holds every on-stage coordinate.
+     sway, the pull flinch, the falling-petal motion, the clock borders
+     and the sky animation. FLOWER_PALETTES, PETAL_SHAPES and SKY_LOOKS
+     hold the curated looks; LAYOUT holds every on-stage coordinate.
    ================================================================== */
 (function () {
     "use strict";
@@ -14632,7 +14638,7 @@ syncSoundUI();
     /* ---------- HESHETHEYIT settings (private) ---------- */
     const SETTINGS = {
         gameName: "HESHETHEYIT",
-        versionNumber: "042-20261119",
+        versionNumber: "043-20261121",
         stageSize: 100,
         saveKey: "KANTMICROGAMES.HESHETHEYIT.best",   // a label; the shell owns the real key
 
@@ -14644,6 +14650,7 @@ syncSoundUI();
         petalWidthFactorMinimum: 0.9,
         petalWidthFactorMaximum: 1.15,
         petalOutlinePixels: 1,
+        petalPixelCentreOffset: 0.5,    // sample the middle of each stage pixel
         petalLightStart: 0.18,         // where the pale streak starts on a petal
         petalLightEnd: 0.75,           // and where it fades out
         petalLightInner: 0.24,         // the streak sits this far off the middle
@@ -14666,7 +14673,17 @@ syncSoundUI();
         swayAmplitudePixels: 1.5,
         swaySpeed: 0.9,
 
-        /* A pulled petal falls, rests and fades. */
+        /* The pull's little flinch: the head tugs left, springs right, settles. */
+        recoilTugPixels: 2,
+        recoilSpringPixels: 1,
+        recoilTugSeconds: 0.09,
+        recoilSpringSeconds: 0.12,
+        recoilTotalSeconds: 0.30,
+
+        /* A pulled petal pops free with a spark, then takes the fall. */
+        petalPopPixels: 2,
+        petalPopSpin: 0.35,
+        petalSparkSeconds: 0.14,
         fallingSpeedPixels: 60,
         fallingDriftPixels: 7,
         fallingSwayPixels: 2.4,
@@ -14675,6 +14692,9 @@ syncSoundUI();
         fallingRestPixels: 84,         // it settles on the grass here
         fallingRestSeconds: 0.35,
         fallenPetalLifetimeSeconds: 0.55,
+
+        /* The bare centre's heart arrives in two small steps. */
+        heartFirstStepSeconds: 0.12,
 
         /* The how-to card's blinking prompt. */
         blinkSeconds: 0.55,
@@ -14686,10 +14706,11 @@ syncSoundUI();
         nightStartHour: 20,
 
         /* Sky life. Times are seconds; speeds are pixels per second. */
-        cloudDriftSpeed: 1.6,
-        cloudSecondDriftSpeed: 1.1,
+        cloudDriftSpeed: 2.0,
+        cloudSecondDriftSpeed: 1.4,
         beeOrbitSpeed: 0.9,
-        beeBobSpeed: 1.3,
+        beeBobSpeed: 1.7,
+        beeFlapSpeed: 16,
         birdSpeed: 6,
         birdFlapSpeed: 4,
         fireflyBlinkSpeed: 1.7,
@@ -14698,9 +14719,23 @@ syncSoundUI();
         fireflyBobSpeed: 0.9,
         starTwinkleSpeed: 2,
         starHeightFraction: 0.55,
-        witchCrossSeconds: 20,
-        witchBobSpeed: 1.4,
-        witchBobPixels: 2,
+        ufoCrossSeconds: 20,           // one crossing about every twenty seconds
+        ufoChaseSpeed: 3,              // how fast the lights and dot step
+        ufoChaseFrames: 4,
+        ufoChaseLit: 2,                // how many of the four chase steps light a lamp
+        ufoLightCount: 5,
+        ufoLightStep: 2,
+        ufoLightRow: 6,
+        ufoScannerRow: 5,
+        ufoScannerGlowRow: 4,
+        ufoBobSpeed: 1.4,
+        ufoBobPixels: 1,
+        ufoMoonClearanceRange: 14,      // begin a gentle rise before the moon
+        ufoMoonClearancePixels: 11,     // keep the full saucer above its rim
+        ufoDotStep: 2,
+        ufoDotSpan: 9,
+        ufoWidth: 11,
+        ufoHeight: 10,
         howToSeed: 7,
         previewSeed: 7,
         previewPetalCount: 7,
@@ -14727,6 +14762,8 @@ syncSoundUI();
         rose: "#C4537F",
         roseLight: "#F27D98",
         gold: "#F3C969",
+        clockGold: "#C9932F",
+        clockHand: "#7A5320",
         grassDark: "#4F8A4B",
         grass: "#6FAE5E",
         grassLight: "#8CC976",
@@ -14757,21 +14794,23 @@ syncSoundUI();
         howToStartWidth: 60,
         howToStartHeight: 11,
 
-        pickTitleLeft: 4,
-        pickTitleTop: 6,
-        pickTitleWidth: 92,
-        pickTitleHeight: 20,
-        pickTitleLineTop: 9,
-        pickSubtitleLineTop: 18,
-        chipTop: 42,
+        pickCardLeft: 4,
+        pickCardTop: 76,
+        pickCardWidth: 92,
+        pickCardHeight: 22,
+        pickTitleLineTop: 79,
+        skyRowTop: 87,
+        skyRowChipTop: 85,
+        skyRowChipHeight: 9,
+        skyRowChipPad: 2,
+        skyRowGap: 3,
+        skyClockWidth: 7,              // the 5 px clock and its 2 px gap
+        skyClockSize: 5,
+        chipTop: 56,
         chipHeight: 13,
         chipGap: 4,
         chipPad: 8,
-        chipHeartTopOffset: 8,
-        pickHintLeft: 8,
-        pickHintTop: 64,
-        pickHintWidth: 84,
-        pickHintHeight: 11,
+        chipHeartTop: 71,
 
         resultRibbonHeight: 18,
         resultRibbonTop: 4,
@@ -14843,9 +14882,7 @@ syncSoundUI();
         fireflySwayX: 5,
         fireflySwayY: 3,
         fireflySecondRowModulo: 2,
-        witchFractionY: 0.12,
-        witchWidth: 9,
-        witchHeight: 7
+        ufoFractionY: 0.12
     };
 
     /* Six curated palettes; each reading picks one at random. */
@@ -14897,9 +14934,14 @@ syncSoundUI();
     ];
     const CLOUD_COLOURS = { C: "#FFFFFF", S: "#D9ECF5" };
 
-    const BEE_MAP = [
+    const BEE_UP_MAP = [
         "W...W",
         ".OOO.",
+        "OYOYO"
+    ];
+    const BEE_DOWN_MAP = [
+        ".....",
+        "WOOOW",
         "OYOYO"
     ];
     const BEE_COLOURS = { W: "#FFF9E8", O: "#3B2B2A", Y: "#F3C969" };
@@ -14921,24 +14963,44 @@ syncSoundUI();
     ];
     const FIREFLY_COLOURS = { G: "#8A7440", Y: "#F3C969" };
 
-    const WITCH_MAP = [
-        "...O...",
-        "..OOO..",
-        ".OOOOO.",
-        "...O...",
-        "..OOO..",
-        ".O.O.O.",
-        "OOOOOOO"
+    /* The saucer's palette: pale glass, two-tone hull, neon lights and a
+       red scanner. Kept together so the little ship reads at 1x. */
+    const UFO_COLOURS = {
+        glass: "#BFE9FF",
+        glint: "#FFFFFF",
+        glassDark: "#8FC4E0",
+        hullLight: "#D7E2F4",
+        hull: "#A3B5D4",
+        hullDark: "#6B7C9E",
+        rim: "#3A4560",
+        neon: "#8CFF6E",
+        neonDim: "#2F6B4C",
+        red: "#FF5A6A",
+        redDim: "#8E2B3C"
+    };
+
+    /* A 11 x 10 map makes the saucer's fixed glass and hull easy to read. */
+    const UFO_MAP = [
+        "....gGG....",
+        "...AGGGG...",
+        "..TTTTTTT..",
+        ".MMMMMMMMM.",
+        "rMMMMMMMMMr",
+        ".rDDDDDDDr.",
+        "...........",
+        "...........",
+        "...........",
+        "..........."
     ];
-    const WITCH_COLOURS = { O: "#4C5E8C" };
-    const WITCH_RIM = [
-        { x: 3, y: 0, colour: "#8FA8E8" },
-        { x: 2, y: 2, colour: "#8FA8E8" },
-        { x: 4, y: 2, colour: "#8FA8E8" },
-        { x: 3, y: 3, colour: "#F3C969" },
-        { x: 7, y: 6, colour: "#C9A86A" },
-        { x: 8, y: 6, colour: "#C9A86A" }
-    ];
+    const UFO_MAP_COLOURS = {
+        g: UFO_COLOURS.glint,
+        G: UFO_COLOURS.glass,
+        A: UFO_COLOURS.glassDark,
+        T: UFO_COLOURS.hullLight,
+        M: UFO_COLOURS.hull,
+        D: UFO_COLOURS.hullDark,
+        r: UFO_COLOURS.rim
+    };
 
     const PRONOUNS = [
         { label: "HE", subject: "HE", verb: "LOVES" },
@@ -14979,6 +15041,10 @@ syncSoundUI();
         }
     };
 
+    /* The four skies in clock order, and the four labels on the pick card. */
+    const SKY_NAMES = ["dawn", "day", "dusk", "night"];
+    const SKY_LABELS = ["DAWN", "DAY", "DUSK", "NIGHT"];
+
     /* ---------- HESHETHEYIT private state ---------- */
     const STATE = {
         HOW_TO: "how_to",
@@ -14991,6 +15057,9 @@ syncSoundUI();
     let state = STATE.HOW_TO;
     let worldClock = 0;
     let selectedIndex = 1;               // SHE is the first suggestion
+    let chosenSkyIndex = 1;              // DAY until start() reads the clock
+    let deviceSkyIndex = 1;              // the sky the device clock chose
+    let chosenSky = SKY_NAMES[1];
     let flower = null;
     let petalsLeft = 0;
     let phrase = "";
@@ -15001,7 +15070,8 @@ syncSoundUI();
     let best = 0;
     let shownMessage = "";
     let currentActionLabel = "START";
-    let forcedSkyPhase = "";
+    let recoil = { active: false, age: 0 };
+    let heartStartClock = 0;
 
     /* ---------- HESHETHEYIT small pixel helpers (private) ---------- */
 
@@ -15075,6 +15145,18 @@ syncSoundUI();
         return "night";
     }
 
+    /* The index of a sky name in clock order; day if the name is unknown. */
+    function skyIndexForPhase(phase) {
+        const index = SKY_NAMES.indexOf(phase);
+        return index < 0 ? SKY_NAMES.indexOf("day") : index;
+    }
+
+    /* Make one sky the chosen one, with wrap-around, and remember its index. */
+    function setChosenSky(index) {
+        chosenSkyIndex = (index + SKY_NAMES.length) % SKY_NAMES.length;
+        chosenSky = SKY_NAMES[chosenSkyIndex];
+    }
+
     /* Pick a seed for the next flower, or reuse the test hook's seed. */
     function nextSeed() {
         return Math.floor(Math.random() * SETTINGS.seedLimit);
@@ -15103,42 +15185,47 @@ syncSoundUI();
         return halfWidth * Math.sin(Math.PI * Math.pow(fraction, taperPower));
     }
 
-    /* Add one petal's pixels to a list; the pale streak and the dark outline
-       are chosen per pixel so a petal is painted in one pass. */
+    /* Add one petal's pixels to a list. Every stage pixel in the petal's
+       square is tested at its centre, so a diagonal petal is one solid
+       shape with no skipped pixels; the taper, pale streak, notch and
+       one-pixel outline are the same rules as before. */
     function collectPetalPixels(target, palette, centreX, centreY, angle, length, halfWidth, taperPower, notched) {
         const directionX = Math.cos(angle);
         const directionY = Math.sin(angle);
         const sideX = -directionY;
         const sideY = directionX;
-        const outlineLength = length + SETTINGS.petalOutlinePixels;
-        for (let along = 0; along <= outlineLength; along++) {
-            const fraction = Math.min(1, along / length);
-            const innerLimit = petalHalfWidth(fraction, halfWidth, taperPower);
-            const outerLimit = innerLimit + SETTINGS.petalOutlinePixels;
-            const acrossLimit = Math.ceil(outerLimit);
-            for (let across = -acrossLimit; across <= acrossLimit; across++) {
+        const outlinePixels = SETTINGS.petalOutlinePixels;
+        const reach = Math.ceil(length + outlinePixels + 1);
+        const baseX = Math.round(centreX);
+        const baseY = Math.round(centreY);
+        const lightInner = halfWidth * SETTINGS.petalLightInner;
+        const lightOuter = halfWidth * SETTINGS.petalLightOuter;
+        for (let y = -reach; y <= reach; y++) {
+            for (let x = -reach; x <= reach; x++) {
+                const localX = x + SETTINGS.petalPixelCentreOffset;
+                const localY = y + SETTINGS.petalPixelCentreOffset;
+                const along = (localX * directionX) + (localY * directionY);
+                const across = (localX * sideX) + (localY * sideY);
                 const distance = Math.abs(across);
+                if (along < -SETTINGS.petalPixelCentreOffset || along > length + outlinePixels) continue;
+                const fraction = Math.min(1, Math.max(0, along / length));
+                const innerLimit = petalHalfWidth(fraction, halfWidth, taperPower);
+                const outerLimit = innerLimit + outlinePixels;
                 if (distance > outerLimit) continue;
-                const insidePetal = along <= length;
-                if (insidePetal && distance <= innerLimit) {
-                    const lightInner = halfWidth * SETTINGS.petalLightInner;
-                    const lightOuter = halfWidth * SETTINGS.petalLightOuter;
+                const insidePetal = along <= length && distance <= innerLimit;
+                if (insidePetal) {
                     const inStreak = across > lightInner && across < lightOuter &&
                         fraction > SETTINGS.petalLightStart && fraction < SETTINGS.petalLightEnd;
                     const cutNotch = notched && fraction > SETTINGS.petalNotchStart &&
                         distance < halfWidth * SETTINGS.petalNotchWidth;
                     if (cutNotch) continue;
                     target.push({
-                        x: Math.round(centreX + directionX * along + sideX * across),
-                        y: Math.round(centreY + directionY * along + sideY * across),
+                        x: baseX + x,
+                        y: baseY + y,
                         colour: inStreak ? palette.light : palette.petal
                     });
                 } else {
-                    target.push({
-                        x: Math.round(centreX + directionX * along + sideX * across),
-                        y: Math.round(centreY + directionY * along + sideY * across),
-                        colour: palette.outline
-                    });
+                    target.push({ x: baseX + x, y: baseY + y, colour: palette.outline });
                 }
             }
         }
@@ -15190,7 +15277,8 @@ syncSoundUI();
     }
 
     /* Grow one new flower: a curated palette, shape, centre, leaf-or-thorn
-       choice, lean and a sky fixed to the device clock when it was grown. */
+       choice, lean and a width. The sky is chosen separately, so changing
+       it never changes the flower. */
     function makeFlower(seed, options) {
         const choices = options || {};
         const random = makeRandom(seed);
@@ -15205,7 +15293,6 @@ syncSoundUI();
             : SETTINGS.petalCountMinimum + Math.floor(random() * (SETTINGS.petalCountMaximum - SETTINGS.petalCountMinimum + 1));
         const leafCount = SETTINGS.leafCountMinimum +
             Math.floor(random() * (SETTINGS.leafCountMaximum - SETTINGS.leafCountMinimum + 1));
-        const phase = choices.phase || forcedSkyPhase || skyPhaseForHour(readDeviceHour());
         const result = {
             seed: seed,
             palette: FLOWER_PALETTES[paletteIndex],
@@ -15219,8 +15306,7 @@ syncSoundUI();
                 random() * (SETTINGS.petalWidthFactorMaximum - SETTINGS.petalWidthFactorMinimum),
             lean: Math.round((random() * 2 - 1) * SETTINGS.flowerLeanMaximum),
             leafCount: leafCount,
-            thorns: choices.thorns !== undefined ? choices.thorns : random() < SETTINGS.thornChance,
-            sky: makeSky(phase, seed)
+            thorns: choices.thorns !== undefined ? choices.thorns : random() < SETTINGS.thornChance
         };
         buildFlowerHead(result);
         return result;
@@ -15286,18 +15372,28 @@ syncSoundUI();
         }
     }
 
-    /* The witch on a broom: a distant silhouette with a moonlit rim. */
-    function paintWitch(ctx, x, y, scale) {
-        paintPixels(ctx, WITCH_MAP, WITCH_COLOURS, Math.round(x), Math.round(y), false, scale);
-        for (let index = 0; index < WITCH_RIM.length; index++) {
-            const rim = WITCH_RIM[index];
-            paintPixel(ctx, x + rim.x * scale, y + rim.y * scale, rim.colour);
+    /* The little saucer: a glass dome, a two-tone hull, five neon-green
+       lights and a red scanner dot. The frame steps the chase and the dot. */
+    function paintUfo(ctx, x, y, frame) {
+        const left = Math.round(x);
+        const top = Math.round(y);
+        paintPixels(ctx, UFO_MAP, UFO_MAP_COLOURS, left, top, false, 1);
+        for (let light = 0; light < SETTINGS.ufoLightCount; light++) {
+            const lit = (light + frame) % SETTINGS.ufoChaseFrames < SETTINGS.ufoChaseLit;
+            paintPixel(ctx, left + 1 + light * SETTINGS.ufoLightStep, top + SETTINGS.ufoLightRow,
+                lit ? UFO_COLOURS.neon : UFO_COLOURS.neonDim);
         }
+        const dotX = left + 1 + ((frame * SETTINGS.ufoDotStep) % SETTINGS.ufoDotSpan);
+        paintPixel(ctx, dotX, top + SETTINGS.ufoScannerRow, UFO_COLOURS.red);
+        paintPixel(ctx, dotX, top + SETTINGS.ufoScannerGlowRow, UFO_COLOURS.red);
     }
 
-    /* A bee: two wings, a dark body and a gold stripe. */
-    function paintBee(ctx, x, y, scale) {
-        paintPixels(ctx, BEE_MAP, BEE_COLOURS, Math.round(x), Math.round(y), false, scale);
+    /* A bee: two wings, a dark body and a gold stripe. The wings flick
+       between an up and a down shape as the clock passes. */
+    function paintBee(ctx, x, y, scale, clock, phase) {
+        const wingsUp = Math.sin(clock * SETTINGS.beeFlapSpeed + phase) > 0;
+        paintPixels(ctx, wingsUp ? BEE_UP_MAP : BEE_DOWN_MAP, BEE_COLOURS,
+            Math.round(x), Math.round(y), false, scale);
     }
 
     /* A bird: two small wings, flapping between an up and a down shape. */
@@ -15314,7 +15410,7 @@ syncSoundUI();
     }
 
     /* The moving life of the sky: birds, bees, fireflies, stars and the
-       witch. The clock makes it drift without any stored animation state. */
+       night saucer. The clock makes it drift without stored animation. */
     function paintSkyLife(ctx, sky, width, height, clock) {
         const look = sky.look;
         const scale = Math.max(1, Math.round(width / STAGE));
@@ -15323,12 +15419,18 @@ syncSoundUI();
                 paintStar(ctx, sky.stars[index], width, height, clock);
             }
             paintMoon(ctx, width * look.sunX, height * look.sunY, look, scale);
-            const witchPeriod = clock % SETTINGS.witchCrossSeconds;
-            const witchX = -LAYOUT.witchWidth +
-                (witchPeriod / SETTINGS.witchCrossSeconds) * (width + LAYOUT.witchWidth * 2);
-            const witchY = height * LAYOUT.witchFractionY +
-                Math.sin(clock * SETTINGS.witchBobSpeed) * SETTINGS.witchBobPixels;
-            paintWitch(ctx, witchX, witchY, scale);
+            const ufoPeriod = clock % SETTINGS.ufoCrossSeconds;
+            const ufoX = -SETTINGS.ufoWidth +
+                (ufoPeriod / SETTINGS.ufoCrossSeconds) * (width + SETTINGS.ufoWidth * 2);
+            const ufoCentreX = ufoX + SETTINGS.ufoWidth / 2;
+            const moonDistance = Math.abs(ufoCentreX - width * look.sunX);
+            const moonApproach = Math.max(0, Math.min(1,
+                (SETTINGS.ufoMoonClearanceRange - moonDistance) / 4));
+            const ufoY = height * LAYOUT.ufoFractionY -
+                moonApproach * SETTINGS.ufoMoonClearancePixels +
+                Math.round(Math.sin(clock * SETTINGS.ufoBobSpeed)) * SETTINGS.ufoBobPixels;
+            const ufoFrame = Math.floor(clock * SETTINGS.ufoChaseSpeed) % SETTINGS.ufoChaseFrames;
+            paintUfo(ctx, ufoX, ufoY, ufoFrame);
             return;
         }
         paintSun(ctx, width * look.sunX, height * look.sunY, look, scale);
@@ -15364,7 +15466,7 @@ syncSoundUI();
                 Math.sin(clock * SETTINGS.beeOrbitSpeed + index) * LAYOUT.beeSwayX;
             const beeY = height * (LAYOUT.beeFractionY + index * LAYOUT.beeSpacingY) +
                 Math.cos(clock * SETTINGS.beeBobSpeed + index) * LAYOUT.beeSwayY;
-            paintBee(ctx, beeX, beeY, scale);
+            paintBee(ctx, beeX, beeY, scale, clock, index);
         }
     }
 
@@ -15451,7 +15553,17 @@ syncSoundUI();
             paintPixel(ctx, headX + flower.centrePixels[pixel].x,
                 headY + flower.centrePixels[pixel].y, flower.centrePixels[pixel].colour);
         }
-        if (bare) paintHeart(ctx, Math.round(headX) - 2, Math.round(headY) - 2, PAL.rose);
+        if (bare) paintBareHeart(ctx, headX, headY);
+    }
+
+    /* The bare centre's heart pops in: one pixel first, then the whole
+       little heart a moment later. */
+    function paintBareHeart(ctx, headX, headY) {
+        if (worldClock - heartStartClock < SETTINGS.heartFirstStepSeconds) {
+            paintPixel(ctx, Math.round(headX), Math.round(headY), PAL.rose);
+            return;
+        }
+        paintHeart(ctx, Math.round(headX) - 2, Math.round(headY) - 2, PAL.rose);
     }
 
     /* One small petal painted in place, used by the falling and resting petals. */
@@ -15505,7 +15617,7 @@ syncSoundUI();
             LAYOUT.howToPanelWidth, LAYOUT.howToPanelHeight);
         paintCentredText(ctx, "HESHETHEYIT", STAGE / 2, LAYOUT.howToNameTop, PAL.ink, 2);
         paintCentredText(ctx, "FIND OUT WHO LOVES YOU", STAGE / 2, LAYOUT.howToLineTop, PAL.ink, 1);
-        paintCentredText(ctx, "PICK HE SHE THEY IT", STAGE / 2, LAYOUT.howToLineTop + LAYOUT.howToLineGap, PAL.ink, 1);
+        paintCentredText(ctx, "PICK WHO - UP DOWN SKY", STAGE / 2, LAYOUT.howToLineTop + LAYOUT.howToLineGap, PAL.ink, 1);
         paintCentredText(ctx, "PULL ONE PETAL PER TAP", STAGE / 2, LAYOUT.howToLineTop + LAYOUT.howToLineGap * 2, PAL.ink, 1);
         paintCentredText(ctx, "THE LAST PETAL ANSWERS", STAGE / 2, LAYOUT.howToLineTop + LAYOUT.howToLineGap * 3, PAL.ink, 1);
         const icon = FLOWER_PALETTES[0];
@@ -15517,12 +15629,54 @@ syncSoundUI();
         }
     }
 
-    /* The pick card: who do you ask? Four chips, a heart over the chosen one. */
-    function paintPickCard(ctx) {
-        paintPlaque(ctx, LAYOUT.pickTitleLeft, LAYOUT.pickTitleTop,
-            LAYOUT.pickTitleWidth, LAYOUT.pickTitleHeight);
-        paintCentredText(ctx, "ASK THE FLOWER", STAGE / 2, LAYOUT.pickTitleLineTop, PAL.ink, 1);
-        paintCentredText(ctx, "WHO DO YOU ASK", STAGE / 2, LAYOUT.pickSubtitleLineTop, PAL.rose, 1);
+    /* A tiny gold clock: a one-pixel ring with a hand at twelve and three.
+       It marks the sky the device clock chose. */
+    function paintClock(ctx, left, top) {
+        paintBox(ctx, left + 1, top, 3, 1, PAL.clockGold);
+        paintBox(ctx, left, top + 1, 1, 3, PAL.clockGold);
+        paintBox(ctx, left + 4, top + 1, 1, 3, PAL.clockGold);
+        paintBox(ctx, left + 1, top + 4, 3, 1, PAL.clockGold);
+        paintPixel(ctx, left + 2, top + 1, PAL.clockHand);
+        paintPixel(ctx, left + 2, top + 2, PAL.clockHand);
+        paintPixel(ctx, left + 3, top + 2, PAL.clockHand);
+    }
+
+    /* The four sky names on the pick card. The chosen one sits in a dark
+       chip, and the little gold clock marks the device-clock sky. */
+    function paintSkyRow(ctx) {
+        const widths = [];
+        let total = LAYOUT.skyRowChipPad * 2;
+        for (let index = 0; index < SKY_LABELS.length; index++) {
+            widths.push(measureText(SKY_LABELS[index], 1));
+            total += widths[index];
+        }
+        total += LAYOUT.skyRowGap * (SKY_LABELS.length - 1);
+        total += LAYOUT.skyClockWidth;
+        let left = Math.round((STAGE - total) / 2);
+        for (let index = 0; index < SKY_LABELS.length; index++) {
+            if (index === deviceSkyIndex) {
+                paintClock(ctx, left, LAYOUT.skyRowTop);
+                left += LAYOUT.skyClockWidth;
+            }
+            const chosen = index === chosenSkyIndex;
+            if (chosen) {
+                paintBox(ctx, left - LAYOUT.skyRowChipPad, LAYOUT.skyRowChipTop,
+                    widths[index] + LAYOUT.skyRowChipPad * 2, LAYOUT.skyRowChipHeight, PAL.ink);
+                paintCentredText(ctx, SKY_LABELS[index], left + widths[index] / 2,
+                    LAYOUT.skyRowTop, PAL.cream, 1);
+                left += widths[index] + LAYOUT.skyRowChipPad * 2;
+            } else {
+                paintCentredText(ctx, SKY_LABELS[index], left + widths[index] / 2,
+                    LAYOUT.skyRowTop, PAL.ink, 1);
+                left += widths[index];
+            }
+            left += LAYOUT.skyRowGap;
+        }
+    }
+
+    /* Four pronoun chips, with the heart now under the chosen chip so it
+       never covers a petal. */
+    function paintPronounChips(ctx) {
         const widths = [];
         let total = LAYOUT.chipGap * (PRONOUNS.length - 1);
         for (let index = 0; index < PRONOUNS.length; index++) {
@@ -15530,19 +15684,30 @@ syncSoundUI();
             total += widths[index];
         }
         let left = Math.round((STAGE - total) / 2);
+        let chosenCentre = 0;
         for (let index = 0; index < PRONOUNS.length; index++) {
             const chosen = index === selectedIndex;
             paintPlaque(ctx, left, LAYOUT.chipTop, widths[index], LAYOUT.chipHeight);
-            if (chosen) paintBox(ctx, left + 1, LAYOUT.chipTop + 1, widths[index] - 2, LAYOUT.chipHeight - 2, PAL.ink);
+            if (chosen) {
+                paintBox(ctx, left + 1, LAYOUT.chipTop + 1,
+                    widths[index] - 2, LAYOUT.chipHeight - 2, PAL.ink);
+            }
             paintCentredText(ctx, PRONOUNS[index].label, left + widths[index] / 2,
                 LAYOUT.chipTop + 4, chosen ? PAL.cream : PAL.ink, 1);
-            if (chosen) paintHeart(ctx, left + Math.round(widths[index] / 2) - 2,
-                LAYOUT.chipTop - LAYOUT.chipHeartTopOffset, PAL.roseLight);
+            if (chosen) chosenCentre = left + widths[index] / 2;
             left += widths[index] + LAYOUT.chipGap;
         }
-        paintPlaque(ctx, LAYOUT.pickHintLeft, LAYOUT.pickHintTop,
-            LAYOUT.pickHintWidth, LAYOUT.pickHintHeight);
-        paintCentredText(ctx, "LEFT RIGHT THEN PICK", STAGE / 2, LAYOUT.pickHintTop + 3, PAL.ink, 1);
+        paintHeart(ctx, Math.round(chosenCentre) - 2, LAYOUT.chipHeartTop, PAL.roseLight);
+    }
+
+    /* The pick card at the foot: the title, the sky row and the pronoun
+       chips, so the sky and the flower head stay clear. */
+    function paintPickCard(ctx) {
+        paintPlaque(ctx, LAYOUT.pickCardLeft, LAYOUT.pickCardTop,
+            LAYOUT.pickCardWidth, LAYOUT.pickCardHeight);
+        paintCentredText(ctx, "ASK THE FLOWER", STAGE / 2, LAYOUT.pickTitleLineTop, PAL.ink, 1);
+        paintSkyRow(ctx);
+        paintPronounChips(ctx);
     }
 
     /* The result card: the answer in the top ribbon and a prompt at the foot. */
@@ -15555,14 +15720,28 @@ syncSoundUI();
 
     /* ---------- HESHETHEYIT painting: the stage (private) ---------- */
 
+    /* How far the head flinches this frame: left on the tug, right on the
+       spring, then back to the gentle sway. */
+    function recoilOffset() {
+        if (!recoil.active) return 0;
+        if (recoil.age < SETTINGS.recoilTugSeconds) return -SETTINGS.recoilTugPixels;
+        if (recoil.age < SETTINGS.recoilTugSeconds + SETTINGS.recoilSpringSeconds) {
+            return SETTINGS.recoilSpringPixels;
+        }
+        return 0;
+    }
+
     /* Draw the sky, the ground, the flower, its fallen petals and the one
-       petal in the air. The head sways by a pixel or two around the stem. */
+       petal in the air. The head sways by a pixel or two around the stem,
+       and flinches when a petal is pulled. */
     function paintGrowingFlower(ctx, flowerToPaint) {
-        paintSkyBands(ctx, flowerToPaint.sky, STAGE, STAGE);
-        paintSkyLife(ctx, flowerToPaint.sky, STAGE, STAGE, worldClock);
+        const sky = makeSky(chosenSky, flowerToPaint.seed);
+        paintSkyBands(ctx, sky, STAGE, STAGE);
+        paintSkyLife(ctx, sky, STAGE, STAGE, worldClock);
         paintGround(ctx, STAGE, STAGE);
         const headX = LAYOUT.flowerCentreX +
-            Math.round(Math.sin(worldClock * SETTINGS.swaySpeed) * SETTINGS.swayAmplitudePixels);
+            Math.round(Math.sin(worldClock * SETTINGS.swaySpeed) * SETTINGS.swayAmplitudePixels) +
+            recoilOffset();
         const headY = LAYOUT.flowerCentreY;
         flowerToPaint.stemFootX = LAYOUT.flowerCentreX + flowerToPaint.lean;
         paintStem(ctx, flowerToPaint, headX, headY, LAYOUT.stemFootY, 1);
@@ -15576,6 +15755,9 @@ syncSoundUI();
         if (falling.active) {
             const fade = falling.landed && falling.rest > SETTINGS.fallenPetalLifetimeSeconds;
             if (!fade) {
+                if (falling.age < SETTINGS.petalSparkSeconds) {
+                    paintPixel(ctx, Math.round(falling.x) - 2, Math.round(falling.y) + 2, PAL.gold);
+                }
                 paintLoosePetal(ctx, flowerToPaint.palette, falling.x, falling.y, falling.spin,
                     flowerToPaint.shape.taperPower, flowerToPaint.shape.notched);
             }
@@ -15616,7 +15798,7 @@ syncSoundUI();
             LAYOUT.previewHeight - LAYOUT.previewGroundLightTop, PAL.grassLight);
         const previewFlower = makeFlower(SETTINGS.previewSeed, {
             petalCount: SETTINGS.previewPetalCount, paletteIndex: 0, shapeIndex: 0, centreIndex: 0,
-            phase: "day", headRadius: LAYOUT.previewRadius
+            headRadius: LAYOUT.previewRadius
         });
         previewFlower.stemFootX = LAYOUT.previewCentreX + previewFlower.lean;
         paintStem(ctx, previewFlower, LAYOUT.previewCentreX, LAYOUT.previewCentreY,
@@ -15656,13 +15838,16 @@ syncSoundUI();
         if (fallenPetals.length > PRONOUNS.length * 2) fallenPetals.shift();
     }
 
-    /* Start the one petal that falls from the flower after a pull. */
+    /* Start the one petal that pops free and falls after a pull. It leaves
+       two pixels outside the head, with a little spin and a spark. */
     function startFallingPetal(flowerToPull, petalIndex) {
         const angle = -Math.PI / 2 + petalIndex * (Math.PI * 2 / flowerToPull.petalCount);
         const headX = LAYOUT.flowerCentreX +
-            Math.round(Math.sin(worldClock * SETTINGS.swaySpeed) * SETTINGS.swayAmplitudePixels);
-        const startX = headX + Math.cos(angle) * (flowerToPull.headRadius - 2);
-        const startY = LAYOUT.flowerCentreY + Math.sin(angle) * (flowerToPull.headRadius - 2);
+            Math.round(Math.sin(worldClock * SETTINGS.swaySpeed) * SETTINGS.swayAmplitudePixels) +
+            recoilOffset();
+        const startX = headX + Math.cos(angle) * (flowerToPull.headRadius + SETTINGS.petalPopPixels);
+        const startY = LAYOUT.flowerCentreY + Math.sin(angle) * (flowerToPull.headRadius + SETTINGS.petalPopPixels);
+        const startSpin = angle - SETTINGS.petalPopSpin;
         falling = {
             active: true,
             landed: false,
@@ -15670,7 +15855,8 @@ syncSoundUI();
             y: startY,
             startX: startX,
             angle: angle,
-            spin: angle,
+            spin: startSpin,
+            startSpin: startSpin,
             age: 0,
             rest: 0
         };
@@ -15684,7 +15870,7 @@ syncSoundUI();
             falling.y += SETTINGS.fallingSpeedPixels * dt;
             falling.x = falling.startX + Math.sin(falling.age * SETTINGS.fallingSwaySpeed) * SETTINGS.fallingSwayPixels +
                 SETTINGS.fallingDriftPixels * falling.age;
-            falling.spin = falling.angle + falling.age * SETTINGS.fallingSpinSpeed;
+            falling.spin = falling.startSpin + falling.age * SETTINGS.fallingSpinSpeed;
             if (falling.y >= SETTINGS.fallingRestPixels) {
                 falling.y = SETTINGS.fallingRestPixels;
                 falling.landed = true;
@@ -15706,6 +15892,7 @@ syncSoundUI();
         if (falling.active && !falling.landed) return;
         keepFallenPetal();
         falling = { active: false };
+        recoil = { active: true, age: 0 };
         const petalIndex = flower.petalCount - petalsLeft;
         flower.removed[petalIndex] = true;
         petalsLeft -= 1;
@@ -15714,6 +15901,7 @@ syncSoundUI();
         phrase = makePhrase(lovesMe);
         startFallingPetal(flower, petalIndex);
         if (petalsLeft === 0) {
+            heartStartClock = worldClock;
             answer = phrase + "!";
             resultPending = true;
             writeMessage("the last petal is falling...");
@@ -15736,7 +15924,8 @@ syncSoundUI();
         }
     }
 
-    /* Ask about someone: a fresh flower and a fresh sky, then the pick card. */
+    /* Ask about someone: a fresh flower keeps this visit's chosen sky, then
+       the pick card opens. */
     function beginPick() {
         flower = makeFlower(nextSeed(), {});
         petalsLeft = flower.petalCount;
@@ -15745,10 +15934,12 @@ syncSoundUI();
         falling = { active: false };
         fallenPetals = [];
         resultPending = false;
+        recoil = { active: false, age: 0 };
+        heartStartClock = 0;
         state = STATE.PICK;
         setScoreChipsHidden(true);
         setAction("PICK");
-        writeMessage("left and right choose - PICK to ask");
+        writeMessage("left right pick - up down sky - PICK to ask");
     }
 
     /* Leave the pick card and show the flower, ready for the first pull. */
@@ -15761,6 +15952,8 @@ syncSoundUI();
         falling = { active: false };
         fallenPetals = [];
         resultPending = false;
+        recoil = { active: false, age: 0 };
+        heartStartClock = 0;
         state = STATE.PULL;
         setScoreChipsHidden(true);
         setAction("PULL");
@@ -15769,13 +15962,17 @@ syncSoundUI();
 
     /* ---------- HESHETHEYIT module contract ---------- */
 
-    /* Open on the how-to card with a fresh clock and SHE suggested. */
+    /* Open on the how-to card with a fresh clock and SHE suggested. The sky
+       starts at the device clock; the how-to card itself stays on day. */
     function start() {
         best = readBest(SETTINGS.gameName);
         worldClock = 0;
         selectedIndex = 1;
+        const devicePhase = skyPhaseForHour(readDeviceHour());
+        deviceSkyIndex = skyIndexForPhase(devicePhase);
+        setChosenSky(deviceSkyIndex);
         flower = makeFlower(SETTINGS.howToSeed, {
-            petalCount: 5, paletteIndex: 0, shapeIndex: 0, centreIndex: 0, phase: "day"
+            petalCount: 5, paletteIndex: 0, shapeIndex: 0, centreIndex: 0
         });
         petalsLeft = flower.petalCount;
         phrase = "";
@@ -15783,6 +15980,8 @@ syncSoundUI();
         falling = { active: false };
         fallenPetals = [];
         resultPending = false;
+        recoil = { active: false, age: 0 };
+        heartStartClock = 0;
         state = STATE.HOW_TO;
         setScoreChipsHidden(true);
         setAction("START");
@@ -15799,7 +15998,8 @@ syncSoundUI();
         beginPick();
     }
 
-    /* Left and right choose a pronoun; any direction starts the how-to card. */
+    /* Left and right choose a pronoun; up and down choose the sky on the
+       pick card only. Any direction starts the how-to card. */
     function onDir(dir, pressed) {
         if (!pressed) return;
         if (state === STATE.HOW_TO) {
@@ -15809,6 +16009,8 @@ syncSoundUI();
         if (state !== STATE.PICK) return;
         if (dir === "left") selectedIndex = (selectedIndex + PRONOUNS.length - 1) % PRONOUNS.length;
         if (dir === "right") selectedIndex = (selectedIndex + 1) % PRONOUNS.length;
+        if (dir === "up") setChosenSky(chosenSkyIndex + 1);
+        if (dir === "down") setChosenSky(chosenSkyIndex - 1);
     }
 
     /* The action button walks the game forward: START, PICK, PULL, AGAIN. */
@@ -15829,10 +16031,14 @@ syncSoundUI();
         if (state === STATE.HOW_TO || state === STATE.RESULT) onAction();
     }
 
-    /* Advance the clock and the one falling petal; nothing else moves. */
+    /* Advance the clock, the pull's flinch and the one falling petal. */
     function update(rawDt) {
         const dt = rawDt > 0.25 ? 0.25 : rawDt;
         worldClock += dt;
+        if (recoil.active) {
+            recoil.age += dt;
+            if (recoil.age >= SETTINGS.recoilTotalSeconds) recoil = { active: false, age: 0 };
+        }
         updateFallingPetal(dt);
         if (resultPending && !falling.active) finishReading();
     }
@@ -15845,7 +16051,7 @@ syncSoundUI();
         tagline: "one petal at a time",
         concept: "The last petal answers. (Inspired by Yuan Ning)",
         actionLabel: "START",
-        hint: "left and right pick HE SHE THEY IT · SPACE or tap pulls a petal · R restarts · ESC shelf",
+        hint: "left right pick HE SHE THEY IT · up down sky · SPACE or tap pulls · R restarts · ESC shelf",
         previewPaint: paintShelfPreview,
         start, stop, restart, update, paint, onDir, onAction, onStageTap, onAnyKey
     });
@@ -15859,29 +16065,47 @@ syncSoundUI();
         window.__HESHETHEYIT_TEST__ = {
             /* Read the current state without touching it. */
             snapshot: function () {
+                const headX = LAYOUT.flowerCentreX +
+                    Math.round(Math.sin(worldClock * SETTINGS.swaySpeed) * SETTINGS.swayAmplitudePixels) +
+                    recoilOffset();
                 return {
                     state: state,
                     actionLabel: currentActionLabel,
                     selectedIndex: selectedIndex,
                     selectedLabel: PRONOUNS[selectedIndex].label,
                     petalCount: flower ? flower.petalCount : 0,
+                    seed: flower ? flower.seed : 0,
                     petalsLeft: petalsLeft,
                     phrase: phrase,
                     answer: answer,
-                    skyPhase: flower ? flower.sky.phase : "",
+                    skyPhase: chosenSky,
+                    deviceSkyPhase: SKY_NAMES[deviceSkyIndex],
                     paletteName: flower ? flower.palette.name : "",
+                    palette: flower ? flower.palette : null,
                     shapeName: flower ? flower.shape.name : "",
+                    taperPower: flower ? flower.shape.taperPower : 0,
+                    notched: flower ? flower.shape.notched : false,
                     centreIndex: flower ? flower.centreIndex : 0,
                     thorns: flower ? flower.thorns : false,
+                    headRadius: flower ? flower.headRadius : 0,
+                    widthFactor: flower ? flower.widthFactor : 0,
+                    clock: worldClock,
+                    headX: flower ? headX : 0,
+                    headY: LAYOUT.flowerCentreY,
                     fallingActive: falling.active,
                     fallingX: falling.active ? Math.round(falling.x) : 0,
                     fallingY: falling.active ? Math.round(falling.y) : 0,
-                    fallenCount: fallenPetals.length
+                    fallingAngle: falling.active ? falling.spin : 0,
+                    fallenCount: fallenPetals.length,
+                    fallen: fallenPetals.map((petal) => ({
+                        x: petal.x, y: petal.y, angle: petal.angle
+                    }))
                 };
             },
             /* Put a chosen flower on stage, ready for the first pull. */
             forceFlower: function (options) {
                 const choices = options || {};
+                if (choices.phase !== undefined) setChosenSky(skyIndexForPhase(choices.phase));
                 flower = makeFlower(choices.seed !== undefined ? choices.seed : nextSeed(), choices);
                 beginPull();
             },

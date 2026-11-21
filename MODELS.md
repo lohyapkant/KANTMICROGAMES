@@ -134,6 +134,8 @@ What each model used on each build. This is a record, not an opinion, and not a 
 | 040 | DeepSeek V4.1 Flash Free · OpenCode | wrote the prompt with the owner (effort High) and built | ~52 min | 333,427 tokens processed | measured: 235,806 input + 43,164 output + 54,457 reasoning; 16,279,040 cache reads not counted; 146 steps; 169 tool calls; OpenCode stats delta over the same two-day window, final reading after the swap and the live check (see the build record in plans/buildlog/040-20261117.md) |
 | 041 | DeepSeek V4.1 Flash Free · OpenCode | wrote the prompt with the owner (effort High) and built | ~40 min | 1,274,945 tokens processed | measured: 883,950 input + 154,177 output + 236,818 reasoning; 39,316,864 cache reads not counted; 397 steps; 456 tool calls; OpenCode stats delta over the same two-day window, final reading after the swap and the live check (see the build record in plans/buildlog/041-20261118.md) |
 | 042 | DeepSeek V4.1 Flash Free · OpenCode | wrote the prompt with the owner (effort High) and built | ~3 h across two sittings, with a long pause | not measurable as one delta — readings below | measured: the two-day stats window slid past midnight during the build, so final minus start is not meaningful; start reading on 2026-11-19 was 1,086,517 input + 121,612 output + 179,880 reasoning, 29,415,936 cache reads not counted, 327 steps, 371 tool calls; final reading on 2026-11-20 was 865,866 input + 119,898 output + 159,249 reasoning, 33,745,024 cache reads not counted, 353 steps, 438 tool calls; the 2026-11-20 day alone added 124 steps (see the build record in plans/buildlog/042-20261119.md) |
+| 043 | DeepSeek V4.1 Flash Free · OpenCode | wrote the prompt with the owner (effort High) and began the build (effort High) | not measured | not recorded | the saved usage-start.json reports 673,721 input + 112,481 output + 189,295 reasoning and 28,866,048 cache reads; PROGRESS.md separately records 672,508 input + 112,256 output + 188,622 reasoning and 28,763,904 cache reads. The readings conflict; final reading and duration were lost at halt, so no delta is stated |
+| 043 | GPT-6-Luna · OpenAI Codex CLI | completed the build (effort High) | 2 h 39 min 28 s (Codex UI display) | final meter: 1,008,937 total tokens (not a build delta) | owner-provided end reading: 832,968 input + 175,969 output (86,596 reasoning included in output); 39,387,264 cached input shown separately and not counted. Start meter not checked, so build delta is unavailable; no credit reading supplied |
 
 ### Totals that can honestly be added
 - **Credits, Qoder CLI, per-request transcript, builds 009-016:** 74.5874 credits over 1,143 billable requests.
@@ -143,6 +145,7 @@ What each model used on each build. This is a record, not an opinion, and not a 
 - **Iterations recorded (from build 017):** 4 over 1 build.
 - **Iterations recorded (build 018):** 1 repair cycle pair (a 280 px control clash, fixed by stacking the corner pair under 360 px and using 4 px page padding).
 - **Tokens, OpenCode readings (input + output + reasoning; cache reads not counted), builds 005, 017, 021, 023, 024, 025, 026, 027, 028, 036, 037, 038, 039, 040 and 041:** about 8.62 M tokens in total (005 is approximate at about 2.37 M; 017 is 165,312; 021 is 203,831 at the final reading; 023 is 187,025; 024 is 301,245 at the final reading after the swap and the live regression; 025 is 241,367 at the final reading after the swap and the live regression; 026 is 272,819 at the final reading after the swap and the live check; 027 is 117,458 at the final reading after the swap and the live check; 028 is 303,053 at the final reading after the swap and the live check; 036 is 485,529 at the final reading after the swap and the live check; 037 is 863,602 at the final reading after the swap and the live check; 038 is 1,052,704 at the final reading after the swap and the live check; 039 is 452,098 at the final reading after the swap and the live check; 040 is 333,427 at the final reading after the swap and the live check; 041 is 1,274,945 at the final reading after the swap and the live check). Builds 018, 019 and 020 have no token reading. Other token figures count different things and are never added to these. (The build 026 total should have read 3.74 M; corrected in build 027. The build 028 total was recomputed from the listed figures. The build 036 total was recomputed from the listed figures. The build 037 total was recomputed from the listed figures. The build 041 total was recomputed from the listed figures.) (Build 042 is not listed: its two-day stats window slid past midnight, so no build total can be stated; its ledger row carries the start and final readings.)
+- **Build 043:** no build usage total is added. OpenCode's saved start record and the handover notes disagree, and its post-halt final reading was lost. The owner supplied the Codex CLI end meter (1,008,937 total; 832,968 input + 175,969 output, including 86,596 reasoning; 39,387,264 cached input not counted), but its start meter was not checked, so this is an end snapshot rather than a build delta. The Codex UI displayed 2 h 39 min 28 s; OpenCode time and combined duration remain unknown. No credit reading was supplied.
 - **Build 021 usage note:** the ledger row for build 021 shows the reading taken when the records were written (162,156 tokens); the build's usage after the final swap is 203,831 tokens. The row is a record and is not edited.
 - **Build 022 token reading:** 361,981 tokens (input 309,861 + output 32,999 + reasoning 19,121; 7,112,192 cache reads not counted; 69 steps; 68 tool calls; cost $0.00), from the OpenCode final reading after the swap and the docs check. An earlier post-swap reading of 249,131 was taken before the OpenCode run stopped and resumed; the ledger uses 361,981. Gemini 3.8 Flash's share of build 022 has no reading. The bullet above listed builds 005, 017 and 021 when this note was written; build 023 extended it.
 - **Time by model, approximate.** Builds 000-002 and the GPT-OSS attempt have no time recorded, so DeepSeek and GLM are undercounted. One block = 10 minutes, rounded half up.
@@ -156,8 +159,9 @@ What each model used on each build. This is a record, not an opinion, and not a 
 | Flint 40B Free | ~25 | ▇▇▇ |
 | Claude Opus 4.6 Thinking | ~20 | ▇▇ |
 | Shared session (build 006: DeepSeek + Gemini) | ~30 | ▇▇▇ |
+| GPT-6-Luna | ~160 | ▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇ |
 
-Total recorded: about 1081 minutes (about 18 h 1 min) across the builds listed in the table.
+Total recorded: about 1240 minutes (about 20 h 40 min) across the builds listed in the table, including the Codex UI's 2 h 39 min 28 s display for build 043; the OpenCode portion of build 043 has no time reading.
 (Totals were recomputed after the build-038 row was added and the earlier corrections applied; the build records remain the source of truth (the long-form ones are private; the public CHANGELOG.md entry repeats the time and usage).)
 
 ## 2026-11-07 — DeepSeek V4.1 Flash Free (OpenCode) — build 021
@@ -607,6 +611,14 @@ Source: Owner's words, recorded by DeepSeek V4.1 Flash Free (OpenCode)
 Builds observed: `038-20261115`.
 
 The owner confirmed that the prompt was written with DeepSeek V4.1 Flash Free in OpenCode CLI at High effort and that the build itself also ran at High effort. Builds 036 and 037 keep "effort not shown", because no reading was supplied for them; they are not retrofitted.
+
+## 2026-11-21 — Owner note — Build 043 tool and model
+
+Source: Owner's words (verbatim)
+
+Builds observed: `043-20261121`.
+
+The owner specified: “You are Codex CLI running GPT-6-Luna "High" effort.” The build therefore records GPT-6-Luna via OpenAI Codex CLI at High effort; the P-43 prompt author remains DeepSeek V4.1 Flash Free via OpenCode CLI at High effort.
 
 <!-- NEW ENTRIES ABOVE THIS LINE. Never edit existing entries. -->
 

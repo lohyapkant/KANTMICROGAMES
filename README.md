@@ -4,7 +4,7 @@ Eleven tiny pixel-art games in one HTML file. Open it, pick a game, play a minut
 
 Play online: <https://kantmicrogames.lohyapkant.workers.dev/>
 
-**Current build:** `042-20261119` — eleven games, one file.
+**Current build:** `043-20261121` — eleven games, one file.
 
 ## About this project
 
@@ -28,7 +28,7 @@ A short record of every build is in CHANGELOG.md; the long-form build records ar
 | CATNAPCATCH | Slide a paper pillow under a sleeping kitten and catch the falling noisemakers; three clangs wake the nap. |
 | PENGUINSLIDE | Waddle Pip across the ice, belly-slide with SPACE, and eat six golden fish while dodging two grumpy seals. |
 | CHASEKILLKANT | Chase Kant down a warm office corridor and hit him five times with thrown cutlery in sixty seconds, while dodging falling cacti and grabbing delivery boxes. |
-| HESHETHEYIT | Pick HE, SHE, THEY or IT, then pull a petal per tap; the last petal answers. |
+| HESHETHEYIT | Pick HE, SHE, THEY or IT, choose a sky with up/down, then pull a petal per tap; the last petal answers. |
 
 ## How to play
 

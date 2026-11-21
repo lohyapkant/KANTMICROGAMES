@@ -8,6 +8,16 @@ A short record of every build, newest first. Each entry gives the build ID, the 
 - **Corrected in build 028:** 13 lines in entries 000 to 018 were cut off mid-sentence when this record was made in build 027; they were restored in full from the private record. (The build 028 prompt expected 15: entries 001 and 000 were named too, but their lines were already whole, so nothing there needed changing.)
 
 <!-- NEW ENTRIES: paste the newest short entry on the line below this comment, above the previous newest. Never edit older entries except to add a dated correction line in the header. -->
+## 043-20261121 — 2026-11-21 (HESHETHEYIT v2: solid petals, a chosen sky and a night saucer)
+
+Built from prompt: P-43, written by the owner with DeepSeek V4.1 Flash Free (OpenCode CLI) at High effort and pasted verbatim after review; build completed by GPT-6-Luna (OpenAI Codex CLI) at High effort.  
+What changed: HESHETHEYIT v2. Petals now rasterize solidly; the PICK card lets the player choose among all four skies, while the device clock remains the suggestion; the night witch and broom became a small saucer; the flower recoils on a pull, the petal pops before falling, the bare heart arrives in two steps, and the how-to card teaches the sky control. All eleven games are frozen.  
+Checked: logic harness 574/574; art harness 69/69, including a measured zero pinholes in head petals, loose petals and the how-to icon (same-seed Build 42 comparison: 269/4/1 before, 0/0/0 after); headless Chrome 60/60 flow checks, stage rectangle identical to Build 42 at all seven named viewports, zero console errors and zero external requests. Ten other game modules unchanged.  
+Not checked: Safari, a physical phone, sound or owner visual approval.  
+Open issue: the saved-sheet planning counts were 416 head and 25 loose-petal pinholes; the same-seed probe against the saved Build 42 file measured 269 and 4. The before and after counts above are from the probe, not the planning estimates. Usage readings and duration were not captured consistently; MODELS.md records the available readings and the recovery request.  
+Time and usage: see the Build 043 rows in MODELS.md.  
+Usage/time update (2026-11-21): the owner supplied the Codex CLI end display: 1,008,937 total tokens (832,968 input + 175,969 output, with 86,596 reasoning included in output; 39,387,264 cached input shown separately). The Codex UI showed 2 h 39 min 28 s worked. The start meter was not captured, so this is not a build usage delta; OpenCode's final reading and time remain unavailable.  
+
 ## 042-20261119 — 2026-11-19 (HESHETHEYIT: the eleventh game, and the last petal answers)
 
 Built from prompt: P-42, written by the owner with DeepSeek V4.1 Flash Free in OpenCode CLI at High effort and pasted verbatim after reviewing the planning sheet (a new game about pulling flower petals, with a clock-driven sky and the last answer on the shelf); prompt effort High  

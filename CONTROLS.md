@@ -1,4 +1,4 @@
-<!-- Applies to: build 042-20261119 · eleven games · changes to controls are recorded in CHANGELOG.md -->
+<!-- Applies to: build 043-20261121 · eleven games · changes to controls are recorded in CHANGELOG.md -->
 # KANTMICROGAMES — Controls
 
 Which controls exist, how they behave on each kind of device, and why.
@@ -18,7 +18,7 @@ This guide applies to all eleven games, on every kind of device.
 | CATNAPCATCH | slide the pillow left and right with `A` / `D`, ← → or the direction pad | **POUF** — widen the paper pillow for 1.4 s, 4.5 s cooldown | catch falling noisemakers for 45 s; three clangs wake Mochi |
 | PENGUINSLIDE | slide on ice with `W A S D` / arrows / the direction pad | **STOP** — halt sliding to think | push ice blocks to build a path to the fish within 60 s; score equals remaining seconds |
 | CHASEKILLKANT | strafe with `A` / `D`, ← → or the direction pad | **THROW** — toss the next piece of cutlery, 0.28 s apart | hit Kant five times in 60 s while dodging falling cacti; delivery boxes restock one piece |
-| HESHETHEYIT | choose with `A` / `D`, ← → or the direction pad | **START / PICK / PULL / AGAIN** — one petal per press | pull every petal; the last one answers who loves you |
+| HESHETHEYIT | choose HE/SHE/THEY/IT with `A` / `D`, ← → or the direction pad; choose the sky with `W` / `S`, ↑ ↓ or the direction pad on PICK | **START / PICK / PULL / AGAIN** — one petal per press | pull every petal; the last one answers who loves you |
 
 The action button carries the game's own label (DASH / POKE / GO / REACH / STOMP / ZOOM / PEEK / POUF / STOP / THROW / START / PICK / PULL / AGAIN),
 so one button serves every game. SLIMEHOP is the one game where a direction press is a single
@@ -32,9 +32,11 @@ hedge blocks a step. It never moves diagonally, so Momo cannot wedge between two
 CATNAPCATCH uses the horizontal axis only: left and right slide the paper pillow, and up
 and down do nothing. CHASEKILLKANT also uses the horizontal axis only: left and right
 strafe along the hallway, up and down do nothing, and the action button throws.
-HESHETHEYIT uses the horizontal axis only too: left and right step through HE, SHE,
-THEY and IT, up and down do nothing, and the action button picks and pulls one petal
-per press. It has no score; the shelf line shows the last answer.
+HESHETHEYIT uses left and right to choose HE, SHE, THEY or IT. On the PICK card,
+up and down cycle dawn, day, dusk and night; the device clock marks its suggested sky.
+The choice stays through the reading and AGAIN, and resets to the device sky when the
+game is reopened. The action button picks and pulls one petal per press. It has no
+score; the shelf line shows the last answer.
 
 ## Settings
 
