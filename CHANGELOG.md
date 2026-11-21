@@ -8,6 +8,16 @@ A short record of every build, newest first. Each entry gives the build ID, the 
 - **Corrected in build 028:** 13 lines in entries 000 to 018 were cut off mid-sentence when this record was made in build 027; they were restored in full from the private record. (The build 028 prompt expected 15: entries 001 and 000 were named too, but their lines were already whole, so nothing there needed changing.)
 
 <!-- NEW ENTRIES: paste the newest short entry on the line below this comment, above the previous newest. Never edit older entries except to add a dated correction line in the header. -->
+## 045-20261121 — 2026-11-21 (About reflection, catalog wrapping and comic art polish)
+
+Built from prompt: P-45, owner request and design confirmed; reflection edited by Claude.Ai Sonnet 5.5 (High).  
+Tool and model: **GPT-6-Luna** (OpenAI Codex CLI); effort High  
+What changed: Replaced the About reflection with the approved wording, cleared the right scrollbar inset, and let game descriptions wrap. Redrew the four comic panels with larger, more detailed pixel maps and added flight and space details.  
+Games changed: none  
+Checked: staged checker 12/12 PASS; readable check 3/3 PASS; headless Chrome passed all seven stage sizes, 11 wrapped descriptions, four comic panels, dialog and focus flows, with zero console errors or external requests. Live checks follow the swap.  
+Not checked: Safari, a physical phone, sound playback and owner visual approval.  
+Time and usage: duration not supplied; final Codex CLI snapshot 1,556,975 total tokens (not a build delta); start total not captured; 51,818,112 cached input shown separately.  
+
 ## 044-20261121 — 2026-11-21 (Shelf About overlay: animated 4-panel comic, reflections, games catalog, credits and license)
 
 Built from prompt: P-44, planned by the owner with Claude Opus 4.6 (Thinking) and Gemini 3.8 Flash (High) on Google Antigravity CLI and pasted verbatim; build completed by Gemini 3.8 Flash (Google Antigravity CLI) at High effort.  

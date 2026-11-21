@@ -138,6 +138,8 @@ What each model used on each build. This is a record, not an opinion, and not a 
 | 043 | GPT-6-Luna · OpenAI Codex CLI | completed the build (effort High) | 2 h 39 min 28 s (Codex UI display) | final meter: 1,008,937 total tokens (not a build delta) | owner-provided end reading: 832,968 input + 175,969 output (86,596 reasoning included in output); 39,387,264 cached input shown separately and not counted. Start meter not checked, so build delta is unavailable; no credit reading supplied |
 | 044 | Claude Opus 4.6 (Thinking) · Google Antigravity | planned (About prompt part 1) | ~30 min | session quota | rate limit reached; token count not exposed in CLI stdout |
 | 044 | Gemini 3.8 Flash (High) · Google Antigravity | planned & built (About overlay) | ~40 min | session quota | Antigravity quota; token count not exposed in CLI stdout |
+| 045 | Claude.Ai Sonnet 5.5 · Claude.ai | edited the reflection (effort High) | — | — | prompt text edit; usage and duration not reported |
+| 045 | GPT-6-Luna · OpenAI Codex CLI | built (effort High) | not recorded | end snapshot: 1,556,975 total tokens (not a build delta) | owner-supplied final reading: 1,295,647 input + 261,328 output (135,075 reasoning included); 51,818,112 cached input shown separately and not counted. Start token total was not captured, so usage delta is unavailable; elapsed time was not supplied |
 
 ### Totals that can honestly be added
 - **Credits, Qoder CLI, per-request transcript, builds 009-016:** 74.5874 credits over 1,143 billable requests.
@@ -147,6 +149,7 @@ What each model used on each build. This is a record, not an opinion, and not a 
 - **Iterations recorded (from build 017):** 4 over 1 build.
 - **Iterations recorded (build 018):** 1 repair cycle pair (a 280 px control clash, fixed by stacking the corner pair under 360 px and using 4 px page padding).
 - **Tokens, OpenCode readings (input + output + reasoning; cache reads not counted), builds 005, 017, 021, 023, 024, 025, 026, 027, 028, 036, 037, 038, 039, 040 and 041:** about 8.62 M tokens in total (005 is approximate at about 2.37 M; 017 is 165,312; 021 is 203,831 at the final reading; 023 is 187,025; 024 is 301,245 at the final reading after the swap and the live regression; 025 is 241,367 at the final reading after the swap and the live regression; 026 is 272,819 at the final reading after the swap and the live check; 027 is 117,458 at the final reading after the swap and the live check; 028 is 303,053 at the final reading after the swap and the live check; 036 is 485,529 at the final reading after the swap and the live check; 037 is 863,602 at the final reading after the swap and the live check; 038 is 1,052,704 at the final reading after the swap and the live check; 039 is 452,098 at the final reading after the swap and the live check; 040 is 333,427 at the final reading after the swap and the live check; 041 is 1,274,945 at the final reading after the swap and the live check). Builds 018, 019 and 020 have no token reading. Other token figures count different things and are never added to these. (The build 026 total should have read 3.74 M; corrected in build 027. The build 028 total was recomputed from the listed figures. The build 036 total was recomputed from the listed figures. The build 037 total was recomputed from the listed figures. The build 041 total was recomputed from the listed figures.) (Build 042 is not listed: its two-day stats window slid past midnight, so no build total can be stated; its ledger row carries the start and final readings.)
+- **Build 045:** no build usage total is added. The owner supplied the Codex CLI end snapshot: 1,556,975 total tokens (1,295,647 input + 261,328 output, including 135,075 reasoning); 51,818,112 cached input shown separately and not counted. The start total was not captured, and elapsed time was not supplied.
 - **Build 043:** no build usage total is added. OpenCode's saved start record and the handover notes disagree, and its post-halt final reading was lost. The owner supplied the Codex CLI end meter (1,008,937 total; 832,968 input + 175,969 output, including 86,596 reasoning; 39,387,264 cached input not counted), but its start meter was not checked, so this is an end snapshot rather than a build delta. The Codex UI displayed 2 h 39 min 28 s; OpenCode time and combined duration remain unknown. No credit reading was supplied.
 - **Build 021 usage note:** the ledger row for build 021 shows the reading taken when the records were written (162,156 tokens); the build's usage after the final swap is 203,831 tokens. The row is a record and is not edited.
 - **Build 022 token reading:** 361,981 tokens (input 309,861 + output 32,999 + reasoning 19,121; 7,112,192 cache reads not counted; 69 steps; 68 tool calls; cost $0.00), from the OpenCode final reading after the swap and the docs check. An earlier post-swap reading of 249,131 was taken before the OpenCode run stopped and resumed; the ledger uses 361,981. Gemini 3.8 Flash's share of build 022 has no reading. The bullet above listed builds 005, 017 and 021 when this note was written; build 023 extended it.
@@ -163,7 +166,7 @@ What each model used on each build. This is a record, not an opinion, and not a 
 | Shared session (build 006: DeepSeek + Gemini) | ~30 | ▇▇▇ |
 | GPT-6-Luna | ~160 | ▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇ |
 
-Total recorded: about 1240 minutes (about 20 h 40 min) across the builds listed in the table, including the Codex UI's 2 h 39 min 28 s display for build 043; the OpenCode portion of build 043 has no time reading.
+Total recorded: about 1240 minutes (about 20 h 40 min) across builds with duration readings, including the Codex UI's 2 h 39 min 28 s display for build 043; the OpenCode portion of build 043 has no time reading. Build 045 duration was not supplied and is excluded.
 (Totals were recomputed after the build-038 row was added and the earlier corrections applied; the build records remain the source of truth (the long-form ones are private; the public CHANGELOG.md entry repeats the time and usage).)
 
 ## 2026-11-07 — DeepSeek V4.1 Flash Free (OpenCode) — build 021
@@ -629,6 +632,14 @@ Source: Recorded by Gemini 3.8 Flash from the owner's feedback and prompt instru
 Builds observed: `044-20261121`.
 
 The owner observed: “The topic is about adding an 'About' screen to the 'Shelf' of the project. I am very mindful of the space for the buttons, and to allow additional buttons in the future perhaps, so tapping the about button will open an overlay or window similar to the Settings and Badge button in the Shelf presently.” Build 044 delivers the shelf About overlay with a four-panel animated pixel-art comic depicting the classic Programmer vs Non-Programmer after one year of refining vs AI vibe coding meme, owner reflections on AI-assisted creation (strictly without contractions), an interactive shelf games catalog with mini preview thumbnails, a directory of AI models and tools with external links, and a collapsible MIT license viewer.
+
+## 2026-11-21 — Owner observation — Gemini 3.8 Flash (Google Antigravity) and comic pixel art
+
+Source: Owner's words (verbatim)
+
+Builds observed: `044-20261121` and `045-20261121`.
+
+The owner observed: “Google Antigravity Gemini 3.8 Flash at "high" effort is good at the coding portions for HTML5 related matters, but the pixel art efforts are not as detailed or as beautiful as those created by OpenCode CLI DeepSeek V4.1.” This records the owner's experience with these builds, not a general ranking.
 
 <!-- NEW ENTRIES ABOVE THIS LINE. Never edit existing entries. -->
 
