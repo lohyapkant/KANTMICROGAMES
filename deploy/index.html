@@ -6,8 +6,8 @@
   Repository : https://github.com/lohyapkant/KANTMICROGAMES
   Play online: https://kantmicrogames.lohyapkant.workers.dev/
   Hosting    : Cloudflare Workers (https://workers.cloudflare.com/)
-  Current    : build 046-20261121 — SIMONENUTS: twelfth microgame, smashing acorns on an oak table
-               animated comic, reflections, games catalog, credits and license
+  Current    : build 048-20261124 — a warmer acknowledgment and a dream in the reflection
+               animated comic, reflections, games catalog, acknowledgments, credits and license
   Names      : project and on-screen brand KANTMICROGAMES ·
                save keys and the console tag use the KANTMICROGAMES prefix
   Build log  : build 028-20261114, DeepSeek V4.1 Flash Free (OpenCode) — a short
@@ -493,10 +493,25 @@
             .card:hover { transform: translateY(-4px) rotate(-0.5deg); }
         }
 
+        /* Keyboard focus gets the same gentle lift as a mouse hover. */
+        .card:focus-visible { transform: translateY(-4px) rotate(-0.5deg); }
+
+        /* Dialogs and a hidden tab rest the shelf. */
+        body.shelfPaused .card .preview { animation-play-state: paused; }
+
+        /* A one-pixel breath on the preview art, staggered card by card so
+           the shelf ripples rather than pulsing in unison. */
+        @keyframes shelfBreathe {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-1px); }
+        }
+
         .card .preview {
             display: block;
             width: 100%;
             height: auto;
+            animation: shelfBreathe 3.8s ease-in-out infinite;
+            animation-delay: var(--shelfBreathDelay, 0s);
             /* keep the 200 x 96 stage-card art in proportion on every card
                width; a fixed 96 px height used to squash it vertically */
             aspect-ratio: 200 / 96;
@@ -835,17 +850,16 @@
             grid-template-columns: repeat(2, minmax(0, 1fr));
             gap: 8px;
             margin: 4px auto 6px;
-            max-width: 440px;
+            /* 200 px panels (a 2x view of 100 art pixels) plus the 8 px gap */
+            max-width: 408px;
         }
 
         .comicPanel {
             position: relative;
+            margin: 0;
             border-radius: 12px;
             overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
+            display: block;
             box-shadow: 0 2px 6px rgba(74, 59, 50, 0.08);
         }
 
@@ -858,24 +872,32 @@
             image-rendering: pixelated;
         }
 
-        .comicPanel.panel1, .comicPanel.panel3 {
-            border: 1px solid var(--outline);
-            background: #f4eedb;
-            padding: 3px;
+        .comicPanelCaption {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: baseline;
+            column-gap: 5px;
+            row-gap: 1px;
+            margin: 4px 0 0;
+            text-align: left;
+            font-size: 0.68rem;
+            line-height: 1.25;
+            color: var(--ink);
         }
 
-        .comicPanel.panel2 {
-            border: 2px solid #4a7bb0;
-            background: #87ceeb;
-            padding: 2px;
-            box-shadow: 0 0 0 1px #ffffff, 0 4px 10px rgba(74, 123, 176, 0.25);
+        .comicCaptionNumber {
+            font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+            color: var(--ink-soft);
         }
 
-        .comicPanel.panel4 {
-            border: 2px dashed #e06c1b;
-            background: #0d091a;
-            padding: 2px;
-            box-shadow: inset 0 0 8px rgba(224, 108, 27, 0.3);
+        .comicCaptionTitle {
+            font-weight: 800;
+            letter-spacing: 0.02em;
+        }
+
+        .comicCaptionLine {
+            flex-basis: 100%;
+            color: var(--ink-soft);
         }
 
         .comicCaption {
@@ -1479,7 +1501,8 @@
         }
 
         @media (prefers-reduced-motion: reduce) {
-            .card, .card:hover, .chip.pulse b { animation: none; transition: none; transform: none; }
+            .card, .card:hover, .card:focus-visible, .chip.pulse b { animation: none; transition: none; transform: none; }
+            .card .preview { animation: none; }
             .pbtn, .pill, .cornerBtn { transition: none; }
             .pbtn.press, .pill.press, .cornerBtn.press { transform: none; }
         }
@@ -1618,18 +1641,22 @@
                     <!-- Section 1: 4-Panel Comic -->
                     <div id="comicContainer">
                         <div id="comicGrid">
-                            <div class="comicPanel panel1">
-                                <canvas id="comicCanvas1" width="100" height="100" aria-label="Panel 1: Programmer starting project with paper plane"></canvas>
-                            </div>
-                            <div class="comicPanel panel2">
-                                <canvas id="comicCanvas2" width="100" height="100" aria-label="Panel 2: Modern supersonic jet after 1 year of refining"></canvas>
-                            </div>
-                            <div class="comicPanel panel3">
-                                <canvas id="comicCanvas3" width="100" height="100" aria-label="Panel 3: Non-programmer starting project with paper plane"></canvas>
-                            </div>
-                            <div class="comicPanel panel4">
-                                <canvas id="comicCanvas4" width="100" height="100" aria-label="Panel 4: Frankenplane in space after 1 year of AI vibe coding"></canvas>
-                            </div>
+                            <figure class="comicPanel panel1">
+                                <canvas id="comicCanvas1" width="100" height="100" aria-label="Panel 1: Programmer starting project with a large paper plane"></canvas>
+                                <figcaption class="comicPanelCaption"><span class="comicCaptionNumber">01</span> <span class="comicCaptionTitle">PROGRAMMER</span> <span class="comicCaptionLine">STARTING PROJECT</span></figcaption>
+                            </figure>
+                            <figure class="comicPanel panel2">
+                                <canvas id="comicCanvas2" width="100" height="100" aria-label="Panel 2: Swept-wing jet after one year of refining"></canvas>
+                                <figcaption class="comicPanelCaption"><span class="comicCaptionNumber">02</span> <span class="comicCaptionTitle">AFTER 1 YEAR</span> <span class="comicCaptionLine">OF REFINING</span></figcaption>
+                            </figure>
+                            <figure class="comicPanel panel3">
+                                <canvas id="comicCanvas3" width="100" height="100" aria-label="Panel 3: Non-programmer starting project with the same paper plane and a tangled trail"></canvas>
+                                <figcaption class="comicPanelCaption"><span class="comicCaptionNumber">03</span> <span class="comicCaptionTitle">NON-PROGRAMMER</span> <span class="comicCaptionLine">STARTING PROJECT</span></figcaption>
+                            </figure>
+                            <figure class="comicPanel panel4">
+                                <canvas id="comicCanvas4" width="100" height="100" aria-label="Panel 4: Frankenplane in space after one year of AI vibe coding"></canvas>
+                                <figcaption class="comicPanelCaption"><span class="comicCaptionNumber">04</span> <span class="comicCaptionTitle">AFTER 1 YEAR OF</span> <span class="comicCaptionLine">AI VIBE CODING</span></figcaption>
+                            </figure>
                         </div>
                         <p class="comicCaption">Homage to a classic meme remembered from r/ProgrammerHumor.</p>
                     </div>
@@ -1640,7 +1667,7 @@
                         <p>I have experienced a deep ambivalence throughout the creation of this project. On the one hand, there is genuine apprehension that people who have dedicated years to studying and mastering computer science and software development may find their hard work displaced by code generated by the ever-improving capabilities of large language models. That concern for livelihoods and craft is real and should not be overlooked.</p>
                         <p>On the other hand, this technology has been truly transformative for someone like me. Although I earned a diploma in computer science more than twenty years ago, I remained a hesitant programmer and never possessed the time or technical confidence to construct interactive games or complete software independently. For more than two decades, I held creative desires that I simply could not bring to life.</p>
                         <p>Working with modern large language models changed that entirely. It is comparable to collaborating with a tireless collective of programmers, pixel artists, and automated testers at any hour of the day or night, although on free plans the work does pause when a quota runs out. It allows rapid ideation and experimentation, while my part is to brainstorm the ideas, shape the requests, play-test the games, and decide what stays. Yet, as the illustration above demonstrates, guiding artificial intelligence toward a coherent and unified vision often produces surprising results. One game, PENGUINSLIDE, passed through nine versions across four different models. Its first version did not even show the penguin, and its second version existed only to repair a single missing comma that stopped the whole shelf from loading. The models assemble whatever parts seem to fit each request. The resulting aircraft may have propellers on the wings, rockets on the tail, and cockpits in unexpected places, but it flies.</p>
-                        <p>The result is KANTMICROGAMES: twelve (and counting!) tiny pixel-art games in one file, built across more than forty numbered builds in about three weeks, on free or trial plans. The recorded model working time comes to more than twenty hours, a small amount of time beside the more than twenty years that came before it. The project is the realization of that long unfulfilled ambition, brought into existence through persistence, curiosity, and the eccentric power of machine collaboration.</p>
+                        <p>The result is KANTMICROGAMES: twelve (and counting!) tiny pixel-art games in one file, built across more than forty numbered builds in about three weeks, on free or trial plans. The recorded model working time comes to more than twenty hours, a small amount of time beside the more than twenty years that came before it. The project is the realization of that long unfulfilled dream, brought into existence through persistence, curiosity, and the eccentric power of machine collaboration.</p>
                     </section>
 
                     <!-- Section 3: Games Catalog -->
@@ -1649,7 +1676,14 @@
                         <div id="aboutGamesList"></div>
                     </section>
 
-                    <!-- Section 4: Models & Tools -->
+                    <!-- Section 4: Acknowledgments -->
+                    <section class="aboutSection" id="acknowledgments">
+                        <h3 class="aboutHeading">ACKNOWLEDGMENTS</h3>
+                        <p>This project would not have been possible without the inspiration and support of so many people from across the world. Some offered an idea, some tested a game, some shared a perspective or a kind word, and many shared experiences that helped me learn and grow with the rapid advances in AI and large language models.</p>
+                        <p>My wholehearted thanks, love and appreciation to all.</p>
+                    </section>
+
+                    <!-- Section 5: Models & Tools -->
                     <section class="aboutSection">
                         <h3 class="aboutHeading">MODELS AND TOOLS</h3>
                         <p class="aboutSubtext">This project is built intentionally using free tiers, community trials, and rate-limited developer accounts to discover what can be created without a development budget.</p>
@@ -1679,7 +1713,7 @@
                         </div>
                     </section>
 
-                    <!-- Section 5: License -->
+                    <!-- Section 6: License -->
                     <section class="aboutSection">
                         <h3 class="aboutHeading">PROJECT LICENSE</h3>
                         <p>KANTMICROGAMES is released under the permissive MIT License.</p>
@@ -1863,7 +1897,7 @@
 
 const APP = {
     name: "KANTMICROGAMES",
-    fileVersion: "046-20261121",       // build number of THIS one-file app
+    fileVersion: "048-20261124",       // build number of THIS one-file app
     savePrefix: "KANTMICROGAMES."      // best scores live at prefix + GAMEID + ".best"
 };
 
@@ -2575,7 +2609,10 @@ function updateGameIdentity() {
     gameIdentityEl.hidden = spare < lineHeight + IDENTITY_LINE_SPARE_PIXELS;
 }
 
-function buildCard(game) {
+// Seconds between one card's breath and the next card's breath.
+const SHELF_BREATH_STAGGER_SECONDS = 0.22;
+
+function buildCard(game, cardIndex) {
     const card = document.createElement("button");
     card.type = "button";
     card.className = "card";
@@ -2597,6 +2634,9 @@ function buildCard(game) {
     preview.width = 200;
     preview.height = 96;
     preview.setAttribute("aria-label", "Pixel-art preview of " + displayName(game));
+    /* Each card starts its breath a little later than the one before, so
+       the shelf reads as a slow ripple instead of one pulse. */
+    preview.style.setProperty("--shelfBreathDelay", (cardIndex * SHELF_BREATH_STAGGER_SECONDS) + "s");
     if (typeof game.previewPaint === "function") {
         game.previewPaint(preview.getContext("2d"));
     }
@@ -2830,8 +2870,8 @@ pickBannerEl.addEventListener("click", function () {
 function buildShelf() {
     const shelf = document.getElementById("shelf");
     shelf.innerHTML = "";
-    GAMES.forEach(function (game) {
-        shelf.appendChild(buildCard(game));
+    GAMES.forEach(function (game, cardIndex) {
+        shelf.appendChild(buildCard(game, cardIndex));
     });
     shelf.appendChild(buildComingSoonCard());
     applyShelfOrder();
@@ -3399,6 +3439,7 @@ function openSettings() {
     syncColourUI();
     syncSoundUI();
     settingsScrimEl.hidden = false;
+    refreshShelfMotion();
     const chosen = colourOptionsEl.querySelector('[aria-pressed="true"]');
     const first = chosen || colourOptionsEl.querySelector(".colourOpt");
     if (first) first.focus();
@@ -3408,6 +3449,7 @@ function closeSettings() {
     if (settingsScrimEl.hidden) return;
     cueTick();
     settingsScrimEl.hidden = true;
+    refreshShelfMotion();
     lastScreenSwap = performance.now();   // settle gate: a closing tap cannot open a card
     if (settingsReturnFocus && typeof settingsReturnFocus.focus === "function") {
         settingsReturnFocus.focus();
@@ -3539,6 +3581,7 @@ function openBadges() {
     syncBadgesButton();
     buildBadgeTiles();
     badgesScrimEl.hidden = false;
+    refreshShelfMotion();
     badgeListEl.focus();
 }
 
@@ -3546,6 +3589,7 @@ function closeBadges() {
     if (badgesScrimEl.hidden) return;
     cueTick();
     badgesScrimEl.hidden = true;
+    refreshShelfMotion();
     lastScreenSwap = performance.now();   // settle gate: a closing tap cannot open a card
     if (badgesReturnFocus && typeof badgesReturnFocus.focus === "function") {
         badgesReturnFocus.focus();
@@ -3648,219 +3692,1074 @@ badgesDialogEl.addEventListener("keydown", function (event) {
    animated comic, the shelf microgames catalog, credits and the MIT license.
    ================================================================== */
 
-const ABOUT_SETTINGS = {
-    canvasSizePixels: 100,
-    textLineOneYPixels: 4,
-    textLineTwoYPixels: 11,
-    paperPlaneOriginX: 24,
-    paperPlaneOriginY: 41,
-    paperPlanePixelScale: 2,
-    paperTrailOriginX: 8,
-    paperTrailOriginY: 76,
-    paperPlaneBobSpeedMultiplier: 0.003,
-    paperPlaneBobRangePixels: 2,
-    jetOriginX: 6,
-    jetOriginY: 34,
-    jetPixelScale: 2,
-    jetBobSpeedMultiplier: 0.002,
-    jetBobRangePixels: 1,
-    cloudOneBaseX: 130,
-    cloudTwoBaseX: 80,
-    cloudSpeedOne: 0.035,
-    cloudSpeedTwo: 0.020,
-    frankenplaneOriginX: 15,
-    frankenplaneOriginY: 37,
-    frankenplanePixelScale: 2,
-    frankenplaneBobSpeedMultiplier: 0.005,
-    frankenplaneBobRangePixels: 2,
-    animationFrameIntervalMilliseconds: 90,
-    starTwinkleIntervalMilliseconds: 800,
-    starTwinkleHalfIntervalMilliseconds: 400
+/* ==================================================================
+   ABOUT DIALOG (build 047, shelf only)
+   Modal dialog on the shelf presenting project reflections, a four-panel
+   animated comic, the shelf microgames catalog, acknowledgments, credits
+   and the MIT license.
+   ================================================================== */
+
+/* ==================================================================
+   COMIC — four full-bleed 100 x 100 panels
+   One canvas pixel is one art pixel. Each painter fills a ComicPixelBuffer
+   and then the buffer is copied to the panel canvas. Captions are real
+   HTML text outside the canvas, never painted pixels.
+   ================================================================== */
+
+const COMIC_PANEL_SIZE_PIXELS = 100;
+const COMIC_FRAME_INTERVAL_MILLISECONDS = 110;
+const COMIC_BOB_CYCLE_FRAMES = 24;
+const DEGREES_TO_RADIANS = Math.PI / 180;
+const RANDOM_MULTIPLIER = 1664525;
+const RANDOM_INCREMENT = 1013904223;
+const RANDOM_MODULUS = 4294967296;
+
+/* One shared palette. Panels 1 and 3 share every paper colour, so the
+   two starting points really are the same plane. */
+const COMIC_COLOURS = {
+    cream: "#f4eedb",
+    creamShade: "#e8dfc6",
+    creamGrid: "#e3dac1",
+    ink: "#4a3b32",
+    inkSoft: "#8a776a",
+    paperLight: "#fffdf6",
+    paperMid: "#f2e9d2",
+    paperShade: "#ddd0b1",
+    paperDark: "#bda98a",
+    pencilBody: "#e2b25a",
+    pencilShade: "#b98a3c",
+    pencilTape: "#a99b88",
+
+    skyHigh: "#86cdec",
+    skyMid: "#a3dcf5",
+    skyLow: "#c6ecfb",
+    cloudLight: "#ffffff",
+    cloudMid: "#dceffb",
+    cloudShade: "#aed6ee",
+    sunLight: "#ffe9a3",
+    sunMid: "#ffd75e",
+    sunShade: "#e9b23a",
+
+    jetLight: "#fffdf6",
+    jetMid: "#d7e3ee",
+    jetShade: "#9db4c7",
+    jetDark: "#5d7789",
+    jetInk: "#1d2b38",
+    jetGold: "#f2c14e",
+    jetBlue: "#3d7ea6",
+    canopy: "#5fe0f2",
+    canopyDark: "#1c8fa8",
+    canopyGlint: "#d9fbff",
+
+    flameCore: "#fffbe0",
+    flameMid: "#ffc93f",
+    flameOuter: "#ff8a3d",
+    flameRed: "#ef4f47",
+
+    space: "#0b0817",
+    spaceDeep: "#150f2b",
+    spaceHaze: "#1d1538",
+    star: "#ffffff",
+    starDim: "#c9c0f2",
+    starFaint: "#4a3d7d",
+    orbit: "#41346f",
+    moonLight: "#6f639e",
+    moonMid: "#544879",
+    moonShade: "#3c3260",
+
+    frankenBody: "#6ecf8c",
+    frankenBodyShade: "#3fa667",
+    frankenBelly: "#d9f2c9",
+    blimp: "#8fa9c9",
+    blimpShade: "#63809f",
+    blimpLight: "#c9dcf0",
+    wingRed: "#e8585f",
+    wingRedShade: "#b23a45",
+    wingRedLight: "#f78f92",
+    rust: "#a9673a",
+    steel: "#c3ced9",
+    steelDark: "#7f8f9e",
+    bolt: "#f0e6c8",
+    coneOrange: "#f08a3c",
+    coneBand: "#fff6e0",
+    tape: "#ddd3b4"
 };
 
-const COMIC_PALETTES = {
-    paperPlane: {
-        W: "#ffffff",
-        G: "#f4ead7",
-        D: "#c5b79d",
-        O: "#4a3b32",
-        B: "#9b7653"
-    },
-    jet: {
-        W: "#fffdf5",
-        G: "#cbd5e1",
-        D: "#64748b",
-        C: "#38bdf8",
-        S: "#e0f2fe",
-        F: "#00d2d3",
-        Y: "#facc15",
-        O: "#1e293b",
-        R: "#fb7185",
-        P: "#f0abfc"
-    },
-    cloud: {
-        W: "#ffffff",
-        S: "#cce4f7",
-        B: "#9ac7e3"
-    },
-    franken: {
-        B: "#a7bed3",
-        D: "#718096",
-        G: "#69d28a",
-        E: "#31a879",
-        R: "#fb7185",
-        Y: "#fbbf24",
-        P: "#f97316",
-        H: "#64748b",
-        M: "#e2e8f0",
-        C: "#67e8f9",
-        O: "#263449",
-        W: "#fffdf5"
+/* ==================================================================
+   1. Pixel buffer
+   ================================================================== */
+
+// One flat grid of colours, with the small set of drawing tools the
+// panels need. Coordinates are art pixels, never screen pixels.
+class ComicPixelBuffer {
+    constructor(width, height) {
+        this.width = width;
+        this.height = height;
+        this.pixels = new Array(width * height).fill(null);
     }
-};
 
-const PAPER_PLANE_PIXELS = [
-    "...........................OO.....",
-    ".........................OO.W.....",
-    ".......................OO.WWW.....",
-    ".....................OO.WWW.......",
-    "...................OO.WWW.GG......",
-    ".................OO.WWW.GGGG......",
-    "...............OO.WWW.GGGGGG......",
-    ".............OO.WWW.GGGGGGGG......",
-    "...........OO.WWW.GGGGGGGG.DD.....",
-    ".........OO.WWW.GGGGGGGG.DDDD.....",
-    ".......OO.WWW.GGGGGGGG.DDDD.......",
-    ".....OO.WWW.GGGGGGGG.DDDD.........",
-    "...OO.WWW.GGGGGGGG.DDDD....BB.....",
-    "OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO..."
+    isInside(x, y) {
+        return x >= 0 && y >= 0 && x < this.width && y < this.height;
+    }
+
+    set(x, y, colour) {
+        x = Math.round(x);
+        y = Math.round(y);
+        if (!colour || !this.isInside(x, y)) return;
+        this.pixels[y * this.width + x] = colour;
+    }
+
+    get(x, y) {
+        return this.isInside(x, y) ? this.pixels[y * this.width + x] : null;
+    }
+
+    fill(colour) {
+        this.pixels.fill(colour);
+    }
+
+    rectangle(x, y, width, height, colour) {
+        for (let row = y; row < y + height; row++) {
+            for (let column = x; column < x + width; column++) {
+                this.set(column, row, colour);
+            }
+        }
+    }
+
+    horizontalLine(xStart, xEnd, y, colour) {
+        for (let x = xStart; x <= xEnd; x++) this.set(x, y, colour);
+    }
+
+    verticalLine(x, yStart, yEnd, colour) {
+        for (let y = yStart; y <= yEnd; y++) this.set(x, y, colour);
+    }
+
+    // Bresenham, so a diagonal stays one pixel thick.
+    line(xStart, yStart, xEnd, yEnd, colour) {
+        let x = Math.round(xStart);
+        let y = Math.round(yStart);
+        const targetX = Math.round(xEnd);
+        const targetY = Math.round(yEnd);
+        const stepX = Math.abs(targetX - x);
+        const stepY = -Math.abs(targetY - y);
+        const signX = x < targetX ? 1 : -1;
+        const signY = y < targetY ? 1 : -1;
+        let error = stepX + stepY;
+        for (;;) {
+            this.set(x, y, colour);
+            if (x === targetX && y === targetY) break;
+            const doubled = error * 2;
+            if (doubled >= stepY) { error += stepY; x += signX; }
+            if (doubled <= stepX) { error += stepX; y += signY; }
+        }
+    }
+
+    // Fill a closed polygon with the even-odd rule. When onlyOver is a
+    // colour, the polygon recolours only pixels that already hold it,
+    // which is how the shading wedges stay inside the silhouette.
+    polygon(pointList, colour, onlyOver) {
+        let lowest = Infinity;
+        let highest = -Infinity;
+        for (const point of pointList) {
+            lowest = Math.min(lowest, point[1]);
+            highest = Math.max(highest, point[1]);
+        }
+        for (let y = Math.floor(lowest); y <= Math.ceil(highest); y++) {
+            const sampleY = y + 0.5;
+            const crossings = [];
+            for (let index = 0; index < pointList.length; index++) {
+                const first = pointList[index];
+                const second = pointList[(index + 1) % pointList.length];
+                const crosses = (first[1] <= sampleY && second[1] > sampleY) ||
+                                (second[1] <= sampleY && first[1] > sampleY);
+                if (!crosses) continue;
+                const portion = (sampleY - first[1]) / (second[1] - first[1]);
+                crossings.push(first[0] + portion * (second[0] - first[0]));
+            }
+            crossings.sort(function (a, b) { return a - b; });
+            for (let pair = 0; pair + 1 < crossings.length; pair += 2) {
+                const startX = Math.round(crossings[pair]);
+                const endX = Math.round(crossings[pair + 1]) - 1;
+                for (let x = startX; x <= endX; x++) {
+                    if (onlyOver && this.get(x, y) !== onlyOver) continue;
+                    this.set(x, y, colour);
+                }
+            }
+        }
+    }
+
+    disc(centreX, centreY, radius, colour) {
+        for (let y = Math.floor(centreY - radius); y <= Math.ceil(centreY + radius); y++) {
+            for (let x = Math.floor(centreX - radius); x <= Math.ceil(centreX + radius); x++) {
+                if ((x - centreX) ** 2 + (y - centreY) ** 2 <= radius * radius) {
+                    this.set(x, y, colour);
+                }
+            }
+        }
+    }
+
+    ellipseFill(centreX, centreY, radiusX, radiusY, colour) {
+        for (let y = Math.floor(centreY - radiusY); y <= Math.ceil(centreY + radiusY); y++) {
+            const ratio = (y - centreY) / radiusY;
+            if (Math.abs(ratio) > 1) continue;
+            const halfWidth = radiusX * Math.sqrt(1 - ratio * ratio);
+            for (let x = Math.round(centreX - halfWidth); x <= Math.round(centreX + halfWidth); x++) {
+                this.set(x, y, colour);
+            }
+        }
+    }
+
+    ellipseOutline(centreX, centreY, radiusX, radiusY, colour) {
+        const steps = Math.max(120, Math.round((radiusX + radiusY) * 4));
+        for (let step = 0; step < steps; step++) {
+            const angle = (step / steps) * Math.PI * 2;
+            this.set(centreX + Math.cos(angle) * radiusX, centreY + Math.sin(angle) * radiusY, colour);
+        }
+    }
+
+    // Put an ink edge around everything drawn so far. Runs on a copy of
+    // the grid so a new edge never triggers another edge beside it.
+    outline(colour) {
+        const source = this.pixels.slice();
+        const width = this.width;
+        const height = this.height;
+        for (let y = 0; y < height; y++) {
+            for (let x = 0; x < width; x++) {
+                if (source[y * width + x]) continue;
+                const neighbours = [
+                    x > 0 ? source[y * width + x - 1] : null,
+                    x < width - 1 ? source[y * width + x + 1] : null,
+                    y > 0 ? source[(y - 1) * width + x] : null,
+                    y < height - 1 ? source[(y + 1) * width + x] : null
+                ];
+                if (neighbours.some(Boolean)) this.pixels[y * width + x] = colour;
+            }
+        }
+    }
+
+    // Copy every painted pixel of another buffer over this one, leaving
+    // this buffer's own pixels wherever the other is empty. This is how
+    // an outlined object is stamped onto a scene. An optional clip keeps
+    // a big machine off the frame itself.
+    composite(otherBuffer, clip) {
+        const left = clip ? clip[0] : 0;
+        const top = clip ? clip[1] : 0;
+        const right = clip ? clip[2] : this.width - 1;
+        const bottom = clip ? clip[3] : this.height - 1;
+        for (let y = top; y <= bottom; y++) {
+            for (let x = left; x <= right; x++) {
+                const index = y * this.width + x;
+                if (otherBuffer.pixels[index]) this.pixels[index] = otherBuffer.pixels[index];
+            }
+        }
+    }
+
+}
+
+/* ==================================================================
+   2. Geometry helpers
+   ================================================================== */
+
+// Map a point in the aircraft's own frame (along the fuselage, across
+// the wings) into panel pixels. Negative angles tilt the nose up-right.
+function makePlaneMapper(originX, originY, degrees) {
+    const radians = degrees * DEGREES_TO_RADIANS;
+    const cosine = Math.cos(radians);
+    const sine = Math.sin(radians);
+    return function (alongFuselage, acrossWings) {
+        return [
+            originX + alongFuselage * cosine - acrossWings * sine,
+            originY + alongFuselage * sine + acrossWings * cosine
+        ];
+    };
+}
+
+// Build the mapper from where the nose should sit, rather than from the
+// tail, because the nose is the part the eye reads first.
+function mapperFromNose(noseX, noseY, degrees, noseAlongFuselage) {
+    const radians = degrees * DEGREES_TO_RADIANS;
+    return makePlaneMapper(
+        noseX - noseAlongFuselage * Math.cos(radians),
+        noseY - noseAlongFuselage * Math.sin(radians),
+        degrees
+    );
+}
+
+// Sample a cubic Bezier curve into a dense point list, so a dashed
+// trail can follow it smoothly.
+function cubicBezierPoints(start, controlOne, controlTwo, end, pointCount) {
+    const points = [];
+    for (let index = 0; index <= pointCount; index++) {
+        const progress = index / pointCount;
+        const inverse = 1 - progress;
+        const startWeight = inverse * inverse * inverse;
+        const controlOneWeight = 3 * inverse * inverse * progress;
+        const controlTwoWeight = 3 * inverse * progress * progress;
+        const endWeight = progress * progress * progress;
+        points.push([
+            startWeight * start[0] + controlOneWeight * controlOne[0] + controlTwoWeight * controlTwo[0] + endWeight * end[0],
+            startWeight * start[1] + controlOneWeight * controlOne[1] + controlTwoWeight * controlTwo[1] + endWeight * end[1]
+        ]);
+    }
+    return points;
+}
+
+// Draw a dashed line through a dense point list. The phase shifts the
+// dashes along the path, which is the whole "trail drifting" animation.
+function dashedPolyline(pixelBuffer, pointList, colour, onLength, offLength, phase) {
+    let travelled = phase || 0;
+    const period = onLength + offLength;
+    for (let index = 1; index < pointList.length; index++) {
+        const start = pointList[index - 1];
+        const end = pointList[index];
+        const distance = Math.hypot(end[0] - start[0], end[1] - start[1]);
+        const steps = Math.max(1, Math.round(distance * 2));
+        for (let step = 0; step < steps; step++) {
+            const alongFraction = step / steps;
+            const position = travelled + distance * alongFraction;
+            if (position % period < onLength) {
+                pixelBuffer.set(
+                    start[0] + (end[0] - start[0]) * alongFraction,
+                    start[1] + (end[1] - start[1]) * alongFraction,
+                    colour
+                );
+            }
+        }
+        travelled += distance;
+    }
+}
+
+// Positive remainder, so a drifting cloud wraps from the right edge back
+// to the left instead of jumping when the value goes negative.
+function comicWrap(value, range) {
+    return ((value % range) + range) % range;
+}
+
+// A deterministic random number source, so stars and stars alone differ
+// from frame to frame and every screenshot of frame 0 matches.
+function makeSeededRandom(seed) {
+    let state = seed >>> 0;
+    return function () {
+        state = (state * RANDOM_MULTIPLIER + RANDOM_INCREMENT) >>> 0;
+        return state / RANDOM_MODULUS;
+    };
+}
+
+// Round a sine wave to whole pixels: pixel art bobs in steps, never in
+// sub-pixel glides.
+function bobOffset(frameIndex, cycleFrames, amplitude) {
+    const phase = Math.sin((frameIndex % cycleFrames) / cycleFrames * Math.PI * 2);
+    return Math.round(phase * amplitude);
+}
+
+/* ==================================================================
+   3. Shared pieces: clouds, sparkles, frames, paper plane
+   ================================================================== */
+
+// The cloud is four overlapping puffs. Each row is: horizontal position,
+// vertical lift, horizontal radius, vertical radius, and which colour.
+const COMIC_CLOUD_PUFFS = [
+    [0.30, 0.00, 0.30, 0.52, "mid"],
+    [0.62, -0.10, 0.26, 0.62, "mid"],
+    [0.48, -0.28, 0.22, 0.50, "light"],
+    [0.22, -0.12, 0.16, 0.34, "light"]
 ];
 
-const SUPERSONIC_JET_PIXELS = [
-    "..........................OO................",
-    "........................OO.WO...............",
-    "......................OO.WWWWO..............",
-    "....................OO.WWWWWWWO.............",
-    "..................OO.WWWWWWWWWO.............",
-    "................OO.WWWWWWWWWWWWCCCC.........",
-    "..............OO.WWWWWWWWWWWWWWCCCCCC.......",
-    "............OO.WWWWWWWWWWWWWWWWWSSSSSS......",
-    "..........OO.WWWWWWWWWWWWWWWWWWWWWWWWW......",
-    "........OO.WWWWWWWWWWWWWWWWWWWWWWWWWWW......",
-    "......OO.WWWWWWWWWWWWWWWWWWWWWWWWWWWWWW.....",
-    "....OO.WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW....",
-    "..OO.WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW...",
-    "OOOYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYOO.",
-    "..OO.WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW...",
-    "....OO.WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW....",
-    "......OO.WWWWWWWWWWWWWWWWWWWWWWWWWWWWWW.....",
-    "........OO.WWWWWWWWWWWWWWWWWWWWWWWWWWW......",
-    "..........OO.WWWWWWWWWWWWWWWWWWWWWWWO.......",
-    "............OO.WWWWWWWWWWWWWWWWWWWO.........",
-    "..............OO.WWWWWWWWWWWWWWWO...........",
-    "................OO.WWWWWWWWWWWO.............",
-    "..................OO.WWWWWWWO...............",
-    "....................OO.WWWO................."
+// Two soft shade lines under the puffs. Each row is: where the line starts
+// across the cloud, where it ends, and how far down the cloud it sits.
+const COMIC_CLOUD_SHADE_ROWS = [
+    [0.10, 0.90, 0.42],
+    [0.16, 0.76, 0.58]
 ];
 
-const CLOUD_PIXELS = [
-    "......WWWW..........",
-    "....WWWWWWWW..WWWW..",
-    "..WWWWWWWWWWWWWWWWWW",
-    "WWWWWWWWWWWWWWWWWWWW",
-    "WWWWWWWWWWWWWWWWWWWW",
-    "WWWWWWWWWWWWWWWWWWWW",
-    "..SSSSSSSSSSSSSSSSSS",
-    "....SSSSSSSSSSSS...."
+const COMIC_CLOUD_HEIGHT_FRACTION = 0.42;
+const COMIC_CLOUD_CENTRE_FRACTION = 0.62;
+
+// Draw one soft layered cloud, sized from the width it is given.
+function paintComicCloud(pixelBuffer, leftX, topY, width, palette) {
+    const height = Math.round(width * COMIC_CLOUD_HEIGHT_FRACTION);
+    const centreY = topY + height * COMIC_CLOUD_CENTRE_FRACTION;
+    for (const puff of COMIC_CLOUD_PUFFS) {
+        pixelBuffer.ellipseFill(
+            leftX + width * puff[0],
+            centreY + height * puff[1],
+            width * puff[2],
+            height * puff[3],
+            palette[puff[4]]
+        );
+    }
+    for (const shadeRow of COMIC_CLOUD_SHADE_ROWS) {
+        const shadeY = Math.round(centreY + height * shadeRow[2]);
+        for (let x = Math.round(leftX + width * shadeRow[0]);
+                x <= Math.round(leftX + width * shadeRow[1]); x++) {
+            pixelBuffer.set(x, shadeY, palette.shade);
+        }
+    }
+}
+
+// Draw a small four-point sparkle, used once in panel 1.
+function paintSparkle(pixelBuffer, centreX, centreY, size, colour) {
+    pixelBuffer.set(centreX, centreY, colour);
+    for (let step = 1; step <= size; step++) {
+        pixelBuffer.set(centreX - step, centreY, colour);
+        pixelBuffer.set(centreX + step, centreY, colour);
+        pixelBuffer.set(centreX, centreY - step, colour);
+        pixelBuffer.set(centreX, centreY + step, colour);
+    }
+    pixelBuffer.set(centreX - size - 1, centreY - size - 1, colour);
+    pixelBuffer.set(centreX + size + 1, centreY - size - 1, colour);
+    pixelBuffer.set(centreX - size - 1, centreY + size + 1, colour);
+    pixelBuffer.set(centreX + size + 1, centreY + size + 1, colour);
+}
+
+// Panel 1 and 3 frame: one ink line with chamfered corners, so the card
+// can keep a small rounded corner without the frame being cut off.
+function paintInkFrame(pixelBuffer, ink, accent) {
+    const low = 2;
+    const high = COMIC_PANEL_SIZE_PIXELS - 3;
+    pixelBuffer.horizontalLine(low + 2, high - 2, low, ink);
+    pixelBuffer.horizontalLine(low + 2, high - 2, high, ink);
+    pixelBuffer.verticalLine(low, low + 2, high - 2, ink);
+    pixelBuffer.verticalLine(high, low + 2, high - 2, ink);
+    pixelBuffer.set(low + 1, low + 1, ink);
+    pixelBuffer.set(high - 1, low + 1, ink);
+    pixelBuffer.set(low + 1, high - 1, ink);
+    pixelBuffer.set(high - 1, high - 1, ink);
+    pixelBuffer.rectangle(low + 3, low + 3, 2, 1, accent);
+    pixelBuffer.rectangle(high - 4, low + 3, 2, 1, accent);
+}
+
+// Panel 2 frame: a plain rule outside and a gold rule inside, with four
+// small corner brackets. Reads as "refined" without any ornament.
+function paintRuleFrame(pixelBuffer, outer, inner, bracket) {
+    const low = 2;
+    const high = COMIC_PANEL_SIZE_PIXELS - 3;
+    pixelBuffer.horizontalLine(low, high, low, outer);
+    pixelBuffer.horizontalLine(low, high, high, outer);
+    pixelBuffer.verticalLine(low, low, high, outer);
+    pixelBuffer.verticalLine(high, low, high, outer);
+
+    pixelBuffer.horizontalLine(low + 4, high - 4, low + 3, inner);
+    pixelBuffer.horizontalLine(low + 4, high - 4, high - 3, inner);
+    pixelBuffer.verticalLine(low + 3, low + 4, high - 4, inner);
+    pixelBuffer.verticalLine(high - 3, low + 4, high - 4, inner);
+
+    const corners = [[low + 6, low + 6, 1, 1], [high - 6, low + 6, -1, 1], [low + 6, high - 6, 1, -1], [high - 6, high - 6, -1, -1]];
+    for (const [x, y, directionX, directionY] of corners) {
+        for (let step = 0; step < 5; step++) {
+            pixelBuffer.set(x + step * directionX, y, bracket);
+            pixelBuffer.set(x, y + step * directionY, bracket);
+        }
+    }
+}
+
+// Panel 4 frame: mismatched stitches, a few bolts, and a caution corner.
+function paintStitchedFrame(pixelBuffer, stitchInk, stitchLight, cautionLight, cautionDark) {
+    const low = 2;
+    const high = COMIC_PANEL_SIZE_PIXELS - 3;
+    for (let x = low + 2; x <= high - 2; x += 6) {
+        pixelBuffer.horizontalLine(x, Math.min(x + 3, high - 2), low, stitchInk);
+        pixelBuffer.horizontalLine(x + 2, Math.min(x + 5, high - 2), high, stitchLight);
+    }
+    for (let y = low + 2; y <= high - 2; y += 6) {
+        pixelBuffer.verticalLine(low, y, Math.min(y + 3, high - 2), stitchLight);
+        pixelBuffer.verticalLine(high, y + 2, Math.min(y + 5, high - 2), stitchInk);
+    }
+    const boltSites = [[low, low], [high, low], [low, high], [high, high], [50, low], [50, high], [low, 50], [high, 50]];
+    for (const [x, y] of boltSites) pixelBuffer.disc(x, y, 1, stitchLight);
+
+    const patchLeft = high - 15;
+    const patchTop = high - 8;
+    for (let y = patchTop; y <= high - 1; y++) {
+        for (let x = patchLeft; x <= high - 1; x++) {
+            const stripe = (x + y) % 6 < 3;
+            pixelBuffer.set(x, y, stripe ? cautionLight : cautionDark);
+        }
+    }
+    pixelBuffer.horizontalLine(patchLeft, high - 1, patchTop - 1, stitchInk);
+    pixelBuffer.verticalLine(patchLeft - 1, patchTop, high - 1, stitchInk);
+}
+
+/* The paper plane. Panel 1 and Panel 3 call this with different tilt
+   and a different wing bend, and everything else stays identical.
+   It is drawn on its own buffer so the ink outline wraps only the
+   plane, not the trail or the clouds behind it. */
+function paintPaperPlane(targetBuffer, mapper, wingBend) {
+    const plane = new ComicPixelBuffer(COMIC_PANEL_SIZE_PIXELS, COMIC_PANEL_SIZE_PIXELS);
+    const nose = mapper(80, 0);
+    const farTip = mapper(-2, -24);
+    const tail = mapper(4, 0);
+    const nearTip = mapper(-2, 30 + (wingBend || 0));
+
+    plane.polygon([nose, farTip, tail, nearTip], COMIC_COLOURS.paperMid);
+    plane.polygon([nose, farTip, tail], COMIC_COLOURS.paperLight, COMIC_COLOURS.paperMid);
+    plane.polygon([nose, tail, nearTip], COMIC_COLOURS.paperShade, COMIC_COLOURS.paperMid);
+
+    // The fold that makes it a plane, not a triangle.
+    plane.line(nose[0], nose[1], tail[0], tail[1], COMIC_COLOURS.paperDark);
+    plane.line(nose[0], nose[1] + 1, tail[0] + 1, tail[1] + 1, COMIC_COLOURS.paperShade);
+
+    // Two crease lines on the lit wing.
+    const creaseOneStart = mapper(62, -3);
+    const creaseOneEnd = mapper(20, -14);
+    const creaseTwoStart = mapper(48, -3);
+    const creaseTwoEnd = mapper(12, -19);
+    plane.line(creaseOneStart[0], creaseOneStart[1], creaseOneEnd[0], creaseOneEnd[1], COMIC_COLOURS.paperMid);
+    plane.line(creaseTwoStart[0], creaseTwoStart[1], creaseTwoEnd[0], creaseTwoEnd[1], COMIC_COLOURS.paperMid);
+
+    // A bright edge where the light catches the leading fold.
+    const glintStart = mapper(74, -2);
+    const glintEnd = mapper(26, -12);
+    plane.line(glintStart[0], glintStart[1], glintEnd[0], glintEnd[1], COMIC_COLOURS.paperLight);
+
+    // The near wing's trailing edge sits in shadow.
+    plane.line(tail[0], tail[1], nearTip[0], nearTip[1], COMIC_COLOURS.paperDark);
+
+
+    plane.outline(COMIC_COLOURS.ink);
+    targetBuffer.composite(plane);
+}
+
+// A pencil stub, for the panel 1 corner. Drawn in a tilted local frame
+// so it reads as a pencil rather than a rectangle.
+function paintPencil(targetBuffer, originX, originY) {
+    const pencil = new ComicPixelBuffer(COMIC_PANEL_SIZE_PIXELS, COMIC_PANEL_SIZE_PIXELS);
+    const mapper = makePlaneMapper(originX, originY, -18);
+    pencil.polygon([mapper(0, 0), mapper(0, 4), mapper(15, 4), mapper(15, 0)], COMIC_COLOURS.pencilBody);
+    pencil.polygon([mapper(0, 2.5), mapper(0, 4), mapper(15, 4), mapper(15, 2.5)], COMIC_COLOURS.pencilShade, COMIC_COLOURS.pencilBody);
+    pencil.polygon([mapper(15, 0), mapper(15, 4), mapper(19, 2)], COMIC_COLOURS.paperMid);
+    const lead = mapper(18, 2);
+    pencil.set(lead[0], lead[1], COMIC_COLOURS.ink);
+    const tapePoint = mapper(2, 0);
+    pencil.horizontalLine(tapePoint[0], tapePoint[0] + 2, tapePoint[1], COMIC_COLOURS.pencilTape);
+    pencil.outline(COMIC_COLOURS.ink);
+    targetBuffer.composite(pencil);
+}
+
+// A crumpled paper ball, for panel 3. Small, cheap, and it says "attempt"
+// without adding a speech bubble.
+function paintCrumpledBall(targetBuffer, centreX, centreY, radius) {
+    const ball = new ComicPixelBuffer(COMIC_PANEL_SIZE_PIXELS, COMIC_PANEL_SIZE_PIXELS);
+    ball.disc(centreX, centreY, radius, COMIC_COLOURS.paperMid);
+    ball.disc(centreX - 1, centreY - 1, radius - 1, COMIC_COLOURS.paperLight);
+    ball.disc(centreX + 2, centreY + 2, radius - 2, COMIC_COLOURS.paperMid);
+    ball.line(centreX - radius + 2, centreY - 1, centreX + 1, centreY - radius + 3, COMIC_COLOURS.paperShade);
+    ball.line(centreX - 2, centreY + radius - 2, centreX + 2, centreY, COMIC_COLOURS.paperShade);
+    ball.line(centreX - radius + 3, centreY + 2, centreX, centreY + radius - 2, COMIC_COLOURS.paperShade);
+    ball.set(centreX + 1, centreY - 2, COMIC_COLOURS.paperShade);
+    ball.set(centreX - 2, centreY + 1, COMIC_COLOURS.paperShade);
+    ball.outline(COMIC_COLOURS.ink);
+    targetBuffer.composite(ball);
+}
+
+/* ==================================================================
+   4. Panel 1 — programmer starting the project
+   ================================================================== */
+
+function paintComicPanelOne(pixelBuffer, frameIndex) {
+    pixelBuffer.fill(COMIC_COLOURS.cream);
+
+    // A corner of blueprint paper: faint grid plus a measured edge.
+    for (let x = 6; x <= 31; x += 5) pixelBuffer.verticalLine(x, 6, 30, COMIC_COLOURS.creamGrid);
+    for (let y = 6; y <= 30; y += 5) pixelBuffer.horizontalLine(6, 31, y, COMIC_COLOURS.creamGrid);
+    pixelBuffer.rectangle(6, 30, 26, 1, COMIC_COLOURS.creamShade);
+    pixelBuffer.rectangle(31, 6, 1, 25, COMIC_COLOURS.creamShade);
+
+    paintPencil(pixelBuffer, 72, 88);
+
+    const bob = bobOffset(frameIndex, COMIC_BOB_CYCLE_FRAMES, 1);
+    const mapper = mapperFromNose(90, 18 + bob, -38, 80);
+    const tailPoint = mapper(4, 0);
+
+    // One tidy trail, a single smooth curve with a drifting dash phase.
+    const dashPhase = (frameIndex % 6) * 1.5;
+    const trail = cubicBezierPoints([6, 94], [2, 74], [26, 92], [tailPoint[0] - 2, tailPoint[1] + 7], 100);
+    dashedPolyline(pixelBuffer, trail, COMIC_COLOURS.inkSoft, 4, 3, dashPhase);
+
+    paintPaperPlane(pixelBuffer, mapper, 0);
+
+    // One sparkle in the clear cream, turning slowly in the light.
+    paintSparkle(pixelBuffer, 70, 68, 1, COMIC_COLOURS.pencilBody);
+
+    paintInkFrame(pixelBuffer, COMIC_COLOURS.ink, COMIC_COLOURS.pencilBody);
+}
+
+/* ==================================================================
+   5. Panel 3 — non-programmer starting the project
+   ================================================================== */
+
+function paintComicPanelThree(pixelBuffer, frameIndex) {
+    pixelBuffer.fill(COMIC_COLOURS.cream);
+
+    // Graph paper in the opposite corner, with the failed attempt
+    // resting on it.
+    for (let x = 64; x <= 91; x += 5) pixelBuffer.verticalLine(x, 64, 90, COMIC_COLOURS.creamGrid);
+    for (let y = 64; y <= 90; y += 5) pixelBuffer.horizontalLine(64, 91, y, COMIC_COLOURS.creamGrid);
+    pixelBuffer.rectangle(64, 64, 28, 1, COMIC_COLOURS.creamShade);
+    pixelBuffer.rectangle(64, 64, 1, 27, COMIC_COLOURS.creamShade);
+
+    // The same corner as panel 1, but the trail is a spiral of attempts.
+    const tanglePhase = (frameIndex % 8) * 2;
+    const spiral = [];
+    for (let step = 0; step <= 220; step++) {
+        const travel = step / 220;
+        const angle = travel * Math.PI * 2 * 2.6;
+        const radius = 3 + 8.5 * travel;
+        spiral.push([
+            15 + Math.cos(angle) * radius + Math.sin(travel * 9) * 1.2,
+            81 + Math.sin(angle) * radius * 0.85
+        ]);
+    }
+    dashedPolyline(pixelBuffer, spiral, COMIC_COLOURS.inkSoft, 3, 2, tanglePhase);
+    // A short link back to the plane, so the tangle reads as one trail
+    // that went wrong rather than a separate doodle.
+    const tailLink = cubicBezierPoints([25, 63], [21, 68], [19, 73], [17, 76], 30);
+    dashedPolyline(pixelBuffer, tailLink, COMIC_COLOURS.inkSoft, 3, 3, tanglePhase + 3);
+
+    paintCrumpledBall(pixelBuffer, 76, 84, 5);
+
+    const oppositeBob = -bobOffset(frameIndex, COMIC_BOB_CYCLE_FRAMES, 1);
+    const mapper = mapperFromNose(90, 18 + oppositeBob, -30, 80);
+    paintPaperPlane(pixelBuffer, mapper, 2);
+
+    // One fold too many, running with the spine instead of across it.
+    const worryStart = mapper(52, 8);
+    const worryEnd = mapper(26, 20);
+    pixelBuffer.line(worryStart[0], worryStart[1], worryEnd[0], worryEnd[1], COMIC_COLOURS.paperMid);
+
+    paintInkFrame(pixelBuffer, COMIC_COLOURS.ink, COMIC_COLOURS.pencilBody);
+}
+
+/* ==================================================================
+   6. Panel 2 — after one year of refining
+   ================================================================== */
+
+function paintComicPanelTwo(pixelBuffer, frameIndex) {
+    const highBand = 38;
+    const midBand = 72;
+    pixelBuffer.rectangle(0, 0, COMIC_PANEL_SIZE_PIXELS, highBand, COMIC_COLOURS.skyHigh);
+    pixelBuffer.rectangle(0, highBand, COMIC_PANEL_SIZE_PIXELS, midBand - highBand, COMIC_COLOURS.skyMid);
+    pixelBuffer.rectangle(0, midBand, COMIC_PANEL_SIZE_PIXELS, COMIC_PANEL_SIZE_PIXELS - midBand, COMIC_COLOURS.skyLow);
+
+    // Sun, with eight short rays.
+    pixelBuffer.disc(27, 14, 6, COMIC_COLOURS.sunMid);
+    pixelBuffer.disc(27, 13, 4, COMIC_COLOURS.sunLight);
+    for (let ray = 0; ray < 8; ray++) {
+        const angle = (ray / 8) * Math.PI * 2;
+        for (let step = 8; step <= 10; step++) {
+            pixelBuffer.set(27 + Math.cos(angle) * step, 14 + Math.sin(angle) * step, COMIC_COLOURS.sunShade);
+        }
+    }
+
+    // Clouds drift slowly to the left; each one moves one pixel every
+    // other frame, which is barely visible and never distracting.
+    const drift = Math.floor(frameIndex / 2);
+    const cloudPalette = { light: COMIC_COLOURS.cloudLight, mid: COMIC_COLOURS.cloudMid, shade: COMIC_COLOURS.cloudShade };
+    paintComicCloud(pixelBuffer, comicWrap(68 - drift, 140) - 30, 74, 30, cloudPalette);
+    paintComicCloud(pixelBuffer, comicWrap(4 - drift * 0.6, 140) - 20, 24, 22, cloudPalette);
+    paintComicCloud(pixelBuffer, comicWrap(88 - drift * 0.4, 140) - 20, 6, 16, cloudPalette);
+
+    // Speed streaks around the nose, not over it.
+    const streakSites = [[70, 34, 8], [76, 44, 6], [64, 26, 5], [84, 52, 7]];
+    for (const [x, y, length] of streakSites) pixelBuffer.horizontalLine(x, x + length, y, COMIC_COLOURS.cloudLight);
+
+    const mapper = mapperFromNose(92, 17, -30, 84);
+    const bob = bobOffset(frameIndex, COMIC_BOB_CYCLE_FRAMES, 1);
+
+    // Two short contrails peeling off the wing tips and running out of
+    // the panel behind the jet.
+    dashedPolyline(pixelBuffer, [
+        mapper(18, -26),
+        mapper(-2, -30),
+        mapper(-18, -30)
+    ], COMIC_COLOURS.cloudLight, 2, 3, (frameIndex % 5));
+    dashedPolyline(pixelBuffer, [
+        mapper(24, 29),
+        mapper(4, 33),
+        mapper(-12, 35)
+    ], COMIC_COLOURS.cloudLight, 2, 3, (frameIndex % 5) + 2);
+
+    paintJet(pixelBuffer, mapper, bob, frameIndex);
+
+    paintRuleFrame(pixelBuffer, COMIC_COLOURS.jetInk, COMIC_COLOURS.jetGold, COMIC_COLOURS.jetBlue);
+}
+
+// Draw one closed shape as its own part: fill, ink edge, then stamp it
+// onto the scene. Giving each part its own edge is what keeps a stack of
+// shapes readable instead of melting into one silhouette.
+function stampShape(targetBuffer, pointList, fillColour, inkColour) {
+    const part = new ComicPixelBuffer(COMIC_PANEL_SIZE_PIXELS, COMIC_PANEL_SIZE_PIXELS);
+    part.polygon(pointList, fillColour);
+    part.outline(inkColour);
+    targetBuffer.composite(part);
+    return part;
+}
+
+// Draw the refined swept-wing jet, seen from the side on the panel diagonal.
+function paintJet(targetBuffer, mapper, bob, frameIndex) {
+    const jet = new ComicPixelBuffer(COMIC_PANEL_SIZE_PIXELS, COMIC_PANEL_SIZE_PIXELS);
+    // Put one aircraft-frame point into panel pixels, including the bob.
+    const point = function (along, across) {
+        const mapped = mapper(along, across);
+        return [mapped[0], mapped[1] + bob];
+    };
+
+    // Afterburner first, so the tail sits over it.
+    const flameLengths = [16, 19, 17, 21];
+    const flameLength = flameLengths[frameIndex % 4];
+    stampShape(jet, [
+        point(0, -2.5),
+        point(-flameLength, -1.5),
+        point(-flameLength - 3, 0),
+        point(-flameLength, 1.5),
+        point(0, 2.5)
+    ], COMIC_COLOURS.flameOuter, COMIC_COLOURS.flameRed);
+    jet.polygon([
+        point(0, -1.8),
+        point(-Math.round(flameLength * 0.66), -1),
+        point(-Math.round(flameLength * 0.70), 0),
+        point(-Math.round(flameLength * 0.66), 1),
+        point(0, 1.8)
+    ], COMIC_COLOURS.flameMid);
+    jet.polygon([
+        point(0, -1),
+        point(-Math.round(flameLength * 0.36), 0),
+        point(0, 1)
+    ], COMIC_COLOURS.flameCore);
+
+    // Fin and stabiliser, behind the body. Both attach along a long root
+    // so they read as tail surfaces instead of loose slabs.
+    stampShape(jet, [point(16, -5), point(3, -6), point(1, -17), point(10, -16)], COMIC_COLOURS.jetShade, COMIC_COLOURS.jetInk);
+    jet.line(...point(14, -6), ...point(3, -16), COMIC_COLOURS.jetDark);
+    stampShape(jet, [point(12, 3), point(2, 5), point(-9, 15), point(1, 15)], COMIC_COLOURS.jetShade, COMIC_COLOURS.jetInk);
+
+    // Far wing, swept back from a long root, peeking over the fuselage.
+    stampShape(jet, [point(64, -7), point(18, -28), point(12, -24), point(38, -6)], COMIC_COLOURS.jetMid, COMIC_COLOURS.jetInk);
+    jet.line(...point(62, -8), ...point(20, -26), COMIC_COLOURS.jetLight);
+
+    // Fuselage, side profile: a long spindle with a pointed nose.
+    const body = new ComicPixelBuffer(COMIC_PANEL_SIZE_PIXELS, COMIC_PANEL_SIZE_PIXELS);
+    body.polygon([
+        point(0, -2), point(10, -5), point(26, -7), point(48, -8),
+        point(66, -7), point(80, -5), point(89, 0), point(80, 4.5),
+        point(66, 5.5), point(48, 6), point(26, 5), point(10, 3.5), point(0, 2)
+    ], COMIC_COLOURS.jetMid);
+    body.polygon([
+        point(0, -2), point(10, -5), point(26, -7), point(48, -8),
+        point(66, -7), point(80, -5), point(89, 0), point(60, 0), point(16, 0)
+    ], COMIC_COLOURS.jetLight, COMIC_COLOURS.jetMid);
+    body.polygon([
+        point(16, 3.5), point(60, 3.5), point(80, 4.5), point(66, 5.5),
+        point(48, 6), point(26, 5), point(10, 3.5)
+    ], COMIC_COLOURS.jetShade, COMIC_COLOURS.jetMid);
+
+    // A racing stripe along the side, and two cabin windows.
+    body.line(...point(8, 1), ...point(78, 1), COMIC_COLOURS.jetBlue);
+    body.line(...point(8, 2), ...point(78, 2), COMIC_COLOURS.jetBlue);
+    for (const along of [32, 40]) {
+        const window = point(along, -3.4);
+        body.rectangle(window[0], window[1], 2, 2, COMIC_COLOURS.canopy);
+        body.set(window[0], window[1], COMIC_COLOURS.canopyGlint);
+    }
+    body.line(...point(24, -5.5), ...point(24, 4), COMIC_COLOURS.jetShade);
+    body.line(...point(70, -5), ...point(70, 4.5), COMIC_COLOURS.jetShade);
+    body.outline(COMIC_COLOURS.jetInk);
+    jet.composite(body);
+
+    // Near wing in front, same long root so it matches the far wing.
+    const nearWing = new ComicPixelBuffer(COMIC_PANEL_SIZE_PIXELS, COMIC_PANEL_SIZE_PIXELS);
+    nearWing.polygon([point(66, 7), point(24, 30), point(17, 26), point(40, 6)], COMIC_COLOURS.jetShade);
+    nearWing.line(...point(64, 8), ...point(26, 28), COMIC_COLOURS.jetMid);
+    nearWing.line(...point(26, 29), ...point(19, 26), COMIC_COLOURS.jetGold);
+    nearWing.outline(COMIC_COLOURS.jetInk);
+    jet.composite(nearWing);
+
+    // Canopy bubble, its frame, and one glint pixel, sitting on the spine.
+    stampShape(jet, [point(52, -7), point(56, -12), point(64, -12), point(71, -8.5), point(73, -6)], COMIC_COLOURS.canopyDark, COMIC_COLOURS.jetInk);
+    jet.polygon([point(54, -7), point(57, -11.5), point(63, -11.5), point(69, -8), point(70, -6.5)], COMIC_COLOURS.canopy);
+    jet.set(...point(59, -10), COMIC_COLOURS.canopyGlint);
+    jet.set(...point(60, -10), COMIC_COLOURS.canopyGlint);
+
+    // Nose tip.
+    jet.set(...point(88, 0), COMIC_COLOURS.jetInk);
+
+    targetBuffer.composite(jet);
+}
+
+/* ==================================================================
+   7. Panel 4 — after one year of AI vibe coding
+   ================================================================== */
+
+function paintComicPanelFour(pixelBuffer, frameIndex) {
+    pixelBuffer.fill(COMIC_COLOURS.space);
+
+    // Two soft haze bands so the black is not flat.
+    for (let y = 64; y < COMIC_PANEL_SIZE_PIXELS; y++) {
+        for (let x = 0; x < COMIC_PANEL_SIZE_PIXELS; x++) {
+            if ((x + y) % 7 === 0) pixelBuffer.set(x, y, COMIC_COLOURS.spaceDeep);
+        }
+    }
+
+    const wobble = bobOffset(frameIndex, COMIC_BOB_CYCLE_FRAMES, 1);
+
+    // Stars first, so the machine covers them and they read as distant.
+    // Fixed positions, three brightness groups, a gentle twinkle.
+    const random = makeSeededRandom(20261122);
+    for (let index = 0; index < 46; index++) {
+        const x = Math.floor(4 + random() * 92);
+        const y = Math.floor(4 + random() * 92);
+        const brightness = index % 3;
+        const twinkling = (frameIndex + index) % 13 < 2;
+        if (twinkling) {
+            pixelBuffer.set(x, y, COMIC_COLOURS.star);
+            pixelBuffer.set(x - 1, y, COMIC_COLOURS.starDim);
+            pixelBuffer.set(x + 1, y, COMIC_COLOURS.starDim);
+            pixelBuffer.set(x, y - 1, COMIC_COLOURS.starDim);
+            pixelBuffer.set(x, y + 1, COMIC_COLOURS.starDim);
+        } else {
+            pixelBuffer.set(x, y, brightness === 0 ? COMIC_COLOURS.star : (brightness === 1 ? COMIC_COLOURS.starDim : COMIC_COLOURS.starFaint));
+        }
+    }
+
+    // Orbit ring and a small cratered moon, also behind the machine.
+    pixelBuffer.ellipseOutline(50, 56, 45, 19, COMIC_COLOURS.orbit);
+    pixelBuffer.ellipseOutline(50, 56, 44, 18, COMIC_COLOURS.spaceHaze);
+
+    pixelBuffer.disc(13, 15, 6, COMIC_COLOURS.moonMid);
+    pixelBuffer.disc(13, 15, 5, COMIC_COLOURS.moonLight);
+    pixelBuffer.disc(11, 13, 2, COMIC_COLOURS.moonMid);
+    pixelBuffer.disc(15, 16, 1, COMIC_COLOURS.moonMid);
+    pixelBuffer.disc(12, 18, 1, COMIC_COLOURS.moonShade);
+    pixelBuffer.set(10, 16, COMIC_COLOURS.moonShade);
+
+    paintFrankenplane(pixelBuffer, frameIndex, wobble);
+
+    paintStitchedFrame(pixelBuffer, COMIC_COLOURS.steelDark, COMIC_COLOURS.steel, COMIC_COLOURS.jetGold, COMIC_COLOURS.ink);
+}
+
+// Draw the Frankenplane, a machine stitched from every part that happened
+// to be nearby, seen from the side on the panel diagonal.
+function paintFrankenplane(targetBuffer, frameIndex, wobble) {
+    const machine = new ComicPixelBuffer(COMIC_PANEL_SIZE_PIXELS, COMIC_PANEL_SIZE_PIXELS);
+    const mapper = mapperFromNose(93, 24, -28, 85);
+    // Put one aircraft-frame point into panel pixels, including the wobble.
+    const point = function (along, across) {
+        const mapped = mapper(along, across);
+        return [mapped[0], mapped[1] + wobble];
+    };
+    // Stamp a closed part with its own ink edge, so the parts stay readable.
+    const shape = function (localPoints, colour, ink) {
+        stampShape(machine, localPoints.map(function (entry) {
+            return point(entry[0], entry[1]);
+        }), colour, ink);
+    };
+    // Build the points of one balloon ellipse in the aircraft frame.
+    const ellipsePoints = function (centreAlong, centreAcross, alongRadius, acrossRadius) {
+        const points = [];
+        for (let index = 0; index < 40; index++) {
+            const angle = (index / 40) * Math.PI * 2;
+            points.push([
+                centreAlong + Math.cos(angle) * alongRadius,
+                centreAcross + Math.sin(angle) * acrossRadius
+            ]);
+        }
+        return points;
+    };
+
+    // --- blimp envelope, the rear half of the machine ---
+    shape(ellipsePoints(17, 0, 17, 12), COMIC_COLOURS.blimp, COMIC_COLOURS.jetInk);
+    machine.polygon(ellipsePoints(17, -5, 12, 4), COMIC_COLOURS.blimpLight);
+    for (const ribAlong of [8, 15, 22]) {
+        machine.line(...point(ribAlong, -10), ...point(ribAlong, 10), COMIC_COLOURS.blimpShade);
+    }
+
+    // --- tail fins, with a base that sits on the balloon curve ---
+    shape([[14, -10.5], [6, -7.5], [1, -18]], COMIC_COLOURS.wingRed, COMIC_COLOURS.jetInk);
+    shape([[14, 10.5], [6, 7.5], [1, 18]], COMIC_COLOURS.wingRed, COMIC_COLOURS.jetInk);
+    machine.line(...point(13, -10), ...point(6, -8), COMIC_COLOURS.wingRedLight);
+    machine.line(...point(13, 10), ...point(6, 8), COMIC_COLOURS.wingRedShade);
+    machine.set(...point(12, -10), COMIC_COLOURS.steelDark);
+    machine.set(...point(12, 10), COMIC_COLOURS.steelDark);
+
+    // --- steel nozzle and flame, at the very back ---
+    const flameLengths = [8, 11, 9, 12];
+    const flameLength = flameLengths[frameIndex % 4];
+    shape([[1, -3.5], [-3, -3.5], [-3, 3.5], [1, 3.5]], COMIC_COLOURS.steelDark, COMIC_COLOURS.jetInk);
+    machine.rectangle(...point(0, -2), 2, 4, COMIC_COLOURS.steel);
+    shape([[-2, -2.5], [-flameLength, -1.5], [-flameLength - 2, 0], [-flameLength, 1.5], [-2, 2.5]], COMIC_COLOURS.flameOuter, COMIC_COLOURS.flameRed);
+    machine.polygon([point(-3, -1.4), point(-Math.round(flameLength * 0.6), 0), point(-3, 1.4)], COMIC_COLOURS.flameMid);
+    machine.polygon([point(-3, -0.6), point(-Math.round(flameLength * 0.3), 0), point(-3, 0.6)], COMIC_COLOURS.flameCore);
+
+    // --- green jet fuselage, stitched to the blimp ---
+    shape([
+        [26, -6], [38, -7.2], [54, -7], [62, -5], [64, 0],
+        [62, 5], [54, 7], [38, 7.2], [26, 6]
+    ], COMIC_COLOURS.frankenBody, COMIC_COLOURS.jetInk);
+    machine.polygon([
+        point(26, -6), point(38, -7.2), point(54, -7), point(62, -5),
+        point(64, 0), point(40, 0), point(26, 0)
+    ], COMIC_COLOURS.frankenBelly);
+    machine.polygon([
+        point(26, 3), point(40, 3), point(62, 3), point(64, 0),
+        point(62, 5), point(54, 7), point(38, 7.2), point(26, 6)
+    ], COMIC_COLOURS.frankenBodyShade);
+
+    // A cream stripe, rivets, rust patches and the seam stitches.
+    machine.line(...point(28, 1), ...point(60, 1), COMIC_COLOURS.tape);
+    machine.line(...point(28, 2), ...point(60, 2), COMIC_COLOURS.tape);
+    for (let rivet = 30; rivet <= 58; rivet += 5) {
+        machine.set(...point(rivet, -4), COMIC_COLOURS.frankenBodyShade);
+    }
+    machine.polygon([point(36, 4), point(40, 4), point(40, 6), point(36, 6)], COMIC_COLOURS.rust);
+    machine.polygon([point(50, -5), point(53, -5), point(53, -3), point(50, -3)], COMIC_COLOURS.rust);
+    for (let stitchAcross = -8; stitchAcross <= 8; stitchAcross += 2) {
+        machine.line(...point(29, stitchAcross), ...point(31, stitchAcross + 2), COMIC_COLOURS.tape);
+        machine.set(...point(31, stitchAcross + 2), COMIC_COLOURS.inkSoft);
+    }
+
+    // --- biplane wings above and below, joined by steel struts ---
+    shape([[32, -13], [58, -13], [54, -20], [36, -20]], COMIC_COLOURS.wingRed, COMIC_COLOURS.jetInk);
+    machine.line(...point(36, -19), ...point(55, -19), COMIC_COLOURS.wingRedLight);
+    shape([[34, 13], [60, 13], [56, 20], [38, 20]], COMIC_COLOURS.wingRed, COMIC_COLOURS.jetInk);
+    machine.line(...point(38, 19), ...point(57, 19), COMIC_COLOURS.wingRedShade);
+    for (const strutAlong of [38, 53]) {
+        machine.line(...point(strutAlong, -13), ...point(strutAlong, -8), COMIC_COLOURS.steel);
+        machine.line(...point(strutAlong, 8), ...point(strutAlong, 13), COMIC_COLOURS.steel);
+    }
+
+    // --- rotor: a tilted disc with two blades sweeping round it ---
+    const rotorAngle = ((frameIndex % 8) / 8) * Math.PI * 2;
+    machine.line(...point(47, -19), ...point(47, -31), COMIC_COLOURS.steelDark);
+    for (let step = 0; step < 24; step++) {
+        const first = (step / 24) * Math.PI * 2;
+        const second = ((step + 1) / 24) * Math.PI * 2;
+        machine.line(
+            ...point(47 + Math.cos(first) * 3.5, -31 + Math.sin(first) * 10),
+            ...point(47 + Math.cos(second) * 3.5, -31 + Math.sin(second) * 10),
+            COMIC_COLOURS.orbit
+        );
+    }
+    const bladeOne = point(47 + Math.cos(rotorAngle) * 3.5, -31 + Math.sin(rotorAngle) * 10);
+    const bladeTwo = point(47 - Math.cos(rotorAngle) * 3.5, -31 - Math.sin(rotorAngle) * 10);
+    machine.line(...point(47, -31), ...bladeOne, COMIC_COLOURS.steel);
+    machine.line(...point(47, -31), ...bladeTwo, COMIC_COLOURS.steel);
+    machine.rectangle(...point(46, -32), 3, 2, COMIC_COLOURS.steel);
+    machine.set(...point(47, -32), COMIC_COLOURS.bolt);
+
+    // --- traffic cone taped to the paper nose ---
+    shape([[73, -3], [79, -3], [76, -11]], COMIC_COLOURS.coneOrange, COMIC_COLOURS.jetInk);
+    machine.line(...point(74, -7), ...point(78, -7), COMIC_COLOURS.coneBand);
+    machine.line(...point(72, -2), ...point(80, -2), COMIC_COLOURS.steelDark);
+
+    // --- folded paper nose, taped on at the seam ---
+    shape([[62, -5], [90, 0], [62, 5]], COMIC_COLOURS.paperLight, COMIC_COLOURS.jetInk);
+    machine.polygon([point(62, -4.5), point(88, 0), point(62, 0)], COMIC_COLOURS.paperMid);
+    machine.line(...point(62, 0), ...point(88, 0), COMIC_COLOURS.paperShade);
+    machine.line(...point(64, -3.5), ...point(84, -0.6), COMIC_COLOURS.paperDark);
+    machine.polygon([point(60, -5), point(64, -5), point(64, 5), point(60, 5)], COMIC_COLOURS.tape);
+
+    // --- one loose bolt, drifting just off the top of the machine ---
+    const drift = Math.sin((frameIndex / 30) * Math.PI * 2);
+    machine.rectangle(...point(24 + drift * 2, -26 + drift), 3, 2, COMIC_COLOURS.bolt);
+    machine.set(...point(25 + drift * 2, -26 + drift), COMIC_COLOURS.steelDark);
+    machine.set(...point(26 + drift * 2, -25 + drift), COMIC_COLOURS.steelDark);
+
+    machine.outline(COMIC_COLOURS.jetInk);
+    targetBuffer.composite(machine, [4, 4, 95, 95]);
+}
+
+/* ==================================================================
+   8. Renderer and stepped animation
+   ================================================================== */
+
+const COMIC_PANEL_PAINTERS = [
+    paintComicPanelOne,
+    paintComicPanelTwo,
+    paintComicPanelThree,
+    paintComicPanelFour
 ];
 
-const PAPER_TRAIL_PIXELS = [
-    "..W.............W...............",
-    "...........W....................",
-    "......................W.........",
-    "....W.........................W."
+const comicCanvasElements = [
+    document.getElementById("comicCanvas1"),
+    document.getElementById("comicCanvas2"),
+    document.getElementById("comicCanvas3"),
+    document.getElementById("comicCanvas4")
 ];
 
-const SUN_PIXELS = [
-    "....Y....",
-    "..Y.Y.Y..",
-    ".YYYYYYY.",
-    "..YWWWY..",
-    ".YYWWWYY.",
-    "..YWWWY..",
-    ".YYYYYYY.",
-    "..Y.Y.Y..",
-    "....Y...."
-];
+// One reusable grid per panel: the painters fill it, then it is copied
+// to the canvas in a single step.
+const comicPanelBuffers = COMIC_PANEL_PAINTERS.map(function () {
+    return new ComicPixelBuffer(COMIC_PANEL_SIZE_PIXELS, COMIC_PANEL_SIZE_PIXELS);
+});
 
-const SPEED_STREAK_PIXELS = [
-    "....................S.................",
-    "...............S......................",
-    "....S.................................",
-    ".........................S............",
-    ".........S............................"
-];
+// Parsed colours are cached, because the loop would otherwise parse tens
+// of thousands of hex strings every second.
+const comicColourChannels = new Map();
 
-const FRANKEN_ORBIT_PIXELS = [
-    ".............PPPPPPPPPPPP...............",
-    "........PPPP..............PPPP..........",
-    ".....PP........................PP.......",
-    "...P..............................P.....",
-    "..P................................P....",
-    ".P..................................P...",
-    "P....................................P.."
-];
+let comicFrameIndex = 0;
+let comicLastStepMilliseconds = 0;
 
-const FRANKEN_PIXELS_A = [
-    "...........MMMMMMMMMMMM.........",
-    ".................H..............",
-    "..........OOOOOOOOOOOO..........",
-    "........OOBBBBBBBBBBBBOO........",
-    ".......OBBWOBBWOBBBBBBBBO.......",
-    ".......OBBRBBBBWBBBBRBBBO.......",
-    "........OODDDDDDDDDDDDOO........",
-    "..........OOOOOOOOOOOO..........",
-    "...........O........O...........",
-    "....RRRR...O.CCCCCCCC.O...PP....",
-    "..RRYYYY.OOGGGGGGGGGGGGOOOPP....",
-    "YYYYWWWW.OGGGGGGGGGGGGGGOPP.....",
-    "..RRYYYY.OOGGGGGGGGGGGGOOOPP....",
-    "....RRRR...O.CCCCCCCC.O...PP....",
-    "...........O........O...........",
-    "........OOOOOOOOOOOOOOOO........",
-    ".......OGGGGGGGGGGGGGGGGO.......",
-    ".......OEEEEEEEEEEEEEEEEO.......",
-    "........OOOOOOOOOOOOOOOO........",
-    "................................"
-];
+const comicReducedMotionQuery = window.matchMedia
+    ? window.matchMedia("(prefers-reduced-motion: reduce)")
+    : null;
 
-const FRANKEN_PIXELS_B = [
-    "........MMMM.........MMMM.......",
-    ".................H..............",
-    "..........OOOOOOOOOOOO..........",
-    "........OOBBBBBBBBBBBBOO........",
-    ".......OBBWOBBWOBBBBBBBBO.......",
-    ".......OBBRBBBBBBBRBBBBBO.......",
-    "........OODDDDDDDDDDDDOO........",
-    "..........OOOOOOOOOOOO..........",
-    "...........O........O...........",
-    "....RRRR...O.CCCCCCCC.O.........",
-    ".RRRYYYYYOOGGGGGGGGGGGGOOOPPPP..",
-    "YYWWWWWW.OGGGGGGGGGGGGGGOPPPP...",
-    ".RRRYYYYYOOGGGGGGGGGGGGOOOPPPP..",
-    "....RRRR...O.CCCCCCCC.O.........",
-    "...........O........O...........",
-    "........OOOOOOOOOOOOOOOO........",
-    ".......OGGGGGGGGGGGGGGGGO.......",
-    ".......OEEEEEEEEEEEEEEEEO.......",
-    "........OOOOOOOOOOOOOOOO........",
-    "................................"
-];
+// Say whether the visitor asked the whole page to move less.
+function comicMotionIsReduced() {
+    return Boolean(comicReducedMotionQuery && comicReducedMotionQuery.matches);
+}
 
-const COMIC_STAR_COORDINATES = [
-    [12, 28], [20, 76], [30, 20], [50, 80], [60, 20], [80, 72], [96, 30],
-    [8, 86], [50, 96], [80, 86], [20, 50], [86, 50], [60, 80], [80, 30]
-];
+// Turn one "#rrggbb" colour into the three bytes an ImageData pixel needs.
+function comicColourBytes(colour) {
+    let bytes = comicColourChannels.get(colour);
+    if (bytes) return bytes;
+    const packed = parseInt(colour.slice(1), 16);
+    bytes = [(packed >> 16) & 255, (packed >> 8) & 255, packed & 255];
+    comicColourChannels.set(colour, bytes);
+    return bytes;
+}
+
+// Copy one finished panel buffer onto its canvas in a single putImageData.
+function paintComicBufferOnCanvas(pixelBuffer, canvasElement) {
+    const context = canvasElement.getContext("2d");
+    const image = context.createImageData(COMIC_PANEL_SIZE_PIXELS, COMIC_PANEL_SIZE_PIXELS);
+    const data = image.data;
+    for (let index = 0; index < pixelBuffer.pixels.length; index++) {
+        const colour = pixelBuffer.pixels[index];
+        const offset = index * 4;
+        if (!colour) {
+            data[offset + 3] = 0;
+            continue;
+        }
+        const bytes = comicColourBytes(colour);
+        data[offset] = bytes[0];
+        data[offset + 1] = bytes[1];
+        data[offset + 2] = bytes[2];
+        data[offset + 3] = 255;
+    }
+    context.putImageData(image, 0, 0);
+}
+
+// Paint all four panels at one shared frame number.
+function paintComicFrame(frameNumber) {
+    for (let index = 0; index < COMIC_PANEL_PAINTERS.length; index++) {
+        COMIC_PANEL_PAINTERS[index](comicPanelBuffers[index], frameNumber);
+        paintComicBufferOnCanvas(comicPanelBuffers[index], comicCanvasElements[index]);
+    }
+}
+
+// Loop callback: repaint about nine times a second while About is open.
+function animateAboutComicLoop(timestampMilliseconds) {
+    if (aboutScrimEl.hidden) {
+        aboutAnimationHandle = 0;
+        return;
+    }
+    if (timestampMilliseconds - comicLastStepMilliseconds >=
+            COMIC_FRAME_INTERVAL_MILLISECONDS) {
+        comicLastStepMilliseconds = timestampMilliseconds;
+        comicFrameIndex += 1;
+        paintComicFrame(comicFrameIndex);
+    }
+    aboutAnimationHandle = window.requestAnimationFrame(animateAboutComicLoop);
+}
 
 const MIT_LICENSE_TEXT = "MIT License\n\nCopyright (c) 2026 Loh Yap Kant\n\nPermission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the \"Software\"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.";
 
@@ -3875,125 +4774,18 @@ const toggleLicenseLabelEl = document.getElementById("toggleLicenseLabel");
 const aboutLicenseTextEl = document.getElementById("aboutLicenseText");
 const aboutBuildLineEl = document.getElementById("aboutBuildLine");
 
-const comicCanvasOneEl = document.getElementById("comicCanvas1");
-const comicCanvasTwoEl = document.getElementById("comicCanvas2");
-const comicCanvasThreeEl = document.getElementById("comicCanvas3");
-const comicCanvasFourEl = document.getElementById("comicCanvas4");
-
 let aboutReturnFocus = null;
 let aboutAnimationHandle = 0;
 
-// Draw a line of 3x5 pixel font text left-aligned on a comic canvas context.
-function paintComicTextLine(canvasContext, textString, leftXPixels, topYPixels, colorHex) {
-    for (let charIndex = 0; charIndex < textString.length; charIndex++) {
-        const characterGlyph = PIXEL_FONT[textString[charIndex]] || PIXEL_FONT[textString[charIndex].toUpperCase()] || PIXEL_FONT[" "];
-        for (let glyphRow = 0; glyphRow < 5; glyphRow++) {
-            for (let glyphCol = 0; glyphCol < 3; glyphCol++) {
-                if (characterGlyph[glyphRow][glyphCol] !== "1") continue;
-                canvasContext.fillStyle = colorHex;
-                canvasContext.fillRect(leftXPixels + charIndex * 4 + glyphCol, topYPixels + glyphRow, 1, 1);
-            }
-        }
-    }
+// Keep every shelf preview still while a dialog is open or the tab is hidden.
+function refreshShelfMotion() {
+    const dialogIsOpen = !aboutScrimEl.hidden ||
+        !settingsScrimEl.hidden ||
+        !badgesScrimEl.hidden;
+    document.body.classList.toggle("shelfPaused", dialogIsOpen || document.hidden);
 }
 
-// Draw the simple folded paper plane shared between Panel 1 and Panel 3.
-function paintPaperAirplane(canvasContext, originXPixels, originYPixels) {
-    paintPixels(canvasContext, PAPER_PLANE_PIXELS, COMIC_PALETTES.paperPlane, originXPixels, originYPixels, false, ABOUT_SETTINGS.paperPlanePixelScale);
-}
-
-// Draw Panel 1: Programmer starting project with paper plane on cream background.
-function paintComicPanelOne(timestampMilliseconds) {
-    const context = comicCanvasOneEl.getContext("2d");
-    context.fillStyle = "#f4eedb";
-    context.fillRect(0, 0, ABOUT_SETTINGS.canvasSizePixels, ABOUT_SETTINGS.canvasSizePixels);
-
-    paintComicTextLine(context, "PROGRAMMER", 4, ABOUT_SETTINGS.textLineOneYPixels, "#4a3b32");
-    paintComicTextLine(context, "STARTING PROJECT", 4, ABOUT_SETTINGS.textLineTwoYPixels, "#7c6a59");
-
-    paintPixels(context, PAPER_TRAIL_PIXELS, COMIC_PALETTES.paperPlane, ABOUT_SETTINGS.paperTrailOriginX, ABOUT_SETTINGS.paperTrailOriginY);
-    paintPixels(context, CLOUD_PIXELS, COMIC_PALETTES.cloud, 4, 31);
-    paintPixels(context, CLOUD_PIXELS, COMIC_PALETTES.cloud, 74, 25);
-
-    const verticalBobOffset = Math.sin(timestampMilliseconds * ABOUT_SETTINGS.paperPlaneBobSpeedMultiplier) * ABOUT_SETTINGS.paperPlaneBobRangePixels;
-    paintPaperAirplane(context, ABOUT_SETTINGS.paperPlaneOriginX, ABOUT_SETTINGS.paperPlaneOriginY + verticalBobOffset);
-}
-
-// Draw Panel 2: Modern supersonic jet after 1 year of refining flying through sky.
-function paintComicPanelTwo(timestampMilliseconds) {
-    const context = comicCanvasTwoEl.getContext("2d");
-    context.fillStyle = "#87ceeb";
-    context.fillRect(0, 0, ABOUT_SETTINGS.canvasSizePixels, ABOUT_SETTINGS.canvasSizePixels);
-
-    paintPixels(context, SUN_PIXELS, COMIC_PALETTES.jet, 79, 25);
-    paintPixels(context, SPEED_STREAK_PIXELS, COMIC_PALETTES.jet, 6, 70);
-
-    const firstCloudX = Math.round((ABOUT_SETTINGS.cloudOneBaseX - timestampMilliseconds * ABOUT_SETTINGS.cloudSpeedOne) % 150 - 30);
-    paintPixels(context, CLOUD_PIXELS, COMIC_PALETTES.cloud, firstCloudX, 20);
-
-    const secondCloudX = Math.round((ABOUT_SETTINGS.cloudTwoBaseX - timestampMilliseconds * ABOUT_SETTINGS.cloudSpeedTwo) % 150 - 30);
-    paintPixels(context, CLOUD_PIXELS, COMIC_PALETTES.cloud, secondCloudX, 60);
-
-    paintComicTextLine(context, "AFTER 1 YEAR", 4, ABOUT_SETTINGS.textLineOneYPixels, "#1a3450");
-    paintComicTextLine(context, "OF REFINING", 4, ABOUT_SETTINGS.textLineTwoYPixels, "#274d75");
-
-    const verticalBobOffset = Math.sin(timestampMilliseconds * ABOUT_SETTINGS.jetBobSpeedMultiplier) * ABOUT_SETTINGS.jetBobRangePixels;
-    paintPixels(context, SUPERSONIC_JET_PIXELS, COMIC_PALETTES.jet, ABOUT_SETTINGS.jetOriginX, ABOUT_SETTINGS.jetOriginY + verticalBobOffset, false, ABOUT_SETTINGS.jetPixelScale);
-}
-
-// Draw Panel 3: Non-programmer starting project with identical paper plane.
-function paintComicPanelThree(timestampMilliseconds) {
-    const context = comicCanvasThreeEl.getContext("2d");
-    context.fillStyle = "#f4eedb";
-    context.fillRect(0, 0, ABOUT_SETTINGS.canvasSizePixels, ABOUT_SETTINGS.canvasSizePixels);
-
-    paintComicTextLine(context, "NON-PROGRAMMER", 4, ABOUT_SETTINGS.textLineOneYPixels, "#4a3b32");
-    paintComicTextLine(context, "STARTING PROJECT", 4, ABOUT_SETTINGS.textLineTwoYPixels, "#7c6a59");
-
-    paintPixels(context, PAPER_TRAIL_PIXELS, COMIC_PALETTES.paperPlane, ABOUT_SETTINGS.paperTrailOriginX, ABOUT_SETTINGS.paperTrailOriginY);
-    paintPixels(context, CLOUD_PIXELS, COMIC_PALETTES.cloud, 4, 31);
-    paintPixels(context, CLOUD_PIXELS, COMIC_PALETTES.cloud, 74, 25);
-
-    const verticalBobOffset = Math.sin(timestampMilliseconds * ABOUT_SETTINGS.paperPlaneBobSpeedMultiplier) * ABOUT_SETTINGS.paperPlaneBobRangePixels;
-    paintPaperAirplane(context, ABOUT_SETTINGS.paperPlaneOriginX, ABOUT_SETTINGS.paperPlaneOriginY + verticalBobOffset);
-}
-
-// Draw Panel 4: The comic Frankenplane in space after 1 year of AI vibe coding.
-function paintComicPanelFour(timestampMilliseconds) {
-    const context = comicCanvasFourEl.getContext("2d");
-    context.fillStyle = "#0d091a";
-    context.fillRect(0, 0, ABOUT_SETTINGS.canvasSizePixels, ABOUT_SETTINGS.canvasSizePixels);
-
-    paintPixels(context, FRANKEN_ORBIT_PIXELS, COMIC_PALETTES.franken, 4, 45);
-
-    for (let starIndex = 0; starIndex < COMIC_STAR_COORDINATES.length; starIndex++) {
-        const starCoords = COMIC_STAR_COORDINATES[starIndex];
-        const isTwinkling = ((timestampMilliseconds + starIndex * 150) % ABOUT_SETTINGS.starTwinkleIntervalMilliseconds) < ABOUT_SETTINGS.starTwinkleHalfIntervalMilliseconds;
-        context.fillStyle = isTwinkling ? "#ffffff" : "#6c5ce7";
-        context.fillRect(starCoords[0], starCoords[1], 1, 1);
-    }
-
-    paintComicTextLine(context, "AFTER 1 YEAR OF", 4, ABOUT_SETTINGS.textLineOneYPixels, "#f39c12");
-    paintComicTextLine(context, "AI VIBE CODING", 4, ABOUT_SETTINGS.textLineTwoYPixels, "#e67e22");
-
-    const verticalBobOffset = Math.sin(timestampMilliseconds * ABOUT_SETTINGS.frankenplaneBobSpeedMultiplier) * ABOUT_SETTINGS.frankenplaneBobRangePixels;
-    const animationFrameIndex = Math.floor(timestampMilliseconds / ABOUT_SETTINGS.animationFrameIntervalMilliseconds) % 2;
-    const frankenMap = animationFrameIndex === 0 ? FRANKEN_PIXELS_A : FRANKEN_PIXELS_B;
-    paintPixels(context, frankenMap, COMIC_PALETTES.franken, ABOUT_SETTINGS.frankenplaneOriginX, ABOUT_SETTINGS.frankenplaneOriginY + verticalBobOffset, false, ABOUT_SETTINGS.frankenplanePixelScale);
-}
-
-// Loop callback animating the four comic panels while the About overlay is visible.
-function animateAboutComicLoop(timestampMilliseconds) {
-    if (aboutScrimEl.hidden) {
-        aboutAnimationHandle = 0;
-        return;
-    }
-    paintComicPanelOne(timestampMilliseconds);
-    paintComicPanelTwo(timestampMilliseconds);
-    paintComicPanelThree(timestampMilliseconds);
-    paintComicPanelFour(timestampMilliseconds);
-    aboutAnimationHandle = window.requestAnimationFrame(animateAboutComicLoop);
-}
+document.addEventListener("visibilitychange", refreshShelfMotion);
 
 // Build the list of games shown in the About dialog shelf catalog.
 function buildAboutGamesList() {
@@ -4048,7 +4840,10 @@ function openAbout() {
     aboutBuildLineEl.textContent = APP.name + " build " + APP.fileVersion;
     aboutLicenseTextEl.textContent = MIT_LICENSE_TEXT;
     aboutScrimEl.hidden = false;
-    if (!aboutAnimationHandle) {
+    refreshShelfMotion();
+    paintComicFrame(comicFrameIndex);
+    if (!comicMotionIsReduced() && !aboutAnimationHandle) {
+        comicLastStepMilliseconds = performance.now();
         aboutAnimationHandle = window.requestAnimationFrame(animateAboutComicLoop);
     }
     aboutBodyEl.focus();
@@ -4059,6 +4854,7 @@ function closeAbout() {
     if (aboutScrimEl.hidden) return;
     cueTick();
     aboutScrimEl.hidden = true;
+    refreshShelfMotion();
     lastScreenSwap = performance.now();
     if (aboutAnimationHandle) {
         window.cancelAnimationFrame(aboutAnimationHandle);

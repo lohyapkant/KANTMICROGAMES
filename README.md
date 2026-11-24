@@ -4,7 +4,7 @@ Twelve tiny pixel-art games in one HTML file. Open it, pick a game, play a minut
 
 Play online: <https://kantmicrogames.lohyapkant.workers.dev/>
 
-**Current build:** `046-20261121` — twelve games, one file.
+**Current build:** `048-20261124` — twelve games, one file, and a warmer About page with a four-panel comic, a general acknowledgment and a gently breathing shelf.
 
 ## About this project
 
@@ -41,6 +41,7 @@ A short record of every build is in CHANGELOG.md; the long-form build records ar
 - The shelf offers a pick of the day and can sort the games by name, best score, unplayed or most opened.
 - Badges reward what you try, from your first game to scoring in all twelve; see them under BADGES on the shelf.
 - The background colour changes each visit; pick your own under SETTINGS on the shelf.
+- ABOUT on the shelf shows a four-panel comic, the project reflections, a general acknowledgment, the models and tools, and the license.
 - SETTINGS can erase your scores, counts and badges on this device.
 - Switching tabs or apps pauses the run. Page zoom is allowed.
 - Tip: add `#game=PANDASNACK` (or any game name) to the play link to jump straight into a game.

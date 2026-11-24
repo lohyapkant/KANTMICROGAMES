@@ -8,6 +8,27 @@ A short record of every build, newest first. Each entry gives the build ID, the 
 - **Corrected in build 028:** 13 lines in entries 000 to 018 were cut off mid-sentence when this record was made in build 027; they were restored in full from the private record. (The build 028 prompt expected 15: entries 001 and 000 were named too, but their lines were already whole, so nothing there needed changing.)
 
 <!-- NEW ENTRIES: paste the newest short entry on the line below this comment, above the previous newest. Never edit older entries except to add a dated correction line in the header. -->
+## 048-20261124 — 2026-11-24 (A warmer acknowledgment and a dream in the reflection)
+
+Built from prompt: P-48 (the owner chose the general acknowledgment wording and the word "dream"; private archive file `prompts/P-48_warmer-acknowledgment.txt`)  
+Tool and model: **DeepSeek V4.1 Flash Free** (OpenCode); effort High  
+What changed: The reflection now says "long unfulfilled dream" instead of "ambition". The four-name acknowledgment list is replaced by a warmer general statement that thanks people around the world for their inspiration, support, ideas, testing, perspectives, kind words and shared experiences, and closes with wholehearted thanks, love and appreciation to all. The in-game dedications in SIMONENUTS stay unchanged. No game changed.  
+Games changed: none  
+Checked: check-project.py 12/12 PASS at baseline and after the swap; headless Chrome on the staged file 22/22 PASS; seven-viewport stage comparison 7/7 PASS; all twelve game module hashes unchanged.  
+Not checked: Safari, a physical phone, sound playback and owner visual approval after the build.  
+Time and usage: about 3 min; 9,242 input + 7,321 output + 5,658 reasoning (22,221 tokens total), with 2,412,928 cache reads not counted; full readings are in the Build 048 entry in MODELS.md.  
+
+## 047-20261123 — 2026-11-23 (About comic, visible acknowledgments and the breathing shelf)
+
+Built from prompt: P-47, planned with the owner and approved before the build; the owner's approval and follow-up instruction are recorded verbatim in the private planning record.  
+Tool and model: **DeepSeek V4.1 Flash Free** (OpenCode); effort High  
+What changed: The About comic now has four full-bleed 100 x 100 panels drawn at one art pixel per canvas pixel, with captions outside the canvas: a large paper plane, a swept-wing jet, the same plane with a tangled trail, and the Frankenplane in space. A visible ACKNOWLEDGMENTS section now sits after the games list and thanks Yuan Ning, Simone, Gilles and Brenda in the approved words. Shelf previews breathe one pixel over 3.8 seconds, staggered card by card, lift on keyboard focus, rest while any shelf dialog is open or the tab is hidden, and stop under reduced motion. The comic steps about nine times a second only while About is open. All twelve games remain unchanged and frozen.  
+Games changed: none  
+Checked: check-project.py 12/12 PASS; readable check 0 undocumented functions, 0 short identifiers and 40 art-coordinate literals allowed by the pixel-art rule; all twelve game module hashes match plans/game-versions.txt byte-for-byte; headless Chrome on the staged file passed 20 of 20 about/shelf checks, the reduced-motion freeze, the 320 px dialog and zero console errors; the stage rectangle on the shelf and in play matched the previous build at all seven named viewports with no shelf overflow.  
+Not checked: Safari, a physical phone, sound playback and owner visual approval after the build.  
+Time and usage: about 24 h 15 min wall-clock from the start reading to the final reading, including an overnight pause and two token-limit interruptions; the two-day usage readings do not overlap, so no delta is stated; full readings are in the Build 047 entry in MODELS.md.  
+Corrected 2026-11-24 (build 048): the four-name list became a general statement, and the reflection's "ambition" became "dream".  
+
 ## 046-20261121 — 2026-11-21 (SIMONENUTS: twelfth microgame, smashing acorns on an oak table)
 
 Built from prompt: P-46, planned by the owner with Gemini 3.8 Flash (High) on Google Antigravity CLI and pasted verbatim; build completed by Gemini 3.8 Flash (Google Antigravity CLI) at High effort.  

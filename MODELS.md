@@ -141,6 +141,8 @@ What each model used on each build. This is a record, not an opinion, and not a 
 | 045 | Claude.Ai Sonnet 5.5 · Claude.ai | edited the reflection (effort High) | — | — | prompt text edit; usage and duration not reported |
 | 045 | GPT-6-Luna · OpenAI Codex CLI | built (effort High) | not recorded | end snapshot: 1,556,975 total tokens (not a build delta) | owner-supplied final reading: 1,295,647 input + 261,328 output (135,075 reasoning included); 51,818,112 cached input shown separately and not counted. Start token total was not captured, so usage delta is unavailable; elapsed time was not supplied |
 | 046 | Gemini 3.8 Flash · Google Antigravity | planned & built (SIMONENUTS; effort High) | ~45 min | session quota | Antigravity quota / weekly rate limit; token telemetry not exposed in CLI stdout |
+| 047 | DeepSeek V4.1 Flash Free · OpenCode | wrote the prompt with the owner (effort High) and built (effort High) | about 24 h 15 min wall-clock, including an overnight pause and two token-limit interruptions; active time not measured | not measurable as one delta — readings below | measured: the two-day stats window slid forward during the build, so the start and final readings do not overlap; start reading on 2026-11-23 before edits was 576,253 input + 87,332 output + 124,938 reasoning, 17,129,600 cache reads not counted, 160 steps, 165 tool calls, 6 prompts; final reading on 2026-11-24 after the swap was 461,853 input + 39,203 output + 50,445 reasoning, 15,826,176 cache reads not counted, 140 steps, 153 tool calls, 4 prompts; no delta is stated |
+| 048 | DeepSeek V4.1 Flash Free · OpenCode | built (effort High) | about 3 min | 9,242 input + 7,321 output + 5,658 reasoning (22,221 tokens total); 2,412,928 cache reads not counted; 25 steps; 25 tool calls | `opencode stats --days 2 --json`, final minus start; cache reads separate and not counted; the two readings were 2 min 45 s apart |
 
 ### Totals that can honestly be added
 - **Credits, Qoder CLI, per-request transcript, builds 009-016:** 74.5874 credits over 1,143 billable requests.
@@ -649,6 +651,26 @@ Source: Recorded by Gemini 3.8 Flash from the owner's feedback and prompt instru
 Builds observed: .
 
 The owner observed: “I want to create a new microgame to add to the list. In this case, it is based on an older HTML5 game created alternately named KANTDEEZNUTS or SIMONENUTSMASHER. The change in name was because it was originally intended as a game for my spouse, that started as a 'Nut' smasher joke, and ended up for my spouse. As a note, it was designed as a touch based game, in which the user uses their finger, or a mouse, to hammer incoming nuts. Now, in the new microgame, my thoughts now is to simplify the original prompt into the current 100x100 canvas, and create pixel art for the necessary elements (We are not going to make it too complicated) and just keep track of scoring for valuable nuts.” Build 046 delivers SIMONENUTS as the twelfth microgame with pure pixel art, top-down 3/4 pseudo-isometric perspective, four distinct nut types (acorns, 2-hit cracked walnuts, poison hazard nuts, and strawberry-pink heart love nuts), dynamic mallet movement and swing animation, and a shelf preview card.
+
+## 2026-11-23 — Owner observation — About comic, visible acknowledgments and the breathing shelf
+
+Source: Owner's words (verbatim)
+
+Builds observed: `047-20261123`.
+
+The owner observed: “In reply, I support your art direction - and use your Acknowledgment as recommended and show it without the expand and your thinking is very sound. And I agree on ther shelf breathing. Let us proceed to the next step.” After the build began, the owner added: “Okay - please proceed. Ensure all ledger are documented and the readme and model taken note of my comments.” Build 047 records that approval here, in README.md, in the CHANGELOG entry and in the private ledgers, and it keeps the acknowledgment visible rather than hidden behind an expand.
+
+## 2026-11-24 — Owner observation — A warmer acknowledgment and "dream"
+
+Source: Owner's words (verbatim)
+
+Builds observed: `048-20261124`.
+
+The owner observed: “For the reflection - I saw a word "ambition" - it does sound a bit harsh. are you able to remove it and replace with "dream"? Also, after thinking about it, for the Simone line in the acknowledgement, can we remove that line please? Due to the large number of people that has affected me and inspired me, I think the acknowlegdment should be a statement. Something like "This KANTMICROGAMES project would not have been possible without the inspiraton, and support of so many people from accross the world, and the experiences and sharings given to allow me to learn and grow with advancements in AI/LLM technology. A wholehearted thanks and love and appreciation to all!" Does that sound impersonal? Please do advise. Do not take action to edit yet. I want to hear your thoughts, before we do this minor amendment.”
+
+After the advice, the owner chose the warmer general statement: “Let us do B) and keep the in-game dedications for Simone (since it is game specific). For all I know, I might add a game for Gilles and more. That aside, please proceed with the warmer tone, and fixes.”
+
+Build 048 replaces the four-name list with that general statement and changes "ambition" to "dream". The in-game SIMONENUTS dedication stays.
 
 <!-- NEW ENTRIES ABOVE THIS LINE. Never edit existing entries. -->
 
