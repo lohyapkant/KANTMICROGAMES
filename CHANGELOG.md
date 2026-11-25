@@ -16,7 +16,7 @@ What changed: The private rulebook and templates now say twelve games everywhere
 Games changed: none  
 Checked: check-project.py 12/12 PASS before and after the one-step swap; all twelve game module hashes unchanged; no browser run was needed because no game or shell behaviour changed.  
 Not checked: Safari, a physical phone, sound playback and owner visual approval after the build.  
-Time and usage: time measured this run; usage not stated as a build delta because no start reading was taken; the final reading is in the Build 049 entry in MODELS.md.
+Time and usage: about 4 min; usage not recorded — no start reading was taken, and the final reading is context only, not a build delta.
 
 ## 048-20261124 — 2026-11-24 (A warmer acknowledgment and a dream in the reflection)
 
