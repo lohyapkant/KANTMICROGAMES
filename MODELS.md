@@ -143,6 +143,7 @@ What each model used on each build. This is a record, not an opinion, and not a 
 | 046 | Gemini 3.8 Flash · Google Antigravity | planned & built (SIMONENUTS; effort High) | ~45 min | session quota | Antigravity quota / weekly rate limit; token telemetry not exposed in CLI stdout |
 | 047 | DeepSeek V4.1 Flash Free · OpenCode | wrote the prompt with the owner (effort High) and built (effort High) | about 24 h 15 min wall-clock, including an overnight pause and two token-limit interruptions; active time not measured | not measurable as one delta — readings below | measured: the two-day stats window slid forward during the build, so the start and final readings do not overlap; start reading on 2026-11-23 before edits was 576,253 input + 87,332 output + 124,938 reasoning, 17,129,600 cache reads not counted, 160 steps, 165 tool calls, 6 prompts; final reading on 2026-11-24 after the swap was 461,853 input + 39,203 output + 50,445 reasoning, 15,826,176 cache reads not counted, 140 steps, 153 tool calls, 4 prompts; no delta is stated |
 | 048 | DeepSeek V4.1 Flash Free · OpenCode | built (effort High) | about 3 min | 9,242 input + 7,321 output + 5,658 reasoning (22,221 tokens total); 2,412,928 cache reads not counted; 25 steps; 25 tool calls | `opencode stats --days 2 --json`, final minus start; cache reads separate and not counted; the two readings were 2 min 45 s apart |
+| 049 | DeepSeek V4.1 Flash Free · OpenCode | built (effort High) | about 4 min wall-clock to the final reading; records written after | not recorded | no start reading was taken; the final reading is recorded as context, not as a build delta |
 
 ### Totals that can honestly be added
 - **Credits, Qoder CLI, per-request transcript, builds 009-016:** 74.5874 credits over 1,143 billable requests.
@@ -151,7 +152,7 @@ What each model used on each build. This is a record, not an opinion, and not a 
 - **Approximate list-price value:** the plan meter reads 300 of 300 trial credits used, which is about US$3.00 at about US$0.01 per credit. An estimate, not a bill: the trial is free. Check https://docs.qoder.com/account/pricing before relying on it. Never converted for tokens and never added across tools.
 - **Iterations recorded (from build 017):** 4 over 1 build.
 - **Iterations recorded (build 018):** 1 repair cycle pair (a 280 px control clash, fixed by stacking the corner pair under 360 px and using 4 px page padding).
-- **Tokens, OpenCode readings (input + output + reasoning; cache reads not counted), builds 005, 017, 021, 023, 024, 025, 026, 027, 028, 036, 037, 038, 039, 040 and 041:** about 8.62 M tokens in total (005 is approximate at about 2.37 M; 017 is 165,312; 021 is 203,831 at the final reading; 023 is 187,025; 024 is 301,245 at the final reading after the swap and the live regression; 025 is 241,367 at the final reading after the swap and the live regression; 026 is 272,819 at the final reading after the swap and the live check; 027 is 117,458 at the final reading after the swap and the live check; 028 is 303,053 at the final reading after the swap and the live check; 036 is 485,529 at the final reading after the swap and the live check; 037 is 863,602 at the final reading after the swap and the live check; 038 is 1,052,704 at the final reading after the swap and the live check; 039 is 452,098 at the final reading after the swap and the live check; 040 is 333,427 at the final reading after the swap and the live check; 041 is 1,274,945 at the final reading after the swap and the live check). Builds 018, 019 and 020 have no token reading. Other token figures count different things and are never added to these. (The build 026 total should have read 3.74 M; corrected in build 027. The build 028 total was recomputed from the listed figures. The build 036 total was recomputed from the listed figures. The build 037 total was recomputed from the listed figures. The build 041 total was recomputed from the listed figures.) (Build 042 is not listed: its two-day stats window slid past midnight, so no build total can be stated; its ledger row carries the start and final readings.)
+- **Tokens, OpenCode readings (input + output + reasoning; cache reads not counted), builds 005, 017, 021, 023, 024, 025, 026, 027, 028, 036, 037, 038, 039, 040, 041 and 048:** about 8.64 M tokens in total (005 is approximate at about 2.37 M; 017 is 165,312; 021 is 203,831 at the final reading; 023 is 187,025; 024 is 301,245 at the final reading after the swap and the live regression; 025 is 241,367 at the final reading after the swap and the live regression; 026 is 272,819 at the final reading after the swap and the live check; 027 is 117,458 at the final reading after the swap and the live check; 028 is 303,053 at the final reading after the swap and the live check; 036 is 485,529 at the final reading after the swap and the live check; 037 is 863,602 at the final reading after the swap and the live check; 038 is 1,052,704 at the final reading after the swap and the live check; 039 is 452,098 at the final reading after the swap and the live check; 040 is 333,427 at the final reading after the swap and the live check; 041 is 1,274,945 at the final reading after the swap and the live check; 048 is 22,221 at the final reading after the swap). Builds 018, 019 and 020 have no token reading. Other token figures count different things and are never added to these. (The build 026 total should have read 3.74 M; corrected in build 027. The build 028 total was recomputed from the listed figures. The build 036 total was recomputed from the listed figures. The build 037 total was recomputed from the listed figures. The build 041 total was recomputed from the listed figures.) (Build 042 is not listed: its two-day stats window slid past midnight, so no build total can be stated; its ledger row carries the start and final readings. Build 047 has no build delta because its two-day readings do not overlap; build 049 was not recorded.)
 - **Build 045:** no build usage total is added. The owner supplied the Codex CLI end snapshot: 1,556,975 total tokens (1,295,647 input + 261,328 output, including 135,075 reasoning); 51,818,112 cached input shown separately and not counted. The start total was not captured, and elapsed time was not supplied.
 - **Build 043:** no build usage total is added. OpenCode's saved start record and the handover notes disagree, and its post-halt final reading was lost. The owner supplied the Codex CLI end meter (1,008,937 total; 832,968 input + 175,969 output, including 86,596 reasoning; 39,387,264 cached input not counted), but its start meter was not checked, so this is an end snapshot rather than a build delta. The Codex UI displayed 2 h 39 min 28 s; OpenCode time and combined duration remain unknown. No credit reading was supplied.
 - **Build 021 usage note:** the ledger row for build 021 shows the reading taken when the records were written (162,156 tokens); the build's usage after the final swap is 203,831 tokens. The row is a record and is not edited.
@@ -161,7 +162,7 @@ What each model used on each build. This is a record, not an opinion, and not a 
 | Model | Minutes | At a glance |
 |---|---|---|
 | Qwen3.8-Flash | ~305 | ▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇ |
-| DeepSeek V4.1 Flash Free | ~596 | ▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇ |
+| DeepSeek V4.1 Flash Free | ~603 | ▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇ |
 | Gemini 3.8 Flash | ~105 | ▇▇▇▇▇▇▇▇▇▇ |
 | GLM-5.3 Flash Free | ~45 | ▇▇▇▇▇ |
 | Flint 40B Free | ~25 | ▇▇▇ |
@@ -169,7 +170,7 @@ What each model used on each build. This is a record, not an opinion, and not a 
 | Shared session (build 006: DeepSeek + Gemini) | ~30 | ▇▇▇ |
 | GPT-6-Luna | ~160 | ▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇ |
 
-Total recorded: about 1285 minutes (about 21 h 25 min) across builds with duration readings, including the Codex UI's 2 h 39 min 28 s display for build 043; the OpenCode portion of build 043 has no time reading. Build 045 duration was not supplied and is excluded.
+Total recorded: about 1292 minutes (about 21 h 32 min) across builds with duration readings, including the Codex UI's 2 h 39 min 28 s display for build 043; the OpenCode portion of build 043 has no time reading. Build 045 duration was not supplied and is excluded. Build 047's 24 h 15 min is wall-clock and is not added as active time; build 048 adds about 3 min; build 049 adds about 4 min.
 (Totals were recomputed after the build-038 row was added and the earlier corrections applied; the build records remain the source of truth (the long-form ones are private; the public CHANGELOG.md entry repeats the time and usage).)
 
 ## 2026-11-07 — DeepSeek V4.1 Flash Free (OpenCode) — build 021
@@ -671,6 +672,16 @@ The owner observed: “For the reflection - I saw a word "ambition" - it does so
 After the advice, the owner chose the warmer general statement: “Let us do B) and keep the in-game dedications for Simone (since it is game specific). For all I know, I might add a game for Gilles and more. That aside, please proceed with the warmer tone, and fixes.”
 
 Build 048 replaces the four-name list with that general statement and changes "ambition" to "dream". The in-game SIMONENUTS dedication stays.
+
+## 2026-11-25 — Owner decision — build 049 Stage 1
+
+Source: Owner's words (verbatim)
+
+Builds observed: `049-20261125`.
+
+The owner reviewed the governance audit and said: "Do a stage 1 first. Again, do NOT execute git. Then we can review and audit again."
+
+Build 049 implements Stage 1: the stale game-count sweep, the finish-date rule and the README/MODELS truth-up. The owner will review and audit again before Stage 2.
 
 <!-- NEW ENTRIES ABOVE THIS LINE. Never edit existing entries. -->
 

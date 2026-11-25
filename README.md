@@ -4,7 +4,7 @@ Twelve tiny pixel-art games in one HTML file. Open it, pick a game, play a minut
 
 Play online: <https://kantmicrogames.lohyapkant.workers.dev/>
 
-**Current build:** `048-20261124` — twelve games, one file, and a warmer About page with a four-panel comic, a general acknowledgment and a gently breathing shelf.
+**Current build:** `049-20261125` — twelve games, one file, and a documentation clean-up that changes no game.
 
 ## About this project
 
@@ -64,7 +64,7 @@ Keyboard, touch and device details are in CONTROLS.md.
 <!-- BEGIN:models-table  (add or edit rows only) -->
 | Model | Developer | Used via | Builds | How it went (owner notes, 2026-11-01) |
 |---|---|---|---|---|
-| DeepSeek V4.1 Flash Free | [DeepSeek](https://www.deepseek.com/) | OpenCode | 000, 001, 005, 006, 017, 018, 019, 020, 021, 022, 023, 024, 025, 026, 027, 028, 036, 037, 038, 039, 040, 041, 042 | Clear pixel art and clean code (owner: "amazing"). |
+| DeepSeek V4.1 Flash Free | [DeepSeek](https://www.deepseek.com/) | OpenCode | 000, 001, 005, 006, 017, 018, 019, 020, 021, 022, 023, 024, 025, 026, 027, 028, 036, 037, 038, 039, 040, 041, 042, 047, 048, 049 | Clear pixel art and clean code (owner: "amazing"). |
 | Mistral Medium 3.5 High | [Mistral AI](https://mistral.ai/) | Vibe CLI | 029 | Initial PENGUINSLIDE version; rebuilt in build 031 after the owner found the character art and puzzle were not usable. |
 | GPT-6-Luna | [OpenAI](https://openai.com/) | OpenAI Codex CLI | 030, 031, 043, 045 | Owner feedback led to a complete PENGUINSLIDE rebuild in build 031; completed HESHETHEYIT v2 and polished the About page. |
 | GLM-5.3 Flash Free | [Z.ai (Zhipu AI)](https://z.ai/) | OpenCode | 002, 003 | Worked mechanically; one game needed a full rework. |

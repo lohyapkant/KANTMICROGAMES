@@ -8,6 +8,16 @@ A short record of every build, newest first. Each entry gives the build ID, the 
 - **Corrected in build 028:** 13 lines in entries 000 to 018 were cut off mid-sentence when this record was made in build 027; they were restored in full from the private record. (The build 028 prompt expected 15: entries 001 and 000 were named too, but their lines were already whole, so nothing there needed changing.)
 
 <!-- NEW ENTRIES: paste the newest short entry on the line below this comment, above the previous newest. Never edit older entries except to add a dated correction line in the header. -->
+## 049-20261125 — 2026-11-25 (Documentation clean-up: twelve games everywhere)
+
+Built from prompt: P-49 (stage 1 of the governance audit: correct stale game counts, the build-date rule and the model records; private archive file `prompts/P-49_stage1-rulebook-sweep.txt`)  
+Tool and model: **DeepSeek V4.1 Flash Free** (OpenCode); effort High  
+What changed: The private rulebook and templates now say twelve games everywhere; the build-date rule uses the finish date; the README model row and the MODELS notes include builds 047-049. No game, control or shell behaviour changed.  
+Games changed: none  
+Checked: check-project.py 12/12 PASS before and after the one-step swap; all twelve game module hashes unchanged; no browser run was needed because no game or shell behaviour changed.  
+Not checked: Safari, a physical phone, sound playback and owner visual approval after the build.  
+Time and usage: time measured this run; usage not stated as a build delta because no start reading was taken; the final reading is in the Build 049 entry in MODELS.md.
+
 ## 048-20261124 — 2026-11-24 (A warmer acknowledgment and a dream in the reflection)
 
 Built from prompt: P-48 (the owner chose the general acknowledgment wording and the word "dream"; private archive file `prompts/P-48_warmer-acknowledgment.txt`)  
