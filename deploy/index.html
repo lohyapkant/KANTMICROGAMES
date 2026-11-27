@@ -6,8 +6,8 @@
   Repository : https://github.com/lohyapkant/KANTMICROGAMES
   Play online: https://kantmicrogames.lohyapkant.workers.dev/
   Hosting    : Cloudflare Workers (https://workers.cloudflare.com/)
-  Current    : build 049-20261125 — a documentation count sweep: twelve games everywhere,
-               the finish-date rule in the templates, and truthful README and model records
+  Current    : build 050-20261126 — the rule checker is hardened: records, history, offline
+               loading, game counts, public lists, changelog entries and manifests are checked
   Names      : project and on-screen brand KANTMICROGAMES ·
                save keys and the console tag use the KANTMICROGAMES prefix
   Build log  : build 028-20261114, DeepSeek V4.1 Flash Free (OpenCode) — a short
@@ -1897,7 +1897,7 @@
 
 const APP = {
     name: "KANTMICROGAMES",
-    fileVersion: "049-20261125",       // build number of THIS one-file app
+    fileVersion: "050-20261126",       // build number of THIS one-file app
     savePrefix: "KANTMICROGAMES."      // best scores live at prefix + GAMEID + ".best"
 };
 

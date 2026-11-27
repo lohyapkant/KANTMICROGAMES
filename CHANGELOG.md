@@ -6,8 +6,19 @@ A short record of every build, newest first. Each entry gives the build ID, the 
 - **The project name is `KANTMICROGAMES`.** Entries up to build 009 used older singular spellings; they are historical records and are not rewritten.
 - **Corrections are dated, not silent.** A wrong past record is corrected by a dated line that names the build that corrected it.
 - **Corrected in build 028:** 13 lines in entries 000 to 018 were cut off mid-sentence when this record was made in build 027; they were restored in full from the private record. (The build 028 prompt expected 15: entries 001 and 000 were named too, but their lines were already whole, so nothing there needed changing.)
+- **Corrected 2026-11-26:** the build-049 post-review snapshot was briefly committed and tagged as build-050; its build identity is 049-20261125. Build 050 is the checker-hardening build. No game or shell behaviour changed.
 
 <!-- NEW ENTRIES: paste the newest short entry on the line below this comment, above the previous newest. Never edit older entries except to add a dated correction line in the header. -->
+## 050-20261126 — 2026-11-26 (The rule checker guards the records too)
+
+Built from prompt: P-50 (stage 2 of the governance audit: harden the rule checker and add its fault suite; private archive file `prompts/P-50_checker-hardening.txt`)  
+Tool and model: **DeepSeek V4.1 Flash Free** (OpenCode); effort High  
+What changed: No game change. The rule checker now fails on a missing build record, an edited older entry or usage row, an external subresource, a wrong game count, a missing or extra public game row, a bad plan row, an incomplete changelog entry, a stale header, a hard-coded footer or a self-authorized unfreeze. It runs 27 checks, up from 12, and a new fault-injection suite runs 41 cases, including 36 planted faults and 5 controls, to prove each rule.  
+Games changed: none  
+Checked: check-project.py 27/27 PASS on the mirror and after the one-step swap; fault-injection.py 41 cases, 0 unexpected; all twelve game module hashes unchanged; no browser run was needed because no game or shell behaviour changed.  
+Not checked: Safari, a physical phone, sound playback and owner visual approval after the build.  
+Time and usage: about 29 h 30 min wall-clock, including an overnight token-limit pause; usage not stated because the two-day tool window slid during the pause.
+
 ## 049-20261125 — 2026-11-25 (Documentation clean-up: twelve games everywhere)
 
 Built from prompt: P-49 (stage 1 of the governance audit: correct stale game counts, the build-date rule and the model records; private archive file `prompts/P-49_stage1-rulebook-sweep.txt`)  
